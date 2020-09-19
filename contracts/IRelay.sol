@@ -19,7 +19,8 @@ interface IRelay {
      * @notice Parses, validates and stores a batch of headers
      * @param headers Raw block headers (80* bytes)
      */
-    function submitBlockHeaderBatch(uint8 prevPos, bytes calldata headers) external;
+    function submitBlockHeaderBatch(uint8 prevPos, bytes calldata headers)
+        external;
 
     /**
      * @notice Gets the height of an included block
@@ -44,5 +45,4 @@ interface IRelay {
         external
         view
         returns (bytes32 digest, uint32 height);
-
 }
