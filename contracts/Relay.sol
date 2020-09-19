@@ -9,8 +9,10 @@ contract Relay is IRelay {
   using BTCUtils for bytes;
 
   // CONSTANTS
-  uint256 public constant DIFFICULTY_ADJUSTMENT_INTERVAL = 2016;
+  uint256 internal constant DIFFICULTY_ADJUSTMENT_INTERVAL = 2016;
   uint8 internal constant BUFFER_CAPACITY = 255;
+  uint8 internal constant MMR_POS = 255;
+  uint8 internal constant EMPTY_TIP = 255;
 
   // EXCEPTION MESSAGES
   // OPTIMIZATION: limit string length to 32 bytes
@@ -21,7 +23,7 @@ contract Relay is IRelay {
   string internal constant ERR_DIFF_TARGET_HEADER = 'Incorrect difficulty target';
   string internal constant ERR_INVALID_HEADER_BATCH = 'Invalid block header batch';
 
-  uint256 public pointers;
+  uint256 public _pointers;
 
   // target of the difficulty period
   uint256 public _epochStartTarget;
@@ -30,19 +32,34 @@ contract Relay is IRelay {
   uint64 public _epochStartTime;
   uint64 public _epochEndTime;
 
-  uint256[] public pendingData;
-  bytes32[] public pendingHashes;
+  uint256[] public _pendingData;
+  bytes32[] public _pendingHashes;
+  bytes32[] public _mmr;
   
-  constructor(bytes32 header, uint256 height) public {
-    for(uint256 i = 0; i < BUFFER_CAPACITY; i++) {
-      pendingData.push(0);
-      pendingHashes.push(0x0);
+  constructor(bytes32 header, uint32 height, bytes32[] memory mmr) public {
+    // store a header in the buffer
+    _pendingData.push(_packData(MMR_POS, height));
+    _pendingHashes.push(header);
+
+    // initialize all storage slots for buffer
+    uint256 i;
+    for(i = 1; i < BUFFER_CAPACITY; i++) {
+      _pendingData.push(0);
+      _pendingHashes.push(0x0);
     }
-    uint8[] memory empty = new uint8[](0);
-    pointers = _packState(0, 0, empty);
+
+    // safe merkle mountain ranges
+    for (i = 0; i < mmr. length; i++) {
+      _mmr[i] = mmr[i];
+    }
+
+    // construct _pointers and store
+    uint8[] memory tips = new uint8[](1);
+    tips[0] = 0;
+    _pointers = _packState(1, 0, tips);
   }
 
-  function _packData(uint32 prevPos, uint32 blockHeight) internal pure returns (uint256 data) {
+  function _packData(uint8 prevPos, uint32 blockHeight) internal pure returns (uint256 data) {
     data = uint256(prevPos) << 32 | uint256(blockHeight);
   }
 
@@ -52,12 +69,16 @@ contract Relay is IRelay {
   }
 
   function _packState(uint8 freePos, uint8 tailPos, uint8[] memory tips) internal pure returns (uint256) {
-    return (uint256(freePos) | uint256(tailPos << 8));
+    uint256 acc = uint256(freePos) | uint256(tailPos) << 8;
+    for (uint i = 0; i < tips.length; i++) {
+      acc = acc | uint256(tips[i]) << (16 + i * 8);
+    }
+    return acc;
   }
 
-  function _unpackState(uint256 pointers) internal pure returns (uint8 freePos, uint8 tailPos, uint8[] memory tips) {
+  function _unpackState(uint256 points) internal pure returns (uint8 freePos, uint8 tailPos, uint8[] memory tips) {
     uint8[] memory empty = new uint8[](0);
-    return (uint8(pointers), uint8(pointers >> 8), empty);
+    return (uint8(points), uint8(points >> 8), empty);
   }
 
   /**
@@ -71,6 +92,27 @@ contract Relay is IRelay {
 
   function _isPeriodEnd(uint32 height) internal pure returns (bool) {
     return height % DIFFICULTY_ADJUSTMENT_INTERVAL == 2015;
+  }
+
+  function _findPrevByHash(bytes32 prevHash) internal view returns (uint8 prevPos) {
+    uint8[] memory tips;
+    (,,tips) = _unpackState(points);
+    // we skip position 0 (free pointer) and 1 (end pointer here)
+    for (uint256 i = 2; i < tips.length; i++) {
+      // stop if no more tips in list
+      if (tips[i] == EMPTY_TIP) {
+        break;
+      }
+      uint8 pos = tips[i];
+      while (pos != MMR_POS) {
+        // if this is it, return
+        if (_pendingHashes[pos] == prevHash) {
+          return pos;
+        }
+        // otherwise continue walking backwards
+        pos = _unpackData(_pendingData[pos]);
+      }
+    }
   }
 
   function _getFreeCapacity(uint256 points) internal pure returns (uint8 capacity, uint8 freePos) {
@@ -89,7 +131,7 @@ contract Relay is IRelay {
   function _getBest(uint256 points) internal view returns (bytes32 hash, uint32 height) {
     // load all tips
     // for each tip, get height
-    // return highers
+    // return highest
     uint8[] memory tips;
     (,,tips) = _unpackState(points);
     height = 0;
@@ -101,13 +143,13 @@ contract Relay is IRelay {
         break;
       }
       // set height if larger than what we had before
-      uint32 tipHeight = uint32(pendingData[tips[i]]);
+      uint32 tipHeight = uint32(_pendingData[tips[i]]);
       if (tipHeight > height) {
         height = tipHeight;
         bestTip = i;
       }
     }
-    hash = pendingHashes[bestTip];
+    hash = _pendingHashes[bestTip];
   }
 
   /**
@@ -119,7 +161,7 @@ contract Relay is IRelay {
     bytes32 hashCurrBlock = header.hash256();
 
     // TODO: Fail if block already exists
-    uint256 points = pointers;
+    uint256 points = _pointers;
     // how to check inclusion?
     // if prev is not tip, then this is a fork
     // A: walk from all tips to prev, try to find duplicate
@@ -128,7 +170,7 @@ contract Relay is IRelay {
 
     // Fail if previous block hash not in current state of main chain
     bytes32 hashPrevBlock = header.extractPrevBlockLE().toBytes32();
-    require(pendingHashes[prevPos] == hashPrevBlock, ERR_PREVIOUS_BLOCK);
+    require(_pendingHashes[prevPos] == hashPrevBlock, ERR_PREVIOUS_BLOCK);
 
     uint256 target = header.extractTarget();
 
@@ -140,7 +182,7 @@ contract Relay is IRelay {
     );
 
     uint32 prevHeight;
-    (prevHeight,) = _unpackData(pendingData[prevPos]);
+    (prevHeight,) = _unpackData(_pendingData[prevPos]);
     uint32 height = 1 + prevHeight;
 
     // Check the specified difficulty target is correct
@@ -169,11 +211,11 @@ contract Relay is IRelay {
 
 
     uint8 freePos;
-    (,freePos) = _getFreeCapacity(pointers);
+    (,freePos) = _getFreeCapacity(points);
     // todo: check that enough space left, if not, flush buffer
 
-    pendingData[freePos] = _packData(prevPos, height);
-    pendingHashes[freePos] = hashCurrBlock;
+    _pendingData[freePos] = _packData(prevPos, height);
+    _pendingHashes[freePos] = hashCurrBlock;
 
     // update tips
     // move free pointer
@@ -216,6 +258,15 @@ contract Relay is IRelay {
    * @dev See {IRelay-submitBlockHeader}.
    */
   function submitBlockHeader(uint8 prevPos, bytes calldata header) external override {
+    _submitBlockHeader(prevPos, header);
+  }
+
+  /**
+   * @dev See {IRelay-submitBlockHeader}.
+   */
+  function submitBlockHeader(bytes calldata header) external override {
+    bytes32 hashPrevBlock = header.extractPrevBlockLE().toBytes32();
+
     _submitBlockHeader(prevPos, header);
   }
 
@@ -266,6 +317,6 @@ contract Relay is IRelay {
       view
       returns (bytes32 digest, uint32 height)
   {
-      return _getBest(pointers);
+      return _getBest(_pointers);
   }
 }
