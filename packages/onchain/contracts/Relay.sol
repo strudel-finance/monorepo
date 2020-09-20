@@ -78,10 +78,10 @@ contract Relay is IRelay {
     function _unpackData(uint256 data)
         internal
         pure
-        returns (uint32 height, uint32 prevPos)
+        returns (uint32 height, uint8 prevPos)
     {
         height = uint32(data);
-        prevPos = uint32(data >> 32);
+        prevPos = uint8(data >> 32);
     }
 
     function _packState(
@@ -128,7 +128,7 @@ contract Relay is IRelay {
         returns (uint8 prevPos)
     {
         uint8[] memory tips;
-        (, , tips) = _unpackState(points);
+        (, , tips) = _unpackState(_pointers);
         // we skip position 0 (free pointer) and 1 (end pointer here)
         for (uint256 i = 2; i < tips.length; i++) {
             // stop if no more tips in list
@@ -142,7 +142,7 @@ contract Relay is IRelay {
                     return pos;
                 }
                 // otherwise continue walking backwards
-                pos = _unpackData(_pendingData[pos]);
+                (,pos) = _unpackData(_pendingData[pos]);
             }
         }
     }
@@ -299,10 +299,7 @@ contract Relay is IRelay {
     /**
      * @dev See {IRelay-submitBlockHeader}.
      */
-    function submitBlockHeader(uint8 prevPos, bytes calldata header)
-        external
-        override
-    {
+    function submitBlockHeaderWithPos(uint8 prevPos, bytes calldata header) external {
         _submitBlockHeader(prevPos, header);
     }
 
@@ -310,24 +307,22 @@ contract Relay is IRelay {
      * @dev See {IRelay-submitBlockHeader}.
      */
     function submitBlockHeader(bytes calldata header) external override {
-        bytes32 hashPrevBlock = header.extractPrevBlockLE().toBytes32();
-
-        _submitBlockHeader(prevPos, header);
+      _submitBlockHeader(_findPrevByHash(header.extractPrevBlockLE().toBytes32()), header);
     }
 
     /**
      * @dev See {IRelay-submitBlockHeaderBatch}.
+     * Headers expected to be ordered
      */
-    function submitBlockHeaderBatch(uint8 prevPos, bytes calldata headers)
-        external
-        override
-    {
-        require(headers.length % 80 == 0, ERR_INVALID_HEADER_BATCH);
+    function submitBlockHeaderBatch(bytes calldata headers) external override {
+      bytes memory header = headers.slice(0, 80);
+      uint8 prevPos = _findPrevByHash(header.extractPrevBlockLE().toBytes32());
+      require(headers.length % 80 == 0, ERR_INVALID_HEADER_BATCH);
 
-        for (uint256 i = 0; i < headers.length / 80; i = i + 1) {
-            bytes memory header = headers.slice(i * 80, 80);
-            prevPos = _submitBlockHeader(prevPos, header);
-        }
+      for (uint256 i = 0; i < headers.length / 80; i = i + 1) {
+        header = headers.slice(i * 80, 80);
+        prevPos = _submitBlockHeader(prevPos, header);
+      }
     }
 
     /**
