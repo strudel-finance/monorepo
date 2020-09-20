@@ -13,8 +13,6 @@ import {it, describe, afterEach} from "mocha";
 import SniperRifle from "./src/index";
 import Db from "./src/db";
 
-const leap = require("leap-core");
-
 chai.use(sinonChai);
 
 const sdb = {

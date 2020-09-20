@@ -26,9 +26,10 @@ function findTreeHeight(number, mrrHeight) {
 async function getRecursiveHash(index, sdb, height) {}
 
 async function getProof(height, sdb) {
+  height = Number(height);
   const merkleHeight = 10;
   const proofLength = findTreeHeight(height, merkleHeight);
-  let indicator = proofLength;
+  let indicator = height;
   let proofArray = [];
   let index = height.toString();
   //case that Block is its own proof
@@ -37,9 +38,13 @@ async function getProof(height, sdb) {
   }
 
   for (var i = 0; i < proofLength; i++) {
-    index = index.split("-");
     if (index.length == 1) {
+      index = indicator % 2 == 0 ? Number(index) + 1 : Number(index) - 1;
+      proofArray.push(await sdb.getHash(index.toString()));
+      indicator = Math.floor(indicator / 2);
+      index= + "-" +
     }
+    index = index.split("-");
     if (indicator % 2 == 0) {
     } else {
     }
