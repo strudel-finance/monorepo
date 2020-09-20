@@ -82,7 +82,7 @@ functions:
     events:
       - http:
           method: post
-          path: /address
+          path: /
           integration: lambda
           cors: true
           response: *response_mappings

@@ -6,15 +6,12 @@
  * tree.
  */
 
-import chai, { expect, assert } from "chai";
+import chai, {expect, assert} from "chai";
 import sinonChai from "sinon-chai";
 import sinon from "sinon";
-import { it, describe, afterEach } from "mocha";
-import { BigInt } from "jsbi-utils";
+import {it, describe, afterEach} from "mocha";
 import SniperRifle from "./src/index";
 import Db from "./src/db";
-
-const leap = require("leap-core");
 
 chai.use(sinonChai);
 
@@ -35,7 +32,7 @@ describe("SniperRifle", () => {
   it("handle chain progressed", async () => {
     const heightBefore = 100;
     sinon.stub(sdb, "getAttributes").yields(null, {
-      Attributes: [{ Name: "lastBlock", Value: heightBefore.toString() }],
+      Attributes: [{Name: "lastBlock", Value: heightBefore.toString()}],
     });
     sinon.stub(sdb, "putAttributes").yields(null, {});
 
@@ -47,7 +44,7 @@ describe("SniperRifle", () => {
 
     expect(sdb.putAttributes).calledWith({
       Attributes: [
-        { Name: "lastBlock", Replace: true, Value: heightAfter.toString() },
+        {Name: "lastBlock", Replace: true, Value: heightAfter.toString()},
       ],
       DomainName: sinon.match.any,
       ItemName: "testnet",
@@ -57,7 +54,7 @@ describe("SniperRifle", () => {
   it("handle chain didn't progress", async () => {
     const heightBefore = 100;
     sinon.stub(sdb, "getAttributes").yields(null, {
-      Attributes: [{ Name: "lastBlock", Value: heightBefore.toString() }],
+      Attributes: [{Name: "lastBlock", Value: heightBefore.toString()}],
     });
     sinon.stub(sdb, "putAttributes").yields(null, {});
 
