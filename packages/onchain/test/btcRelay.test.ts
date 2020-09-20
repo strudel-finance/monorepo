@@ -32,7 +32,7 @@ describe("Relay", () => {
 
   beforeEach(async () => {
     signers = await ethers.signers();
-    relay = await deploy(signers[0], genesisHash, genesisHeight);
+    relay = await deploy(signers[0], genesisHeader, genesisHeight);
   });
 
   it("should store genesis header", async () => {
@@ -46,8 +46,7 @@ describe("Relay", () => {
 
     // check header was stored correctly
     const height = await relay.getBlockHeight(genesisHash);
-    expect(height).to.eq(genesisHeight);
-    // expect(header.merkle).to.eq("0xd1dd4e30908c361dfeabfb1e560281c1a270bde3c8719dbda7c8480053175944");
+    await expect(height).to.eq(genesisHeight);
   });
 
   it("should fail with duplicate (genesis)", async () => {
@@ -60,7 +59,12 @@ describe("Relay", () => {
     "0x000000204615614beedb06491a82e78b38eb6650e29116cc9cce21000000000000000000b034884fc285ff1acc861af67be0d87f5a610daa459d75a58503a01febcc287a34c0615c886f2e17046e7325";
 
   it("should store and fail on resubmission", async () => {
-    await relay.submitBlockHeader(header1);
+    const tx = await relay.submitBlockHeaderWithPos(0, header1);
+    console.log((await tx.wait(1)).gasUsed?.toNumber());
+    const tips = await relay._pointers();
+    const pdata = await relay._pendingData(1);
+    const phash = await relay._pendingHashes(1);
+    console.log(`pointers ${tips}, data 1 ${pdata}, hash 1 ${phash}`);
     await expect(relay.submitBlockHeader(header1)).to.be.revertedWith(
       ErrorCode.ERR_DUPLICATE_BLOCK
     );
@@ -104,6 +108,7 @@ describe("Relay", () => {
       header:
         "0x0000002093ca64158287d362f3304f8279a9a40c51cfac9466af120000000000000000009dd6aca8ff633eaa81fa5a6a861877bde0648ad5c7e64b7245720b4b9a0990c07745955d240f16171c168c88",
     };
+
     relay = await deploy(signers[0], fakeGenesis.header, fakeGenesis.height);
 
     const result = relay.submitBlockHeader(fakeBlock.header);
@@ -261,11 +266,12 @@ describe("Relay (Batch)", () => {
   });
 
   it("should store 16 headers", async () => {
-    await relay.submitBlockHeaderBatch(
+    const tx = await relay.submitBlockHeaderBatch(
       headers.slice(1, 17).reduce((prev, curr) => {
         return Buffer.concat([prev, Buffer.from(curr, "hex")]);
       }, Buffer.alloc(0))
     );
+    console.log('gas used: ', (await tx.wait(1)).gasUsed?.toNumber());
   });
 
   it("should store 32 headers", async () => {

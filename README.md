@@ -63,3 +63,14 @@ requesting proof for block at position (POS):
 		- get right half hash
 		- hash together, store in db, and return
 - once we have reached the current height, return proof
+
+
+## contract cost analysis:
+
+- finding previous header: 11k
+- calcurate target: 25k
+- check epoch (not match): 150
+- extract prevHash: 2300
+- itterating position pointers to 30 instead of 4: 15k
+- calculating block hash: 2500
+
