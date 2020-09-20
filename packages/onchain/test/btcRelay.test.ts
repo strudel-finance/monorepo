@@ -17,7 +17,7 @@ function deploy(
   height: number
 ): Promise<Relay> {
   const factory = new RelayFactory(signer);
-  return factory.deploy(header, height);
+  return factory.deploy(header, height, []);
 }
 
 describe("Relay", () => {
@@ -32,7 +32,7 @@ describe("Relay", () => {
 
   beforeEach(async () => {
     signers = await ethers.signers();
-    relay = await deploy(signers[0], genesisHeader, genesisHeight);
+    relay = await deploy(signers[0], genesisHash, genesisHeight);
   });
 
   it("should store genesis header", async () => {
