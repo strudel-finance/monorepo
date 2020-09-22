@@ -1,76 +1,34 @@
-# Sierra Retarda
+# Strudel Finance
 
-A more efficient implementation of the btcRelay.
+Vortex Finance is the first one-way, **trustless bridge** linking Bitcoin to Ethereum. The bridge can only be crossed by burning BTC on the Bitcoin blockchain and receiving an equal amount vBTC on Ethereum. The action is irreversable.
 
-## Installation
+The purpose of the Vortex is two-fold:
+1. To **integrate the Bitcoin and Ethereum ecosystems** tightly with each other. By equiping BTC with the ERC20 interface and smart-contract interoperability it becomes more versatile. Furthermore, it's supply can be locked into protocols for lending, options and other DeFi use-cases, reducing its volatility and potentially increasing market value.
+2. To **reduce systemic risk** in the ecosystem, as introduced by trusted bridge solutions like $REN and $WBTC. Not only do these bridges lock BTC in [insecure multisig setups](https://medium.com/wanchain-foundation/how-safe-are-todays-wrapped-btc-bridges-b0f35a7b15e2) (<8  signers), but they [raise concerns](https://twitter.com/VitalikButerin/status/1295252403558559746) of total value collapse causing harm to protocols locking these assets.
 
-Install dependencies:
+**vBTC is the better wrappend BTC!** With a fully auditable supply and no risk of compromise it is the asset of choice for traders and DeFi users. 
 
-```bash
-yarn install
-```
+### Bridge Design
 
-Build the contracts and interfaces:
+When BTC is burned using the vortex finance interface, an OP_RETURN output with the burn amount and the data of the receiving Ethereum wallet address is created.
 
-```bash
-yarn build
-```
+![burn transaction](https://i.imgur.com/2ZQiaNd.png)
 
-## Testing
+Next, the block header of the Bitcoin block containing the transactions need to be relayed to Vortex contract on Ethereum, where its proof-of-work is verified and the canonical chain is constructed. The Vortex contract implements the [simple payment verification](https://en.bitcoinwiki.org/wiki/Simplified_Payment_Verification) (SPV) protocol as used by all light clients and most wallets of the Bitcoin network.
 
-Run the tests:
+#### Fallback to P2FSH
 
-```bash
-yarn test
-```
+A fallback for non-BIP70 wallets is provided. the ethereum address is injected into the P2SH (pay to script-hash) output as script, creating a P2FSH (fake script hash) output.
 
-## API Spec
+<drawing here></drawing>
 
-GET api/blockInclusionProof/{height}
+Lastly an inclusion proof of the transaction is relayed to the Vortex contract, proving transaction inclusion, burn amount and receiver address. The Vortex contract verifies authenticity of the burn and mints vBTC.
+The Vortex contract strictly mints 1 vBTC for 1 burned BTC, not taking any fees for bridge crossings.
 
-```
-{
-	proof: [0x123, 0x234]
-	header: 0x1234
-}
-```
+### $STRDL
 
-
-## DB Layout
-
-| primary key | hash       | headerData  |
-|-------------|------------|-------------|
-| 0           | 0x0234..32 | 0x02345..80 |
-| 1           | 0x1234..32 | 0x12345..80 |
-| 2           | 0x2345..32 | 0x23456..80 |
-| 3           | 0x3234..32 | 0x32345..80 |
-| 2-3         | 0x1234..32 |             |
-| 0-1         | 0x1234..32 |             |
-| 0-3         | 0x1234..32 |             |
-
-
-assumption: current block height is 7
-requesting proof for block at position (POS):
-- POS / 2 is even, so we look up neighbour on the right (3), put in proof array
-- POS / 2 / 2 is uneven, hence we taken the neighbour on the left (0-1)
-	- if (0-1) can be found in db, put in in the proof array, if not, calcurate it
-		- get left half hash
-		- get right half hash
-		- hash together, store in db, and return
-- POS / 2 / 2 / 2 is even, so we look up the neighbour on the right (4-7)
-	- if (4-7) can be found in db, put in in the proof array, if not, calcurate it
-		- get left half hash
-		- get right half hash
-		- hash together, store in db, and return
-- once we have reached the current height, return proof
-
-
-## contract cost analysis:
-
-- finding previous header: 11k
-- calcurate target: 25k
-- check epoch (not match): 150
-- extract prevHash: 2300
-- itterating position pointers to 30 instead of 4: 15k
-- calculating block hash: 2500
+$STRDL (Strudel) is the governance and reward token for Vortex Finince. It is created on 3 separate ocasions:
+1. when BTC cross the bridge, the user receives $STRDL. early users receive a quadratic bonus.
+2. When liquidity is staked into the vBTC-ETH pool $STRDL is distributed. When liquidity is staked into the STRDL-ETH pool $STRDL is distributed. 
+3. when block headers are relayed from Bitcoin to the Relayer contract.
 
