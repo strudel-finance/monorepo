@@ -1,47 +1,37 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity ^0.6.0;
+pragma solidity >=0.4.22 <0.8.0;
 
-interface IRelay {
-    /**
-     * @param digest block header hash of block header submitted for storage
-     * @param height height of the stored block
-     */
-    event StoreHeader(bytes32 indexed digest, uint32 indexed height);
+/** @title IRelay */
 
-    /**
-     * @notice Parses, validates and stores a block header
-     * @param header Raw block header bytes (80 bytes)
-     */
-    function submitBlockHeader(bytes calldata header) external;
+contract IRelay {
 
-    /**
-     * @notice Parses, validates and stores a batch of headers
-     * @param headers Raw block headers (80* bytes)
-     */
-    function submitBlockHeaderBatch(bytes calldata headers) external;
+    /// @notice     Getter for bestKnownDigest
+    /// @dev        This updated only by calling markNewHeaviest
+    /// @return     The hash of the best marked chain tip
+    function getBestKnownDigest() public view returns (bytes32) {
+    }
 
-    /**
-     * @notice Gets the height of an included block
-     * @param digest Hash of the referenced block
-     * @return Height of the stored block, reverts if not found
-     */
-    function getBlockHeight(bytes32 digest) external view returns (uint32);
+    /// @notice         Finds the height of a header by its digest
+    /// @dev            Will fail if the header is unknown
+    /// @param _digest  The header digest to search for
+    /// @return         The height of the header, or error if unknown
+    function findHeight(bytes32 _digest) external view returns (uint256) {
+    }
 
-    /**
-     * @notice Gets the hash of an included block
-     * @param height Height of the referenced block
-     * @return Hash of the stored block, reverts if not found
-     */
-    function getBlockHash(uint32 height) external view returns (bytes32);
+    /// @notice             Checks if a digest is an ancestor of the current one
+    /// @dev                Limit the amount of lookups (and thus gas usage) with _limit
+    /// @param _ancestor    The prospective ancestor
+    /// @param _descendant  The descendant to check
+    /// @param _limit       The maximum number of blocks to check
+    /// @return             true if ancestor is at most limit blocks lower than descendant, otherwise false
+    function isAncestor(bytes32 _ancestor, bytes32 _descendant, uint256 _limit) external view returns (bool) {
+    }
 
-    /**
-     * @notice Gets the hash and height for the best tip
-     * @return digest Hash of stored block
-     * @return height Height of stored block
-     */
-    function getBestBlock()
-        external
-        view
-        returns (bytes32 digest, uint32 height);
+    /// @notice     Getter for relayGenesis
+    /// @dev        This is updated only by calling markNewHeaviest
+    /// @return     The hash of the shared ancestor of the most recent fork
+    function getLastReorgCommonAncestor() public view returns (bytes32) {
+    }
+
 }
