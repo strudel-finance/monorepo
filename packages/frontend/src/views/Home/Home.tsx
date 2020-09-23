@@ -1,5 +1,8 @@
-import React, { useCallback, useState, useMemo } from 'react'
+import React, {useCallback, useState, useMemo} from 'react'
 import styled from 'styled-components'
+import {useWallet} from 'use-wallet'
+import WalletProviderModal from '../../components/WalletProviderModal'
+
 import chef from '../../assets/img/chef.png'
 import Button from '../../components/Button'
 import Container from '../../components/Container'
@@ -14,29 +17,17 @@ import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 
 const Home: React.FC = () => {
-
   const [val, setVal] = useState('0')
 
-  const [address, setAddress] = useState('0x0000000000000000000000000000000000000000')
-
-  const walletAddress = useMemo(() => {
-    const address = '0x1234123412341234123412341234123412341234';
-    return formatAddress(address)
-  }, [])
+  const [address, setAddress] = useState(
+    '0x0000000000000000000000000000000000000000',
+  )
+  const wallet = useWallet()
+  const account = wallet.account
+  const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
 
   const [onPresentBurn] = useModal(
-    <BurnModal
-      value={val}
-      address={walletAddress}
-      onConfirm={() => {}}
-    />,
-  )
-
-  const handleAddressChange = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
-      setAddress(e.currentTarget.value)
-    },
-    [setAddress],
+    <BurnModal value={val} address={account} onConfirm={() => {}} />,
   )
 
   const handleAmountChange = useCallback(
@@ -46,11 +37,6 @@ const Home: React.FC = () => {
     [setVal],
   )
 
-  const handleSelectWallet = useCallback(() => {
-    // TODO: get address frow web3 provider
-    setAddress(walletAddress)
-  }, [walletAddress, setVal])
-
   return (
     <Page>
       <PageHeader
@@ -58,23 +44,31 @@ const Home: React.FC = () => {
         title="The Vortex is ready"
         subtitle="Burn BTC to receive vBTC and $STRDL!"
       />
-      <Container>
-        <AddressInput
-          address={walletAddress}
-          onSelectWallet={handleSelectWallet}
-          onChange={handleAddressChange}
-          value={address}
-        />
-        <BurnAmountInput
-          onChange={handleAmountChange}
-          value={val}
-          symbol="BTC"
-        />
-        <Button
-          text={'Burn'}
-          onClick={onPresentBurn}
-        />
-      </Container>
+      {wallet.status === 'connected' ? (
+        <Container>
+          <AddressInput address={account} value={account} />
+          <BurnAmountInput
+            onChange={handleAmountChange}
+            value={val}
+            symbol="BTC"
+          />
+          <Button text={'Get vBTC'} onClick={onPresentBurn} />
+        </Container>
+      ) : (
+        <div
+          style={{
+            alignItems: 'center',
+            display: 'flex',
+            flex: 1,
+            justifyContent: 'center',
+          }}
+        >
+          <Button
+            onClick={onPresentWalletProviderModal}
+            text="🔓 Unlock Wallet"
+          />
+        </div>
+      )}
       <Spacer size="lg" />
       <StyledInfo>
         🏆<b>Pro Tip</b>: SUSHI-ETH UNI-V2 LP token pool yields TWICE more token

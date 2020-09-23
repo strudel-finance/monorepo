@@ -1,22 +1,26 @@
 import BigNumber from 'bignumber.js'
-import React, { useCallback, useMemo, useState } from 'react'
+import React, {useCallback, useMemo, useState} from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
 import CardIcon from '../../../components/CardIcon'
-import Modal, { ModalProps } from '../../../components/Modal'
+import Modal, {ModalProps} from '../../../components/Modal'
 import ModalActions from '../../../components/ModalActions'
 import ModalTitle from '../../../components/ModalTitle'
 import ModalContent from '../../../components/ModalContent'
 import TokenInput from '../../../components/TokenInput'
-import { getFullDisplayBalance } from '../../../utils/formatBalance'
+import {getFullDisplayBalance} from '../../../utils/formatBalance'
 import Value from '../../../components/Value'
 import Label from '../../../components/Label'
+import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
+import Checkbox from '../../../components/Checkbox'
+import QRCode from 'qrcode.react'
 
+import sb from 'satoshi-bitcoin'
 
 interface BurnModalProps extends ModalProps {
-  value: number | string,
-  address: string,
+  value: number | string
+  address: string
   onConfirm: (amount: string) => void
 }
 
@@ -28,6 +32,8 @@ const BurnModal: React.FC<BurnModalProps> = ({
 }) => {
   const [val, setVal] = useState('')
   const [pendingTx, setPendingTx] = useState(false)
+  const [checked, setChecked] = useState(false)
+  const [continued, setContinued] = useState(false)
 
   const handleChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
@@ -36,35 +42,74 @@ const BurnModal: React.FC<BurnModalProps> = ({
     [setVal],
   )
 
+  const handleClick = (event: any) => {
+    event.target.firstElementChild.checked = !event.target.firstElementChild
+      .checked
+    setChecked(event.target.firstElementChild.checked)
+  }
+
+  const handleContinue = () => {
+    setContinued(true)
+  }
+
+  const handleCheckboxChange = (event: any) => {
+    setChecked(event.target.checked)
+  }
+
   return (
     <Modal>
       <ModalTitle text={`Confirm Transaction`} />
       <ModalContent>
         <Spacer />
-
-        <div style={{ display: 'flex' }}>
-          <StyledBalanceWrapper>
-            <CardIcon>
-              <span>🍣</span>
-            </CardIcon>
-            <StyledBalance>
-              <Label text="Bitcoin sent" />
-              <Value value={value} />
-            </StyledBalance>
-          </StyledBalanceWrapper>
-        </div>
-        <div style={{ display: 'flex' }}>
-          <StyledBalanceWrapper>
-            <StyledBalance>
-              <Label text="Exchange Rate" />
-              <Label text="1 BTC = 1 vBTC" />
-            </StyledBalance>
-          </StyledBalanceWrapper>
-        </div>
-
+        {!continued ? (
+          <div>
+            <div style={{display: 'flex'}}>
+              <StyledBalanceWrapper>
+                <CardIcon>
+                  <span>🍣</span>
+                </CardIcon>
+                <StyledBalance>
+                  <Label text="Bitcoin sent" />
+                  <Value value={value} />
+                </StyledBalance>
+              </StyledBalanceWrapper>
+            </div>
+            <div style={{display: 'flex'}}>
+              <StyledBalanceWrapper>
+                <StyledBalance>
+                  <Label text="Exchange Rate" />
+                  <Label text="1 BTC = 1 vBTC" />
+                </StyledBalance>
+              </StyledBalanceWrapper>
+            </div>
+            <div style={{display: 'flex'}}>
+              <StyledBalanceWrapper>
+                <StyledBalance>
+                  <DangerLabel
+                    checkbox={<Checkbox onChange={handleCheckboxChange} />}
+                    text="Danger: Your bitcoins will be irretrievably burnt."
+                    onClick={handleClick}
+                  />
+                </StyledBalance>
+              </StyledBalanceWrapper>
+            </div>
+          </div>
+        ) : (
+          <div style={{display: 'flex'}}>
+            <StyledBalanceWrapper>
+              <QRCode
+                size={256}
+                value={`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
+                  .toSatoshi(value)
+                  .toString()}`}
+              />
+            </StyledBalanceWrapper>
+          </div>
+        )}
         <Spacer />
       </ModalContent>
       <ModalActions>
+        <Button onClick={handleContinue} text="Continue" disabled={!checked} />
         <Button onClick={onDismiss} text="Cancel" />
       </ModalActions>
     </Modal>
