@@ -37,8 +37,8 @@ describe('OnDemandSPV', async () => {
 
   describe('#provideProof', async () => {
 
-    it('runs succesfully, and sets validatedTxns and latestValidatedTx', async () => {
-      await instance.proofOpReturnAndMint(
+    it('happy case', async () => {
+      const tx = await instance.proofOpReturnAndMint(
         constants.OP_RETURN_HEADER,
         constants.OP_RETURN_PROOF,
         constants.OP_RETURN_VERSION,
@@ -48,20 +48,9 @@ describe('OnDemandSPV', async () => {
         constants.OP_RETURN_VIN,
         constants.OP_RETURN_VOUT
       );
+      console.log((await tx.wait(1)).gasUsed?.toNumber());
     });
 
-    it('shortcuts inclusion validatins for already-seen txns', async () => {
-      await instance.proofOpReturnAndMint(
-        '0x',
-        '0x',
-        constants.OP_RETURN_VERSION,
-        constants.OP_RETURN_LOCKTIME,
-        0,
-        '0x0001', // requestIndices
-        constants.OP_RETURN_VIN,
-        constants.OP_RETURN_VOUT
-      );
-    });
   });
 
 });
