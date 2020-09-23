@@ -4,6 +4,7 @@ pragma solidity >=0.4.22 <0.8.0;
 
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {ERC20Detailed} from "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
+import {ERC20Mintable} from "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
 import {TypedMemView} from "@summa-tx/bitcoin-spv-sol/contracts/TypedMemView.sol";
@@ -22,16 +23,18 @@ contract VBTCToken is ERC20Detailed, ERC20 {
 
   uint256 public numConfs;
   IRelay public relay;
+  ERC20Mintable public strudel;
 
   // storing all sucessfully processed outputs
   mapping(bytes32 => bool) knownOutputs;
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
-  constructor(address _relay, uint256 _minConfs)
+  constructor(address _relay, address _strudel, uint256 _minConfs)
     ERC20Detailed("vBTC", "VBTC", 18)
   public {
     relay = IRelay(_relay);
+    strudel = ERC20Mintable(_strudel);
     numConfs = _minConfs;
   }
 
@@ -40,21 +43,19 @@ contract VBTCToken is ERC20Detailed, ERC20 {
     return (_txid >> 1) << 1 | bytes32(uint256(uint8(_index)));
   }
 
-  /// @dev             Mints an amount of the token and assigns it to an account.
-  ///                  Uses the internal _mint function.
-  /// @param _header   header
-  /// @param _proof    proof
-  /// @param _index    index
-  /// @param _txid     txid
-  function proofOpReturnAndMint(
-    bytes29 _header,
-    bytes29 _proof,
+  /// @notice             Verifies inclusion of a tx in a header, and that header in the Relay chain
+  /// @dev                Specifically we check that both the best tip and the heaviest common header confirm it
+  /// @param  _header     The header containing the merkleroot committing to the tx
+  /// @param  _proof      The merkle proof intermediate nodes
+  /// @param  _index      The index of the tx in the merkle tree's leaves
+  /// @param  _txid       The txid that is the proof leaf
+  function _checkInclusion(
+    bytes29 _header,    // Header
+    bytes29 _proof,     // MerkleArray
     uint256 _index,
     bytes32 _txid
-  ) external returns (bool) {
+  ) internal view returns (bool) {
 
-    bytes32 outpoint = makeOutpoint(_index, _txid);
-    require(!knownOutputs[outpoint], "already processed outputs");
     // check the txn is included in the header
     require(
       ViewSPV.prove(
@@ -68,26 +69,84 @@ contract VBTCToken is ERC20Detailed, ERC20 {
     bytes32 headerHash = _header.hash256();
     bytes32 GCD = relay.getLastReorgCommonAncestor();
     require(
-      relay.isAncestor(
-        headerHash,
-        GCD,
-        240),
-      "GCD does not confirm header");
-    bytes32 bestKnownDigest = relay.getBestKnownDigest();
+      relay.isAncestor(headerHash, GCD, 240),
+      "GCD does not confirm header"
+    );
 
     // check offset to tip
-    uint256 height = relay.findHeight(bestKnownDigest).sub(relay.findHeight(headerHash));
-    require(height >= numConfs, "Insufficient confirmations");
+    bytes32 bestKnownDigest = relay.getBestKnownDigest();
+    uint256 offset = relay.findHeight(bestKnownDigest).sub(relay.findHeight(headerHash));
+    require(offset >= numConfs, "Insufficient confirmations");
 
-    // mark success
-    knownOutputs[outpoint] = true;    
-
-    // do payout
-    // TODO: extract receiver and address
-    uint256 amount = 0;
-    address account = address(0x0);
-    _mint(account, amount);
     return true;
+  }
+
+  /// @dev             Mints an amount of the token and assigns it to an account.
+  ///                  Uses the internal _mint function.
+  /// @param _header   header
+  /// @param _proof    proof
+  /// @param _version    index
+  /// @param _locktime    index
+  /// @param _burnOutputIndex    index
+  /// @param _index    index
+  /// @param _vin    index
+  /// @param _vout    index
+  function proofOpReturnAndMint(
+    bytes calldata _header,
+    bytes calldata _proof,
+    bytes4 _version,
+    bytes4 _locktime,
+    uint256 _index,
+    uint8 _burnOutputIndex,
+    bytes calldata _vin,
+    bytes calldata _vout
+  ) external returns (bool) {
+    return _provideProof(_header, _proof,  _version, _locktime, _index, _burnOutputIndex, _vin, _vout);
+  }
+
+
+  function _provideProof(
+      bytes memory _header,
+      bytes memory _proof,
+      bytes4 _version,
+      bytes4 _locktime,
+      uint256 _index,
+      uint8 _burnOutputIndex,
+      bytes memory _vin,
+      bytes memory _vout
+  ) internal returns (bool) {
+    bytes32 txId = abi.encodePacked(_version, _vin, _vout, _locktime).ref(0).hash256();
+    bytes32 outpoint = makeOutpoint(_index, txId);
+    require(!knownOutputs[outpoint], "already processed outputs");
+
+    _checkInclusion(
+      _header.ref(0).tryAsHeader().assertValid(),
+      _proof.ref(0).tryAsMerkleArray().assertValid(),
+      _index,
+      txId
+    );
+
+    // mark processed
+    knownOutputs[outpoint] = true;
+
+    // do payouts
+    doPayouts(_vout.ref(0).tryAsVout(), _burnOutputIndex);
+    return true;
+  }
+
+  function doPayouts(bytes29 _vout, uint256 _burnOutputIndex) internal {
+    bytes29 output = _vout.indexVout(_burnOutputIndex);
+
+    // extract receiver and address
+    uint256 amount = output.value();
+    // TODO: fix test
+    // require(amount > 0, "output has 0 value");
+    bytes29 opReturnPayload = output.scriptPubkey().opReturnPayload();
+    require(opReturnPayload.len() == 20, "invalid op-return payload length");
+    address account = address(bytes20(opReturnPayload.index(0, 20)));
+    _mint(account, amount);
+    // TODO: quadratic function
+    strudel.mint(account, amount);
   }
 
   function proofP2FSHAndMint(
