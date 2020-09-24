@@ -1,17 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
-import { provider } from 'web3-core'
+import {useCallback, useEffect, useState} from 'react'
+import {provider} from 'web3-core'
 
 import BigNumber from 'bignumber.js'
-import { useWallet } from 'use-wallet'
-import { Contract } from 'web3-eth-contract'
+import {useWallet} from 'use-wallet'
+import {Contract} from 'web3-eth-contract'
 
 import {
   getMasterChefContract,
   getWethContract,
   getFarms,
   getTotalLPWethValue,
-} from '../sushi/utils'
-import useSushi from './useSushi'
+} from '../vbtc/utils'
+import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 
 export interface StakedValue {
@@ -24,11 +24,11 @@ export interface StakedValue {
 
 const useAllStakedValue = () => {
   const [balances, setBalance] = useState([] as Array<StakedValue>)
-  const { account }: { account: string; ethereum: provider } = useWallet()
-  const sushi = useSushi()
-  const farms = getFarms(sushi)
-  const masterChefContract = getMasterChefContract(sushi)
-  const wethContact = getWethContract(sushi)
+  const {account}: {account: string; ethereum: provider} = useWallet()
+  const vbtc = useVBTC()
+  const farms = getFarms(vbtc)
+  const masterChefContract = getMasterChefContract(vbtc)
+  const wethContact = getWethContract(vbtc)
   const block = useBlock()
 
   const fetchAllStakedValue = useCallback(async () => {
@@ -54,13 +54,13 @@ const useAllStakedValue = () => {
     )
 
     setBalance(balances)
-  }, [account, masterChefContract, sushi])
+  }, [account, masterChefContract, vbtc])
 
   useEffect(() => {
-    if (account && masterChefContract && sushi) {
+    if (account && masterChefContract && vbtc) {
       fetchAllStakedValue()
     }
-  }, [account, block, masterChefContract, setBalance, sushi])
+  }, [account, block, masterChefContract, setBalance, vbtc])
 
   return balances
 }

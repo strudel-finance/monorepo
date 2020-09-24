@@ -44,6 +44,7 @@ const StyledInputWrapper = styled.div`
 `
 
 const StyledInput = styled.input`
+  width: 100%;
   background: none;
   border: 0;
   color: ${(props) => props.theme.color.grey[600]};

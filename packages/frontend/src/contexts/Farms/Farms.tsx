@@ -1,22 +1,22 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import React, {useCallback, useEffect, useState} from 'react'
 
-import { useWallet } from 'use-wallet'
-import useSushi from '../../hooks/useSushi'
+import {useWallet} from 'use-wallet'
+import useVBTC from '../../hooks/useVBTC'
 
-import { bnToDec } from '../../utils'
-import { getMasterChefContract, getEarned } from '../../sushi/utils'
-import { getFarms } from '../../sushi/utils'
+import {bnToDec} from '../../utils'
+import {getMasterChefContract, getEarned} from '../../vbtc/utils'
+import {getFarms} from '../../vbtc/utils'
 
 import Context from './context'
-import { Farm } from './types'
+import {Farm} from './types'
 
-const Farms: React.FC = ({ children }) => {
+const Farms: React.FC = ({children}) => {
   const [unharvested, setUnharvested] = useState(0)
 
-  const sushi = useSushi()
-  const { account } = useWallet()
+  const vbtc = useVBTC()
+  const {account} = useWallet()
 
-  const farms = getFarms(sushi)
+  const farms = getFarms(vbtc)
 
   return (
     <Context.Provider

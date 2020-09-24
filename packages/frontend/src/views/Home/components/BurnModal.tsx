@@ -95,23 +95,42 @@ const BurnModal: React.FC<BurnModalProps> = ({
             </div>
           </div>
         ) : (
-          <div style={{display: 'flex'}}>
-            <StyledBalanceWrapper>
-              <QRCode
-                size={256}
-                value={`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
-                  .toSatoshi(value)
-                  .toString()}`}
-              />
-            </StyledBalanceWrapper>
+          <div>
+            <div style={{display: 'flex'}}>
+              <StyledBalanceWrapper>
+                <QRCode
+                  size={256}
+                  value={`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
+                    .toSatoshi(value)
+                    .toString()}`}
+                />
+              </StyledBalanceWrapper>
+            </div>
+            <div style={{display: 'flex'}}>
+              <StyledBalanceWrapper>
+                <StyledBalance>
+                  <Label text="Please scan the following QR code" />
+                </StyledBalance>
+              </StyledBalanceWrapper>
+            </div>
           </div>
         )}
         <Spacer />
       </ModalContent>
-      <ModalActions>
-        <Button onClick={handleContinue} text="Continue" disabled={!checked} />
-        <Button onClick={onDismiss} text="Cancel" />
-      </ModalActions>
+      {!continued ? (
+        <ModalActions>
+          <Button
+            onClick={handleContinue}
+            text="Continue"
+            disabled={!checked}
+          />
+          <Button onClick={onDismiss} text="Cancel" />
+        </ModalActions>
+      ) : (
+        <ModalActions>
+          <Button onClick={onDismiss} text="Close" />
+        </ModalActions>
+      )}
     </Modal>
   )
 }
