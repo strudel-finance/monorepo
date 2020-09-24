@@ -32,3 +32,23 @@ $STRDL (Strudel) is the governance and reward token for Vortex Finince. It is cr
 2. When liquidity is staked into the vBTC-ETH pool $STRDL is distributed. When liquidity is staked into the STRDL-ETH pool $STRDL is distributed. 
 3. when block headers are relayed from Bitcoin to the Relayer contract.
 
+
+### vBTC Price Stability
+
+The supply of tokenized Bitcoin on Ethereum now [tops $1.1B](https://www.coindesk.com/tokenized-bitcoin-wrapped-bitcoin-on-ethereum). The demand for Bitcoin is here to stay, though it is unclear how much further it will grow.
+As th Strudel Protocol implements a one-way trustless bridge, vBTC can not migrate back to its parent chain. Hence, the protocol aims to satisfy only the base demand for BTC on Ethereum, that supply which will not need to exit Ethereum back onto Bitcoin ever. This way vBTC holders will not 
+
+
+Stablecoins have often gone off peg due to varying market conditions and limitations in monetary policy. The recent boom in yield farming has only exacerbated this problem as farmers buy and sell large amounts of stablecoins in order to chase the best yield.
+
+
+The Strudel protocol empowers farmers to leverage their yield-seeking tendencies to help the DeFi ecosystem maintain the pegs of the 3 largest : DAI, USDC, USDT, and sUSD.
+The idea is simple, PICKLEs are minted and distributed to Uniswap LPs of the following pools:
+DAI-ETH
+USDC-ETH
+USDT-ETH
+sUSD-ETH
+When a stablecoin is above peg, the protocol will distribute fewer PICKLEs to that pool and more PICKLEs to other pools. As farmers chase the best yield, this creates sell pressure for the overvalued stablecoin and buy pressure for the other coins. This works in reverse for stablecoins that are below peg.
+Initial distribution of PICKLEs is based off Curve.fi’s sUSD pool.
+Image for post
+Future distributions will be done via a timelock contract, with input from the governance community.

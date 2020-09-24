@@ -22,7 +22,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
   using ViewBTC for bytes29;
   using ViewSPV for bytes29;
 
-  event Burn(bytes32 indexed btcTxHash, address indexed receiver, uint256 amount);
+  event Burn(bytes32 indexed btcTxHash, address indexed receiver, uint256 amount, uint8 outputIndex);
 
   uint8 constant ADDR_LEN = 20;
   uint256 constant BTC_CAP = 21*10**24;
@@ -160,7 +160,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     address account;
     uint256 amount;
     (account, amount) = doPayouts(_vout.ref(0).tryAsVout(), _burnOutputIndex);
-    emit Burn(txId, account, amount);
+    emit Burn(txId, account, amount, _burnOutputIndex);
     return true;
   }
 
