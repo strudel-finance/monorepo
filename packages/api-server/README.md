@@ -1,33 +1,39 @@
 
 
 ## GET /account/\<0xaa..ff\>
-responses:
-- 200:
+possible responses:
+- 200: no previous paymnts
+	```json
+    {
+      "account": "0x20",
+      "burns": []
+    }
+	```
+- 200: no previous paymnts, only sig
+	```json
+    {
+      "account": "0x20",
+      "burns": [],
+      "sig": {
+        "r": "0x32",
+	"s": "0x32",
+	"v": 8
+      }
+    }
+	```
+- 200: one previous payment, no sig
 	```json
     {
       "account": "0x20",
       "burns": [{
 		"amount": "1000", // satoshis
 		"dateCreated": "23/9/2020",
-		"status": "requested"
-	  }..{}],
-      "sig": {r, s, v}
-    }
-	```
-- 200:
-	```json
-    {
-      "account": '0x20',
-      "burns": [{
-		"amount": "1000", // satoshis
-		"dateCreated": "23/9/2020",
 		"btcTxHash": "0x32",
 		"status": "pending"
-	  }..{}],
-      "sig": {r, s, v}
+	  }]
     }
 	```
-- 200:
+- 200: 2 previous payments and sig
 	```json
     {
       "account": "0x20",
@@ -37,25 +43,15 @@ responses:
 		"btcTxHash": "0x32",
 		"ethTxHash": "0x32",
 		"status": "paid"
-	}..{}],
-      "sig": {r, s, v}
+	}, {..}],
+      "sig": {
+        "r": "0x32",
+	"s": "0x32",
+	"v": 8
+      }
     }
 	```
 - 404: account not found
-
-## POST /account/\<0xaa..ff\>/addPayment
-
-post body:
-```json
-{
-     "amount": "1000", // satoshis
-}
-```
-
-responses:
-- 204: created
-- 400: invalid address
-- 409: conflict
 
 ## POST /account/\<0xaa..ff\>/addSig
 
@@ -71,9 +67,10 @@ post body:
 ```
 
 responses:
-- 200
-- 404: account not found
+- 200: sig already here, and it's the same
+- 204: sig added
 - 400: sig does not match account address
+- 404: account not found
 
 ## POST /account/\<0xaa..ff\>/addBtcTx
 
@@ -84,7 +81,7 @@ post body:
 }
 ```
 responses:
-- 200
+- 200: btc tx parsed and added
 - 400: no relevant output
 - 404: account not found
 - 408: tx not found in mempool
@@ -97,7 +94,7 @@ post body:
 }
 ```
 responses:
-- 200
+- 200: sucessfull eth Tx found on chain and added
 - 400: no relevent event
 - 404: account not found
 - 408: tx not found on chain
