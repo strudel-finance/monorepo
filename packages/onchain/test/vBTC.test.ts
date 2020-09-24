@@ -21,12 +21,12 @@ async function deploy(signer: Signer): Promise<VBTCToken> {
   let strudelFactory = new StrudelFactory(signer);
   let strudel = await strudelFactory.deploy();
   let factory = new VBTCTokenFactory(signer);
-  let vbtc = await factory.deploy(relay.address, strudel.address, 0);
+  let vbtc = await factory.deploy(relay.address, strudel.address, 0, relay.address, 50);
   await strudel.addMinter(vbtc.address);
   return vbtc;
 }
 
-describe('OnDemandSPV', async () => {
+describe('VBTC', async () => {
   let signers: Signer[];
   let instance: VBTCToken;
 
@@ -44,11 +44,13 @@ describe('OnDemandSPV', async () => {
         constants.OP_RETURN_VERSION,
         constants.OP_RETURN_LOCKTIME,
         constants.OP_RETURN_INDEX,
-        '0x0001', // requestIndices
+        '0x0000', // requestIndices
         constants.OP_RETURN_VIN,
         constants.OP_RETURN_VOUT
       );
-      console.log((await tx.wait(1)).gasUsed?.toNumber());
+      const rsp = (await tx.wait(1));
+      //console.log(rsp);
+      console.log(rsp.gasUsed?.toNumber());
     });
 
   });

@@ -9,13 +9,13 @@ import {ITokenRecipient} from "./ITokenRecipient.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract Strudel is ERC20Mintable, ERC20Detailed {
+contract StrudelToken is ERC20Mintable, ERC20Detailed {
   using SafeMath for uint256;
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
   constructor()
-    ERC20Detailed("vBTC", "VBTC", 18)
+    ERC20Detailed("Strudel Finance", "STRDL", 18)
   public {
     // solhint-disable-previous-line no-empty-blocks
   }
