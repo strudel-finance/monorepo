@@ -72,12 +72,12 @@ responses:
 - 400: sig does not match account address
 - 404: account not found
 
-## POST /account/\<0xaa..ff\>/addBtcTx
+## POST /payment/\<0xaa..32..ff\>
 
 post body:
 ```json
 {
-	"btcTxHash": "0x32"
+	"txData": "0x1122..3344"
 }
 ```
 responses:
@@ -86,7 +86,7 @@ responses:
 - 404: account not found
 - 408: tx not found in mempool
 
-## POST /account/\<0xaa..ff\>/addEthTx
+## POST /payment/\<0xaa..32..ff\>/addEthTx
 post body:
 ```json
 {
@@ -107,7 +107,7 @@ responses:
 responses:
 - 200:
 	```json
-	{bitcoind rpc proxy}
+	{bitcoin tx data as returned bitcoind rpc}
 	```
 - 400: no relevant output
 - 404: tx not found
@@ -116,7 +116,11 @@ responses:
 responses:
 - 200:
 	```json
-	{bitcoind rpc proxy}
+	{
+	  "proof": "0x1122..3344",
+	  "header": "0x2233..4455",
+	  "txData": "0x3344..5566"
+	}
 	```
 - 400: no relevant output
 - 404: block not found
