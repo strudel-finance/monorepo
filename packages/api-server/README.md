@@ -5,40 +5,40 @@ responses:
 - 200:
 	```json
     {
-      account: '0x20',
-      burns: [{
-		amount: '1000', // satoshis
-		dateCreated: '23/9/2020',
-		status: 'requested'
+      "account": "0x20",
+      "burns": [{
+		"amount": "1000", // satoshis
+		"dateCreated": "23/9/2020",
+		"status": "requested"
 	  }..{}],
-      sig: {r, s, v}
+      "sig": {r, s, v}
     }
 	```
 - 200:
 	```json
     {
-      account: '0x20',
-      burns: [{
-		amount: '1000', // satoshis
-		dateCreated: '23/9/2020',
-		btcTxHash: '0x32',
-		status: 'pending'
+      "account": '0x20',
+      "burns": [{
+		"amount": "1000", // satoshis
+		"dateCreated": "23/9/2020",
+		"btcTxHash": "0x32",
+		"status": "pending"
 	  }..{}],
-      sig: {r, s, v}
+      "sig": {r, s, v}
     }
 	```
 - 200:
 	```json
     {
-      account: '0x20',
-      burns: [{
-		amount: '1000', // satoshis
-		dateCreated: '23/9/2020',
-		btcTxHash: '0x32',
-		ethTxHash: '0x32',
-		status: 'paid'
+      "account": "0x20",
+      "burns": [{
+		"amount": 1000, // satoshis
+		"dateCreated": "23/9/2020",
+		"btcTxHash": "0x32",
+		"ethTxHash": "0x32",
+		"status": "paid"
 	}..{}],
-      sig: {r, s, v}
+      "sig": {r, s, v}
     }
 	```
 - 404: account not found
@@ -50,9 +50,9 @@ this can be done for
 post body:
 ```json
 {
-	r: '0x32',
-	s: '0x32',
-	v: 256
+	"r": "0x32",
+	"s": "0x32",
+	"v": 256
 }
 ```
 
@@ -66,7 +66,7 @@ responses:
 post body:
 ```json
 {
-	btcTxHash: '0x32'
+	"btcTxHash": "0x32"
 }
 ```
 responses:
@@ -79,7 +79,7 @@ responses:
 post body:
 ```json
 {
-	ethTxHash: '0x32'
+	"ethTxHash": "0x32"
 }
 ```
 responses:
@@ -110,3 +110,5 @@ responses:
 - 400: no relevant output
 - 404: block not found
 - 408: tx not found in block
+
+[this code](https://github.com/summa-tx/bitcoin-spv/tree/master/js) can be used to verify proofs client side.
