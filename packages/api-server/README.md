@@ -43,6 +43,20 @@ responses:
 	```
 - 404: account not found
 
+## POST /account/\<0xaa..ff\>/addPayment
+
+post body:
+```json
+{
+     "amount": "1000", // satoshis
+}
+```
+
+responses:
+- 204: created
+- 400: invalid address
+- 409: conflict
+
 ## POST /account/\<0xaa..ff\>/addSig
 
 this can be done for 
