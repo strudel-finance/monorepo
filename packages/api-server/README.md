@@ -1,6 +1,6 @@
 
 
-## GET /account/<0xaa..ff>
+## GET /account/\<0xaa..ff\>
 responses:
 - 200:
 	```json
@@ -43,7 +43,7 @@ responses:
 	```
 - 404: account not found
 
-## POST /account/<0xaa..ff>/addSig
+## POST /account/\<0xaa..ff\>/addSig
 
 this can be done for 
 
@@ -61,7 +61,7 @@ responses:
 - 404: account not found
 - 400: sig does not match account address
 
-## POST /account/<0xaa..ff>/addBtcTx
+## POST /account/\<0xaa..ff\>/addBtcTx
 
 post body:
 ```json
@@ -75,7 +75,7 @@ responses:
 - 404: account not found
 - 408: tx not found in mempool
 
-## POST /account/<0xaa..ff>/addEthTx
+## POST /account/\<0xaa..ff\>/addEthTx
 post body:
 ```json
 {
@@ -92,7 +92,7 @@ responses:
 responses:
 - 200: `["P2FSH_ADDR_1", "P2FSH_ADDR_2", "P2FSH_ADDR_3"]`
 
-## GET /tx/<txHash>
+## GET /tx/\<txHash\>
 responses:
 - 200:
 	```json
@@ -101,7 +101,7 @@ responses:
 - 400: no relevant output
 - 404: tx not found
 
-## GET /proof/<txHash>/<blockHash>
+## GET /proof/\<txHash\>/\<blockHash\>
 responses:
 - 200:
 	```json
