@@ -1,6 +1,7 @@
 const { Errors } = require('leap-lambda-boilerplate');
 const ethers = require('ethers');
 const ADDR_REGEX = /0x[A-Fa-f0-9]{40}/;
+const { Transaction, opcodes } = require('bitcoinjs-lib');
 
 module.exports = class StrudelHandler {
 
@@ -8,8 +9,12 @@ module.exports = class StrudelHandler {
     this.db = db;
   }
 
-  async getAccount(request) {
-   
+  async getAccount(accountAddr) {
+    const account = await this.db.getAccount(accountAddr);
+    return {
+      statusCode: 200,
+      data: account
+    }
   }
 
   async addSig(accountAddr, sig) {
@@ -37,10 +42,44 @@ module.exports = class StrudelHandler {
     return {statusCode: 204};
   }
 
-  async addBtcTx(txHash) {
+  async addBtcTx(txHash, txData) {
+    // parse tx
+    const tx = Transaction.fromBuffer(Buffer.from(txData.replace('0x', ''), 'hex'));
+    const txId = tx.getId();
+
+    // verify hash
+    const hashBuf = Buffer.from(txHash.replace('0x', ''), 'hex');
+    let isEqual = Buffer.compare(Buffer.from(tx.getId(), 'hex'), hashBuf);
+    if (isEqual !== 0) {
+      if (Buffer.compare(hashBuf, tx.getHash(false)) !== 0) {
+        throw new Errors.BadRequest(`${txId} does not match tx data.`);
+      }
+    }
+
+    // find op-return output
+    let count = 0;
+    let index;
+    tx.outs.forEach((out, i) => {
+      if (out.script.readUInt8(0) === opcodes.OP_RETURN && out.script.length == 22) {
+        count++;
+        index = i;
+      }
+    })
+    if (count < 1) {
+      throw new Errors.BadRequest(`${txId} has no OP_RETURN output.`);
+    }
+    if (count > 1) {
+      throw new Errors.ServerError(`multiple OP_RETURN outputs not implemented.`);
+    }
+    if (tx.outs[index].value < 1) {
+      throw new Errors.ServerError(`output has 0 value.`);
+    }
+    const walletAddress = `0x${tx.outs[index].script.slice(2, 22).toString('hex')}`;
+    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`);
+    return {statusCode: 204};
   }
 
-  async addEthTx(txHash) {
+  async addEthTx(btcTxHash, outputIndex) {
 
   }
 
