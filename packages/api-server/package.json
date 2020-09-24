@@ -46,6 +46,7 @@
   },
   "dependencies": {
     "babel-plugin-transform-builtin-extend": "^1.1.2",
+    "bitcoin-core": "^3.0.0",
     "web3": "0.20.7"
   }
 }
