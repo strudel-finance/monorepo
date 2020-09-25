@@ -32,7 +32,8 @@ const db = new DB(DOMAIN_NAME);
 db.sdb = sdb;
 
 const PRIV_KEY = '0x0123456789012345678901234567890123456789012345678901234567890123';
-const wallet = new ethers.Wallet(PRIV_KEY);
+const provider = new ethers.providers.JsonRpcProvider('https://network.io/');
+const wallet = new ethers.Wallet(PRIV_KEY, provider);
 const ADDR = wallet.address;
 const ADDR2 = '0xedb1b5c2f39af0fec151732585b1049b07895211';
 const DATE = "Fri Sep 25 2020 01:17:52";
@@ -69,29 +70,78 @@ describe('StrudelHandler', () => {
     });
   });
 
-  it('should accept tx', async () => {
-    // set up & stub
-    const p2fshBuf = Buffer.from(`0xa914${ADDR.replace('0x', '')}87`, 'hex');
-    let flatSig = await wallet.signMessage(p2fshBuf);
-    let sig = ethers.utils.splitSignature(flatSig);
-    sinon.stub(sdb, 'putAttributes').yields(null, {});
+  describe('addBtcTx', () => {
 
-    // run
-    const rsp = await new StrudelHandler(db).addBtcTx(OP_RETURN_TX_ID_LE, OP_RETURN_TX);
+    it('should accept btc tx output', async () => {
+      // set up & stub
+      const p2fshBuf = Buffer.from(`0xa914${ADDR.replace('0x', '')}87`, 'hex');
+      let flatSig = await wallet.signMessage(p2fshBuf);
+      let sig = ethers.utils.splitSignature(flatSig);
+      sinon.stub(sdb, 'putAttributes').yields(null, {});
 
-    // check
-    expect(sdb.putAttributes).calledWith({
-      Attributes: [
+      // run
+      const rsp = await new StrudelHandler(db).addBtcTx(OP_RETURN_TX_ID_LE, OP_RETURN_TX);
+
+      // check
+      expect(sdb.putAttributes).calledWith({
+        Attributes: [
+          {Name: "account", Value: ADDR2 },
+          {Name: "created", Value: sinon.match.any },
+          {Name: "amount", Value: '497480' },
+          {Name: "btcTxHash", Value: OP_RETURN_TX_ID_LE },
+        ],
+        DomainName: DOMAIN_NAME,
+        ItemName: `${OP_RETURN_TX_ID_LE}-01`
+      });
+      expect(rsp).to.eql({
+        statusCode: 204
+      });
+    });
+  });
+
+  describe('addEthTx', () => {
+    it('should accept eth tx', async () => {
+      // set up & stub
+      const ethTxHash = '0x6320487f51e5583ec425c3a79afcc9c435ed2e611b2b72fb05495b697242044f';
+
+      sinon.stub(provider, 'getTransactionReceipt').resolves({ 
+        transactionHash: ethTxHash,
+        logs: [{}, {}, {}, {
+          topics: [
+            '0x3d023d90350b769385d88d9e75401f8b4e4431afbcb22be877125e15b5fb1d5b',
+            `0x${OP_RETURN_TX_ID_LE}`,
+            `0x000000000000000000000000${ADDR2.replace('0x', '')}`
+          ],
+          data: '0x0000000000000000000000000000000000000000000000000011ac8de2d420000000000000000000000000000000000000000000000000000000000000000001'
+        }]
+      });
+
+      sinon.stub(sdb, 'getAttributes').yields(null, { Attributes: [
         {Name: "account", Value: ADDR2 },
-        {Name: "created", Value: sinon.match.any },
+        {Name: "created", Value: DATE },
         {Name: "amount", Value: '497480' },
         {Name: "btcTxHash", Value: OP_RETURN_TX_ID_LE },
-      ],
-      DomainName: DOMAIN_NAME,
-      ItemName: `${OP_RETURN_TX_ID_LE}-01`
-    });
-    expect(rsp).to.eql({
-      statusCode: 204
+      ] });
+      sinon.stub(sdb, 'putAttributes').yields(null, {});
+
+      // run
+      const rsp = await new StrudelHandler(db, provider).addEthTx(OP_RETURN_TX_ID_LE, 1, ethTxHash);
+
+      // check
+      expect(sdb.getAttributes).calledWith({
+        DomainName: DOMAIN_NAME,
+        ItemName: `${OP_RETURN_TX_ID_LE}-01`
+      });
+      expect(sdb.putAttributes).calledWith({
+        Attributes: [
+          {Name: "ethTxHash", Value: ethTxHash },
+        ],
+        DomainName: DOMAIN_NAME,
+        ItemName: `${OP_RETURN_TX_ID_LE}-01`
+      });
+      expect(rsp).to.eql({
+        statusCode: 200
+      });
     });
   });
 

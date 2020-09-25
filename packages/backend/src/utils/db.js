@@ -1,4 +1,5 @@
 const { SimpleDb } = require('leap-lambda-boilerplate');
+const ethers = require('ethers');
 
 exports.DB = class DB extends SimpleDb {
 
@@ -18,6 +19,9 @@ exports.DB = class DB extends SimpleDb {
   setPaymentOutput(txHash, outputIndex, walletAddress, amount) {
     const pad = "00";
     const oi = (pad + outputIndex).slice(-pad.length);
+    if (typeof amount == 'number') {
+      throw new Error(`Error: amount should not be number.`);
+    }
     return this.setAttrs(`${txHash}-${oi}`, {
       account: walletAddress,
       created: new Date().toString(),
@@ -39,7 +43,9 @@ exports.DB = class DB extends SimpleDb {
   }
 
   setClaimTx(btcTxHash, outputIndex, ethTxHash) {
-    return this.setAttrs(`${btcTxHash}-${outputIndex}`, { ethTxHash });
+    const pad = "00";
+    const oi = (pad + outputIndex).slice(-pad.length);
+    return this.setAttrs(`${btcTxHash}-${oi}`, { ethTxHash });
   }
 
   async getAccount(walletAddress) {

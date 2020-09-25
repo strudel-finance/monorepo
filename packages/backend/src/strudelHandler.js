@@ -5,8 +5,9 @@ const { Transaction, opcodes } = require('bitcoinjs-lib');
 
 module.exports = class StrudelHandler {
 
-  constructor(db) {
+  constructor(db, provider) {
     this.db = db;
+    this.provider = provider;
   }
 
   async getAccount(accountAddr) {
@@ -79,8 +80,37 @@ module.exports = class StrudelHandler {
     return {statusCode: 204};
   }
 
-  async addEthTx(btcTxHash, outputIndex) {
+  async addEthTx(btcTxHash, outputIndex, ethTxHash) {
+    // btc output exists
+    const entry = await this.db.getPaymentOutput(btcTxHash, outputIndex);
 
+    // check the Eth transaction matches what we need
+    //   - same tx hash
+    //   - same output index
+    //   - same amount
+    //   - same account
+    const receipt = await this.provider.getTransactionReceipt(ethTxHash);
+    const parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+    if (parsedTxHash !== btcTxHash) {
+      throw new Errors.BadRequest(`parsed txHash ${parsedTxHash} doesn't match.`);
+    }
+    const dataBuf = Buffer.from(receipt.logs[3].data.replace('0x', ''), 'hex');
+    const parsedOutputIndex = dataBuf.readUInt8(dataBuf.length - 1);
+    if (parsedOutputIndex !== outputIndex) {
+      throw new Errors.BadRequest(`parsed outIndex ${parsedOutputIndex} doesn't match.`);
+    }
+    const parsedValue = ethers.utils.bigNumberify(`0x${dataBuf.slice(0, 32).toString('hex')}`);
+    if (parsedValue.eq(ethers.utils.bigNumberify(entry.amount))) {
+      throw new Errors.BadRequest(`parsed value ${parsedValue} doesn't match.`);
+    }
+    const parsedAccount = receipt.logs[3].topics[2].replace('000000000000000000000000', '');
+    if (parsedAccount.toLowerCase() !== entry.account) {
+      throw new Errors.BadRequest(`parsed accountAddr ${parsedAccount} doesn't match.`);
+    }
+    await this.db.setClaimTx(btcTxHash, outputIndex, ethTxHash);
+    return {
+      statusCode: 200
+    };
   }
 
   async getWatchlist() {
