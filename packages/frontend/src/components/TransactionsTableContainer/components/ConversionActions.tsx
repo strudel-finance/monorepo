@@ -6,6 +6,9 @@ import React from 'react'
 import {Transaction} from '../TransactionsTableContainer'
 import {ExternalLink} from './ExternalLink'
 
+import useModal from '../../../hooks/useModal'
+import BurnModal from '../../../views/Home/components/BurnModal'
+
 const useStyles = makeStyles((theme) => ({
   viewLink: {
     fontSize: 12,
@@ -15,29 +18,35 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const proofOpReturnAndMint = async (tx: Transaction) => {
+  const txHash = await new Promise<string>((res, rej) => {
+    res('0x89AB6D3C799d35f5b17194Ee7F07253856A67949')
+  })
+  tx.ethTxHash = txHash
+  // call to server
+  //
+  console.log('click')
+}
+
 interface Props {
   tx: Transaction
 }
 
-export const ConversionActions: React.FC<Props> = ({tx}) => {
+const ConversionActions: React.FC<Props> = ({tx}) => {
   const classes = useStyles()
-  const {
-    setShowGatewayModal,
-    setGatewayModalTx,
-    setShowCancelModal,
-    setCancelModalTx,
-  } = Store.useContainer()
-  const {
-    completeConvertToEthereum,
-    initConvertFromEthereum,
-    removeTx,
-  } = TransactionStore.useContainer()
-
-  const direction = tx.destNetwork === 'ethereum' ? 'in' : 'out'
-
+  const [showModal] = useModal(
+    <BurnModal value={tx.value} address={tx.ethAddress} continueV={true} />,
+  )
   return (
     <React.Fragment>
       <div>
+        {!tx.hasOwnProperty('confirmed') && (
+          <React.Fragment>
+            <a className={classes.viewLink} onClick={showModal}>
+              View Bridge Address
+            </a>
+          </React.Fragment>
+        )}
         {tx.btcTxHash && (
           <ExternalLink
             className={classes.viewLink}
@@ -46,118 +55,29 @@ export const ConversionActions: React.FC<Props> = ({tx}) => {
             View BTC TX
           </ExternalLink>
         )}
-        {direction === 'in' && tx.destTxHash ? (
+        {tx.ethTxHash && (
           <ExternalLink
             className={classes.viewLink}
-            href={
-              'https://' +
-              (tx.destNetworkVersion === 'testnet' ? 'kovan.' : '') +
-              'etherscan.io/tx/' +
-              tx.destTxHash
-            }
+            href={'https://etherscan.io/tx/' + tx.ethTxHash}
           >
             View ETH TX
           </ExternalLink>
-        ) : null}
-        {direction === 'in' && tx.awaiting === 'btc-init' && !tx.error && (
+        )}
+        {tx.confirmed && !tx.ethTxHash && (
           <React.Fragment>
             <a
               className={classes.viewLink}
               onClick={() => {
-                // view modal
-                setShowGatewayModal(true)
-                setGatewayModalTx(tx.id)
+                proofOpReturnAndMint(tx)
               }}
             >
-              View Gateway Address
-            </a>
-            <a
-              className={classes.viewLink}
-              onClick={() => {
-                // are you sure modal
-                setShowCancelModal(true)
-                setCancelModalTx(tx.id)
-              }}
-            >
-              Cancel
+              Claim vBTC
             </a>
           </React.Fragment>
-        )}
-
-        {direction === 'out' && tx.sourceTxHash ? (
-          <ExternalLink
-            className={classes.viewLink}
-            href={
-              'https://' +
-              (tx.sourceNetworkVersion === 'testnet' ? 'kovan.' : '') +
-              'etherscan.io/tx/' +
-              tx.sourceTxHash
-            }
-          >
-            View ETH TX
-          </ExternalLink>
-        ) : null}
-        {direction === 'out' && !tx.awaiting && tx.destAddress && (
-          <ExternalLink
-            className={classes.viewLink}
-            href={`https://sochain.com/address/BTC${
-              tx.destNetworkVersion === 'testnet' ? 'TEST' : ''
-            }/${tx.destAddress}`}
-          >
-            View BTC TX
-          </ExternalLink>
-        )}
-
-        {((tx.error && tx.awaiting === 'eth-settle') ||
-          tx.awaiting === 'eth-init') && (
-          <React.Fragment>
-            <a
-              className={classes.viewLink}
-              onClick={() => {
-                if (direction === 'out') {
-                  initConvertFromEthereum(tx)
-                } else {
-                  completeConvertToEthereum(tx)
-                }
-              }}
-            >
-              Submit
-            </a>
-            {direction === 'out' && (
-              <a
-                className={classes.viewLink}
-                onClick={() => {
-                  removeTx(tx)
-                }}
-              >
-                Cancel
-              </a>
-            )}
-          </React.Fragment>
-        )}
-
-        {!tx.awaiting && !tx.error && (
-          <a
-            className={classes.viewLink}
-            onClick={() => {
-              removeTx(tx)
-            }}
-          >
-            Clear
-          </a>
-        )}
-
-        {direction === 'out' && tx.error && tx.sourceTxHash && (
-          <a
-            className={classes.viewLink}
-            onClick={() => {
-              removeTx(tx)
-            }}
-          >
-            Clear
-          </a>
         )}
       </div>
     </React.Fragment>
   )
 }
+
+export default ConversionActions

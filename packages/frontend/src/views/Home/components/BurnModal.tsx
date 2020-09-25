@@ -14,6 +14,7 @@ import Label from '../../../components/Label'
 import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
+import {Transaction} from '../../../components/TransactionsTableContainer'
 import QRCode from 'qrcode.react'
 
 import sb from 'satoshi-bitcoin'
@@ -21,19 +22,23 @@ import sb from 'satoshi-bitcoin'
 interface BurnModalProps extends ModalProps {
   value: number | string
   address: string
-  onConfirm: (amount: string) => void
+  onConfirm?: (amount: string) => void
+  onAddition?: (tx: Transaction) => void
+  continueV?: boolean
 }
 
-const BurnModal: React.FC<BurnModalProps> = ({
+const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   value,
   address,
   onConfirm,
+  onAddition,
+  continueV = false,
   onDismiss,
 }) => {
   const [val, setVal] = useState('')
   const [pendingTx, setPendingTx] = useState(false)
   const [checked, setChecked] = useState(false)
-  const [continued, setContinued] = useState(false)
+  const [continued, setContinued] = useState(continueV)
 
   const handleChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
@@ -46,6 +51,11 @@ const BurnModal: React.FC<BurnModalProps> = ({
     event.target.firstElementChild.checked = !event.target.firstElementChild
       .checked
     setChecked(event.target.firstElementChild.checked)
+    onAddition({
+      txCreatedAt: new Date(),
+      value: String(value),
+      ethAddress: address,
+    })
   }
 
   const handleContinue = () => {

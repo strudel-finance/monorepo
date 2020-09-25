@@ -12,10 +12,10 @@ const ConversionStatus: React.FC<Props> = ({tx}) => {
   return (
     <React.Fragment>
       <ReddishTextTypography variant="caption">
-        {tx.awaiting === 'btc-init' ? (
+        {!tx.hasOwnProperty('confirmed') ? (
           <span>{`Waiting for BTC to be sent`}</span>
         ) : null}
-        {tx.awaiting === 'btc-settle' ? (
+        {tx.hasOwnProperty('confirmed') && !tx.confirmed ? (
           <span>
             BTC transaction confirming (
             {tx.confirmations === undefined || tx.confirmations < 0
@@ -24,19 +24,14 @@ const ConversionStatus: React.FC<Props> = ({tx}) => {
             /{targetBtcConfs} complete)
           </span>
         ) : null}
-        {!tx.awaiting ? <span>{`Complete`}</span> : null}
+        {tx.hasOwnProperty('confirmed') && tx.confirmed && !tx.ethTxHash ? (
+          <span>Submit to Ethereum</span>
+        ) : null}
+        {tx.hasOwnProperty('confirmed') && tx.confirmed && tx.ethTxHash ? (
+          <span>{`Complete`}</span>
+        ) : null}
       </ReddishTextTypography>
     </React.Fragment>
   )
 }
 export default ConversionStatus
-/*
-{tx.awaiting === 'eth-init' ? (
-  <span>{`Submit to Ethereum`}</span>
-) : null}
-{tx.awaiting === 'eth-settle' ? (
-  <span>
-    {tx.error ? `Submit to Ethereum` : `Submitting to Ethereum`}
-  </span>
-) : null}
-*/

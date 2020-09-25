@@ -7,6 +7,7 @@ import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
+import ConversionActions from './components/ConversionActions'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 import React from 'react'
@@ -50,22 +51,24 @@ const useStyles = makeStyles((theme) => ({
 
 export interface Transaction {
   txCreatedAt: Date
-  value: number
-  confirmed: boolean
-  confirmations: number
-  awaiting: string
-  btcTxHash: string
+  value: string //in BTC not satoshi
+  confirmed?: boolean
+  confirmations?: number
+  btcTxHash?: string
+  ethTxHash?: string
+  ethAddress?: string
 }
 
 export interface TransactionTableProps {
   transactions: Transaction[]
+  lastRequest: Transaction | undefined
 }
 
 const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   transactions,
+  lastRequest,
 }) => {
   const classes = useStyles()
-
   return (
     <div className={classes.container}>
       <SimpleBar style={{maxHeight: 250}}>
@@ -86,9 +89,28 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
+            {lastRequest !== undefined && (
+              <TableRow key="stub">
+                <TableCell align="left">
+                  <ReddishTextTypography variant="caption">
+                    {lastRequest.value} BTC → vBTC
+                  </ReddishTextTypography>
+                </TableCell>
+                <TableCell>
+                  <Typography variant="caption">
+                    <ConversionStatus tx={lastRequest} />
+                  </Typography>
+                </TableCell>
+                <TableCell>
+                  <Grid container justify="flex-end">
+                    <ConversionActions tx={lastRequest} />
+                  </Grid>
+                </TableCell>
+              </TableRow>
+            )}
             {transactions
               .sort((txa, txb) => {
-                return (txa.txCreatedAt ?? 0) < (txb?.txCreatedAt ?? 0) ? 1 : 0
+                return (txa.txCreatedAt ?? 0) < (txb?.txCreatedAt ?? 0) ? 1 : -1
               })
               .map((tx, i) => {
                 return (
@@ -104,7 +126,9 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Grid container justify="flex-end"></Grid>
+                      <Grid container justify="flex-end">
+                        <ConversionActions tx={tx} />
+                      </Grid>
                     </TableCell>
                   </TableRow>
                 )
