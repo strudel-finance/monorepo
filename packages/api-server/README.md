@@ -86,7 +86,7 @@ responses:
 - 404: account not found
 - 408: tx not found in mempool
 
-## POST /payment/\<0xaa..32..ff\>/addEthTx
+## POST /payment/\<0xaa..32..ff\>/output/\<outputIndex\>/addEthTx
 post body:
 ```json
 {
