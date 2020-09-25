@@ -65,9 +65,6 @@ describe('StrudelHandler', () => {
       DomainName: DOMAIN_NAME,
       ItemName: ADDR.toLowerCase()
     });
-    expect(rsp).to.eql({
-      statusCode: 204
-    });
   });
 
   describe('addBtcTx', () => {
@@ -92,9 +89,6 @@ describe('StrudelHandler', () => {
         ],
         DomainName: DOMAIN_NAME,
         ItemName: `${OP_RETURN_TX_ID_LE}-01`
-      });
-      expect(rsp).to.eql({
-        statusCode: 204
       });
     });
   });
@@ -139,9 +133,6 @@ describe('StrudelHandler', () => {
         DomainName: DOMAIN_NAME,
         ItemName: `${OP_RETURN_TX_ID_LE}-01`
       });
-      expect(rsp).to.eql({
-        statusCode: 200
-      });
     });
   });
 
@@ -155,7 +146,7 @@ describe('StrudelHandler', () => {
       // run
       await expectThrow(
         new StrudelHandler(db).getAccount(ADDR),
-        `Not Found: account ${ADDR} not found in db.`
+        `Not Found: account ${ADDR.toLowerCase()} not found in db.`
       );
     });
 
@@ -176,15 +167,12 @@ describe('StrudelHandler', () => {
 
       // check
       expect(rsp).to.eql({
-        statusCode: 200,
-        data: {
-          "account": ADDR,
-          "burns": [],
-          "created": DATE,
-          "r": SIG.r,
-          "s": SIG.s,
-          "v": SIG.v
-        }
+        "account": ADDR.toLowerCase(),
+        "burns": [],
+        "created": DATE,
+        "r": SIG.r,
+        "s": SIG.s,
+        "v": SIG.v
       });
     });
 
@@ -207,15 +195,12 @@ describe('StrudelHandler', () => {
 
       // check
       expect(rsp).to.eql({
-        statusCode: 200,
-        data: {
-          "account": ADDR2,
-          "burns": [{
-            "amount": "497480",
-            "btcTxHash": OP_RETURN_TX_ID_LE,
-            "dateCreated": DATE,
-          }],
-        }
+        "account": ADDR2,
+        "burns": [{
+          "amount": "497480",
+          "btcTxHash": OP_RETURN_TX_ID_LE,
+          "dateCreated": DATE,
+        }]
       });
     });
   });

@@ -1,4 +1,4 @@
-service: strudel-backend
+service: strudel-finance
 
 custom:
   serverless-offline:
@@ -21,6 +21,8 @@ provider:
       Action:
        - sdb:GetAttributes
        - sdb:PutAttributes
+       - sdb:Select
+       - sdb:PutAttributes
       Resource: 
         - Fn::Join:
           - ""
@@ -38,7 +40,7 @@ responseMappings: &response_mappings
           template:
             application/json: ""
       204:
-          pattern: ''
+          pattern: 'Created'
           headers:
             Access-Control-Allow-Origin: "'*'"
           template:
@@ -67,21 +69,48 @@ responseMappings: &response_mappings
             Access-Control-Allow-Origin: "'*'"
 
 functions:
-  circleProxy:
+  bridge-service:
     timeout: 3
     handler: src/strudel.handler
-    name: strudel-${opt:stage}
     environment:
-      ENV: ${opt:stage}
       PROVIDER_URL: ${env:PROVIDER_URL}
       BCD_URL: ${env:BCD_URL}
-      VBTC_ADDR: ${env:VBTC_ADDR, self:custom.vbtcContractAddr}
       TABLE_NAME:
         Ref: strudelDb
     events:
       - http:
-          method: any
-          path: /account/{address+}
+          method: get
+          path: /account/{account}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /account/{account}/addSig
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /payment/{txHash}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /payment/{txHash}/output/{outputIndex}/addEthTx
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: get
+          path: /watchlist
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: get
+          path: /proof/{txHash}/{blockHash}
           integration: lambda
           cors: true
           response: *response_mappings

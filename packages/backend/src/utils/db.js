@@ -50,14 +50,13 @@ exports.DB = class DB extends SimpleDb {
 
   async getAccount(walletAddress) {
     // get sig, if any
-    const rsp = await this.getAttr(walletAddress);
-    if (!rsp.account) {
-      rsp.account = walletAddress;
-    }
+    const rsp = await this.getAttr(walletAddress, {
+      account: walletAddress,
+      burns: []
+    });
     if (rsp.v) {
       rsp.v = parseInt(rsp.v);
     }
-    rsp.burns = [];
     // attach all burns, pending or complete
     const payments = await this.select(`select * from \`${this.tableName}\` where account =  "${walletAddress}"`);
     if (!rsp.created && payments.length == 0) {

@@ -11,11 +11,12 @@ module.exports = class StrudelHandler {
   }
 
   async getAccount(accountAddr) {
-    const account = await this.db.getAccount(accountAddr);
-    return {
-      statusCode: 200,
-      data: account
+    // check account address
+    if (!ADDR_REGEX.test(accountAddr)) {
+      throw new Errors.BadRequest(`${accountAddr} invalid ethereum address.`);
     }
+    accountAddr = accountAddr.toLowerCase();    
+    return await this.db.getAccount(accountAddr);
   }
 
   async addSig(accountAddr, sig) {
@@ -40,7 +41,7 @@ module.exports = class StrudelHandler {
     }
     // store sig
     await this.db.setSig(accountAddr, sig.r, sig.s, `${sig.v}`);
-    return {statusCode: 204};
+    return 'Created';
   }
 
   async addBtcTx(txHash, txData) {
@@ -77,7 +78,7 @@ module.exports = class StrudelHandler {
     }
     const walletAddress = `0x${tx.outs[index].script.slice(2, 22).toString('hex')}`;
     await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`);
-    return {statusCode: 204};
+    return 'Created';
   }
 
   async addEthTx(btcTxHash, outputIndex, ethTxHash) {
@@ -108,9 +109,6 @@ module.exports = class StrudelHandler {
       throw new Errors.BadRequest(`parsed accountAddr ${parsedAccount} doesn't match.`);
     }
     await this.db.setClaimTx(btcTxHash, outputIndex, ethTxHash);
-    return {
-      statusCode: 200
-    };
   }
 
   async getWatchlist() {
