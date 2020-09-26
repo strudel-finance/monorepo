@@ -7,7 +7,7 @@
     "lint": "eslint --fix src/**/*.js",
     "test": "mocha --recursive 'src/**/*.test.js'",
     "start": "serverless offline start -s dev",
-    "deploy": "PROVIDER_URL=https://mainnet.infura.io/v3/55a81c08945e41b98d1bb09fb52ddc77 BCD_URL=http://90.179.1.59:10666 sls deploy -s production"
+    "deploy": "PROVIDER_URL=https://mainnet.infura.io/v3/55a81c08945e41b98d1bb09fb52ddc77 sls deploy -s production"
   },
   "repository": {
     "type": "git",

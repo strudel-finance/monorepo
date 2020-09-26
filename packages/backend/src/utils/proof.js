@@ -130,38 +130,29 @@ async function getProof(client, txid, blockhash, txData) {
 
   const [block, rawheader] = await Promise.all([blockPromise, headerPromise]);
 
-  console.log(block);
+  console.log(rawheader);
+
   const tx = block.tx.filter(tx => tx === txid)[0];
 
   if (!tx) { throw new Error('Cannot find transaction'); }
-
-  const header = {
-    hash: reverse(block.hash),
-    height: block.height,
-    raw: rawheader,
-    merkle_root: reverse(block.merkleroot),
-    prevhash: reverse(block.previousblockhash),
-  };
 
   const txinfo = parseTxHex(txData);
 
   const [nodes, index] = await getMerkleProof(txid, block);
 
   let path = '';
-
   for (const node of nodes) {
     path += node;
   }
 
   return {
-    version: txinfo.version,
-    vin: txinfo.vin,
-    vout: txinfo.vout,
-    locktime: txinfo.locktime,
-    tx_id: reverse(txid),
+    header: `0x${rawheader}`,
+    proof: `0x${path}`,
+    version: `0x${txinfo.version}`,
+    locktime: `0x${txinfo.locktime}`,
     index,
-    confirming_header: header,
-    intermediate_nodes: path
+    vin: `0x${txinfo.vin}`,
+    vout: `0x${txinfo.vout}`
   };
 }
 

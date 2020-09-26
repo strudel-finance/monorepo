@@ -39,7 +39,7 @@ exports.PoorManRpc = class PoorManRpc {
   }
 
   getHeader(blockHash) {
-    const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getblockheader","params":["${blockHash}"]}`;
+    const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getblockheader","params":["${blockHash}", false]}`;
     const options = {
       url: `http://${this.user}:${this.password}@${this.host}:${this.port}/`,
       method: "POST",
