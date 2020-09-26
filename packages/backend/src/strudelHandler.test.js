@@ -6,7 +6,10 @@ const sinon = require('sinon');
 const StrudelHandler = require('./strudelHandler');
 const { DB } = require('./utils/db');
 const ethers = require('ethers');
+const Client = require('bitcoin-core');
 const { expect } = chai;
+const { ValidateSPV, ser } = require("@summa-tx/bitcoin-spv-js");
+const PROOF_DATA = require('./testData/proofData');
 chai.use(sinonChai);
 
 const expectThrow = async (promise, message) => {
@@ -202,6 +205,22 @@ describe('StrudelHandler', () => {
           "dateCreated": DATE,
         }]
       });
+    });
+  });
+
+  describe('getInclusionProof', () => {
+    it('should give proof', async () => {
+      const bclient = new Client();
+      sinon.stub(bclient, 'getBlock').resolves(PROOF_DATA.BLOCK);
+      sinon.stub(bclient, 'getBlockHeader').resolves(PROOF_DATA.BLOCK_HEADER);
+      
+      const txid = PROOF_DATA.TXID;
+      const blockhash = PROOF_DATA.BLOCK_HASH;
+      
+      const rsp = await new StrudelHandler(null, null, bclient).getInclusionProof(txid, blockhash);
+
+      let SPVProof = ser.deserializeSPVProof(rsp);
+      expect(ValidateSPV.validateProof(SPVProof)).to.eql(true);
     });
   });
 
