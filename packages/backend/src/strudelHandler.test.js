@@ -86,6 +86,7 @@ describe('StrudelHandler', () => {
         Attributes: [
           {Name: "account", Value: '0x8db6b632d743aef641146dc943acb64957155388' },
           {Name: "created", Value: sinon.match.any },
+          {Name: "outputIndex", Value: '0' },
           {Name: "amount", Value: '500' },
           {Name: "btcTxHash", Value: txHash },
         ],
@@ -187,6 +188,7 @@ describe('StrudelHandler', () => {
         Attributes: [
           {Name: "account", Value: ADDR2 },
           {Name: "created", Value: DATE },
+          {Name: "outputIndex", Value: '0' },
           {Name: "amount", Value: '497480' },
           {Name: "btcTxHash", Value: OP_RETURN_TX_ID_LE },
         ],
@@ -202,6 +204,7 @@ describe('StrudelHandler', () => {
           "amount": "497480",
           "btcTxHash": OP_RETURN_TX_ID_LE,
           "dateCreated": DATE,
+          "outputIndex": "0"
         }]
       });
     });

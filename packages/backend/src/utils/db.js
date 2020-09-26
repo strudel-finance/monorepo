@@ -25,6 +25,7 @@ exports.DB = class DB extends SimpleDb {
     return this.setAttrs(`${txHash}-${oi}`, {
       account: walletAddress,
       created: new Date().toString(),
+      outputIndex: `${outputIndex}`,
       amount,
       btcTxHash: txHash
     });
@@ -66,6 +67,7 @@ exports.DB = class DB extends SimpleDb {
       const burn = {
         btcTxHash: payment.Attributes.btcTxHash,
         amount: payment.Attributes.amount,
+        outputIndex: payment.Attributes.outputIndex,
         dateCreated: payment.Attributes.created
       };
       if (payment.Attributes.ethTxHash) {

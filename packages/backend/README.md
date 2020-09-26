@@ -38,6 +38,7 @@ possible responses:
 		"amount": "1000", // satoshis
 		"dateCreated": "23/9/2020",
 		"btcTxHash": "0x32",
+		"outputIndex": "0",
 		"status": "pending"
 	  }]
     }
@@ -50,6 +51,7 @@ possible responses:
 		"amount": 1000, // satoshis
 		"dateCreated": "23/9/2020",
 		"btcTxHash": "0x32",
+		"outputIndex": "1",
 		"ethTxHash": "0x32",
 		"status": "paid"
 	}, {..}],
@@ -105,6 +107,11 @@ responses:
 - 400: no relevant output
 - 404: account not found
 - 408: tx not found in mempool
+
+example:
+```
+curl --data '{"txData": "02000000017aa6eca8ed999fd0205a3a8af9d60e2b1893cb1245abb11b87493d26026e6b78000000006b483045022100ac3618fa1915b4139eca9898443de39058fe984e858cf837982824f25093439e022045c1d89f5fea34810a94c648c2c3dec191c9922e306d33cead7998e03828a6c40121035d143cdcd601d42523b5274601391de0ab0bc9a04e3d4303b2d2358eaff23caaffffffff021027000000000000196a1707ffff89ab6d3c799d35f5b17194ee7f07253856a67949c2ff1c00000000001976a91482ab5c363cef14a2b24fa09d9ab16c2ec2fdc9a388ac00000000"}' -H "Content-Type: application/json" -X POST https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/payment/94105cdc1032fa8fd97e45f39b015b6b19b9d47ccf9142c65ee5ae1ea3f32cb1
+```
 
 ## POST /payment/\<0xaa..32..ff\>/output/\<outputIndex\>/addEthTx
 post body:

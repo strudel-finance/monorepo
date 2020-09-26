@@ -15,12 +15,11 @@ const headers = {
   "content-type": "text/plain;"
 };
 const appJson = {
-  "Content-Type: application/json"
+  "content-type": "application/json"
 };
 const USER = process.env.RPC_USER;
 const PASS = process.env.RPC_PASSWORD;
-
-app.use(bodyParser.raw({ type:'*/*' }));
+const PROTOCOL_ID = Buffer.from('07ffff', 'hex'); // 2^19-1
 
 function httpRequest(params) {
   return new Promise(function(resolve, reject) {
@@ -37,6 +36,8 @@ function httpRequest(params) {
   });
 }
 
+app.use(bodyParser.raw({ type:'*/*' }));
+
 app.get('/:destination/:amount', (req, res) => {
 
   let destinationAddress = req.params.destination;
@@ -46,12 +47,13 @@ app.get('/:destination/:amount', (req, res) => {
   console.log('query:', destinationAddress, amount);
   destinationAddress = destinationAddress.replace('0x', '');
 
-  const script = bitcore.Script.buildDataOut(Buffer.from(destinationAddress, 'hex')).toBuffer();
+  const dataBuf = Buffer.alloc(23);
+  PROTOCOL_ID.copy(dataBuf, 0, 0, 3); 
+  Buffer.from(destinationAddress, 'hex').copy(dataBuf, 3, 0, 20);
+  const script = bitcore.Script.buildDataOut(dataBuf).toBuffer();
   const output = new PaymentProtocol().makeOutput();
   output.set('amount', amount);
-  console.log('amount:', amount, output);
   output.set('script', script);
-  console.log('address:', output);
 
   const now = Date.now() / 1000 | 0;
   const details = new PaymentProtocol('BTC').makePaymentDetails();
@@ -84,30 +86,35 @@ app.get('/:destination/:amount', (req, res) => {
   res.send(rawbody);
 });
 
+
 app.post('/ack', async (req, res) => { 
   // Decode payment
   const body = PaymentProtocol.Payment.decode(req.body);
   const payment = new PaymentProtocol().makePayment(body);
   const merchantData = payment.get('merchant_data');
   const transactions = payment.get('transactions');
-  const txHash = transactions[0].toString('hex');
-  console.log('tx:', txHash);
-  const dataString = '{"jsonrpc":"1.0","id":"curltext","method":"sendrawtransaction","params":["' + txHash + '"]}';
+  const txData = transactions[0].toString('hex');
+  console.log('tx:', txData);
+  const dataString = '{"jsonrpc":"1.0","id":"curltext","method":"sendrawtransaction","params":["' + txData + '"]}';
   const rpcOptions = {
-    url: `http://${USER}:${PASS}@bcd.strudel.finance:8332/`,
+    url: `http://${USER}:${PASS}@90.179.1.59:10666/`,
     method: "POST",
     headers: headers,
     body: dataString
   };
-  const txHash = await httpRequest(rpcOptions);
+
+  const rsp = await httpRequest(rpcOptions);
+  console.log('here', rsp);
+  const txHash = JSON.parse(rsp).result;
   console.log('txHash:', txHash);
 
   const backendOptions = {
     url: `https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/payment/${txHash}`,
     method: "POST",
     headers: appJson,
-    body: `{"txData":"${txHash}"}`
+    body: `{"txData":"${txData}"}`
   };
+
   await httpRequest(backendOptions);
     
     // Make a payment acknowledgement
