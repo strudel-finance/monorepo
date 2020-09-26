@@ -15,6 +15,7 @@
     "noEmit": true,
     "jsx": "react",
     "strictNullChecks": false,
+    "suppressImplicitAnyIndexErrors": true,
     "typeRoots": ["./node_modules/@types", "./@types/**/*"]
   },
   "include": ["src"]

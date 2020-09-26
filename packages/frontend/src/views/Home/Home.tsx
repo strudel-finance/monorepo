@@ -50,7 +50,6 @@ const Home: React.FC = () => {
       txCreatedAt: new Date(1600948128765),
       value: '0.1',
       confirmed: true,
-      confirmations: 1,
       btcTxHash:
         'fe45455d3a033da656a973119fc970b68091f867fe4ec6054a66d95783d2fee7',
     },
@@ -67,6 +66,7 @@ const Home: React.FC = () => {
   const [val, setVal] = useState('0')
   const [lastRequest, setLastRequest] = useState(undefined)
   const [transactions, setTransactions] = useState([])
+  const [confirmations, setConfirmations] = useState({})
   const [address, setAddress] = useState(
     '0x0000000000000000000000000000000000000000',
   )
@@ -88,6 +88,7 @@ const Home: React.FC = () => {
         dateCreated: Date
         btcTxHash: string
         status: string
+        outputIndex: string
         ethTxHash?: string
       },
     ]
@@ -114,39 +115,64 @@ const Home: React.FC = () => {
   ]
 }
   */
+  const isAccountRequest = (
+    res: AccountRequest | void,
+  ): res is AccountRequest => {
+    if ((res as AccountRequest).burns) {
+      return true
+    }
+    return false
+  }
+  const checkAndRemoveLastRequest = () => {
+    if (lastRequest !== undefined) {
+      window.localStorage.removeItem('lastRequest')
+      setLastRequest(undefined)
+    }
+  }
   const handleTransactionUpdate = async () => {
     if (wallet.status === 'connected') {
-      /*
       let res = await fetch(
-        `/account/${account}`,
+        `https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/account/${account}`,
       )
         .then((response) => response.json())
         .then((res: AccountRequest) => res)
-        .catch(error => {
-         return;
-      })
-        let resNew = []
+        .catch((error) => {
+          //forget error
+          return
+        })
+
+      let resNew: Transaction[] = []
+      if (isAccountRequest(res)) {
         res.burns.map((tx, i) => {
-          let txNew = {
-          value: sb.toBitcoin(tx.amount),
-          txCreatedAt: new Date(tx.dateCreated),
-          btcTxHash: tx.btcTxHash,
-          confirmed: (tx.status === 'paid') ? true : false
+          let txNew: Transaction = {
+            ethAddress: account,
+            value: sb.toBitcoin(tx.amount),
+            txCreatedAt: new Date(tx.dateCreated),
+            btcTxHash: tx.btcTxHash,
+            outputIndex: tx.outputIndex,
+            confirmed: tx.status === 'paid' ? true : false,
           }
-          if(tx.ethTxHash) txNew.ethTxHash = tx.ethTxHash;
+          if (tx.ethTxHash) {
+            txNew.ethTxHash = tx.ethTxHash
+          }
           resNew.push(txNew)
         })
-        if(transactions.length === 0){
-        setTransactions(resNew);
-      } else {
-      if(data.length > transactions.length){
+        resNew = resNew.sort((txa, txb) => {
+          return (txa.txCreatedAt ?? 0) < (txb?.txCreatedAt ?? 0) ? 1 : -1
+        })
+        if (transactions.length === 0) {
+          if (
+            lastRequest !== undefined &&
+            resNew[0].txCreatedAt > lastRequest.txCreatedAt
+          ) {
+            checkAndRemoveLastRequest()
+          }
           setTransactions(resNew)
-          window.localStorage.removeItem('lastRequest');
-          setLastRequest(undefined);
+        } else if (resNew.length > transactions.length) {
+          setTransactions(resNew)
+          checkAndRemoveLastRequest()
+        }
       }
-    }
-      })
-      */
     }
   }
 
@@ -165,35 +191,45 @@ const Home: React.FC = () => {
 
   useInterval(async () => {
     await handleTransactionUpdate()
-    let transactionsT: Transaction[] = transactions
-    let transactionsWithLowConfirmations = transactionsT.filter(
-      (tx) => !tx.confirmed,
-    )
-    let transactionsWithHighConfirmations = transactionsT.filter(
-      (tx) => tx.confirmed,
-    )
-    for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
-      let res = await fetch(
-        `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
+    if (transactions.length > 0) {
+      let transactionsT: Transaction[] = transactions
+      let transactionsWithLowConfirmations = transactionsT.filter(
+        (tx) =>
+          !tx.confirmed &&
+          (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
+            confirmations[tx.btcTxHash] === undefined),
       )
-        .then((response) => response.json())
-        .then((res: SoChainConfirmed) => res)
-      transactionsWithLowConfirmations[i].confirmations = res.data.confirmations
-      if (res.data.confirmations >= BTC_ACCEPTANCE) {
-        transactionsWithLowConfirmations[i].confirmed = true
+
+      let highConfirmations = {}
+      Object.keys(confirmations).forEach((key) => {
+        console.log(confirmations[key])
+        if (confirmations[key] >= BTC_ACCEPTANCE) {
+          highConfirmations[key] = confirmations[key]
+        }
+      })
+      let newConfirmations = {}
+      for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
+        let res = await fetch(
+          `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
+        )
+          .then((response) => response.json())
+          .then((res: SoChainConfirmed) => res)
+        newConfirmations[transactionsWithLowConfirmations[i].btcTxHash] =
+          res.data.confirmations
       }
+      const confirmationsRecombined = {
+        ...highConfirmations,
+        ...newConfirmations,
+      }
+      setConfirmations(confirmationsRecombined)
     }
-    const transactionsRecombined = [
-      ...transactionsWithLowConfirmations,
-      ...transactionsWithHighConfirmations,
-    ]
-    setTransactions(transactionsRecombined)
   }, POLL_DURATION_TXS)
 
   const handleLastRequestChange = (tx: Transaction) => {
     setLastRequest(tx)
     window.localStorage.setItem('lastRequest', JSON.stringify(tx))
   }
+
   const [onPresentBurn] = useModal(
     <BurnModal
       onAddition={handleLastRequestChange}
@@ -234,6 +270,7 @@ const Home: React.FC = () => {
             <Grid item xs={12} sm={12} md={8}>
               <TransactionsTableContainer
                 transactions={transactions}
+                confirmations={confirmations}
                 lastRequest={lastRequest}
               />
             </Grid>

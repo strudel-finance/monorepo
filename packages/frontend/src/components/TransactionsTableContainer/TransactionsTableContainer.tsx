@@ -53,8 +53,8 @@ export interface Transaction {
   txCreatedAt: Date
   value: string //in BTC not satoshi
   confirmed?: boolean
-  confirmations?: number
   btcTxHash?: string
+  outputIndex?: string
   ethTxHash?: string
   ethAddress?: string
 }
@@ -62,11 +62,12 @@ export interface Transaction {
 export interface TransactionTableProps {
   transactions: Transaction[]
   lastRequest: Transaction | undefined
+  confirmations: {[key: string]: number}
 }
-
 const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   transactions,
   lastRequest,
+  confirmations,
 }) => {
   const classes = useStyles()
   return (
@@ -108,31 +109,33 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                 </TableCell>
               </TableRow>
             )}
-            {transactions
-              .sort((txa, txb) => {
-                return (txa.txCreatedAt ?? 0) < (txb?.txCreatedAt ?? 0) ? 1 : -1
-              })
-              .map((tx, i) => {
-                return (
-                  <TableRow key={i}>
-                    <TableCell align="left">
-                      <ReddishTextTypography variant="caption">
-                        {tx.value} BTC → vBTC
-                      </ReddishTextTypography>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="caption">
-                        <ConversionStatus tx={tx} />
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Grid container justify="flex-end">
-                        <ConversionActions tx={tx} />
-                      </Grid>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
+            {transactions.map((tx, i) => {
+              return (
+                <TableRow key={i}>
+                  <TableCell align="left">
+                    <ReddishTextTypography variant="caption">
+                      {tx.value} BTC → vBTC
+                    </ReddishTextTypography>
+                  </TableCell>
+                  <TableCell>
+                    <Typography variant="caption">
+                      <ConversionStatus
+                        tx={tx}
+                        confirmation={confirmations[tx.btcTxHash]}
+                      />
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Grid container justify="flex-end">
+                      <ConversionActions
+                        tx={tx}
+                        confirmation={confirmations[tx.btcTxHash]}
+                      />
+                    </Grid>
+                  </TableCell>
+                </TableRow>
+              )
+            })}
           </TableBody>
         </Table>
       </SimpleBar>
