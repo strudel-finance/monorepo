@@ -71,24 +71,23 @@ describe('StrudelHandler', () => {
 
     it('should accept btc tx output', async () => {
       // set up & stub
-      const p2fshBuf = Buffer.from(`0xa914${ADDR.replace('0x', '')}87`, 'hex');
-      let flatSig = await wallet.signMessage(p2fshBuf);
-      let sig = ethers.utils.splitSignature(flatSig);
       sinon.stub(sdb, 'putAttributes').yields(null, {});
+      const txHash = 'd05142c0b09454f0b72b968f9f81684147a621cca86e16c686e3c73390cf07ca';
+      const txData = '0200000001b7e96a68afbfd5d4e110d126ccc4ef50429d05e68b49c41b79195837b84c4aae000000006b4830450221009976efdee1e721c1948b92cffc9bc0560d6c0e8a8f9a59c4c1219d47c34fd338022012216a70fce18ab12f156ff03df7792e19af895480448e2c53b62a6931edfa800121036390cab1ffd87e14498af4dcf3cb3b067f9d58dbc000ad986b1fab9e00022a75ffffffff02f401000000000000196a1707ffff8db6b632d743aef641146dc943acb6495715538840890000000000001976a914e944a4312eb693f1ddfa59d34aa6a4a86f8ffd3888ac00000000';
 
       // run
-      const rsp = await new StrudelHandler(db).addBtcTx(OP_RETURN_TX_ID_LE, OP_RETURN_TX);
+      const rsp = await new StrudelHandler(db).addBtcTx(txHash, txData);
 
       // check
       expect(sdb.putAttributes).calledWith({
         Attributes: [
-          {Name: "account", Value: ADDR2 },
+          {Name: "account", Value: '0x8db6b632d743aef641146dc943acb64957155388' },
           {Name: "created", Value: sinon.match.any },
-          {Name: "amount", Value: '497480' },
-          {Name: "btcTxHash", Value: OP_RETURN_TX_ID_LE },
+          {Name: "amount", Value: '500' },
+          {Name: "btcTxHash", Value: txHash },
         ],
         DomainName: DOMAIN_NAME,
-        ItemName: `${OP_RETURN_TX_ID_LE}-01`
+        ItemName: `${txHash}-00`
       });
     });
   });

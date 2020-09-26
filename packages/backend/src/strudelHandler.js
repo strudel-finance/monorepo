@@ -62,13 +62,13 @@ module.exports = class StrudelHandler {
     let count = 0;
     let index;
     tx.outs.forEach((out, i) => {
-      if (out.script.readUInt8(0) === opcodes.OP_RETURN && out.script.length == 22) {
+      if (out.script.readUInt8(0) === opcodes.OP_RETURN && out.script.length == 25) {
         count++;
         index = i;
       }
     })
     if (count < 1) {
-      throw new Errors.BadRequest(`${txId} has no OP_RETURN output.`);
+      throw new Errors.BadRequest(`${txId} has no OP_RETURN output matching protocol.`);
     }
     if (count > 1) {
       throw new Errors.ServerError(`multiple OP_RETURN outputs not implemented.`);
@@ -76,7 +76,7 @@ module.exports = class StrudelHandler {
     if (tx.outs[index].value < 1) {
       throw new Errors.ServerError(`output has 0 value.`);
     }
-    const walletAddress = `0x${tx.outs[index].script.slice(2, 22).toString('hex')}`;
+    const walletAddress = `0x${tx.outs[index].script.slice(5, 25).toString('hex')}`;
     await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`);
     return 'Created';
   }
