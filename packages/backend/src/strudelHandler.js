@@ -2,12 +2,14 @@ const { Errors } = require('leap-lambda-boilerplate');
 const ethers = require('ethers');
 const ADDR_REGEX = /0x[A-Fa-f0-9]{40}/;
 const { Transaction, opcodes } = require('bitcoinjs-lib');
+const getProof = require('./utils/proof');
 
 module.exports = class StrudelHandler {
 
-  constructor(db, provider) {
+  constructor(db, provider, bclient) {
     this.db = db;
     this.provider = provider;
+    this.bclient = bclient;
   }
 
   async getAccount(accountAddr) {
@@ -116,6 +118,7 @@ module.exports = class StrudelHandler {
   }
 
   async getInclusionProof(txHash, blockHash) {
-
+    const proof = await getProof(this.bclient, txHash, blockHash);
+    return JSON.stringify(proof);
   }
 }
