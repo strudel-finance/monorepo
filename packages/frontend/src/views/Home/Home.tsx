@@ -151,7 +151,10 @@ const Home: React.FC = () => {
   }
 
   useEffect(() => {
-    if (lastRequest === undefined) {
+    if (
+      lastRequest === undefined &&
+      localStorage.hasOwnProperty('lastRequest')
+    ) {
       let tx = JSON.parse(window.localStorage.getItem('lastRequest'))
       tx.txCreatedAt = new Date(tx.txCreatedAt)
       setLastRequest(tx)
