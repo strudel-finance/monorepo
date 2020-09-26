@@ -5,7 +5,10 @@ custom:
     port: 3001
   table: strudel-${opt:stage}
   region: eu-west-1
+  bcdRpc: '90.179.1.59'
+  bcdPost: 10666
   vbtcContractAddr: "0x8a55f373dC25B6d638Aa406757eE5Bb5fBb3B9A5"
+
 
 package:
   exclude:
@@ -74,7 +77,10 @@ functions:
     handler: src/strudel.handler
     environment:
       PROVIDER_URL: ${env:PROVIDER_URL}
-      BCD_URL: ${env:BCD_URL}
+      BCD_RPC: ${env:BCD_RPC, self:custom.bcdRpc}
+      BCD_PORT: ${env:BCD_PORT, self:custom.bcdPost}
+      BCD_USERNAME: ${env:BCD_USERNAME}
+      BCD_PASSWORD: ${env:BCD_PASSWORD}
       TABLE_NAME:
         Ref: strudelDb
     events:
@@ -109,7 +115,7 @@ functions:
           cors: true
           response: *response_mappings
       - http:
-          method: get
+          method: post
           path: /proof/{txHash}/{blockHash}
           integration: lambda
           cors: true

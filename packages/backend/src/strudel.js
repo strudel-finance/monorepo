@@ -3,7 +3,8 @@ const AWS = require('aws-sdk');
 const ethers = require('ethers');
 const { DB } = require('./utils/db');
 const StrudelHandler = require('./strudelHandler');
-const Client = require('bitcoin-core');
+const request = require('request');
+const { PoorManRpc } = require('./utils/poorManRpc');
 
 exports.handler = async (event, context) => {
   const providerUrl = process.env.PROVIDER_URL;
@@ -12,14 +13,13 @@ exports.handler = async (event, context) => {
   const method = event.method;
 
   const provider = new ethers.providers.JsonRpcProvider(providerUrl);
-  const bclient = new Client({
-    host: process.env.BITCOIN_RPC,
-    port: process.env.BITCOIN_PORT,
-    username: process.env.BITCOIN_USERNAME,
-    password: process.env.BITCOIN_PASSWORD,
-    network: 'mainnet',
-    version: '0.20.1',
-  });
+  const bclient = new PoorManRpc(
+    request,
+    process.env.BCD_USERNAME,
+    process.env.BCD_PASSWORD,
+    process.env.BCD_RPC,
+    process.env.BCD_PORT,
+  );
   const service = new StrudelHandler(
     new DB(process.env.TABLE_NAME),
     provider,
@@ -49,8 +49,8 @@ exports.handler = async (event, context) => {
   if (path.indexOf('watchlist') > -1 && method === 'GET') {
       return await service.getWatchlist();
   }
-  if (path.indexOf('proof') > -1 && method === 'GET') {
-      return await service.getInclusionProof(event.path.txHash, event.path.blockHash);
+  if (path.indexOf('proof') > -1 && method === 'POST') {
+      return await service.getInclusionProof(event.path.txHash, event.path.blockHash, body.txData);
   }
   return `Not Found: unexpected path: ${path}`;
 };

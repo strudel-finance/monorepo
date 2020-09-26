@@ -117,8 +117,8 @@ module.exports = class StrudelHandler {
 
   }
 
-  async getInclusionProof(txHash, blockHash) {
-    const proof = await getProof(this.bclient, txHash, blockHash);
+  async getInclusionProof(txHash, blockHash, txData) {
+    const proof = await getProof(this.bclient, txHash, blockHash, txData);
     return JSON.stringify(proof);
   }
 }

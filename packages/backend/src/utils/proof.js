@@ -99,12 +99,12 @@ function parseTxHex(hex) {
 }
 
 
-async function getMerkleProof(client, txid, block) {
+async function getMerkleProof(txid, block) {
 
   let index = -1;
   const txs = [];
   for (const [i, tx] of Object.entries(block.tx)) {
-    const curr_txid = tx.txid;
+    const curr_txid = tx;
     if (curr_txid === txid) { index = i >>> 0; } // cast to uint from string
     txs.push(Buffer.from(curr_txid, 'hex').reverse());
   }
@@ -122,20 +122,16 @@ async function getMerkleProof(client, txid, block) {
   return [proof, index];
 }
 
-async function getProof(client, txid, blockhash) {
+async function getProof(client, txid, blockhash, txData) {
   assert(typeof txid === 'string');
 
-  const block = await client.getBlock({
-    blockhash: blockhash,
-    verbosity: 2,
-  });
+  const blockPromise = client.getBlock(blockhash);
+  const headerPromise = client.getHeader(blockhash);
 
-  const rawheader = await client.getBlockHeader({
-    blockhash: blockhash,
-    verbose: false,
-  });
+  const [block, rawheader] = await Promise.all([blockPromise, headerPromise]);
 
-  const tx = block.tx.filter(tx => tx.txid == txid)[0];
+  console.log(block);
+  const tx = block.tx.filter(tx => tx === txid)[0];
 
   if (!tx) { throw new Error('Cannot find transaction'); }
 
@@ -147,9 +143,9 @@ async function getProof(client, txid, blockhash) {
     prevhash: reverse(block.previousblockhash),
   };
 
-  const txinfo = parseTxHex(tx.hex);
+  const txinfo = parseTxHex(txData);
 
-  const [nodes, index] = await getMerkleProof(client, txid, block);
+  const [nodes, index] = await getMerkleProof(txid, block);
 
   let path = '';
 
