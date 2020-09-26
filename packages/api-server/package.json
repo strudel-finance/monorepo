@@ -45,7 +45,10 @@
     "webpack": "^3.3.0"
   },
   "dependencies": {
+    "@summa-tx/bitcoin-spv-js": "^4.0.2",
+    "@summa-tx/bitcoin-spv-js-clients": "^0.1.4",
     "babel-plugin-transform-builtin-extend": "^1.1.2",
+    "bitcoin-core": "^3.0.0",
     "web3": "0.20.7"
   }
 }

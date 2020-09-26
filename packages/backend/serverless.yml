@@ -70,7 +70,7 @@ responseMappings: &response_mappings
 
 functions:
   bridge-service:
-    timeout: 3
+    timeout: 30
     handler: src/strudel.handler
     environment:
       PROVIDER_URL: ${env:PROVIDER_URL}

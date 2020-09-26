@@ -25,6 +25,8 @@
     "sinon-chai": "^3.5.0"
   },
   "dependencies": {
+    "@summa-tx/bitcoin-spv-js": "^4.0.2",
+    "bitcoin-core": "^3.0.0",
     "bitcoinjs-lib": "^5.2.0",
     "ethers": "^4.0.47",
     "jsbi-utils": "^1.0.1",
