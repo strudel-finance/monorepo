@@ -8,9 +8,9 @@ import {ERC20Mintable} from "@openzeppelin/contracts/token/ERC20/ERC20Mintable.s
 import {Ownable} from "@openzeppelin/contracts/ownership/Ownable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
-import {TypedMemView} from "@summa-tx/bitcoin-spv-sol/contracts/TypedMemView.sol";
-import {ViewBTC} from "@summa-tx/bitcoin-spv-sol/contracts/ViewBTC.sol";
-import {ViewSPV} from "@summa-tx/bitcoin-spv-sol/contracts/ViewSPV.sol";
+import {TypedMemView} from "./summa-tx/TypedMemView.sol";
+import {ViewBTC} from "./summa-tx/ViewBTC.sol";
+import {ViewSPV} from "./summa-tx/ViewSPV.sol";
 import {IRelay} from "./IRelay.sol";
 
 /// @title  VBTC Token.
@@ -181,7 +181,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     uint256 sqrtVbtcBefore = sqrt(totalSupply());
     _mint(account, amount);
     uint256 sqrtVbtcAfter = sqrt(totalSupply());
-    
+
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BTC_CAP
