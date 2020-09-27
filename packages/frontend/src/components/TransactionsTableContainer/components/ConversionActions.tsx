@@ -134,6 +134,7 @@ const callProofOpReturnAndMint = async (
     showError(e.message)
     return undefined
   })
+  console.log(ethTxHash)
   if (ethTxHash !== undefined) {
     tx.ethTxHash = ethTxHash
     await pushEthTxHash({ethTxHash: ethTxHash}, tx)
