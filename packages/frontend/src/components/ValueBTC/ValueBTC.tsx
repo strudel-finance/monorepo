@@ -8,7 +8,7 @@ interface ValueProps {
   decimals?: number
 }
 
-const Value: React.FC<ValueProps> = ({value, decimals}) => {
+const ValueBTC: React.FC<ValueProps> = ({value, decimals}) => {
   const [start, updateStart] = useState(0)
   const [end, updateEnd] = useState(0)
 
@@ -28,7 +28,7 @@ const Value: React.FC<ValueProps> = ({value, decimals}) => {
           start={start}
           end={end}
           decimals={
-            decimals !== undefined ? decimals : end < 0 ? 4 : end > 1e5 ? 0 : 3
+            decimals !== undefined ? decimals : end < 0 ? 4 : end > 1e5 ? 0 : 6
           }
           duration={1}
           separator=","
@@ -45,4 +45,4 @@ const StyledValue = styled.div`
   font-weight: 700;
 `
 
-export default Value
+export default ValueBTC

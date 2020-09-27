@@ -1,6 +1,8 @@
 import BigNumber from 'bignumber.js/bignumber'
 import ERC20Abi from './abi/erc20.json'
 import MasterChefAbi from './abi/masterchef.json'
+import StrudelAbi from './abi/StrudelToken.json'
+import VBTCAbi from './abi/vbtc.json'
 import SushiAbi from './abi/sushi.json'
 import UNIV2PairAbi from './abi/uni_v2_lp.json'
 import WETHAbi from './abi/weth.json'
@@ -21,7 +23,9 @@ export class Contracts {
     this.defaultGas = options.defaultGas
     this.defaultGasPrice = options.defaultGasPrice
 
-    this.sushi = new this.web3.eth.Contract(SushiAbi)
+    //TODO change to strudelABI
+    this.strudel = new this.web3.eth.Contract(StrudelAbi)
+    this.vbtc = new this.web3.eth.Contract(VBTCAbi)
     this.masterChef = new this.web3.eth.Contract(MasterChefAbi)
     this.weth = new this.web3.eth.Contract(WETHAbi)
 
@@ -45,20 +49,23 @@ export class Contracts {
       else console.error('Contract address not found in network', networkId)
     }
 
-    setProvider(this.sushi, contractAddresses.sushi[networkId])
+    setProvider(this.vbtc, contractAddresses.vbtc[networkId])
+    setProvider(this.strudel, contractAddresses.strudel[networkId])
     setProvider(this.masterChef, contractAddresses.masterChef[networkId])
     setProvider(this.weth, contractAddresses.weth[networkId])
-
-    this.pools.forEach(
-      ({ lpContract, lpAddress, tokenContract, tokenAddress }) => {
+    this.pools = []
+    /*this.pools.forEach(
+      ({lpContract, lpAddress, tokenContract, tokenAddress}) => {
         setProvider(lpContract, lpAddress)
         setProvider(tokenContract, tokenAddress)
       },
-    )
+
+    )*/
   }
 
   setDefaultAccount(account) {
-    this.sushi.options.from = account
+    this.vbtc.options.from = account
+    this.strudel.options.from = account
     this.masterChef.options.from = account
   }
 
@@ -91,9 +98,9 @@ export class Contracts {
           gasEstimate = await method.estimateGas(txOptions)
         } catch (error) {
           const data = method.encodeABI()
-          const { from, value } = options
+          const {from, value} = options
           const to = method._parent._address
-          error.transactionData = { from, value, data, to }
+          error.transactionData = {from, value, data, to}
           throw error
         }
 
@@ -105,7 +112,7 @@ export class Contracts {
 
       if (confirmationType === Types.ConfirmationType.Simulate) {
         let g = txOptions.gas
-        return { gasEstimate, g }
+        return {gasEstimate, g}
       }
     }
 
@@ -209,7 +216,7 @@ export class Contracts {
       if (this.notifier) {
         this.notifier.hash(transactionHash)
       }
-      return { transactionHash }
+      return {transactionHash}
     }
 
     if (t === Types.ConfirmationType.Confirmed) {
@@ -228,7 +235,7 @@ export class Contracts {
 
   async callConstantContractFunction(method, options) {
     const m2 = method
-    const { blockNumber, ...txOptions } = options
+    const {blockNumber, ...txOptions} = options
     return m2.call(txOptions, blockNumber)
   }
 

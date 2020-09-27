@@ -8,6 +8,7 @@ import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
+import {Transaction} from '../../types/types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 import React from 'react'
@@ -49,25 +50,19 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export interface Transaction {
-  txCreatedAt: Date
-  value: string //in BTC not satoshi
-  confirmed?: boolean
-  btcTxHash?: string
-  outputIndex?: string
-  ethTxHash?: string
-  ethAddress?: string
-}
-
 export interface TransactionTableProps {
   transactions: Transaction[]
   lastRequest: Transaction | undefined
   confirmations: {[key: string]: number}
+  handleLoading: (status: boolean) => void
+  isLoading: boolean
 }
 const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   transactions,
   lastRequest,
   confirmations,
+  handleLoading,
+  isLoading,
 }) => {
   const classes = useStyles()
   return (
@@ -130,6 +125,8 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                       <ConversionActions
                         tx={tx}
                         confirmation={confirmations[tx.btcTxHash]}
+                        handleLoading={handleLoading}
+                        isLoading={isLoading}
                       />
                     </Grid>
                   </TableCell>

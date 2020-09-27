@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import {useWallet} from 'use-wallet'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import {getVbtcAddress} from '../../../vbtc/utils'
+import {getStrudelAddress, getVbtcAddress} from '../../../vbtc/utils'
 import {getBalanceNumber} from '../../../utils/formatBalance'
 import Button from '../../Button'
 import CardIcon from '../../CardIcon'
@@ -14,6 +14,7 @@ import ModalContent from '../../ModalContent'
 import ModalTitle from '../../ModalTitle'
 import Spacer from '../../Spacer'
 import Value from '../../Value'
+import ValueBTC from '../../ValueBTC'
 
 const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
   const {account, reset} = useWallet()
@@ -24,8 +25,8 @@ const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
   }, [onDismiss, reset])
 
   const vbtc = useVBTC()
+  const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
-
   return (
     <Modal>
       <ModalTitle text="My Account" />
@@ -38,8 +39,12 @@ const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
               <span>🍣</span>
             </CardIcon>
             <StyledBalance>
-              <Value value={getBalanceNumber(vbtcBalance)} />
-              <Label text="SUSHI Balance" />
+              <Value value={getBalanceNumber(strudelBalance)} />
+              <Label text="Strudel Balance" />
+            </StyledBalance>
+            <StyledBalance>
+              <ValueBTC value={getBalanceNumber(vbtcBalance)} />
+              <Label text="vBTC Balance" />
             </StyledBalance>
           </StyledBalanceWrapper>
         </div>

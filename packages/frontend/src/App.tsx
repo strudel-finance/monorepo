@@ -15,6 +15,9 @@ import Farms from './views/Farms'
 import Home from './views/Home'
 import Stake from './views/Stake'
 
+import {ToastContainer} from 'react-toastify'
+
+import 'react-toastify/dist/ReactToastify.css'
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
 
@@ -52,15 +55,18 @@ const Providers: React.FC = ({children}) => {
   return (
     <ThemeProvider theme={theme}>
       <UseWalletProvider
-        chainId={1}
-        connectors={{
+        chainId={5}
+        /*connectors={{
           walletconnect: {rpcUrl: 'https://mainnet.eth.aragon.network/'},
-        }}
+        }}*/
       >
         <VBTCProvider>
           <TransactionProvider>
             <FarmsProvider>
-              <ModalsProvider>{children}</ModalsProvider>
+              <ModalsProvider>
+                {children}
+                <ToastContainer limit={3} />
+              </ModalsProvider>
             </FarmsProvider>
           </TransactionProvider>
         </VBTCProvider>

@@ -14,7 +14,7 @@ import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import {getVbtcAddress, getVbtcSupply} from '../../../vbtc/utils'
+import {getStrudelAddress, getStrudelSupply} from '../../../vbtc/utils'
 import {getBalanceNumber} from '../../../utils/formatBalance'
 
 const PendingRewards: React.FC = () => {
@@ -70,15 +70,15 @@ const PendingRewards: React.FC = () => {
   )
 }
 
-const Balances: React.FC = () => {
+const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
-  const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
+  const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const {account, ethereum}: {account: any; ethereum: any} = useWallet()
 
   useEffect(() => {
     async function fetchTotalSupply() {
-      const supply = await getVbtcSupply(vbtc)
+      const supply = await getStrudelSupply(vbtc)
       setTotalSupply(supply)
     }
     if (vbtc) {
@@ -95,9 +95,11 @@ const Balances: React.FC = () => {
               <StrudelIcon />
               <Spacer />
               <div style={{flex: 1}}>
-                <Label text="Your vBTC Balance" />
+                <Label text="Your Strudel Balance" />
                 <Value
-                  value={!!account ? getBalanceNumber(vbtcBalance) : 'Locked'}
+                  value={
+                    !!account ? getBalanceNumber(strudelBalance) : 'Locked'
+                  }
                 />
               </div>
             </StyledBalance>
@@ -114,7 +116,7 @@ const Balances: React.FC = () => {
 
       <Card>
         <CardContent>
-          <Label text="Total vBTC Supply" />
+          <Label text="Total Strudel Supply" />
           <Value
             value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
@@ -159,4 +161,4 @@ const StyledBalance = styled.div`
   flex: 1;
 `
 
-export default Balances
+export default BalanceStrudel

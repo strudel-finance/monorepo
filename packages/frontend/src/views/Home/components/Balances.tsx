@@ -8,6 +8,8 @@ import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
 import Value from '../../../components/Value'
+import ValueBTC from '../../../components/ValueBTC'
+
 import StrudelIcon from '../../../components/StrudelIcon'
 import useAllEarnings from '../../../hooks/useAllEarnings'
 import useAllStakedValue from '../../../hooks/useAllStakedValue'
@@ -18,7 +20,7 @@ import {getVbtcAddress, getVbtcSupply} from '../../../vbtc/utils'
 import {getBalanceNumber} from '../../../utils/formatBalance'
 
 const Balances: React.FC = () => {
-  const [totalSupply, setTotalSupply] = useState<BigNumber>()
+  const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
   const {account, ethereum}: {account: any; ethereum: any} = useWallet()
@@ -26,12 +28,12 @@ const Balances: React.FC = () => {
   useEffect(() => {
     async function fetchTotalSupply() {
       const supply = await getVbtcSupply(vbtc)
-      setTotalSupply(supply)
+      setTotalVBTCSupply(supply)
     }
     if (vbtc) {
       fetchTotalSupply()
     }
-  }, [vbtc, setTotalSupply])
+  }, [vbtc, setTotalVBTCSupply])
 
   return (
     <StyledWrapper>
@@ -43,7 +45,7 @@ const Balances: React.FC = () => {
               <Spacer />
               <div style={{flex: 1}}>
                 <Label text="Your vBTC Balance" />
-                <Value
+                <ValueBTC
                   value={!!account ? getBalanceNumber(vbtcBalance) : 'Locked'}
                 />
               </div>
@@ -56,8 +58,10 @@ const Balances: React.FC = () => {
       <Card>
         <CardContent>
           <Label text="Total vBTC Supply" />
-          <Value
-            value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
+          <ValueBTC
+            value={
+              totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
+            }
           />
         </CardContent>
       </Card>

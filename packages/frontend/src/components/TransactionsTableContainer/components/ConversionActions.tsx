@@ -3,11 +3,16 @@
 import {makeStyles} from '@material-ui/core'
 import React from 'react'
 
-import {Transaction} from '../TransactionsTableContainer'
 import {ExternalLink} from './ExternalLink'
-
+import {SoChainConfirmedGetTx, Proof, Transaction} from '../../../types/types'
 import useModal from '../../../hooks/useModal'
+import {apiServer} from '../../../constants/backendAddresses'
+
 import BurnModal from '../../../views/Home/components/BurnModal'
+import useVBTC from '../../../hooks/useVBTC'
+import {getVbtcContract, proofOpReturnAndMint} from '../../../vbtc/utils'
+import {useWallet} from 'use-wallet'
+import showError from '../../../utils/showError'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -27,10 +32,11 @@ const pushEthTxHash = async (
   tx: Transaction,
 ): Promise<Response> => {
   const url =
-    'https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/payment/' +
+    apiServer +
+    '/production/payment/' +
     tx.btcTxHash +
     '/output/' +
-    tx.outputIndex +
+    tx.burnOutputIndex +
     '/addEthTx'
   const opts: RequestInit = {
     method: 'POST',
@@ -43,51 +49,115 @@ const pushEthTxHash = async (
   return fetch(url, opts)
 }
 
-const proofOpReturnAndMint = async (tx: Transaction) => {
-  const txHash = await new Promise<string>((res, rej) => {
-    res('0x89AB6D3C799d35f5b17194Ee7F07253856A67949')
-  })
-  tx.ethTxHash = txHash
-
-  // post call to server with ethTxHash, in the beginning this will have no error handling if the post goes wrong
-  // to be replaced with subgraph
-  //tx.ethAddress
-  /*
-  // Example POST method implementation:
-  async function postData(url = '', data = {}) {
-    // Default options are marked with *
-    const response = await fetch(url, {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, *cors, same-origin
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, *same-origin, omit
-      headers: {
-        'Content-Type': 'application/json'
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      body: JSON.stringify(data) // body data type must match "Content-Type" header
-    });
-    return response.json(); // parses JSON response into native JavaScript objects
+const getProof = async (
+  tx_data: string,
+  tx_hash: string,
+  block_hash: string,
+): Promise<Response> => {
+  const url = apiServer + '/production/proof/' + tx_hash + '/' + block_hash
+  const opts: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify({txData: tx_data}),
   }
+  return fetch(url, opts)
+}
 
-  postData('https://example.com/answer', { answer: 42 })
-    .then(data => {
-      console.log(data); // JSON data parsed by `data.json()` call
-    });
-  */
-  //
+const callProofHelper = async (
+  proof: Proof,
+  burnOutputIndex: number,
+  account: any,
+  vbtcContract: any,
+): Promise<string> => {
+  return await proofOpReturnAndMint(
+    vbtcContract,
+    account,
+    proof,
+    burnOutputIndex,
+  )
+  // TODO: errors
+}
 
-  console.log('click')
+const callProofOpReturnAndMint = async (
+  tx: Transaction,
+  handleLoading: (status: boolean) => void,
+  account: any,
+  vbtcContract: any,
+) => {
+  handleLoading(true)
+  let proof
+  if (!tx.hasOwnProperty('proof')) {
+    const txHash = await new Promise<string>((res, rej) => {
+      res('0x89AB6D3C799d35f5b17194Ee7F07253856A67949')
+    })
+    let res = await fetch(
+      `https://sochain.com/api/v2/get_tx/BTC/${tx.btcTxHash}`,
+    )
+      .then((response) => response.json())
+      .catch((e) => {
+        //TODO: handle error
+        showError('SoChain API Error')
+        return undefined
+      })
+      .then((res: SoChainConfirmedGetTx) => res)
+    if (res === undefined) {
+      handleLoading(false)
+      return
+    }
+    proof = await getProof(res.data.tx_hex, tx.btcTxHash, res.data.blockhash)
+      .then((response1) => response1.json())
+      .catch((e) => {
+        //TODO: handle error
+        showError(e.errorMessage)
+        return undefined
+      })
+      .then((result: string) => JSON.parse(result))
+    if (proof === undefined) {
+      handleLoading(false)
+      return
+    }
+    tx.proof = proof
+  } else {
+    proof = tx.proof
+  }
+  const ethTxHash = await callProofHelper(
+    proof,
+    Number(tx.burnOutputIndex),
+    account,
+    vbtcContract,
+  ).catch((e) => {
+    showError(e.message)
+    return undefined
+  })
+  if (ethTxHash !== undefined) {
+    tx.ethTxHash = ethTxHash
+    await pushEthTxHash({ethTxHash: ethTxHash}, tx).catch((e) => {
+      showError(e.errorMessage)
+    })
+  }
+  handleLoading(false)
 }
 
 interface Props {
   tx: Transaction
   confirmation?: number
+  handleLoading?: (status: boolean) => void
+  isLoading?: boolean
 }
 
-const ConversionActions: React.FC<Props> = ({tx, confirmation}) => {
+const ConversionActions: React.FC<Props> = ({
+  tx,
+  confirmation,
+  handleLoading,
+  isLoading,
+}) => {
+  const {account} = useWallet()
+  const vbtc = useVBTC()
+  const vbtcContract = getVbtcContract(vbtc)
+
   const targetBtcConfs = 6
   const isConfirmed = confirmation >= targetBtcConfs
   const classes = useStyles()
@@ -122,14 +192,23 @@ const ConversionActions: React.FC<Props> = ({tx, confirmation}) => {
         )}
         {(tx.confirmed || isConfirmed) && !tx.ethTxHash && (
           <React.Fragment>
-            <a
-              className={classes.viewLink}
-              onClick={() => {
-                proofOpReturnAndMint(tx)
-              }}
-            >
-              Claim vBTC
-            </a>
+            {!isLoading ? (
+              <a
+                className={classes.viewLink}
+                onClick={() => {
+                  callProofOpReturnAndMint(
+                    tx,
+                    handleLoading,
+                    account,
+                    vbtcContract,
+                  )
+                }}
+              >
+                Claim vBTC
+              </a>
+            ) : (
+              <a>Loading</a>
+            )}
           </React.Fragment>
         )}
       </div>

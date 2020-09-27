@@ -19,6 +19,11 @@ export const getMasterChefAddress = (vbtc) => {
 export const getVbtcAddress = (vbtc) => {
   return vbtc && vbtc.vbtcAddress
 }
+
+export const getStrudelAddress = (vbtc) => {
+  return vbtc && vbtc.strudelAddress
+}
+
 export const getWethContract = (vbtc) => {
   return vbtc && vbtc.contracts && vbtc.contracts.weth
 }
@@ -28,6 +33,10 @@ export const getMasterChefContract = (vbtc) => {
 }
 export const getVbtcContract = (vbtc) => {
   return vbtc && vbtc.contracts && vbtc.contracts.vbtc
+}
+
+export const getStrudelContract = (vbtc) => {
+  return vbtc && vbtc.contracts && vbtc.contracts.strudel
 }
 
 export const getFarms = (vbtc) => {
@@ -54,7 +63,7 @@ export const getFarms = (vbtc) => {
           tokenSymbol,
           tokenContract,
           earnToken: 'sushi',
-          earnTokenAddress: vbtc.contracts.sushi.options.address,
+          earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
         }),
       )
@@ -123,7 +132,36 @@ export const approve = async (lpContract, masterChefContract, account) => {
 }
 
 export const getVbtcSupply = async (vbtc) => {
-  return new BigNumber(await vbtc.contracts.sushi.methods.totalSupply().call())
+  return new BigNumber(await vbtc.contracts.vbtc.methods.totalSupply().call())
+}
+
+export const getStrudelSupply = async (strudel) => {
+  return new BigNumber(
+    await strudel.contracts.strudel.methods.totalSupply().call(),
+  )
+}
+
+export const proofOpReturnAndMint = async (
+  vbtcContract,
+  account,
+  proof,
+  burnOutputIndex,
+) => {
+  return vbtcContract.methods
+    .proofOpReturnAndMint(
+      proof.header,
+      proof.proof,
+      proof.version,
+      proof.locktime,
+      Number(proof.index),
+      Number(burnOutputIndex),
+      proof.vin,
+      proof.vout,
+    )
+    .send({from: account})
+    .on('transactionHash', (tx) => {
+      return tx
+    })
 }
 
 export const stake = async (masterChefContract, pid, amount, account) => {

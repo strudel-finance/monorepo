@@ -37,10 +37,10 @@ export class Vbtc {
       this.web3.eth.defaultAccount = options.defaultAccount
     }
     this.contracts = new Contracts(realProvider, networkId, this.web3, options)
-    this.vbtcAddress = contractAddresses.sushi[networkId]
+    this.vbtcAddress = contractAddresses.vbtc[networkId]
     this.masterChefAddress = contractAddresses.masterChef[networkId]
     this.wethAddress = contractAddresses.weth[networkId]
-    //this.strudelAddress =
+    this.strudelAddress = contractAddresses.strudel[networkId]
   }
 
   async resetEVM() {

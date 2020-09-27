@@ -14,7 +14,7 @@ import Label from '../../../components/Label'
 import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
-import {Transaction} from '../../../components/TransactionsTableContainer'
+import {Transaction} from '../../../types/types'
 import QRCode from 'qrcode.react'
 
 import sb from 'satoshi-bitcoin'

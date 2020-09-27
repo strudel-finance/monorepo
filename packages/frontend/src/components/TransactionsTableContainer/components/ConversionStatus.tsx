@@ -1,7 +1,9 @@
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
 
-import {Transaction, ReddishTextTypography} from '../TransactionsTableContainer'
+import {Transaction} from '../../../types/types'
+
+import {ReddishTextTypography} from '../TransactionsTableContainer'
 
 interface Props {
   tx: Transaction

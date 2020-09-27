@@ -12,7 +12,10 @@ import Spacer from '../../components/Spacer'
 import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
 import Balances from './components/Balances'
+import BalanceStrudel from './components/BalanceStrudel'
+
 import formatAddress from '../../utils/formatAddress'
+import showError from '../../utils/showError'
 import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import useInterval from '../../hooks/useInterval'
@@ -20,8 +23,9 @@ import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
 import {makeStyles} from '@material-ui/core'
-import {Transaction} from '../../components/TransactionsTableContainer'
+import {Transaction} from '../../types/types'
 import sb from 'satoshi-bitcoin'
+import {apiServer} from '../../constants/backendAddresses'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -45,22 +49,6 @@ const useStyles = makeStyles((theme) => ({
 }))
 
 const Home: React.FC = () => {
-  const txTest: Array<Transaction> = [
-    {
-      txCreatedAt: new Date(1600948128765),
-      value: '0.1',
-      confirmed: true,
-      btcTxHash:
-        'fe45455d3a033da656a973119fc970b68091f867fe4ec6054a66d95783d2fee7',
-    },
-    {
-      txCreatedAt: new Date(1600948139765),
-      value: '0.7',
-      confirmed: false,
-      btcTxHash:
-        'f9fb0605bda597ff0f65ae33b8fb5d9d515568d7c781ca37396c1974654ae97f',
-    },
-  ]
   const POLL_DURATION_TXS = 1500
   const BTC_ACCEPTANCE = 6
   const [val, setVal] = useState('0')
@@ -70,6 +58,7 @@ const Home: React.FC = () => {
   const [address, setAddress] = useState(
     '0x0000000000000000000000000000000000000000',
   )
+  const [isLoading, setLoading] = useState(false)
   const wallet = useWallet()
   const account = wallet.account
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
@@ -88,7 +77,7 @@ const Home: React.FC = () => {
         dateCreated: Date
         btcTxHash: string
         status: string
-        outputIndex: string
+        burnOutputIndex: string
         ethTxHash?: string
       },
     ]
@@ -125,22 +114,27 @@ const Home: React.FC = () => {
   }
   const checkAndRemoveLastRequest = () => {
     if (lastRequest !== undefined) {
-      window.localStorage.removeItem('lastRequest')
+      window.localStorage.removeItem(account)
       setLastRequest(undefined)
     }
   }
+  const handleLoading = (status: boolean) => {
+    setLoading(status)
+  }
+
   const handleTransactionUpdate = async () => {
     if (wallet.status === 'connected') {
-      let res = await fetch(
-        `https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/account/${account}`,
-      )
+      let res = await fetch(`${apiServer}/production/account/${account}`)
         .then((response) => response.json())
         .then((res: AccountRequest) => res)
-        .catch((error) => {
+        .catch((e) => {
           //forget error
-          return
+          showError(e.errorMessage)
+          return undefined
         })
-
+      if (res === undefined) {
+        return
+      }
       let resNew: Transaction[] = []
       if (isAccountRequest(res)) {
         res.burns.map((tx, i) => {
@@ -149,7 +143,7 @@ const Home: React.FC = () => {
             value: sb.toBitcoin(tx.amount),
             txCreatedAt: new Date(tx.dateCreated),
             btcTxHash: tx.btcTxHash,
-            outputIndex: tx.outputIndex,
+            burnOutputIndex: tx.burnOutputIndex,
             confirmed: tx.status === 'paid' ? true : false,
           }
           if (tx.ethTxHash) {
@@ -177,17 +171,19 @@ const Home: React.FC = () => {
   }
 
   useEffect(() => {
-    if (
-      lastRequest === undefined &&
-      localStorage.hasOwnProperty('lastRequest')
-    ) {
-      let tx = JSON.parse(window.localStorage.getItem('lastRequest'))
-      tx.txCreatedAt = new Date(tx.txCreatedAt)
-      setLastRequest(tx)
+    if (account === null) {
+      setTransactions([])
+      setLastRequest(undefined)
+    } else {
+      if (lastRequest === undefined && localStorage.hasOwnProperty(account)) {
+        let tx = JSON.parse(window.localStorage.getItem(account))
+        tx.txCreatedAt = new Date(tx.txCreatedAt)
+        setLastRequest(tx)
+      }
+      // get transactions at first
+      handleTransactionUpdate()
     }
-    // get transactions at first
-    handleTransactionUpdate()
-  }, [])
+  }, [account])
 
   useInterval(async () => {
     await handleTransactionUpdate()
@@ -202,7 +198,6 @@ const Home: React.FC = () => {
 
       let highConfirmations = {}
       Object.keys(confirmations).forEach((key) => {
-        console.log(confirmations[key])
         if (confirmations[key] >= BTC_ACCEPTANCE) {
           highConfirmations[key] = confirmations[key]
         }
@@ -214,6 +209,13 @@ const Home: React.FC = () => {
         )
           .then((response) => response.json())
           .then((res: SoChainConfirmed) => res)
+          .catch((e) => {
+            showError('SoChain API error')
+            return undefined
+          })
+        if (res === undefined) {
+          continue
+        }
         newConfirmations[transactionsWithLowConfirmations[i].btcTxHash] =
           res.data.confirmations
       }
@@ -227,7 +229,7 @@ const Home: React.FC = () => {
 
   const handleLastRequestChange = (tx: Transaction) => {
     setLastRequest(tx)
-    window.localStorage.setItem('lastRequest', JSON.stringify(tx))
+    window.localStorage.setItem(account, JSON.stringify(tx))
   }
 
   const [onPresentBurn] = useModal(
@@ -271,6 +273,8 @@ const Home: React.FC = () => {
               <TransactionsTableContainer
                 transactions={transactions}
                 confirmations={confirmations}
+                handleLoading={handleLoading}
+                isLoading={isLoading}
                 lastRequest={lastRequest}
               />
             </Grid>
@@ -298,6 +302,10 @@ const Home: React.FC = () => {
       <Spacer size="lg" />
       <Container>
         <Balances />
+      </Container>
+      <Spacer size="lg" />
+      <Container>
+        <BalanceStrudel />
       </Container>
       <Spacer size="lg" />
       <div

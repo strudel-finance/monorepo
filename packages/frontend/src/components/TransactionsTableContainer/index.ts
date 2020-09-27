@@ -1,5 +1,2 @@
 export {default} from './TransactionsTableContainer'
-export type {
-  TransactionTableProps,
-  Transaction,
-} from './TransactionsTableContainer'
+export type {TransactionTableProps} from './TransactionsTableContainer'
