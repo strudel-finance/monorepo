@@ -38,7 +38,7 @@ possible responses:
 		"amount": "1000", // satoshis
 		"dateCreated": "23/9/2020",
 		"btcTxHash": "0x32",
-		"outputIndex": "0",
+		"burnOutputIndex": "0",
 		"status": "pending"
 	  }]
     }
@@ -51,7 +51,7 @@ possible responses:
 		"amount": 1000, // satoshis
 		"dateCreated": "23/9/2020",
 		"btcTxHash": "0x32",
-		"outputIndex": "1",
+		"burnOutputIndex": "1",
 		"ethTxHash": "0x32",
 		"status": "paid"
 	}, {..}],
@@ -151,9 +151,13 @@ responses:
 - 200:
 	```json
 	{
-	  "proof": "0x1122..3344",
 	  "header": "0x2233..4455",
-	  "txData": "0x3344..5566"
+	  "proof": "0x1122..3344",
+	  "version": "0x02000000",
+	  "locktime": "0x00000000",
+	  "index": 145, // tx in block, used for proof verification
+	  "vin": "0x3344..5566",
+	  "vout": "0x4455..6677"
 	}
 	```
 - 400: no relevant output

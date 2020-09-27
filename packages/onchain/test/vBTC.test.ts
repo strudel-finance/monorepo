@@ -44,13 +44,14 @@ describe('VBTC', async () => {
         constants.OP_RETURN_VERSION,
         constants.OP_RETURN_LOCKTIME,
         constants.OP_RETURN_INDEX,
-        '0x0000', // requestIndices
+        0, // burn output index in transaction
         constants.OP_RETURN_VIN,
         constants.OP_RETURN_VOUT
       );
       const rsp = (await tx.wait(1));
       //console.log(rsp);
-      console.log(rsp.gasUsed?.toNumber());
+      // console.log(rsp.gasUsed?.toNumber()); 
+      // expecting about 256000 gas
     });
 
   });

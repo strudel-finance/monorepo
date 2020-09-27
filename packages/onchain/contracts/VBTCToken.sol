@@ -22,11 +22,12 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
   using ViewBTC for bytes29;
   using ViewSPV for bytes29;
 
-  event Burn(bytes32 indexed btcTxHash, address indexed receiver, uint256 amount, uint8 outputIndex);
+  event Burn(bytes32 indexed btcTxHash, address indexed receiver, uint256 amount, uint32 outputIndex);
 
   uint8 constant ADDR_LEN = 20;
   uint256 constant BTC_CAP = 21*10**24;
   uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
+  bytes3 constant PROTOCOL_ID = 0x07ffff; // a mersenne prime
 
   uint256 public numConfs;
   IRelay public relay;
@@ -124,7 +125,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     bytes4 _version,
     bytes4 _locktime,
     uint256 _index,
-    uint8 _burnOutputIndex,
+    uint32 _burnOutputIndex,
     bytes calldata _vin,
     bytes calldata _vout
   ) external returns (bool) {
@@ -138,7 +139,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     bytes4 _version,
     bytes4 _locktime,
     uint256 _index,
-    uint8 _burnOutputIndex,
+    uint32 _burnOutputIndex,
     bytes memory _vin,
     bytes memory _vout
   ) internal returns (bool) {
@@ -164,7 +165,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     return true;
   }
 
-  function doPayouts(bytes29 _vout, uint256 _burnOutputIndex) internal returns (address account, uint256 amount) {
+  function doPayouts(bytes29 _vout, uint32 _burnOutputIndex) internal returns (address account, uint256 amount) {
     bytes29 output = _vout.indexVout(_burnOutputIndex);
 
     // extract receiver and address
@@ -172,8 +173,9 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     require(amount > 0, "output has 0 value");
 
     bytes29 opReturnPayload = output.scriptPubkey().opReturnPayload();
-    //require(opReturnPayload.len() == ADDR_LEN, "invalid op-return payload length");
-    // account = address(bytes20(opReturnPayload.index(0, ADDR_LEN)));
+    require(opReturnPayload.len() == ADDR_LEN + 3, "invalid op-return payload length");
+    require(bytes3(opReturnPayload.index(0, 3)) == PROTOCOL_ID, "invalid burn protocol");
+    account = address(bytes20(opReturnPayload.index(3, ADDR_LEN)));
     account = msg.sender;
 
     uint256 sqrtVbtcBefore = sqrt(totalSupply());
@@ -188,17 +190,17 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     strudel.mint(devFund, rewardAmount.div(devFundDivRate));
   }
 
-  function proofP2FSHAndMint(
-    bytes calldata _header,
-    bytes calldata _proof,
-    uint256 _index,
-    bytes32 _txid,
-    bytes32 _r,
-    bytes32 _s,
-    uint8 _v
-  ) external returns (bool) {
-    return false;
-  }
+  // function proofP2FSHAndMint(
+  //   bytes calldata _header,
+  //   bytes calldata _proof,
+  //   uint256 _index,
+  //   bytes32 _txid,
+  //   bytes32 _r,
+  //   bytes32 _s,
+  //   uint8 _v
+  // ) external returns (bool) {
+  //   return false;
+  // }
 
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
     require(relay.addHeaders(_anchor, _headers), "add header failed");

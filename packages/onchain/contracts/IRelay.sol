@@ -5,6 +5,9 @@ pragma solidity >=0.4.22 <0.8.0;
 /** @title IRelay */
 
 interface IRelay {
+  event Extension(bytes32 indexed _first, bytes32 indexed _last);
+  event NewTip(bytes32 indexed _from, bytes32 indexed _to, bytes32 indexed _gcd);
+    
   /// @notice     Getter for bestKnownDigest
   /// @dev        This updated only by calling markNewHeaviest
   /// @return     The hash of the best marked chain tip

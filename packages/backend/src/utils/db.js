@@ -67,7 +67,7 @@ exports.DB = class DB extends SimpleDb {
       const burn = {
         btcTxHash: payment.Attributes.btcTxHash,
         amount: payment.Attributes.amount,
-        outputIndex: payment.Attributes.outputIndex,
+        burnOutputIndex: payment.Attributes.outputIndex,
         dateCreated: payment.Attributes.created
       };
       if (payment.Attributes.ethTxHash) {
