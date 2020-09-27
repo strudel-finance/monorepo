@@ -160,7 +160,7 @@ export const proofOpReturnAndMint = async (
     )
     .send({from: account})
     .on('transactionHash', (tx) => {
-      return tx
+      return tx.transactionHash
     })
 }
 
