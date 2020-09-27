@@ -283,4 +283,9 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     require(_newRelayReward > 0, "!newRelayReward-0");
     relayReward = _newRelayReward;
   }
+
+  function setRelayAddress(address _newRelayAddr) public onlyOwner {
+    require(_newRelayAddr != address(0), "!newRelayAddr-0");
+    relay = IRelay(_newRelayAddr);
+  }
 }

@@ -3,6 +3,7 @@ import {Signer} from "ethers";
 import chai from "chai";
 import {solidity} from "ethereum-waffle";
 import constants from './onDemandSPVHelpers.json';
+import failed from './failedTx.json';
 import { VBTCToken } from '../typechain/VBTCToken';
 import { VBTCTokenFactory } from '../typechain/VBTCTokenFactory';
 import { Strudel } from '../typechain/Strudel';
@@ -47,6 +48,24 @@ describe('VBTC', async () => {
         0, // burn output index in transaction
         constants.OP_RETURN_VIN,
         constants.OP_RETURN_VOUT
+      );
+      const rsp = (await tx.wait(1));
+      //console.log(rsp);
+      // console.log(rsp.gasUsed?.toNumber()); 
+      // expecting about 256000 gas
+    });
+
+
+    it('failed case', async () => {
+      const tx = await instance.proofOpReturnAndMint(
+        failed.OP_RETURN_HEADER,
+        failed.OP_RETURN_PROOF,
+        failed.OP_RETURN_VERSION,
+        failed.OP_RETURN_LOCKTIME,
+        failed.OP_RETURN_INDEX,
+        0, // burn output index in transaction
+        failed.OP_RETURN_VIN,
+        failed.OP_RETURN_VOUT
       );
       const rsp = (await tx.wait(1));
       //console.log(rsp);

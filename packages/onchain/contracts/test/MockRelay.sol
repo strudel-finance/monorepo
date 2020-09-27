@@ -18,7 +18,7 @@ contract MockRelay is IRelay {
   bytes32 bestKnownDigest;
   bytes32 lastReorgCommonAncestor;
   uint256 public currentEpochDiff;
-  mapping(bytes32 => uint256) heights;
+  mapping(bytes32 => uint256) public heights;
 
   constructor(
     bytes32 _bestKnownDigest,
@@ -60,7 +60,7 @@ contract MockRelay is IRelay {
   /// @notice     Getter for relayGenesis
   /// @dev        This is updated only by calling markNewHeaviest
   /// @return     The hash of the shared ancestor of the most recent fork
-  function LastReorgCommonAncestor(bytes32 _lrca) external {
+  function setLastReorgCommonAncestor(bytes32 _lrca) external {
     require(heights[_lrca] > 0, "not found");
     require(heights[_lrca] <= heights[bestKnownDigest], "ahead of tip");
     lastReorgCommonAncestor = _lrca;
