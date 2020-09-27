@@ -3,12 +3,13 @@ const encode = require("./segwit_addr").encode;
 
 module.exports = {
     getBtcAddress: getBtcAddress,
-    //getBtcUri: getBtcUri,
+    getBtcUri: getBtcUri,
 }
 
 const PREFIX = "ffffffffffff"; // prefix and suffix to be added when encoding to p2wsh address 
 const POSTFIX = "ffffffffffff";// not used otherwise
 const HRP = 'bc';
+const URI_PREFIX = 'bitcoin:';
 
 const addrToProgram = (addr) => {
     const re = /[0-9A-Fa-f]{2}/gi;
@@ -33,3 +34,8 @@ function getBtcAddress (ethAddress, isP2WSH=true) {
     return btcAddress;
 }
 
+function getBtcUri (ethAddress, amount, url, isP2WSH=true) {
+    const btcAddress = getBtcAddress(ethAddress, isP2WSH);
+    if (btcAddress == "Error: Wrong Ethereum address format") return btcAddress;
+    return URI_PREFIX.concat(btcAddress,"?amount=",amount.toString(),"&r=",url);
+}
