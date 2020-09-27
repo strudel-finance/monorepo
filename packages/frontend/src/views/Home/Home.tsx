@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import {useWallet} from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
 
-import chef from '../../assets/img/chef.png'
+import astronaut from '../../assets/img/Astronaut.png'
 import Button from '../../components/Button'
 //import Container from '../../components/Container'
 import Page from '../../components/Page'
@@ -15,7 +15,7 @@ import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
 
 import formatAddress from '../../utils/formatAddress'
-import showError from '../../utils/showError'
+import showError, {handleErrors} from '../../utils/showError'
 import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import useInterval from '../../hooks/useInterval'
@@ -82,28 +82,7 @@ const Home: React.FC = () => {
       },
     ]
   }
-  /*
-  let res = {
-  account: "0x",
-  burns: [
-    {
-      txCreatedAt: "1600948128765",
-      amount: '10000000',
-      status: 'd',
-      btcTxHash:
-        'fe45455d3a033da656a973119fc970b68091f867fe4ec6054a66d95783d2fee7',
-    },
-    {
-      txCreatedAt: "1600948139765",
-      amount: '10000000',
-      status: 'paid',
-      btcTxHash:
-        'f9fb0605bda597ff0f65ae33b8fb5d9d515568d7c781ca37396c1974654ae97f',
-      ethTxHash: '0xce3ade4a1b5416ddf0f4cd735f3c45fb8b331a14c81756a177ac0345004a490e'
-    },
-  ]
-}
-  */
+
   const isAccountRequest = (
     res: AccountRequest | void,
   ): res is AccountRequest => {
@@ -125,11 +104,12 @@ const Home: React.FC = () => {
   const handleTransactionUpdate = async () => {
     if (wallet.status === 'connected') {
       let res = await fetch(`${apiServer}/production/account/${account}`)
+        .then(handleErrors)
         .then((response) => response.json())
         .then((res: AccountRequest) => res)
         .catch((e) => {
           //forget error
-          showError(e.errorMessage)
+          showError('Problem fetching account: ' + e.message)
           return undefined
         })
       if (res === undefined) {
@@ -207,12 +187,14 @@ const Home: React.FC = () => {
         let res = await fetch(
           `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
         )
+          .then(handleErrors)
           .then((response) => response.json())
           .then((res: SoChainConfirmed) => res)
           .catch((e) => {
-            showError('SoChain API error')
+            showError('SoChain API error: ' + e.message)
             return undefined
           })
+
         if (res === undefined) {
           continue
         }
@@ -251,7 +233,7 @@ const Home: React.FC = () => {
   return (
     <Page>
       <PageHeader
-        icon={<img src={chef} height={120} />}
+        icon={<img src={astronaut} height={120} />}
         title="The Vortex is ready"
         subtitle="Burn BTC to receive vBTC and $STRDL!"
       />

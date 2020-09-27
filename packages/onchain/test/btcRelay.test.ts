@@ -271,7 +271,7 @@ describe("Relay (Batch)", () => {
         return Buffer.concat([prev, Buffer.from(curr, "hex")]);
       }, Buffer.alloc(0))
     );
-    console.log('gas used: ', (await tx.wait(1)).gasUsed?.toNumber());
+    console.log("gas used: ", (await tx.wait(1)).gasUsed?.toNumber());
   });
 
   it("should store 32 headers", async () => {

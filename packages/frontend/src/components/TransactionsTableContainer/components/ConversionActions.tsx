@@ -12,7 +12,7 @@ import BurnModal from '../../../views/Home/components/BurnModal'
 import useVBTC from '../../../hooks/useVBTC'
 import {getVbtcContract, proofOpReturnAndMint} from '../../../vbtc/utils'
 import {useWallet} from 'use-wallet'
-import showError from '../../../utils/showError'
+import showError, {handleErrors} from '../../../utils/showError'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -96,25 +96,27 @@ const callProofOpReturnAndMint = async (
     let res = await fetch(
       `https://sochain.com/api/v2/get_tx/BTC/${tx.btcTxHash}`,
     )
+      .then(handleErrors)
       .then((response) => response.json())
+      .then((res: SoChainConfirmedGetTx) => res)
       .catch((e) => {
         //TODO: handle error
-        showError('SoChain API Error')
+        showError('SoChain API Error: ' + e.message)
         return undefined
       })
-      .then((res: SoChainConfirmedGetTx) => res)
     if (res === undefined) {
       handleLoading(false)
       return
     }
     proof = await getProof(res.data.tx_hex, tx.btcTxHash, res.data.blockhash)
+      .then(handleErrors)
       .then((response1) => response1.json())
+      .then((result: string) => JSON.parse(result))
       .catch((e) => {
         //TODO: handle error
-        showError(e.errorMessage)
+        showError('Problem fetching proof: ' + e.message)
         return undefined
       })
-      .then((result: string) => JSON.parse(result))
     if (proof === undefined) {
       handleLoading(false)
       return
@@ -134,9 +136,11 @@ const callProofOpReturnAndMint = async (
   })
   if (ethTxHash !== undefined) {
     tx.ethTxHash = ethTxHash
-    await pushEthTxHash({ethTxHash: ethTxHash}, tx).catch((e) => {
-      showError(e.errorMessage)
-    })
+    await pushEthTxHash({ethTxHash: ethTxHash}, tx)
+      .then(handleErrors)
+      .catch((e) => {
+        showError('Problem pushing ETH to DB: ' + e.message)
+      })
   }
   handleLoading(false)
 }

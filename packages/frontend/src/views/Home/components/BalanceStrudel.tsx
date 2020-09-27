@@ -108,7 +108,7 @@ const BalanceStrudel: React.FC = () => {
         <Footnote>
           Pending harvest
           <FootnoteValue>
-            <PendingRewards /> SUSHI
+            <PendingRewards /> STRUDEL
           </FootnoteValue>
         </Footnote>
       </Card>
@@ -123,7 +123,7 @@ const BalanceStrudel: React.FC = () => {
         </CardContent>
         <Footnote>
           New rewards per block
-          <FootnoteValue>1,000 SUSHI</FootnoteValue>
+          <FootnoteValue>1,000 STRUDEL</FootnoteValue>
         </Footnote>
       </Card>
     </StyledWrapper>

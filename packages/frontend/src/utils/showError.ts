@@ -12,4 +12,11 @@ const showError = (message: string) => {
   })
 }
 
+export const handleErrors = (response: any) => {
+  if (!response.ok) {
+    throw Error(response.status)
+  }
+  return response
+}
+
 export default showError

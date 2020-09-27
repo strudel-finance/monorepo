@@ -40,19 +40,20 @@ export const addressMap = {
 
 export const contractAddresses = {
   vbtc: {
-    1: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
-    5: '0xe7f68a99a3f8ab9dfa059ba0ee84670cad04d5ed',
+    1: '',
+    5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
   },
   strudel: {
-    1: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
+    1: '',
     5: '0xc1829e963717cf1ccd9d849266b1b2456a1dbf77',
   },
   masterChef: {
-    1: '0xc2edad668740f1aa35e4d8f227fb8e17dca888cd',
+    1: '',
     5: '0x980b0d3b7f304a7ff23f56257403ae442d8ff759',
   },
   weth: {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+    5: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
   },
 }
 
@@ -76,12 +77,14 @@ UNI-V2 LP Address on mainnet for reference
 
 export const supportedPools = [
   {
-    pid: 12,
+    pid: 1,
     lpAddresses: {
-      1: '0xce84867c3c02b05dc570d0135103d3fb9cc19433',
+      1: '',
+      5: '0x040dad5d12da37b670159326c0117638f5f1871e',
     },
     tokenAddresses: {
-      1: '0x6b3595068778dd592e39a122f4f5a5cf09c90fe2',
+      1: '',
+      5: '0xc1829e963717cf1ccd9d849266b1b2456a1dbf77',
     },
     name: 'Strudel Party!',
     symbol: 'STRDL-ETH UNI-V2 LP',
@@ -91,23 +94,28 @@ export const supportedPools = [
   {
     pid: 0,
     lpAddresses: {
-      1: '0x0d4a11d5eeaac28ec3f61d100daf4d40471f1852',
+      1: '',
+      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
     },
     tokenAddresses: {
-      1: '0xdac17f958d2ee523a2206206994597c13d831ec7',
+      1: '',
+      5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
     },
     name: 'Vortex Vampire',
     symbol: 'VBTC-ETH UNI-V2 LP',
     tokenSymbol: 'VBTC',
     icon: '🧛',
   },
+  /*
   {
     pid: 1,
     lpAddresses: {
       1: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
+      5: ''
     },
     tokenAddresses: {
       1: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      5: ''
     },
     name: 'WBTC Whale',
     symbol: 'WBTC-ETH UNI-V2 LP',
@@ -118,13 +126,16 @@ export const supportedPools = [
     pid: 13,
     lpAddresses: {
       1: '0x8bd1661da98ebdd3bd080f0be4e6d9be8ce9858c',
+      5: ''
     },
     tokenAddresses: {
       1: '0x408e41876cccdc0f92210600ef50372656052a38',
+      5: ''
     },
     name: 'REN Rhino',
     symbol: 'REN-ETH UNI-V2 LP',
     tokenSymbol: 'REN',
     icon: '🦏',
   },
+  */
 ]

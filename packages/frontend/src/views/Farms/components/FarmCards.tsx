@@ -25,15 +25,17 @@ const FarmCards: React.FC = () => {
   const {account} = useWallet()
   const stakedValue = useAllStakedValue()
 
-  const vbtcIndex = farms.findIndex(({tokenSymbol}) => tokenSymbol === 'SUSHI')
+  const strudelIndex = farms.findIndex(
+    ({tokenSymbol}) => tokenSymbol === 'STRDL',
+  )
 
   const vbtcPrice =
-    vbtcIndex >= 0 && stakedValue[vbtcIndex]
-      ? stakedValue[vbtcIndex].tokenPriceInWeth
+    strudelIndex >= 0 && stakedValue[strudelIndex]
+      ? stakedValue[strudelIndex].tokenPriceInWeth
       : new BigNumber(0)
 
   const BLOCKS_PER_YEAR = new BigNumber(2336000)
-  const VBTC_PER_BLOCK = new BigNumber(1000)
+  const STRUDEL_PER_BLOCK = new BigNumber(1000)
 
   const rows = farms.reduce<FarmWithStakedValue[][]>(
     (farmRows, farm, i) => {
@@ -42,7 +44,7 @@ const FarmCards: React.FC = () => {
         ...stakedValue[i],
         apy: stakedValue[i]
           ? vbtcPrice
-              .times(VBTC_PER_BLOCK)
+              .times(STRUDEL_PER_BLOCK)
               .times(BLOCKS_PER_YEAR)
               .times(stakedValue[i].poolWeight)
               .div(stakedValue[i].totalWethValue)
@@ -124,7 +126,7 @@ const FarmCard: React.FC<FarmCardProps> = ({farm}) => {
 
   return (
     <StyledCardWrapper>
-      {farm.tokenSymbol === 'SUSHI' && <StyledCardAccent />}
+      {farm.tokenSymbol === 'STRDL' && <StyledCardAccent />}
       <Card>
         <CardContent>
           <StyledContent>

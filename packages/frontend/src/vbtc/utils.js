@@ -62,7 +62,7 @@ export const getFarms = (vbtc) => {
           tokenAddress,
           tokenSymbol,
           tokenContract,
-          earnToken: 'sushi',
+          earnToken: 'STRUDEL',
           earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
         }),
@@ -79,7 +79,7 @@ export const getPoolWeight = async (masterChefContract, pid) => {
 }
 
 export const getEarned = async (masterChefContract, pid, account) => {
-  return masterChefContract.methods.pendingSushi(pid, account).call()
+  return masterChefContract.methods.pendingStrudel(pid, account).call()
 }
 
 export const getTotalLPWethValue = async (

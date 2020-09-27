@@ -41,9 +41,11 @@ const App: React.FC = () => {
           <Route path="/farms">
             <Farms />
           </Route>
-          <Route path="/staking">
-            <Stake />
-          </Route>
+          {false && (
+            <Route path="/staking">
+              <Stake />
+            </Route>
+          )}
         </Switch>
       </Router>
       <Disclaimer />
@@ -85,7 +87,8 @@ const Disclaimer: React.FC = () => {
   )
 
   useEffect(() => {
-    const seenDisclaimer = true // localStorage.getItem('disclaimer')
+    //const seenDisclaimer = true
+    const seenDisclaimer = localStorage.getItem('disclaimer')
     if (!seenDisclaimer) {
       onPresentDisclaimerModal()
     }
