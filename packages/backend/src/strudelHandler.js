@@ -93,13 +93,16 @@ module.exports = class StrudelHandler {
     //   - same amount
     //   - same account
     const receipt = await this.provider.getTransactionReceipt(ethTxHash);
-    const parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+    console.log(receipt);
+    let parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+    // reverse 
+    parsedTxHash = parsedTxHash.match(/.{2}/g).reverse().join("");
     if (parsedTxHash !== btcTxHash) {
       throw new Errors.BadRequest(`parsed txHash ${parsedTxHash} doesn't match.`);
     }
     const dataBuf = Buffer.from(receipt.logs[3].data.replace('0x', ''), 'hex');
     const parsedOutputIndex = dataBuf.readUInt8(dataBuf.length - 1);
-    if (parsedOutputIndex !== outputIndex) {
+    if (parsedOutputIndex !== parseInt(outputIndex)) {
       throw new Errors.BadRequest(`parsed outIndex ${parsedOutputIndex} doesn't match.`);
     }
     const parsedValue = ethers.utils.bigNumberify(`0x${dataBuf.slice(0, 32).toString('hex')}`);

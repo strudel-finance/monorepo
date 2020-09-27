@@ -7,7 +7,6 @@ custom:
   region: eu-west-1
   bcdRpc: '90.179.1.59'
   bcdPost: 10666
-  vbtcContractAddr: "0x8a55f373dC25B6d638Aa406757eE5Bb5fBb3B9A5"
 
 
 package:

@@ -36,15 +36,15 @@ exports.handler = async (event, context) => {
         v: body.v
       });
   }
-  if (path.indexOf('payment') > -1 && method === 'POST') {
-      return await service.addBtcTx(event.path.txHash, body.txData);
-  }
   if (path.indexOf('output') > -1 && method === 'POST') {
       return await service.addEthTx(
         event.path.txHash,
         event.path.outputIndex,
         body.ethTxHash
       );
+  }
+  if (path.indexOf('payment') > -1 && method === 'POST') {
+      return await service.addBtcTx(event.path.txHash, body.txData);
   }
   if (path.indexOf('watchlist') > -1 && method === 'GET') {
       return await service.getWatchlist();
