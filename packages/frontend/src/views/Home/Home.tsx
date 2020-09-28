@@ -23,9 +23,10 @@ import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
 import {makeStyles} from '@material-ui/core'
-import {Transaction} from '../../types/types'
+import {Transaction, LoadingStatus} from '../../types/types'
 import sb from 'satoshi-bitcoin'
 import {apiServer} from '../../constants/backendAddresses'
+import RollbarErrorTracking from '../../errorTracking/rollbar'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -58,7 +59,8 @@ const Home: React.FC = () => {
   const [address, setAddress] = useState(
     '0x0000000000000000000000000000000000000000',
   )
-  const [isLoading, setLoading] = useState(false)
+  const [isLoading, setLoading] = useState({})
+
   const wallet = useWallet()
   const account = wallet.account
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
@@ -104,8 +106,10 @@ const Home: React.FC = () => {
       setLastRequest(undefined)
     }
   }
-  const handleLoading = (status: boolean) => {
-    setLoading(status)
+  const handleLoading = (ls: LoadingStatus) => {
+    let tempLoading = isLoading
+    tempLoading[ls.tx] = ls.status
+    setLoading(tempLoading)
   }
 
   const handleTransactionUpdate = async () => {
@@ -116,7 +120,12 @@ const Home: React.FC = () => {
         .then((res: AccountRequest) => res)
         .catch((e) => {
           //forget error
-          showError('Problem fetching account: ' + e.message)
+          if (e.message != 404) {
+            showError('Problem fetching account: ' + e.message)
+            RollbarErrorTracking.logErrorInRollbar(
+              'Problem fetching account: ' + e.message,
+            )
+          }
           return undefined
         })
       if (res === undefined) {
@@ -201,6 +210,9 @@ const Home: React.FC = () => {
           .then((res: SoChainConfirmed) => res)
           .catch((e) => {
             showError('SoChain API error: ' + e.message)
+            RollbarErrorTracking.logErrorInRollbar(
+              'SoChain confirmations: ' + e.message,
+            )
             return undefined
           })
 

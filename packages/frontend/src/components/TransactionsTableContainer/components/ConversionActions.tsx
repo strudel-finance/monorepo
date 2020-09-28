@@ -4,7 +4,12 @@ import {makeStyles} from '@material-ui/core'
 import React from 'react'
 
 import {ExternalLink} from './ExternalLink'
-import {SoChainConfirmedGetTx, Proof, Transaction} from '../../../types/types'
+import {
+  SoChainConfirmedGetTx,
+  Proof,
+  Transaction,
+  LoadingStatus,
+} from '../../../types/types'
 import useModal from '../../../hooks/useModal'
 import {apiServer} from '../../../constants/backendAddresses'
 
@@ -13,6 +18,7 @@ import useVBTC from '../../../hooks/useVBTC'
 import {getVbtcContract, proofOpReturnAndMint} from '../../../vbtc/utils'
 import {useWallet} from 'use-wallet'
 import showError, {handleErrors} from '../../../utils/showError'
+import RollbarErrorTracking from '../../../errorTracking/rollbar'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -95,6 +101,7 @@ const waitForTxReceipt = async (
     transactionReceipt = await vbtc.web3.eth
       .getTransactionReceipt(transactionHash)
       .catch((e: any) => {
+        RollbarErrorTracking.logErrorInRollbar(e)
         showError(e)
         return -1
       })
@@ -104,12 +111,14 @@ const waitForTxReceipt = async (
 }
 const callProofOpReturnAndMint = async (
   tx: Transaction,
-  handleLoading: (status: boolean) => void,
+  handleLoading: (ls: LoadingStatus) => void,
   account: any,
   vbtcContract: any,
   vbtc: any,
 ) => {
-  handleLoading(true)
+  let loadingStatus = {tx: tx.btcTxHash, status: true}
+  handleLoading(loadingStatus)
+  loadingStatus.status = false
   let proof
 
   if (!tx.hasOwnProperty('proof')) {
@@ -124,11 +133,14 @@ const callProofOpReturnAndMint = async (
       .then((res: SoChainConfirmedGetTx) => res)
       .catch((e) => {
         //TODO: handle error
+        RollbarErrorTracking.logErrorInRollbar(
+          'SoChain fetch tx error' + e.message,
+        )
         showError('SoChain API Error: ' + e.message)
         return undefined
       })
     if (res === undefined) {
-      handleLoading(false)
+      handleLoading(loadingStatus)
       return
     }
     proof = await getProof(res.data.tx_hex, tx.btcTxHash, res.data.blockhash)
@@ -137,11 +149,14 @@ const callProofOpReturnAndMint = async (
       .then((result: string) => JSON.parse(result))
       .catch((e) => {
         //TODO: handle error
+        RollbarErrorTracking.logErrorInRollbar(
+          'proof fetching problem' + e.message,
+        )
         showError('Problem fetching proof: ' + e.message)
         return undefined
       })
     if (proof === undefined) {
-      handleLoading(false)
+      handleLoading(loadingStatus)
       return
     }
     tx.proof = proof
@@ -154,30 +169,35 @@ const callProofOpReturnAndMint = async (
     account,
     vbtcContract,
   ).catch((e) => {
+    RollbarErrorTracking.logErrorInRollbar(e.message)
     showError(e.message)
     return undefined
   })
-  ethTxHash = ethTxHash.transactionHash
 
   if (
-    (ethTxHash !== undefined && (await waitForTxReceipt(ethTxHash, vbtc))) === 1
+    (ethTxHash !== undefined &&
+      ethTxHash.transactionHash !== undefined &&
+      (await waitForTxReceipt(ethTxHash, vbtc))) === 1
   ) {
     // do things
-    tx.ethTxHash = ethTxHash
+    tx.ethTxHash = ethTxHash.transactionHash
     await pushEthTxHash({ethTxHash: ethTxHash}, tx)
       .then(handleErrors)
       .catch((e) => {
+        RollbarErrorTracking.logErrorInRollbar(
+          'Problem pushing ETH to DB: ' + e.message,
+        )
         showError('Problem pushing ETH to DB: ' + e.message)
       })
   }
-  handleLoading(false)
+  handleLoading(loadingStatus)
 }
 
 interface Props {
   tx: Transaction
   confirmation?: number
-  handleLoading?: (status: boolean) => void
-  isLoading?: boolean
+  handleLoading?: (ls: LoadingStatus) => void
+  isLoading?: any
 }
 
 const ConversionActions: React.FC<Props> = ({
@@ -224,7 +244,7 @@ const ConversionActions: React.FC<Props> = ({
         )}
         {(tx.confirmed || isConfirmed) && !tx.ethTxHash && (
           <React.Fragment>
-            {!isLoading ? (
+            {!isLoading[tx.btcTxHash] ? (
               <a
                 className={classes.viewLink}
                 onClick={() => {
@@ -240,7 +260,7 @@ const ConversionActions: React.FC<Props> = ({
                 Claim vBTC
               </a>
             ) : (
-              <a>Loading</a>
+              <a className={classes.viewLink}>Loading</a>
             )}
           </React.Fragment>
         )}

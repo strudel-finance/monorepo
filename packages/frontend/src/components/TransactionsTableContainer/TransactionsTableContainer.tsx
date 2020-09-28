@@ -8,7 +8,7 @@ import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
-import {Transaction} from '../../types/types'
+import {Transaction, LoadingStatus} from '../../types/types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 import React from 'react'
@@ -54,8 +54,8 @@ export interface TransactionTableProps {
   transactions: Transaction[]
   lastRequest: Transaction | undefined
   confirmations: {[key: string]: number}
-  handleLoading: (status: boolean) => void
-  isLoading: boolean
+  handleLoading: (ls: LoadingStatus) => void
+  isLoading: any
 }
 const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   transactions,

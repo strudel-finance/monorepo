@@ -16,8 +16,25 @@ import Home from './views/Home'
 import Stake from './views/Stake'
 
 import {ToastContainer} from 'react-toastify'
+import {ErrorBoundary} from 'react-error-boundary'
 
 import 'react-toastify/dist/ReactToastify.css'
+import RollbarErrorTracking from './errorTracking/rollbar'
+
+const ErrorFallback = (any: any) => {
+  return (
+    <div role="alert">
+      <p>Something went wrong:</p>
+      <pre style={{color: 'red'}}>{any.error.message}</pre>
+    </div>
+  )
+}
+
+const myErrorHandler = (error: Error, info: {componentStack: string}) => {
+  RollbarErrorTracking.logErroInfo(info)
+  RollbarErrorTracking.logErrorInRollbar(error)
+}
+
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
 
@@ -31,24 +48,29 @@ const App: React.FC = () => {
 
   return (
     <Providers>
-      <Router>
-        <TopBar onPresentMobileMenu={handlePresentMobileMenu} />
-        <MobileMenu onDismiss={handleDismissMobileMenu} visible={mobileMenu} />
-        <Switch>
-          <Route path="/" exact>
-            <Home />
-          </Route>
-          <Route path="/farms">
-            <Farms />
-          </Route>
-          {false && (
-            <Route path="/staking">
-              <Stake />
+      <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
+        <Router>
+          <TopBar onPresentMobileMenu={handlePresentMobileMenu} />
+          <MobileMenu
+            onDismiss={handleDismissMobileMenu}
+            visible={mobileMenu}
+          />
+          <Switch>
+            <Route path="/" exact>
+              <Home />
             </Route>
-          )}
-        </Switch>
-      </Router>
-      <Disclaimer />
+            <Route path="/farms">
+              <Farms />
+            </Route>
+            {false && (
+              <Route path="/staking">
+                <Stake />
+              </Route>
+            )}
+          </Switch>
+        </Router>
+        <Disclaimer />
+      </ErrorBoundary>
     </Providers>
   )
 }

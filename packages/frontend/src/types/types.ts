@@ -5,7 +5,10 @@ export interface SoChainConfirmedGetTx {
     tx_hex: string
   }
 }
-
+export interface LoadingStatus {
+  tx: string
+  status: boolean
+}
 export interface Proof {
   header: string
   proof: string
