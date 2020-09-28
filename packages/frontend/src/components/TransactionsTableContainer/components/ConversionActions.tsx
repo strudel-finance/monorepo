@@ -80,15 +80,38 @@ const callProofHelper = async (
   )
   // TODO: errors
 }
+const sleep = (milliseconds: number) => {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds))
+}
 
+const waitForTxReceipt = async (
+  transactionHash: string,
+  vbtc: any,
+): Promise<number> => {
+  const expectedBlockTime = 1000
+  let transactionReceipt = null
+  while (transactionReceipt == null) {
+    // Waiting expectedBlockTime until the transaction is mined
+    transactionReceipt = await vbtc.web3.eth
+      .getTransactionReceipt(transactionHash)
+      .catch((e: any) => {
+        showError(e)
+        return -1
+      })
+    await sleep(expectedBlockTime)
+  }
+  return transactionReceipt !== -1 ? 1 : -1
+}
 const callProofOpReturnAndMint = async (
   tx: Transaction,
   handleLoading: (status: boolean) => void,
   account: any,
   vbtcContract: any,
+  vbtc: any,
 ) => {
   handleLoading(true)
   let proof
+
   if (!tx.hasOwnProperty('proof')) {
     const txHash = await new Promise<string>((res, rej) => {
       res('0x89AB6D3C799d35f5b17194Ee7F07253856A67949')
@@ -125,7 +148,7 @@ const callProofOpReturnAndMint = async (
   } else {
     proof = tx.proof
   }
-  const ethTxHash = await callProofHelper(
+  let ethTxHash = await callProofHelper(
     proof,
     Number(tx.burnOutputIndex),
     account,
@@ -134,8 +157,12 @@ const callProofOpReturnAndMint = async (
     showError(e.message)
     return undefined
   })
-  console.log(ethTxHash)
-  if (ethTxHash !== undefined) {
+  ethTxHash = ethTxHash.transactionHash
+
+  if (
+    (ethTxHash !== undefined && (await waitForTxReceipt(ethTxHash, vbtc))) === 1
+  ) {
+    // do things
     tx.ethTxHash = ethTxHash
     await pushEthTxHash({ethTxHash: ethTxHash}, tx)
       .then(handleErrors)
@@ -206,6 +233,7 @@ const ConversionActions: React.FC<Props> = ({
                     handleLoading,
                     account,
                     vbtcContract,
+                    vbtc,
                   )
                 }}
               >

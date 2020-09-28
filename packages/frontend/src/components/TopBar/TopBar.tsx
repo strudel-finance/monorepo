@@ -11,7 +11,7 @@ interface TopBarProps {
   onPresentMobileMenu: () => void
 }
 
-const TopBar: React.FC<TopBarProps> = ({ onPresentMobileMenu }) => {
+const TopBar: React.FC<TopBarProps> = ({onPresentMobileMenu}) => {
   return (
     <StyledTopBar>
       <Container size="lg">
@@ -36,7 +36,13 @@ const StyledLogoWrapper = styled.div`
   }
 `
 
-const StyledTopBar = styled.div``
+const StyledTopBar = styled.div`
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 99;
+`
 
 const StyledTopBarInner = styled.div`
   align-items: center;

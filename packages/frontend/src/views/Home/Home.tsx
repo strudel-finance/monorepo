@@ -1,4 +1,4 @@
-import React, {useCallback, useState, useMemo, useEffect} from 'react'
+import React, {useCallback, useState, useMemo, useEffect, useRef} from 'react'
 import styled from 'styled-components'
 import {useWallet} from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
@@ -82,6 +82,13 @@ const Home: React.FC = () => {
       },
     ]
   }
+  const usePrevious = (value: any) => {
+    const ref = useRef()
+    useEffect(() => {
+      ref.current = value
+    })
+    return ref.current
+  }
 
   const isAccountRequest = (
     res: AccountRequest | void,
@@ -149,12 +156,14 @@ const Home: React.FC = () => {
       }
     }
   }
+  const previousAccount = usePrevious(account)
 
   useEffect(() => {
-    if (account === null) {
+    if (account === null || previousAccount !== account) {
       setTransactions([])
       setLastRequest(undefined)
-    } else {
+    }
+    if (previousAccount !== account) {
       if (lastRequest === undefined && localStorage.hasOwnProperty(account)) {
         let tx = JSON.parse(window.localStorage.getItem(account))
         tx.txCreatedAt = new Date(tx.txCreatedAt)
