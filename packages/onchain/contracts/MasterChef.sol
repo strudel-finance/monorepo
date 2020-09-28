@@ -1,10 +1,10 @@
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity ^0.6.0;
 
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import {Ownable} from "@openzeppelin/contracts/ownership/Ownable.sol";
-import {ERC20Mintable} from "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 
 // MasterChef was the baker of STRDL. He now governs over STRDL. He can make STRDL and he is a fair guy.
 //

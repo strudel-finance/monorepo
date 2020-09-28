@@ -5,8 +5,7 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "dependencies": {
-    "@openzeppelin/contracts": "^2.5.0",
-    "@summa-tx/bitcoin-spv-sol": "^4.0.1",
+    "@openzeppelin/contracts": "^3.2.0",
     "bitcoinjs-lib": "^5.1.7",
     "ethers": "^4.0.44"
   },

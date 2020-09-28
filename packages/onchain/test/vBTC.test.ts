@@ -2,12 +2,12 @@ import {ethers} from "@nomiclabs/buidler";
 import {Signer} from "ethers";
 import chai from "chai";
 import {solidity} from "ethereum-waffle";
-import constants from './onDemandSPVHelpers.json';
+import constants from './onDemandSpvHelpers.json';
 import failed from './failedTx.json';
 import { VBTCToken } from '../typechain/VBTCToken';
 import { VBTCTokenFactory } from '../typechain/VBTCTokenFactory';
-import { Strudel } from '../typechain/Strudel';
-import { StrudelFactory } from '../typechain/StrudelFactory';
+import { StrudelToken } from '../typechain/StrudelToken';
+import { StrudelTokenFactory } from '../typechain/StrudelTokenFactory';
 import { MockRelay } from '../typechain/MockRelay';
 import { MockRelayFactory } from '../typechain/MockRelayFactory';
 
@@ -19,7 +19,7 @@ const BYTES32_0 = '0x00000000000000000000000000000000000000000000000000000000000
 async function deploy(signer: Signer): Promise<VBTCToken> {
   let relayFactory = new MockRelayFactory(signer);
   let relay = await relayFactory.deploy(BYTES32_0, 0, BYTES32_0, 0);
-  let strudelFactory = new StrudelFactory(signer);
+  let strudelFactory = new StrudelTokenFactory(signer);
   let strudel = await strudelFactory.deploy();
   let factory = new VBTCTokenFactory(signer);
   let vbtc = await factory.deploy(relay.address, strudel.address, 0, relay.address, 50);
@@ -51,7 +51,7 @@ describe('VBTC', async () => {
       );
       const rsp = (await tx.wait(1));
       //console.log(rsp);
-      // console.log(rsp.gasUsed?.toNumber()); 
+      // console.log(rsp.gasUsed?.toNumber());
       // expecting about 256000 gas
     });
 
@@ -69,7 +69,7 @@ describe('VBTC', async () => {
       );
       const rsp = (await tx.wait(1));
       //console.log(rsp);
-      // console.log(rsp.gasUsed?.toNumber()); 
+      // console.log(rsp.gasUsed?.toNumber());
       // expecting about 256000 gas
     });
 

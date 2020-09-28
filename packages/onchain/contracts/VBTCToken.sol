@@ -1,21 +1,21 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity ^0.6.0;
 
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
-import {ERC20Detailed} from "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import {ERC20Mintable} from "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
-import {Ownable} from "@openzeppelin/contracts/ownership/Ownable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
-import {TypedMemView} from "@summa-tx/bitcoin-spv-sol/contracts/TypedMemView.sol";
-import {ViewBTC} from "@summa-tx/bitcoin-spv-sol/contracts/ViewBTC.sol";
-import {ViewSPV} from "@summa-tx/bitcoin-spv-sol/contracts/ViewSPV.sol";
+import {TypedMemView} from "./summa-tx/TypedMemView.sol";
+import {ViewBTC} from "./summa-tx/ViewBTC.sol";
+import {ViewSPV} from "./summa-tx/ViewSPV.sol";
 import {IRelay} from "./IRelay.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
+contract VBTCToken is ERC20, ERC20Capped, Ownable {
   using SafeMath for uint256;
   using TypedMemView for bytes;
   using TypedMemView for bytes29;
@@ -42,7 +42,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
   constructor(address _relay, address _strudel, uint256 _minConfs, address _devFund, uint256 _relayReward)
-    ERC20Detailed("vBTC", "VBTC", 18)
+    ERC20("vBTC", "VBTC")
     ERC20Capped(BTC_CAP)
   public {
     relay = IRelay(_relay);
@@ -50,6 +50,10 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     numConfs = _minConfs;
     devFund = _devFund;
     relayReward = _relayReward;
+  }
+
+  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20, ERC20Capped) {
+      super._beforeTokenTransfer(from, to, amount);
   }
 
   function makeOutpoint(uint256 _index, bytes32 _txid) internal pure returns (bytes32) {
@@ -181,7 +185,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     uint256 sqrtVbtcBefore = sqrt(totalSupply());
     _mint(account, amount);
     uint256 sqrtVbtcAfter = sqrt(totalSupply());
-    
+
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BTC_CAP
@@ -241,7 +245,10 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    _burnFrom(_account, _amount);
+    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(_amount, "ERC20: burn amount exceeds allowance");
+
+    _approve(_account, _msgSender(), decreasedAllowance);
+    _burn(_account, _amount);
   }
 
   /// @dev Destroys `amount` tokens from `msg.sender`, reducing the

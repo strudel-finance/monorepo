@@ -13,7 +13,7 @@ const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
 const config = {
   defaultNetwork: "buidlerevm",
   solc: {
-    version: "0.5.10",
+    version: "0.6.2",
     optimizer: {enabled: true, runs: 500},
   },
   paths: {
