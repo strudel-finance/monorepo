@@ -194,7 +194,7 @@ export const harvest = async (masterChefContract, pid, account) => {
     .deposit(pid, '0')
     .send({from: account})
     .on('transactionHash', (tx) => {
-      console.log(tx)
+      //console.log(tx)
       return tx.transactionHash
     })
 }

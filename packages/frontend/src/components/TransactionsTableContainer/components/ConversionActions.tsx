@@ -109,6 +109,7 @@ const waitForTxReceipt = async (
   }
   return transactionReceipt !== -1 ? 1 : -1
 }
+
 const callProofOpReturnAndMint = async (
   tx: Transaction,
   handleLoading: (ls: LoadingStatus) => void,
@@ -163,6 +164,7 @@ const callProofOpReturnAndMint = async (
   } else {
     proof = tx.proof
   }
+
   let ethTxHash = await callProofHelper(
     proof,
     Number(tx.burnOutputIndex),
@@ -174,13 +176,15 @@ const callProofOpReturnAndMint = async (
     return undefined
   })
 
+  handleLoading(loadingStatus)
   if (
     (ethTxHash !== undefined &&
       ethTxHash.transactionHash !== undefined &&
-      (await waitForTxReceipt(ethTxHash, vbtc))) === 1
+      (await waitForTxReceipt(ethTxHash.transactionHash, vbtc))) === 1
   ) {
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
+
     await pushEthTxHash({ethTxHash: ethTxHash}, tx)
       .then(handleErrors)
       .catch((e) => {
@@ -190,7 +194,6 @@ const callProofOpReturnAndMint = async (
         showError('Problem pushing ETH to DB: ' + e.message)
       })
   }
-  handleLoading(loadingStatus)
 }
 
 interface Props {
