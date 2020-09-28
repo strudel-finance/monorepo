@@ -5,8 +5,8 @@ custom:
     port: 3001
   table: strudel-${opt:stage}
   region: eu-west-1
-  bcdRpc: '90.179.1.59'
-  bcdPost: 10666
+  bcdRpc: 'bcd.strudel.finance'
+  bcdPost: 8332
 
 
 package:

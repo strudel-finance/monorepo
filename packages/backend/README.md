@@ -126,6 +126,11 @@ responses:
 - 404: account not found
 - 408: tx not found on chain
 
+example:
+```
+curl --data '{"ethTxHash": "0xaf362ecb29e457df9853d023f0d01233758d56624b090e91b77d3994606cc7a7"}' -H "Content-Type: application/json" -X POST https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/payment/94105cdc1032fa8fd97e45f39b015b6b19b9d47ccf9142c65ee5ae1ea3f32cb1/output/0/addEthTx
+```
+
 ## GET /watchlist
 responses:
 - 200: `["P2FSH_ADDR_1", "P2FSH_ADDR_2", "P2FSH_ADDR_3"]`
