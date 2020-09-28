@@ -16,10 +16,7 @@ const Nav: React.FC = () => {
           Gravity Bags
         </StyledLink>
       )}
-      <StyledAbsoluteLink
-        href="https://medium.com/sushiswap/the-sushiswap-project-c4049ea9941e"
-        target="_blank"
-      >
+      <StyledAbsoluteLink href="" target="_blank">
         About
       </StyledAbsoluteLink>
     </StyledNav>

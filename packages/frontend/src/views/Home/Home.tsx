@@ -13,7 +13,7 @@ import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
 import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
-
+import Lottie from '../../components/Lottie'
 import formatAddress from '../../utils/formatAddress'
 import showError, {handleErrors} from '../../utils/showError'
 import useModal from '../../hooks/useModal'
@@ -258,6 +258,8 @@ const Home: React.FC = () => {
         title="The Vortex is ready"
         subtitle="Burn BTC to receive vBTC and $STRDL!"
       />
+
+      {false && <Lottie />}
       {wallet.status === 'connected' ? (
         <Container fixed maxWidth="lg">
           <Grid container spacing={2}>

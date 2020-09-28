@@ -23,7 +23,6 @@ export class Contracts {
     this.defaultGas = options.defaultGas
     this.defaultGasPrice = options.defaultGasPrice
 
-    //TODO change to strudelABI
     this.strudel = new this.web3.eth.Contract(StrudelAbi)
     this.vbtc = new this.web3.eth.Contract(VBTCAbi)
     this.masterChef = new this.web3.eth.Contract(MasterChefAbi)

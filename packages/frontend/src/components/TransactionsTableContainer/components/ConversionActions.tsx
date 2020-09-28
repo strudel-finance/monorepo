@@ -133,7 +133,6 @@ const callProofOpReturnAndMint = async (
       .then((response) => response.json())
       .then((res: SoChainConfirmedGetTx) => res)
       .catch((e) => {
-        //TODO: handle error
         RollbarErrorTracking.logErrorInRollbar(
           'SoChain fetch tx error' + e.message,
         )
@@ -149,7 +148,6 @@ const callProofOpReturnAndMint = async (
       .then((response1) => response1.json())
       .then((result: string) => JSON.parse(result))
       .catch((e) => {
-        //TODO: handle error
         RollbarErrorTracking.logErrorInRollbar(
           'proof fetching problem' + e.message,
         )
