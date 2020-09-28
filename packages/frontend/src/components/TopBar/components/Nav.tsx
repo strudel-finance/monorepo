@@ -9,11 +9,11 @@ const Nav: React.FC = () => {
         Home
       </StyledLink>
       <StyledLink exact activeClassName="active" to="/farms">
-        Menu
+        Terra Mining
       </StyledLink>
       {false && (
         <StyledLink exact activeClassName="active" to="/staking">
-          Staking
+          Gravity Bags
         </StyledLink>
       )}
       <StyledAbsoluteLink
