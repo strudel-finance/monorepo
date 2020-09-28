@@ -7,6 +7,7 @@ import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
 import useFarm from '../../hooks/useFarm'
 import useRedeem from '../../hooks/useRedeem'
+import Button from '../../components/Button'
 import useVBTC from '../../hooks/useVBTC'
 import {getMasterChefContract} from '../../vbtc/utils'
 import {getContract} from '../../utils/erc20'
@@ -61,6 +62,11 @@ const Farm: React.FC = () => {
         subtitle={`Deposit ${lpTokenName}  Tokens and earn ${earnTokenName}`}
         title={name}
       />
+      <Spacer size="sm" />
+      <div style={{  margin: '0 auto' }}>
+          <Button text="<- Back" to="/farms" variant="secondary" size="lg" />
+      </div>
+      <Spacer size="lg" />
       <StyledFarm>
         <StyledCardsWrapper>
           <StyledCardWrapper>
