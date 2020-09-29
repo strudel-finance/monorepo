@@ -2,20 +2,20 @@
 
 pragma solidity ^0.6.0;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {FlashERC20} from "./FlashERC20.sol";
 import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract StrudelToken is ERC20, ERC20Mintable {
+contract StrudelToken is FlashERC20, ERC20Mintable {
   using SafeMath for uint256;
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
   constructor()
-    ERC20("Strudel Finance", "STRDL")
+    FlashERC20("Strudel Finance", "STRDL")
   public {
     // solhint-disable-previous-line no-empty-blocks
   }

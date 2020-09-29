@@ -4,9 +4,10 @@ pragma solidity ^0.6.0;
 
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import {FlashERC20} from "./FlashERC20.sol";
+import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
 import {TypedMemView} from "./summa-tx/TypedMemView.sol";
 import {ViewBTC} from "./summa-tx/ViewBTC.sol";
@@ -15,7 +16,7 @@ import {IRelay} from "./IRelay.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is ERC20, ERC20Capped, Ownable {
+contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   using SafeMath for uint256;
   using TypedMemView for bytes;
   using TypedMemView for bytes29;
@@ -25,14 +26,12 @@ contract VBTCToken is ERC20, ERC20Capped, Ownable {
   event Burn(bytes32 indexed btcTxHash, address indexed receiver, uint256 amount, uint32 outputIndex);
 
   uint8 constant ADDR_LEN = 20;
-  uint256 constant BTC_CAP = 21*10**24;
   uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
   bytes3 constant PROTOCOL_ID = 0x07ffff; // a mersenne prime
 
   uint256 public numConfs;
   IRelay public relay;
   ERC20Mintable public strudel;
-  address public devFund;
   uint256 public devFundDivRate = 50;
   uint256 public relayReward;
 
@@ -42,7 +41,7 @@ contract VBTCToken is ERC20, ERC20Capped, Ownable {
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
   constructor(address _relay, address _strudel, uint256 _minConfs, address _devFund, uint256 _relayReward)
-    ERC20("vBTC", "VBTC")
+    FlashERC20("vBTC", "VBTC")
     ERC20Capped(BTC_CAP)
   public {
     relay = IRelay(_relay);

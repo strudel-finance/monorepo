@@ -16,9 +16,7 @@ const {expect} = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
-async function deploy(signer: Signer): Promise<VBTCToken> {
-  let relayFactory = new MockRelayFactory(signer);
-  let relay = await relayFactory.deploy(BYTES32_0, 0, BYTES32_0, 0);
+async function deploy(signer: Signer, relay: MockRelay): Promise<VBTCToken> {
   let strudelFactory = new StrudelTokenFactory(signer);
   let strudel = await strudelFactory.deploy();
   let factory = new VBTCTokenFactory(signer);
@@ -30,15 +28,22 @@ async function deploy(signer: Signer): Promise<VBTCToken> {
 describe('VBTC', async () => {
   let signers: Signer[];
   let instance: VBTCToken;
+  let relay: MockRelay;
+
+  before(async () => {
+    signers = await ethers.signers();
+    let relayFactory = new MockRelayFactory(signers[0]);
+    relay = await relayFactory.deploy(BYTES32_0, 210, BYTES32_0, 211);
+  });
 
   beforeEach(async () => {
-    signers = await ethers.signers();
-    instance = await deploy(signers[0]);
+    instance = await deploy(signers[0], relay);
   });
 
   describe('#provideProof', async () => {
 
     it('happy case', async () => {
+      await relay.addHeader(constants.OP_RETURN_BLOCK_HASH, 200);
       const tx = await instance.proofOpReturnAndMint(
         constants.OP_RETURN_HEADER,
         constants.OP_RETURN_PROOF,
@@ -57,6 +62,7 @@ describe('VBTC', async () => {
 
 
     it('failed case', async () => {
+      await relay.addHeader(failed.OP_RETURN_BLOCK_HASH, 200);
       const tx = await instance.proofOpReturnAndMint(
         failed.OP_RETURN_HEADER,
         failed.OP_RETURN_PROOF,

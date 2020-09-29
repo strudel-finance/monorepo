@@ -142,12 +142,12 @@ describe('MasterChef', async () => {
       await chef.connect(bob).deposit(0, '0'); // block 100
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('0');
       await chef.connect(bob).deposit(0, '0'); // block 101
-      expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('1000');
+      expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('980');
       await advanceBlock(3);
       await chef.connect(bob).deposit(0, '0'); // block 105
-      expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('5000');
+      expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('4900');
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq('100');
-      expect((await instance.totalSupply()).valueOf()).to.eq('5100');
+      expect((await instance.totalSupply()).valueOf()).to.eq('5000');
     });
 
   //   it('should not distribute SUSHIs if no one deposit', async () => {
