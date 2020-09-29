@@ -1,15 +1,13 @@
 import React from 'react'
 import {Link} from 'react-router-dom'
 import styled from 'styled-components'
-import astronaut from '../../assets/img/Astronaut.png'
+import strudel from '../../assets/img/Strudel.png'
 
 const Logo: React.FC = () => {
   return (
     <StyledLogo to="/">
-      <img src={astronaut} height="32" style={{marginTop: -4}} />
-      <StyledText>
-        Strudel <MasterChefText>MasterAstronaut</MasterChefText>
-      </StyledText>
+      <img src={strudel} height="32" style={{marginTop: -4}} />
+      <StyledText>Strudel Finance</StyledText>
     </StyledLogo>
   )
 }

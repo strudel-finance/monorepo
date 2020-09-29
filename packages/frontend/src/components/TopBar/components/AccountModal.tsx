@@ -15,6 +15,7 @@ import ModalTitle from '../../ModalTitle'
 import Spacer from '../../Spacer'
 import Value from '../../Value'
 import ValueBTC from '../../ValueBTC'
+import StrudelIcon from '../../StrudelIcon'
 
 const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
   const {account, reset} = useWallet()
@@ -31,13 +32,10 @@ const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
     <Modal>
       <ModalTitle text="My Account" />
       <ModalContent>
-        <Spacer />
-
         <div style={{display: 'flex'}}>
           <StyledBalanceWrapper>
-            <CardIcon>
-              <span>🍣</span>
-            </CardIcon>
+            <StrudelIcon size={80} />
+            <Spacer />
             <StyledBalance>
               <Value value={getBalanceNumber(strudelBalance)} />
               <Label text="Strudel Balance" />

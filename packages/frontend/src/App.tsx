@@ -83,23 +83,21 @@ const Providers: React.FC = ({children}) => {
         connectors={{
           walletconnect: {
             rpcUrl:
-              'https://goerli.infura.io/v3/f1ff6ab81a744f4a851714c0b8c20d21',
-            //'https://goerli.eth.aragon.network/',
+              //'https://goerli.infura.io/v3/f1ff6ab81a744f4a851714c0b8c20d21',
+              'https://mainnet.eth.aragon.network/',
           },
         }}
-        //TODO fix problems with walletconnect
+        //TODO fix problems with walletconnect               //,
       >
         <VBTCProvider>
           <TransactionProvider>
             <FarmsProvider>
-              <ModalsProvider>
-                {children}
-                <ToastContainer limit={3} />
-              </ModalsProvider>
+              <ModalsProvider>{children}</ModalsProvider>
             </FarmsProvider>
           </TransactionProvider>
         </VBTCProvider>
       </UseWalletProvider>
+      <ToastContainer limit={3} />
     </ThemeProvider>
   )
 }

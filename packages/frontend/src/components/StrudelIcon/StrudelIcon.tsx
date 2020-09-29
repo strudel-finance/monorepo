@@ -1,22 +1,12 @@
 import React from 'react'
+import vbtc from '../../assets/img/Strudel.png'
 
 interface StrudelIconProps {
   size?: number
   v1?: boolean
-  v2?: boolean
-  v3?: boolean
 }
-
-const StrudelIcon: React.FC<StrudelIconProps> = ({size = 36, v1, v2, v3}) => (
-  <span
-    role="img"
-    style={{
-      fontSize: size,
-      filter: v1 ? 'saturate(0.5)' : undefined,
-    }}
-  >
-    🌪
-  </span>
+const StrudelIcon: React.FC<StrudelIconProps> = ({size = 60, v1}) => (
+  <img src={vbtc} height={size} />
 )
 
 export default StrudelIcon

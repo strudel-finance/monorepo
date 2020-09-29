@@ -2,7 +2,7 @@ import {makeStyles, withStyles} from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
-import TableCell from '@material-ui/core/TableCell'
+import MuiTableCell from '@material-ui/core/TableCell'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
@@ -11,6 +11,7 @@ import ConversionActions from './components/ConversionActions'
 import {Transaction, LoadingStatus} from '../../types/types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
+import tableBackground from '../../assets/img/TableBackground.png'
 import React from 'react'
 
 export const ReddishTextTypography = withStyles({
@@ -27,9 +28,16 @@ const ReddishBoldTextTypography = withStyles({
   },
 })(ReddishTextTypography)
 
+const TableCell = withStyles({
+  root: {
+    borderBottom: 'none',
+  },
+})(MuiTableCell)
+
 const useStyles = makeStyles((theme) => ({
   container: {
-    background: '#f0e9e7',
+    borderColor: 'none',
+    backgroundImage: `url(${tableBackground})`,
     border: '1px solid #e2d6cfff',
     boxShadow: 'inset 1px 1px 0px #f7f4f2',
     borderRadius: '12px',
@@ -39,6 +47,7 @@ const useStyles = makeStyles((theme) => ({
   titleWrapper: {
     paddingBottom: theme.spacing(2),
   },
+
   actionsCell: {
     minWidth: 150,
   },
@@ -68,7 +77,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   return (
     <div className={classes.container}>
       <SimpleBar style={{maxHeight: 250}}>
-        <Table color="primary">
+        <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
               <TableCell align="left">

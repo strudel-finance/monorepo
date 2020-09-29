@@ -16,6 +16,7 @@ import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
 import {Transaction} from '../../../types/types'
 import QRCode from 'qrcode.react'
+import StrudelIcon from '../../../components/StrudelIcon'
 
 import sb from 'satoshi-bitcoin'
 
@@ -75,9 +76,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
           <div>
             <div style={{display: 'flex'}}>
               <StyledBalanceWrapper>
-                <CardIcon>
-                  <span>🍣</span>
-                </CardIcon>
+                <StrudelIcon size={80} />
                 <StyledBalance>
                   <Label text="Bitcoin sent" />
                   <Value value={value} />

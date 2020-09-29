@@ -1,5 +1,5 @@
 import React from 'react'
-import styled, { keyframes } from 'styled-components'
+import styled, {keyframes} from 'styled-components'
 
 import CardIcon from '../CardIcon'
 
@@ -7,11 +7,11 @@ interface LoaderProps {
   text?: string
 }
 
-const Loader: React.FC<LoaderProps> = ({ text }) => {
+const Loader: React.FC<LoaderProps> = ({text}) => {
   return (
     <StyledLoader>
       <CardIcon>
-        <StyledSushi>🍣</StyledSushi>
+        <StyledVortex>🌪️</StyledVortex>
       </CardIcon>
       {!!text && <StyledText>{text}</StyledText>}
     </StyledLoader>
@@ -34,7 +34,7 @@ const StyledLoader = styled.div`
   justify-content: center;
 `
 
-const StyledSushi = styled.div`
+const StyledVortex = styled.div`
   font-size: 32px;
   position: relative;
   animation: 1s ${spin} infinite;

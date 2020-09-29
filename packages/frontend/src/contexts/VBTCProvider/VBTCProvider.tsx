@@ -26,7 +26,6 @@ const VBTCProvider: React.FC = ({children}) => {
   window.vbtc = vbtc
   // @ts-ignore
   window.eth = ethereum
-
   useEffect(() => {
     if (ethereum) {
       const chainId = Number(ethereum.chainId)

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import {useWallet} from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
 
-import astronaut from '../../assets/img/Astronaut.png'
+import strudel from '../../assets/img/Strudel.png'
 import Button from '../../components/Button'
 //import Container from '../../components/Container'
 import Page from '../../components/Page'
@@ -27,7 +27,7 @@ import {Transaction, LoadingStatus} from '../../types/types'
 import sb from 'satoshi-bitcoin'
 import {apiServer} from '../../constants/backendAddresses'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
-
+import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
   container: {
     background: '#fff',
@@ -166,8 +166,17 @@ const Home: React.FC = () => {
     }
   }
   const previousAccount = usePrevious(account)
-
+  /*
+  const vbtc = useVBTC()
   useEffect(() => {
+    showError('hey')
+    console.log(vbtc)
+  }, [vbtc])
+  */
+  useEffect(() => {
+    console.log(account)
+    console.log('previous:' + previousAccount)
+
     if (account === null || previousAccount !== account) {
       setTransactions([])
       setLastRequest(undefined)
@@ -254,7 +263,7 @@ const Home: React.FC = () => {
   return (
     <Page>
       <PageHeader
-        icon={<img src={astronaut} height={120} />}
+        icon={<img src={strudel} height={120} />}
         title="The Vortex is ready"
         subtitle="Burn BTC to receive vBTC and $STRDL!"
       />
@@ -300,26 +309,29 @@ const Home: React.FC = () => {
           />
         </div>
       )}
-      <Spacer size="lg" />
-      <StyledInfo>
-        🏆<b>Degen Tip</b>: Strudel only works in one direction.
-      </StyledInfo>
-      <Spacer size="lg" />
+
       <Container>
-        <Balances />
+        <Spacer size="lg" />
+        <StyledInfo>
+          🏆<b>Degen Tip</b>: Strudel only works in one direction.
+        </StyledInfo>
+        <Spacer size="lg" />
+        <Container>
+          <Balances />
+        </Container>
+        <Spacer size="lg" />
+        <Container>
+          <BalanceStrudel />
+        </Container>
+        <Spacer size="lg" />
+        <div
+          style={{
+            margin: '0 auto',
+          }}
+        >
+          <Button text="🔪 See the Menu" to="/farms" variant="secondary" />
+        </div>
       </Container>
-      <Spacer size="lg" />
-      <Container>
-        <BalanceStrudel />
-      </Container>
-      <Spacer size="lg" />
-      <div
-        style={{
-          margin: '0 auto',
-        }}
-      >
-        <Button text="🔪 See the Menu" to="/farms" variant="secondary" />
-      </div>
     </Page>
   )
 }

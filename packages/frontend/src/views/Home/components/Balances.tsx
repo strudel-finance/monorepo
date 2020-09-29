@@ -1,19 +1,14 @@
 import BigNumber from 'bignumber.js'
 import React, {useEffect, useState} from 'react'
-import CountUp from 'react-countup'
 import styled from 'styled-components'
 import {useWallet} from 'use-wallet'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import Value from '../../../components/Value'
 import ValueBTC from '../../../components/ValueBTC'
 
-import StrudelIcon from '../../../components/StrudelIcon'
-import useAllEarnings from '../../../hooks/useAllEarnings'
-import useAllStakedValue from '../../../hooks/useAllStakedValue'
-import useFarms from '../../../hooks/useFarms'
+import VBTCIcon from '../../../components/VBTCIcon'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
 import {getVbtcAddress, getVbtcSupply} from '../../../vbtc/utils'
@@ -23,7 +18,7 @@ const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
-  const {account, ethereum}: {account: any; ethereum: any} = useWallet()
+  const {account}: {account: any} = useWallet()
 
   useEffect(() => {
     async function fetchTotalSupply() {
@@ -41,7 +36,7 @@ const Balances: React.FC = () => {
         <CardContent>
           <StyledBalances>
             <StyledBalance>
-              <StrudelIcon />
+              <VBTCIcon />
               <Spacer />
               <div style={{flex: 1}}>
                 <Label text="Your vBTC Balance" />
@@ -68,17 +63,6 @@ const Balances: React.FC = () => {
     </StyledWrapper>
   )
 }
-
-const Footnote = styled.div`
-  font-size: 14px;
-  padding: 8px 20px;
-  color: ${(props) => props.theme.color.grey[400]};
-  border-top: solid 1px ${(props) => props.theme.color.grey[300]};
-`
-const FootnoteValue = styled.div`
-  font-family: 'Roboto Mono', monospace;
-  float: right;
-`
 
 const StyledWrapper = styled.div`
   align-items: center;

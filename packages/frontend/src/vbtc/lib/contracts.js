@@ -3,7 +3,6 @@ import ERC20Abi from './abi/erc20.json'
 import MasterChefAbi from './abi/masterchef.json'
 import StrudelAbi from './abi/StrudelToken.json'
 import VBTCAbi from './abi/vbtc.json'
-import SushiAbi from './abi/sushi.json'
 import UNIV2PairAbi from './abi/uni_v2_lp.json'
 import WETHAbi from './abi/weth.json'
 import {
