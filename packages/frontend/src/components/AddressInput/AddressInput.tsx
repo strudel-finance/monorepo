@@ -6,7 +6,6 @@ import Input, {InputProps} from '../Input'
 
 interface AddressInputProps extends InputProps {
   address: string
-  onSelectWallet?: () => void
 }
 
 const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
