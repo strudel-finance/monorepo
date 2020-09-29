@@ -48,7 +48,9 @@ const App: React.FC = () => {
 
   return (
     <Providers>
+      /*
       <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
+        */
         <Router>
           <TopBar onPresentMobileMenu={handlePresentMobileMenu} />
           <MobileMenu
@@ -70,7 +72,9 @@ const App: React.FC = () => {
           </Switch>
         </Router>
         <Disclaimer />
+        /*{' '}
       </ErrorBoundary>
+      */
     </Providers>
   )
 }
@@ -83,8 +87,8 @@ const Providers: React.FC = ({children}) => {
         connectors={{
           walletconnect: {
             rpcUrl:
-              //'https://goerli.infura.io/v3/f1ff6ab81a744f4a851714c0b8c20d21',
-              'https://mainnet.eth.aragon.network/',
+              'https://goerli.infura.io/v3/f1ff6ab81a744f4a851714c0b8c20d21',
+            //'https://mainnet.eth.aragon.network/',
           },
         }}
         //TODO fix problems with walletconnect               //,

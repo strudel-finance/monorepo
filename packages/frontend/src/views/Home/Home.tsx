@@ -177,7 +177,7 @@ const Home: React.FC = () => {
     console.log(account)
     console.log('previous:' + previousAccount)
 
-    if (account === null || previousAccount !== account) {
+    if (account == null || previousAccount !== account) {
       setTransactions([])
       setLastRequest(undefined)
     }
@@ -193,49 +193,51 @@ const Home: React.FC = () => {
   }, [account])
 
   useInterval(async () => {
-    await handleTransactionUpdate()
-    if (transactions.length > 0) {
-      let transactionsT: Transaction[] = transactions
-      let transactionsWithLowConfirmations = transactionsT.filter(
-        (tx) =>
-          !tx.confirmed &&
-          (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
-            confirmations[tx.btcTxHash] === undefined),
-      )
-
-      let highConfirmations = {}
-      Object.keys(confirmations).forEach((key) => {
-        if (confirmations[key] >= BTC_ACCEPTANCE) {
-          highConfirmations[key] = confirmations[key]
-        }
-      })
-      let newConfirmations = {}
-      for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
-        let res = await fetch(
-          `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
+    if (account != null) {
+      await handleTransactionUpdate()
+      if (transactions.length > 0) {
+        let transactionsT: Transaction[] = transactions
+        let transactionsWithLowConfirmations = transactionsT.filter(
+          (tx) =>
+            !tx.confirmed &&
+            (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
+              confirmations[tx.btcTxHash] === undefined),
         )
-          .then(handleErrors)
-          .then((response) => response.json())
-          .then((res: SoChainConfirmed) => res)
-          .catch((e) => {
-            showError('SoChain API error: ' + e.message)
-            RollbarErrorTracking.logErrorInRollbar(
-              'SoChain confirmations: ' + e.message,
-            )
-            return undefined
-          })
 
-        if (res === undefined) {
-          continue
+        let highConfirmations = {}
+        Object.keys(confirmations).forEach((key) => {
+          if (confirmations[key] >= BTC_ACCEPTANCE) {
+            highConfirmations[key] = confirmations[key]
+          }
+        })
+        let newConfirmations = {}
+        for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
+          let res = await fetch(
+            `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
+          )
+            .then(handleErrors)
+            .then((response) => response.json())
+            .then((res: SoChainConfirmed) => res)
+            .catch((e) => {
+              showError('SoChain API error: ' + e.message)
+              RollbarErrorTracking.logErrorInRollbar(
+                'SoChain confirmations: ' + e.message,
+              )
+              return undefined
+            })
+
+          if (res === undefined) {
+            continue
+          }
+          newConfirmations[transactionsWithLowConfirmations[i].btcTxHash] =
+            res.data.confirmations
         }
-        newConfirmations[transactionsWithLowConfirmations[i].btcTxHash] =
-          res.data.confirmations
+        const confirmationsRecombined = {
+          ...highConfirmations,
+          ...newConfirmations,
+        }
+        setConfirmations(confirmationsRecombined)
       }
-      const confirmationsRecombined = {
-        ...highConfirmations,
-        ...newConfirmations,
-      }
-      setConfirmations(confirmationsRecombined)
     }
   }, POLL_DURATION_TXS)
 
