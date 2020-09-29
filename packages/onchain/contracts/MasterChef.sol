@@ -201,7 +201,7 @@ contract MasterChef is Ownable {
             .mul(pool.allocPoint)
             .div(totalAllocPoint);
         strudel.mint(devaddr, strudelReward.div(devFundDivRate));
-        strudel.mint(address(this), strudelReward);
+        strudel.mint(address(this), strudelReward.sub(strudelReward.div(devFundDivRate)));
         pool.accStrudelPerShare = pool.accStrudelPerShare.add(
             strudelReward.mul(1e12).div(lpSupply)
         );

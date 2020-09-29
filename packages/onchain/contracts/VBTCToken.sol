@@ -107,7 +107,9 @@ contract VBTCToken is ERC20, ERC20Capped, Ownable {
 
     // check offset to tip
     bytes32 bestKnownDigest = relay.getBestKnownDigest();
-    uint256 offset = relay.findHeight(bestKnownDigest).sub(relay.findHeight(headerHash));
+    uint256 height = relay.findHeight(headerHash);
+    require(height > 0, "height not found in relay");
+    uint256 offset = relay.findHeight(bestKnownDigest).sub(height);
     require(offset >= numConfs, "Insufficient confirmations");
 
     return true;
