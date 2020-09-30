@@ -181,7 +181,6 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     require(opReturnPayload.len() == ADDR_LEN + 3, "invalid op-return payload length");
     require(bytes3(opReturnPayload.index(0, 3)) == PROTOCOL_ID, "invalid burn protocol");
     account = address(bytes20(opReturnPayload.index(3, ADDR_LEN)));
-    account = msg.sender;
 
     uint256 sqrtVbtcBefore = sqrt(totalSupply());
     _mint(account, amount);
