@@ -1,6 +1,6 @@
-import React, {useCallback, useState, useMemo, useEffect, useRef} from 'react'
+import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import {useWallet} from 'use-wallet'
+import { useWallet } from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
 
 import strudel from '../../assets/img/Strudel.png'
@@ -15,17 +15,17 @@ import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
 import Lottie from '../../components/Lottie'
 import formatAddress from '../../utils/formatAddress'
-import showError, {handleErrors} from '../../utils/showError'
+import showError, { handleErrors } from '../../utils/showError'
 import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import useInterval from '../../hooks/useInterval'
 import Container from '@material-ui/core/Container'
 import Grid from '@material-ui/core/Grid'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
-import {makeStyles} from '@material-ui/core'
-import {Transaction, LoadingStatus} from '../../types/types'
+import { makeStyles } from '@material-ui/core'
+import { Transaction, LoadingStatus } from '../../types/types'
 import sb from 'satoshi-bitcoin'
-import {apiServer} from '../../constants/backendAddresses'
+import { apiServer } from '../../constants/backendAddresses'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
 import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
@@ -261,22 +261,26 @@ const Home: React.FC = () => {
     },
     [setVal],
   )
+  // icon={<img src={strudel} height={120} />}
 
   return (
     <Page>
+      <StyledLottieContainer>
+        <Lottie />
+      </StyledLottieContainer>
       <PageHeader
-        icon={<img src={strudel} height={120} />}
         title="The Vortex is ready"
         subtitle="Burn BTC to receive vBTC and $STRDL!"
       />
-
-      {false && <Lottie />}
       {wallet.status === 'connected' ? (
         <Container fixed maxWidth="lg">
           <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={4}>
               <Container>
-                <AddressInput address={account} value={account} />
+                <AddressInput
+                  address={formatAddress(account)}
+                  value={formatAddress(account)}
+                />
                 <BurnAmountInput
                   onChange={handleAmountChange}
                   value={val}
@@ -311,7 +315,6 @@ const Home: React.FC = () => {
           />
         </div>
       )}
-
       <Container>
         <Spacer size="lg" />
         <StyledInfo>
@@ -337,7 +340,9 @@ const Home: React.FC = () => {
     </Page>
   )
 }
-
+const StyledLottieContainer = styled.div`
+  width: 100%;
+`
 const StyledInfo = styled.h3`
   color: ${(props) => props.theme.color.grey[500]};
   font-size: 16px;

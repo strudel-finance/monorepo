@@ -1,14 +1,14 @@
-import {useLottie} from 'lottie-react'
-import groovyWalkAnimation from './groovyWalk.json'
+import { useLottie } from 'lottie-react'
+import strudelHeaderAnimation from './strudelHeader.json'
 
 const Lottie = () => {
   const options = {
-    animationData: groovyWalkAnimation,
+    animationData: strudelHeaderAnimation,
     loop: true,
     autoplay: true,
   }
 
-  const {View} = useLottie(options)
+  const { View } = useLottie(options)
 
   return View
 }

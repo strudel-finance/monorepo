@@ -48,9 +48,7 @@ const App: React.FC = () => {
 
   return (
     <Providers>
-      /*
       <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
-        */
         <Router>
           <TopBar onPresentMobileMenu={handlePresentMobileMenu} />
           <MobileMenu
@@ -72,9 +70,7 @@ const App: React.FC = () => {
           </Switch>
         </Router>
         <Disclaimer />
-        /*{' '}
       </ErrorBoundary>
-      */
     </Providers>
   )
 }
