@@ -23,7 +23,12 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   using ViewBTC for bytes29;
   using ViewSPV for bytes29;
 
-  event Burn(bytes32 indexed btcTxHash, address indexed receiver, uint256 amount, uint32 outputIndex);
+  event Burn(
+    bytes32 indexed btcTxHash,
+    address indexed receiver,
+    uint256 amount,
+    uint32 outputIndex
+  );
 
   uint8 constant ADDR_LEN = 20;
   uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
@@ -40,10 +45,13 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
-  constructor(address _relay, address _strudel, uint256 _minConfs, address _devFund, uint256 _relayReward)
-    FlashERC20("vBTC", "VBTC")
-    ERC20Capped(BTC_CAP)
-  public {
+  constructor(
+    address _relay,
+    address _strudel,
+    uint256 _minConfs,
+    address _devFund,
+    uint256 _relayReward
+  ) public FlashERC20("vBTC", "VBTC") ERC20Capped(BTC_CAP) {
     relay = IRelay(_relay);
     strudel = ERC20Mintable(_strudel);
     numConfs = _minConfs;
@@ -51,20 +59,23 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     relayReward = _relayReward;
   }
 
-  function _beforeTokenTransfer(address from, address to, uint256 amount) internal virtual override(ERC20, ERC20Capped) {
-      super._beforeTokenTransfer(from, to, amount);
+  function _beforeTokenTransfer(
+    address from,
+    address to,
+    uint256 amount
+  ) internal virtual override(ERC20, ERC20Capped) {
+    super._beforeTokenTransfer(from, to, amount);
   }
 
   function makeOutpoint(uint256 _index, bytes32 _txid) internal pure returns (bytes32) {
     // sacrifice 1 byte instead of hashing
-    return (_txid >> 1) << 1 | bytes32(uint256(uint8(_index)));
+    return ((_txid >> 1) << 1) | bytes32(uint256(uint8(_index)));
   }
-
 
   function sqrt(uint256 y) internal pure returns (uint256 z) {
     if (y > 3) {
       z = y;
-      uint x = y / 2 + 1;
+      uint256 x = y / 2 + 1;
       while (x < z) {
         z = x;
         x = (y / x + x) / 2;
@@ -81,28 +92,18 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   /// @param  _index      The index of the tx in the merkle tree's leaves
   /// @param  _txid       The txid that is the proof leaf
   function _checkInclusion(
-    bytes29 _header,    // Header
-    bytes29 _proof,     // MerkleArray
+    bytes29 _header, // Header
+    bytes29 _proof, // MerkleArray
     uint256 _index,
     bytes32 _txid
   ) internal view returns (bool) {
-
     // check the txn is included in the header
-    require(
-      ViewSPV.prove(
-        _txid,
-        _header.merkleRoot(),
-        _proof,
-        _index),
-      "Bad inclusion proof");
+    require(ViewSPV.prove(_txid, _header.merkleRoot(), _proof, _index), "Bad inclusion proof");
 
     // check the header is included in the chain
     bytes32 headerHash = _header.hash256();
     bytes32 GCD = relay.getLastReorgCommonAncestor();
-    require(
-      relay.isAncestor(headerHash, GCD, 240),
-      "GCD does not confirm header"
-    );
+    require(relay.isAncestor(headerHash, GCD, 240), "GCD does not confirm header");
 
     // check offset to tip
     bytes32 bestKnownDigest = relay.getBestKnownDigest();
@@ -134,9 +135,9 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     bytes calldata _vin,
     bytes calldata _vout
   ) external returns (bool) {
-    return _provideProof(_header, _proof,  _version, _locktime, _index, _burnOutputIndex, _vin, _vout);
+    return
+      _provideProof(_header, _proof, _version, _locktime, _index, _burnOutputIndex, _vin, _vout);
   }
-
 
   function _provideProof(
     bytes memory _header,
@@ -170,7 +171,10 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     return true;
   }
 
-  function doPayouts(bytes29 _vout, uint32 _burnOutputIndex) internal returns (address account, uint256 amount) {
+  function doPayouts(bytes29 _vout, uint32 _burnOutputIndex)
+    internal
+    returns (address account, uint256 amount)
+  {
     bytes29 output = _vout.indexVout(_burnOutputIndex);
 
     // extract receiver and address
@@ -189,7 +193,14 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BTC_CAP
-    uint256 rewardAmount = BTC_CAP.mul(3).mul(sqrtVbtcAfter).add(sqrtVbtcBefore**3).sub(BTC_CAP.mul(3).mul(sqrtVbtcBefore)).sub(sqrtVbtcAfter**3).div(3).div(BTC_CAP_SQRT);
+    uint256 rewardAmount = BTC_CAP
+      .mul(3)
+      .mul(sqrtVbtcAfter)
+      .add(sqrtVbtcBefore**3)
+      .sub(BTC_CAP.mul(3).mul(sqrtVbtcBefore))
+      .sub(sqrtVbtcAfter**3)
+      .div(3)
+      .div(BTC_CAP_SQRT);
     strudel.mint(account, rewardAmount);
     strudel.mint(devFund, rewardAmount.div(devFundDivRate));
   }
@@ -216,11 +227,10 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     bytes calldata _oldPeriodEndHeader,
     bytes calldata _headers
   ) external returns (bool) {
-    require(relay.addHeadersWithRetarget(
-      _oldPeriodStartHeader,
-      _oldPeriodEndHeader,
-      _headers
-    ), "add header with retarget failed");
+    require(
+      relay.addHeadersWithRetarget(_oldPeriodStartHeader, _oldPeriodEndHeader, _headers),
+      "add header with retarget failed"
+    );
     strudel.mint(msg.sender, relayReward);
   }
 
@@ -230,12 +240,10 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     bytes calldata _newBest,
     uint256 _limit
   ) external returns (bool) {
-    require(relay.markNewHeaviest(
-      _ancestor,
-      _currentBest,
-      _newBest,
-      _limit
-    ), "mark new heaviest failed");
+    require(
+      relay.markNewHeaviest(_ancestor, _currentBest, _newBest, _limit),
+      "mark new heaviest failed"
+    );
     strudel.mint(msg.sender, relayReward.div(2));
   }
 
@@ -245,7 +253,10 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(_amount, "ERC20: burn amount exceeds allowance");
+    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
+      _amount,
+      "ERC20: burn amount exceeds allowance"
+    );
 
     _approve(_account, _msgSender(), decreasedAllowance);
     _burn(_account, _amount);
@@ -273,7 +284,8 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     ITokenRecipient _spender,
     uint256 _value,
     bytes memory _extraData
-  ) public returns (bool) { // not external to allow bytes memory parameters
+  ) public returns (bool) {
+    // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
       _spender.receiveApproval(msg.sender, _value, address(this), _extraData);
       return true;

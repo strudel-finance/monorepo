@@ -30,7 +30,11 @@ interface IRelay {
   /// @param _descendant  The descendant to check
   /// @param _limit       The maximum number of blocks to check
   /// @return             true if ancestor is at most limit blocks lower than descendant, otherwise false
-  function isAncestor(bytes32 _ancestor, bytes32 _descendant, uint256 _limit) external view returns (bool);
+  function isAncestor(
+    bytes32 _ancestor,
+    bytes32 _descendant,
+    uint256 _limit
+  ) external view returns (bool);
 
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool);
 

@@ -10,6 +10,14 @@
         "bracketSpacing": false,
         "explicitTypes": "always"
       }
+    },
+    {
+      "files": "*.ts",
+      "options": {
+        "printWidth": 100,
+        "tabWidth": 2,
+        "singleQuote": true
+      }
     }
   ]
 }

@@ -1,15 +1,15 @@
-import {ethers} from "@nomiclabs/buidler";
-import {Signer} from "ethers";
-import chai from "chai";
-import {solidity} from "ethereum-waffle";
+import {ethers} from '@nomiclabs/buidler';
+import {Signer} from 'ethers';
+import chai from 'chai';
+import {solidity} from 'ethereum-waffle';
 import constants from './onDemandSpvHelpers.json';
 import failed from './failedTx.json';
-import { VBTCToken } from '../typechain/VBTCToken';
-import { VBTCTokenFactory } from '../typechain/VBTCTokenFactory';
-import { StrudelToken } from '../typechain/StrudelToken';
-import { StrudelTokenFactory } from '../typechain/StrudelTokenFactory';
-import { MockRelay } from '../typechain/MockRelay';
-import { MockRelayFactory } from '../typechain/MockRelayFactory';
+import {VBTCToken} from '../typechain/VBTCToken';
+import {VBTCTokenFactory} from '../typechain/VBTCTokenFactory';
+import {StrudelToken} from '../typechain/StrudelToken';
+import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
+import {MockRelay} from '../typechain/MockRelay';
+import {MockRelayFactory} from '../typechain/MockRelayFactory';
 
 chai.use(solidity);
 const {expect} = chai;
@@ -41,7 +41,6 @@ describe('VBTC', async () => {
   });
 
   describe('#provideProof', async () => {
-
     it('happy case', async () => {
       await relay.addHeader(constants.OP_RETURN_BLOCK_HASH, 200);
       const tx = await instance.proofOpReturnAndMint(
@@ -54,12 +53,11 @@ describe('VBTC', async () => {
         constants.OP_RETURN_VIN,
         constants.OP_RETURN_VOUT
       );
-      const rsp = (await tx.wait(1));
+      const rsp = await tx.wait(1);
       //console.log(rsp);
       // console.log(rsp.gasUsed?.toNumber());
       // expecting about 256000 gas
     });
-
 
     it('failed case', async () => {
       await relay.addHeader(failed.OP_RETURN_BLOCK_HASH, 200);
@@ -73,12 +71,10 @@ describe('VBTC', async () => {
         failed.OP_RETURN_VIN,
         failed.OP_RETURN_VOUT
       );
-      const rsp = (await tx.wait(1));
+      const rsp = await tx.wait(1);
       //console.log(rsp);
       // console.log(rsp.gasUsed?.toNumber());
       // expecting about 256000 gas
     });
-
   });
-
 });

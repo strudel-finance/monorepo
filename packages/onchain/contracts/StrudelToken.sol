@@ -14,9 +14,7 @@ contract StrudelToken is FlashERC20, ERC20Mintable {
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
-  constructor()
-    FlashERC20("Strudel Finance", "STRDL")
-  public {
+  constructor() public FlashERC20("Strudel Finance", "STRDL") {
     // solhint-disable-previous-line no-empty-blocks
   }
 
@@ -26,7 +24,10 @@ contract StrudelToken is FlashERC20, ERC20Mintable {
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(_amount, "ERC20: burn amount exceeds allowance");
+    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
+      _amount,
+      "ERC20: burn amount exceeds allowance"
+    );
 
     _approve(_account, _msgSender(), decreasedAllowance);
     _burn(_account, _amount);
@@ -54,7 +55,8 @@ contract StrudelToken is FlashERC20, ERC20Mintable {
     ITokenRecipient _spender,
     uint256 _value,
     bytes memory _extraData
-  ) public returns (bool) { // not external to allow bytes memory parameters
+  ) public returns (bool) {
+    // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
       _spender.receiveApproval(msg.sender, _value, address(this), _extraData);
       return true;
