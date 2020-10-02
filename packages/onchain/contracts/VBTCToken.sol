@@ -23,7 +23,7 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   using ViewBTC for bytes29;
   using ViewSPV for bytes29;
 
-  event Burn(
+  event Crossing(
     bytes32 indexed btcTxHash,
     address indexed receiver,
     uint256 amount,
@@ -41,7 +41,7 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   uint256 public relayReward;
 
   // storing all sucessfully processed outputs
-  mapping(bytes32 => bool) knownOutputs;
+  mapping(bytes32 => bool) public knownOutpoints;
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
@@ -67,9 +67,9 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     super._beforeTokenTransfer(from, to, amount);
   }
 
-  function makeOutpoint(uint256 _index, bytes32 _txid) internal pure returns (bytes32) {
-    // sacrifice 1 byte instead of hashing
-    return ((_txid >> 1) << 1) | bytes32(uint256(uint8(_index)));
+  function makeCompressedOutpoint(bytes32 _txid, uint32 _index) internal pure returns (bytes32) {
+    // sacrifice 4 bytes instead of hashing
+    return ((_txid >> 32) << 32) | bytes32(uint256(_index));
   }
 
   function sqrt(uint256 y) internal pure returns (uint256 z) {
@@ -119,24 +119,24 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   ///                  Uses the internal _mint function.
   /// @param _header   header
   /// @param _proof    proof
-  /// @param _version    index
-  /// @param _locktime    index
-  /// @param _burnOutputIndex    index
-  /// @param _index    index
-  /// @param _vin    index
-  /// @param _vout    index
+  /// @param _version  version
+  /// @param _locktime locktime
+  /// @param _index    tx index in block
+  /// @param _crossingOutputIndex    output index that 
+  /// @param _vin      vin
+  /// @param _vout     vout
   function proofOpReturnAndMint(
     bytes calldata _header,
     bytes calldata _proof,
     bytes4 _version,
     bytes4 _locktime,
     uint256 _index,
-    uint32 _burnOutputIndex,
+    uint32 _crossingOutputIndex,
     bytes calldata _vin,
     bytes calldata _vout
   ) external returns (bool) {
     return
-      _provideProof(_header, _proof, _version, _locktime, _index, _burnOutputIndex, _vin, _vout);
+      _provideProof(_header, _proof, _version, _locktime, _index, _crossingOutputIndex, _vin, _vout);
   }
 
   function _provideProof(
@@ -145,13 +145,13 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     bytes4 _version,
     bytes4 _locktime,
     uint256 _index,
-    uint32 _burnOutputIndex,
+    uint32 _crossingOutputIndex,
     bytes memory _vin,
     bytes memory _vout
   ) internal returns (bool) {
     bytes32 txId = abi.encodePacked(_version, _vin, _vout, _locktime).ref(0).hash256();
-    bytes32 outpoint = makeOutpoint(_index, txId);
-    require(!knownOutputs[outpoint], "already processed outputs");
+    bytes32 outpoint = makeCompressedOutpoint(txId, _crossingOutputIndex);
+    require(!knownOutpoints[outpoint], "already processed outputs");
 
     _checkInclusion(
       _header.ref(0).tryAsHeader().assertValid(),
@@ -161,21 +161,21 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     );
 
     // mark processed
-    knownOutputs[outpoint] = true;
+    knownOutpoints[outpoint] = true;
 
     // do payouts
     address account;
     uint256 amount;
-    (account, amount) = doPayouts(_vout.ref(0).tryAsVout(), _burnOutputIndex);
-    emit Burn(txId, account, amount, _burnOutputIndex);
+    (account, amount) = doPayouts(_vout.ref(0).tryAsVout(), _crossingOutputIndex);
+    emit Crossing(txId, account, amount, _crossingOutputIndex);
     return true;
   }
 
-  function doPayouts(bytes29 _vout, uint32 _burnOutputIndex)
+  function doPayouts(bytes29 _vout, uint32 _crossingOutputIndex)
     internal
     returns (address account, uint256 amount)
   {
-    bytes29 output = _vout.indexVout(_burnOutputIndex);
+    bytes29 output = _vout.indexVout(_crossingOutputIndex);
 
     // extract receiver and address
     amount = output.value() * 10**10; // wei / satosh = 10^18 / 10^8 = 10^10
@@ -183,7 +183,7 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
 
     bytes29 opReturnPayload = output.scriptPubkey().opReturnPayload();
     require(opReturnPayload.len() == ADDR_LEN + 3, "invalid op-return payload length");
-    require(bytes3(opReturnPayload.index(0, 3)) == PROTOCOL_ID, "invalid burn protocol");
+    require(bytes3(opReturnPayload.index(0, 3)) == PROTOCOL_ID, "invalid protocol id");
     account = address(bytes20(opReturnPayload.index(3, ADDR_LEN)));
 
     uint256 sqrtVbtcBefore = sqrt(totalSupply());

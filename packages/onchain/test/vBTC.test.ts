@@ -2,8 +2,7 @@ import {ethers} from '@nomiclabs/buidler';
 import {Signer} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
-import constants from './onDemandSpvHelpers.json';
-import failed from './failedTx.json';
+import vector from './testVector.json';
 import {VBTCToken} from '../typechain/VBTCToken';
 import {VBTCTokenFactory} from '../typechain/VBTCTokenFactory';
 import {StrudelToken} from '../typechain/StrudelToken';
@@ -15,6 +14,16 @@ chai.use(solidity);
 const {expect} = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
+
+function reverse(hash: string): string {
+  return `0x${hash.replace('0x', '').match(/.{2}/g)!.reverse().join("")}`;
+}
+
+function makeCompressedOutpoint(hash: string, index: number): string {
+  const hashBuf = Buffer.from(hash.replace('0x', ''), 'hex');
+  hashBuf.writeInt32BE(index, 28);
+  return `0x${hashBuf.toString('hex')}`;
+}
 
 async function deploy(signer: Signer, relay: MockRelay): Promise<VBTCToken> {
   let strudelFactory = new StrudelTokenFactory(signer);
@@ -41,40 +50,32 @@ describe('VBTC', async () => {
   });
 
   describe('#provideProof', async () => {
-    it('happy case', async () => {
-      await relay.addHeader(constants.OP_RETURN_BLOCK_HASH, 200);
-      const tx = await instance.proofOpReturnAndMint(
-        constants.OP_RETURN_HEADER,
-        constants.OP_RETURN_PROOF,
-        constants.OP_RETURN_VERSION,
-        constants.OP_RETURN_LOCKTIME,
-        constants.OP_RETURN_INDEX,
-        0, // burn output index in transaction
-        constants.OP_RETURN_VIN,
-        constants.OP_RETURN_VOUT
-      );
-      const rsp = await tx.wait(1);
-      //console.log(rsp);
-      // console.log(rsp.gasUsed?.toNumber());
-      // expecting about 256000 gas
-    });
+    it('should pass test vector', async () => {
+      for(let i = 0; i < vector.length; i++) {
+        const test = vector[i];
+        await relay.addHeader(test.BLOCK_HASH, 200);
+        const tx = await instance.proofOpReturnAndMint(
+          test.HEADER,
+          test.PROOF,
+          test.VERSION,
+          test.LOCKTIME,
+          test.INDEX,
+          0, // burn output index in transaction
+          test.VIN,
+          test.VOUT
+        );
+        // check 
+        const events = (await tx.wait(1)).events!;
+        const args: any = events[3].args;
+        expect(args.btcTxHash).to.eq(reverse(test.TX_ID_LE));
+        expect(args.receiver).to.eq(test.OUT_RECEIVER);
+        expect(args.amount).to.eq(test.OUT_AMOUNT);
+        expect(args.outputIndex).to.eq(test.OUT_INDEX);
 
-    it('failed case', async () => {
-      await relay.addHeader(failed.OP_RETURN_BLOCK_HASH, 200);
-      const tx = await instance.proofOpReturnAndMint(
-        failed.OP_RETURN_HEADER,
-        failed.OP_RETURN_PROOF,
-        failed.OP_RETURN_VERSION,
-        failed.OP_RETURN_LOCKTIME,
-        failed.OP_RETURN_INDEX,
-        0, // burn output index in transaction
-        failed.OP_RETURN_VIN,
-        failed.OP_RETURN_VOUT
-      );
-      const rsp = await tx.wait(1);
-      //console.log(rsp);
-      // console.log(rsp.gasUsed?.toNumber());
-      // expecting about 256000 gas
+        const outpoint = makeCompressedOutpoint(args.btcTxHash, test.OUT_INDEX);
+        const isKnown = await instance.knownOutpoints(outpoint);
+        expect(isKnown).to.be.true;
+      };
     });
   });
 });
