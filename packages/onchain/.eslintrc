@@ -15,6 +15,7 @@
   ],
   "rules": {
     "no-console": 1,
+    "indent": ["error", 2],
     "prettier/prettier": 2,
     "code": 100
   }

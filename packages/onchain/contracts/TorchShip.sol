@@ -6,14 +6,14 @@ import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 
-// MasterChef was the baker of STRDL. He now governs over STRDL. He can make STRDL and he is a fair guy.
+// The torchship has brought them to Ganymede, where they have to pulverize boulders and lava flows, and seed the resulting dust with carefully formulated organic material.
 //
 // Note that it's ownable and the owner wields tremendous power. The ownership
 // will be transferred to a governance smart contract once STRDLS is sufficiently
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract MasterChef is Ownable {
+contract TorchShip is Ownable {
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
 
@@ -201,7 +201,7 @@ contract MasterChef is Ownable {
             .mul(pool.allocPoint)
             .div(totalAllocPoint);
         strudel.mint(devaddr, strudelReward.div(devFundDivRate));
-        strudel.mint(address(this), strudelReward.sub(strudelReward.div(devFundDivRate)));
+        strudel.mint(address(this), strudelReward);
         pool.accStrudelPerShare = pool.accStrudelPerShare.add(
             strudelReward.mul(1e12).div(lpSupply)
         );
