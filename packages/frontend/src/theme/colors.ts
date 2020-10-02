@@ -12,6 +12,7 @@ export const red = {
 }
 export const blue = {
   100: '#e7efff',
+  200: '#d0e0fe',
 }
 export const grey = {
   100: '#d6e4ff',

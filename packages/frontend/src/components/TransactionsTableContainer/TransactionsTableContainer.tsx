@@ -1,22 +1,21 @@
-import {makeStyles, withStyles} from '@material-ui/core'
+import { makeStyles, withStyles } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
 import MuiTableCell from '@material-ui/core/TableCell'
-import TableHead from '@material-ui/core/TableHead'
+import MuiTableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
-import {Transaction, LoadingStatus} from '../../types/types'
+import { Transaction, LoadingStatus } from '../../types/types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
-import tableBackground from '../../assets/img/TableBackground.png'
 import React from 'react'
 
 export const ReddishTextTypography = withStyles({
   root: {
-    color: '#5b3926',
+    color: '#322015',
     fontFamily: 'Noto Sans',
     fontSize: 16,
   },
@@ -32,12 +31,21 @@ const TableCell = withStyles({
   root: {
     borderBottom: 'none',
   },
+  stickyHeader: {
+    background: 'white',
+  },
 })(MuiTableCell)
+
+const TableHead = withStyles({
+  root: {
+    background: 'white',
+  },
+})(MuiTableHead)
 
 const useStyles = makeStyles((theme) => ({
   container: {
     borderColor: 'none',
-    backgroundImage: `url(${tableBackground})`,
+    background: '#d0e0fe',
     border: '1px solid #e2d6cfff',
     boxShadow: 'inset 1px 1px 0px #f7f4f2',
     borderRadius: '12px',
@@ -62,7 +70,7 @@ const useStyles = makeStyles((theme) => ({
 export interface TransactionTableProps {
   transactions: Transaction[]
   lastRequest: Transaction | undefined
-  confirmations: {[key: string]: number}
+  confirmations: { [key: string]: number }
   handleLoading: (ls: LoadingStatus) => void
   isLoading: any
 }
@@ -76,7 +84,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar style={{maxHeight: 250}}>
+      <SimpleBar style={{ maxHeight: 250 }}>
         <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
