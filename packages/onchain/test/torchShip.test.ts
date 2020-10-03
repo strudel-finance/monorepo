@@ -28,16 +28,6 @@ async function deployStrudel(signer: Signer): Promise<StrudelToken> {
   let factory = new StrudelTokenFactory(signer);
   return factory.deploy();
 }
-// interface deployChefProps {
-//     strudel: StrudelToken,
-//     devaddr: Signer,
-//     strudelPerBlock: string,
-//     startBlock: string,
-//     bonusEndBlock: string,
-//     signer: Signer
-// };
-
-// props: deployChefProps <- use in function
 
 async function deployChef(
   strudel: string,

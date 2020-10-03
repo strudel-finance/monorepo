@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.6;
 
 import {TypedMemView} from "../summa-tx/TypedMemView.sol";
 import {ViewBTC} from "../summa-tx/ViewBTC.sol";

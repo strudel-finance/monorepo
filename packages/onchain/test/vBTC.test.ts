@@ -16,7 +16,7 @@ const {expect} = chai;
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
 function reverse(hash: string): string {
-  return `0x${hash.replace('0x', '').match(/.{2}/g)!.reverse().join("")}`;
+  return `0x${hash.replace('0x', '').match(/.{2}/g)!.reverse().join('')}`;
 }
 
 function makeCompressedOutpoint(hash: string, index: number): string {
@@ -29,7 +29,7 @@ async function deploy(signer: Signer, relay: MockRelay): Promise<VBTCToken> {
   let strudelFactory = new StrudelTokenFactory(signer);
   let strudel = await strudelFactory.deploy();
   let factory = new VBTCTokenFactory(signer);
-  let vbtc = await factory.deploy(relay.address, strudel.address, 0, relay.address, 50);
+  let vbtc = await factory.deploy(relay.address, strudel.address, 0, 50);
   await strudel.addMinter(vbtc.address);
   return vbtc;
 }
@@ -51,7 +51,7 @@ describe('VBTC', async () => {
 
   describe('#provideProof', async () => {
     it('should pass test vector', async () => {
-      for(let i = 0; i < vector.length; i++) {
+      for (let i = 0; i < vector.length; i++) {
         const test = vector[i];
         await relay.addHeader(test.BLOCK_HASH, 200);
         const tx = await instance.proofOpReturnAndMint(
@@ -64,7 +64,7 @@ describe('VBTC', async () => {
           test.VIN,
           test.VOUT
         );
-        // check 
+        // check
         const events = (await tx.wait(1)).events!;
         const args: any = events[3].args;
         expect(args.btcTxHash).to.eq(reverse(test.TX_ID_LE));
@@ -75,7 +75,7 @@ describe('VBTC', async () => {
         const outpoint = makeCompressedOutpoint(args.btcTxHash, test.OUT_INDEX);
         const isKnown = await instance.knownOutpoints(outpoint);
         expect(isKnown).to.be.true;
-      };
+      }
     });
   });
 });
