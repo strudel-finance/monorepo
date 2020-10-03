@@ -5,7 +5,7 @@ pragma solidity 0.6.6;
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import '@uniswap/lib/contracts/libraries/Babylonian.sol';
+import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import {FlashERC20} from "./FlashERC20.sol";
 import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";

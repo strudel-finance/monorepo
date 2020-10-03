@@ -5,7 +5,6 @@ import {IBPool} from "../balancer/IBPool.sol";
 import {BPool} from ".//BPool.sol";
 
 contract MockBFactory {
-
   function newBPool() external returns (IBPool) {
     return new BPool(msg.sender);
   }

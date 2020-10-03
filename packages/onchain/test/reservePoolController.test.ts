@@ -40,7 +40,11 @@ describe('ReservePoolController', async () => {
     // IUniswapV2Router01 _uniRouter,
     uniRouter = await new MockUniRouterFactory(signers[0]).deploy();
     // address _oracle
-    btcOracle = await new BtcPriceOracleFactory(signers[0]).deploy(await uniRouter.factory(), wBtcAddr, pBtcAddr);
+    btcOracle = await new BtcPriceOracleFactory(signers[0]).deploy(
+      await uniRouter.factory(),
+      wBtcAddr,
+      pBtcAddr
+    );
     // create the controller
     controller = await new ReservePoolControllerFactory(signers[0]).deploy(
       vBtc.address,
@@ -49,7 +53,6 @@ describe('ReservePoolController', async () => {
       uniRouter.address,
       btcOracle.address
     );
-
   });
 
   it('should deploy', async () => {
