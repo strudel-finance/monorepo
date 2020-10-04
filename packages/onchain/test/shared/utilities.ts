@@ -5,8 +5,5 @@ export function expandTo18Decimals(n: number): BigNumber {
 }
 
 export function encodePrice(reserve0: BigNumber, reserve1: BigNumber) {
-  return [
-    reserve1.mul(bigNumberify(2).pow(112)).div(reserve0),
-    reserve0.mul(bigNumberify(2).pow(112)).div(reserve1),
-  ];
+  return (reserve0.mul(bigNumberify(2).pow(112)).div(reserve1));
 }

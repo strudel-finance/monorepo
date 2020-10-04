@@ -1,6 +1,7 @@
 import {ethers} from '@nomiclabs/buidler';
 import {Signer, Contract, Wallet} from 'ethers';
 import chai from 'chai';
+import {bigNumberify} from 'ethers/utils';
 import {deployContract, solidity} from 'ethereum-waffle';
 import UniswapV2FactoryArtefact from '@uniswap/v2-core/build/UniswapV2Factory.json';
 import IUniswapV2PairArtefact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
@@ -17,28 +18,30 @@ import {IUniswapV2Pair} from '../typechain/IUniswapV2Pair';
 chai.use(solidity);
 const {expect} = chai;
 
-const token0Amount = expandTo18Decimals(5);
-const token1Amount = expandTo18Decimals(10);
+const wethAmount = expandTo18Decimals(400);
+const tBtc0Amount = expandTo18Decimals(9);
+const tBtc1Amount = expandTo18Decimals(11);
 
-describe('ExampleOracleSimple', () => {
+describe('BtcPriceOracle', () => {
   let signers: Signer[];
   let oracle: BtcPriceOracle;
-  let token0: MockErc20;
-  let token1: MockErc20;
+  let tBtc0: MockErc20;
+  let tBtc1: MockErc20;
   let weth: MockErc20;
-  let pair: IUniswapV2Pair;
+  let pair0: IUniswapV2Pair;
+  let pair1: IUniswapV2Pair;
   let factoryV2: IUniswapV2Factory;
   let router: UniswapV2Router01;
 
   before(async () => {
     signers = await ethers.signers();
     const devAddr = await signers[0].getAddress();
-    token0 = await new MockErc20Factory(signers[0]).deploy(
+    tBtc0 = await new MockErc20Factory(signers[0]).deploy(
       'WBTC',
       'WBTC',
       expandTo18Decimals(10000)
     );
-    token1 = await new MockErc20Factory(signers[0]).deploy(
+    tBtc1 = await new MockErc20Factory(signers[0]).deploy(
       'TBTC',
       'TBTC',
       expandTo18Decimals(10000)
@@ -51,25 +54,37 @@ describe('ExampleOracleSimple', () => {
     ])) as IUniswapV2Factory;
     // deploy router
     router = await new UniswapV2Router01Factory(signers[0]).deploy(factoryV2.address, weth.address);
-    // create pair
-    await factoryV2.createPair(token0.address, token1.address);
-    const pairAddress = await factoryV2.getPair(token0.address, token1.address);
-    pair = new Contract(
-      pairAddress,
+
+    // create pairs
+    await factoryV2.createPair(weth.address, tBtc0.address);
+    const pair0Address = await factoryV2.getPair(weth.address, tBtc0.address);
+    pair0 = new Contract(
+      pair0Address,
+      JSON.stringify(IUniswapV2PairArtefact.abi),
+      ethers.provider
+    ).connect(signers[0]) as IUniswapV2Pair;
+
+    await factoryV2.createPair(weth.address, tBtc1.address);
+    const pair1Address = await factoryV2.getPair(weth.address, tBtc1.address);
+    pair1 = new Contract(
+      pair1Address,
       JSON.stringify(IUniswapV2PairArtefact.abi),
       ethers.provider
     ).connect(signers[0]) as IUniswapV2Pair;
 
     // add addLiquidity
-    await token0.transfer(pair.address, token0Amount);
-    await token1.transfer(pair.address, token1Amount);
-    await pair.mint(devAddr);
+    await weth.transfer(pair0.address, wethAmount);
+    await tBtc0.transfer(pair0.address, tBtc0Amount);
+    await pair0.mint(devAddr);
+    await weth.transfer(pair1.address, wethAmount);
+    await tBtc1.transfer(pair1.address, tBtc1Amount);
+    await pair1.mint(devAddr);
 
     // deploy oracle
     oracle = await new BtcPriceOracleFactory(signers[0]).deploy(
       factoryV2.address,
-      token0.address,
-      token1.address
+      weth.address,
+      [tBtc0.address, tBtc1.address]
     );
   });
 
@@ -81,12 +96,10 @@ describe('ExampleOracleSimple', () => {
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
 
-    const expectedPrice = encodePrice(token0Amount, token1Amount);
-
-    expect(await oracle.price0Average()).to.eq(expectedPrice[0]);
-    expect(await oracle.price1Average()).to.eq(expectedPrice[1]);
-
-    expect(await oracle.consult(token0.address, token0Amount)).to.eq(token1Amount);
-    expect(await oracle.consult(token1.address, token1Amount)).to.eq(token0Amount);
+    console.log('here0');
+    expect(await oracle.priceAverage()).to.eq(encodePrice(wethAmount, expandTo18Decimals(10) ));
+    console.log('here');
+    expect(await oracle.consult(tBtc0Amount)).to.eq(tBtc1Amount);
+    expect(await oracle.consult(tBtc1Amount)).to.eq(tBtc0Amount);
   });
 });
