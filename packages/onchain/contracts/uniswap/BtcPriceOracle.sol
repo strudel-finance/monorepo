@@ -6,10 +6,11 @@ import "@uniswap/lib/contracts/libraries/FixedPoint.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import "./UniswapV2OracleLibrary.sol";
 import "./UniswapV2Library.sol";
+import "./IBtcPriceOracle.sol";
 
 // fixed window oracle that recomputes the average price for the entire period once every period
 // note that the price average is only guaranteed to be over at least 1 period, but may be over a longer period
-contract BtcPriceOracle is Ownable {
+contract BtcPriceOracle is Ownable, IBtcPriceOracle {
   using FixedPoint for *;
 
   uint256 public constant PERIOD = 24 hours;
@@ -21,6 +22,8 @@ contract BtcPriceOracle is Ownable {
   mapping(address => uint256) public priceCumulativeLast;
   uint32 public blockTimestampLast;
   FixedPoint.uq112x112 public priceAverage;
+
+  event Price(uint256 price);
 
   constructor(
     address _factory,
@@ -34,7 +37,11 @@ contract BtcPriceOracle is Ownable {
     }
   }
 
-  function _addPair(address tokenizedBtc, address _factory, address _weth) internal {
+  function _addPair(
+    address tokenizedBtc,
+    address _factory,
+    address _weth
+  ) internal {
     // check inputs
     require(tokenizedBtc != address(0), "zero token");
 
@@ -60,7 +67,7 @@ contract BtcPriceOracle is Ownable {
       address tokenAddr = IUniswapV2Pair(pairs[i]).token1();
       if (tokenAddr == tokenizedBtc) {
         priceCumulativeLast[pairs[i]] = 0;
-        pairs[i] = pairs[pairs.length -1];
+        pairs[i] = pairs[pairs.length - 1];
         pairs.pop();
         return;
       }
@@ -82,13 +89,11 @@ contract BtcPriceOracle is Ownable {
 
       // overflow is desired, casting never truncates
       // cumulative price is in (uq112x112 price * seconds) units so we simply wrap it after division by time elapsed
-
-      priceSum += FixedPoint.uq112x112(
-        uint224((priceCumulative - priceCumulativeLast[pair]) / timeElapsed)
-      )._x;
+      uint256 price = (priceCumulative - priceCumulativeLast[pair]) / timeElapsed;
+      emit Price(price);
+      priceSum += FixedPoint.uq112x112(uint224(price))._x;
 
       priceCumulativeLast[pair] = priceCumulative;
-      
     }
     // TODO: use weights
     // TODO: use geometric
@@ -97,7 +102,7 @@ contract BtcPriceOracle is Ownable {
   }
 
   // note this will always return 0 before update has been called successfully for the first time.
-  function consult(uint256 amountIn) external view returns (uint256 amountOut) {
+  function consult(uint256 amountIn) external override view returns (uint256 amountOut) {
     return priceAverage.mul(amountIn).decode144();
   }
 }

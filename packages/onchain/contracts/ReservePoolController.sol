@@ -42,6 +42,7 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
   // Have to redeclare in the subclass, to be emitted from this contract
 
   event Trade(bool indexed direction, uint256 amount);
+  event Data(uint256 a, uint256 b, uint256 c, uint256 d);
 
   //  immutable (only assigned in constructor)
   IERC20 public immutable vBtc;
@@ -95,7 +96,7 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
 
   // External functions
 
-  function initialize(uint256 initialSwapFee) external {
+  function initialize(uint256 initialSwapFee) external onlyOwner {
     require(address(bPool) == address(0), "already initialized");
     require(initialSwapFee >= MIN_FEE, "swap fee low");
     require(initialSwapFee <= MAX_FEE, "swap fee high");
@@ -104,11 +105,14 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
     _mint(msg.sender, MIN_POOL_SUPPLY);
 
     // get price
-    uint256 wEthBal = wEth.balanceOf(address(this));
-    require(wEthBal > 0, "missing initial WETH bal");
+    uint256 vBtcBal = vBtc.balanceOf(address(this));
+    require(vBtcBal > 0, "missing initial vBTC bal");
     // check denorm amount
-    uint256 btcPrice = IBtcPriceOracle(oracle).consult(address(wEth), wEthBal);
-    require(vBtc.balanceOf(address(this)) >= btcPrice, "missing initial vBTC bal");
+    uint256 btcInEthPrice = IBtcPriceOracle(oracle).consult(vBtcBal);
+    require(wEth.balanceOf(address(this)) == btcInEthPrice, "missing initial WETH bal");
+
+    // deploy bpool
+    bPool = bFactory.newBPool();
 
     // approve vBTC and weth to bpool and uni pool
     vBtc.safeApprove(address(bPool), MAX_UINT);
@@ -116,10 +120,11 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
     wEth.safeApprove(address(bPool), MAX_UINT);
     wEth.safeApprove(address(uniRouter), MAX_UINT);
 
-    // deploy bpool
-    bPool = bFactory.newBPool();
-    bPool.bind(address(vBtc), wEthBal, DEFAULT_WEIGHT);
-    bPool.bind(address(wEth), wEthBal, DEFAULT_WEIGHT);
+    // bind assets
+    bPool.bind(address(vBtc), vBtcBal, DEFAULT_WEIGHT);
+    bPool.bind(address(wEth), btcInEthPrice, DEFAULT_WEIGHT);
+
+    // TODO: issue tokens
 
     // set fee
     bPool.setSwapFee(initialSwapFee);
@@ -138,9 +143,9 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
 
     // simple check for re-entrancy
     require(msg.sender == tx.origin, "caller not EOA");
-    // read FEED price of BTC
-    uint256 truePriceEth = 1000 * 10**18;
-    uint256 truePriceBtc = IBtcPriceOracle(oracle).consult(address(wEth), truePriceEth);
+    // read FEED price of BTC ()
+    uint256 truePriceBtc = 10**18;
+    uint256 truePriceEth = IBtcPriceOracle(oracle).consult(truePriceBtc);
 
     // true price is expressed as a ratio, so both values must be non-zero
     require(truePriceBtc != 0, "ReservePool: ZERO_PRICE");
@@ -155,6 +160,7 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
         address(wEth),
         address(vBtc)
       );
+      emit Data(truePriceEth, truePriceBtc, reserveWeth, reserveVbtc);
       // how much ETH (including UNI fee) is needed to lift SPOT to FEED?
       (ethToBtc, tradeAmount) = computeProfitMaximizingTrade(
         truePriceEth,
@@ -184,7 +190,6 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
         );
       }
     }
-
     // get the loan
     IFlashERC20(address(vBtc)).flashMint(vBtcToBorrow, bytes32(uint256(ethToBtc ? 1 : 0)));
   }
@@ -209,8 +214,8 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
         address(vBtc),
         amount,
         address(wEth),
-        0xff, // minAmountOut
-        0xff
+        0, // minAmountOut
+        MAX_UINT
       ); // maxPrice
     }
 
@@ -226,20 +231,21 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
       0, // amountOutMin: we can skip computing this number because the math is tested
       path,
       address(this),
-      0xff // deadline
+      MAX_UINT // deadline
     );
 
     if (!ethToBtc) {
-      // we traded vBTC for ETH in uni, now let's use it
+      // we traded vBTC for ETH in uni, now let's use it in balancer
       (tradeAmount, ) = bPool.swapExactAmountIn( // returns uint tokenAmountOut, uint spotPriceAfter
-        address(wEth),
-        amounts[1],
-        address(vBtc),
-        0xff, // minAmountOut
-        0xff
-      ); // maxPrice
+        address(wEth), // address tokenIn,
+        amounts[1], // uint256 tokenAmountIn,
+        address(vBtc), // address tokenOut,
+        0, // minAmountOut
+        MAX_UINT // maxPrice
+      );
     }
 
+    // adjusts weight in reserve pool
     {
       // read uni weights
       (uint256 reserveWeth, uint256 reserveVbtc) = UniswapV2Library.getReserves(
@@ -256,7 +262,7 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
       require(newVbtcWeight < maxVbtcWeight, "max weight error");
       // adjust weights so there is no arbitrage
       IBPool(bPool).rebind(address(vBtc), vBtcBalance, newVbtcWeight);
-      IBPool(bPool).rebind(address(wEth), wEthBalance, reserveWeth);
+      IBPool(bPool).rebind(address(wEth), wEthBalance, DEFAULT_WEIGHT);
     }
 
     // 6. repay loan

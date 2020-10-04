@@ -7,7 +7,6 @@ import {IFlashERC20} from "./IFlashERC20.sol";
 
 contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
   uint256 constant BTC_CAP = 21 * 10**24;
-  uint256 constant BORROW_THRESHOLD = 10**17; // 0.1 BTC
 
   // Dev fund (2%, initially)
   uint256 public devFundDivRate = 50;
@@ -18,9 +17,6 @@ contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
 
   // Allows anyone to mint tokens as long as it gets burned by the end of the transaction.
   function flashMint(uint256 amount, bytes32 data) external override {
-    // check holder
-    require(balanceOf(msg.sender) > BORROW_THRESHOLD, "only holders can borrow");
-
     // do not exceed cap
     require(totalSupply().add(amount) <= BTC_CAP, "can not borrow more than BTC cap");
 

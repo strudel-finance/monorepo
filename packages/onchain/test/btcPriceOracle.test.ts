@@ -1,11 +1,10 @@
 import {ethers} from '@nomiclabs/buidler';
 import {Signer, Contract, Wallet} from 'ethers';
 import chai from 'chai';
-import {bigNumberify} from 'ethers/utils';
 import {deployContract, solidity} from 'ethereum-waffle';
 import UniswapV2FactoryArtefact from '@uniswap/v2-core/build/UniswapV2Factory.json';
 import IUniswapV2PairArtefact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
-import {expandTo18Decimals, encodePrice} from './shared/utilities';
+import {expandTo18Decimals, encodePrice, round, normalize} from './shared/utilities';
 import {BtcPriceOracle} from '../typechain/BtcPriceOracle';
 import {BtcPriceOracleFactory} from '../typechain/BtcPriceOracleFactory';
 import {MockErc20} from '../typechain/MockErc20';
@@ -81,11 +80,10 @@ describe('BtcPriceOracle', () => {
     await pair1.mint(devAddr);
 
     // deploy oracle
-    oracle = await new BtcPriceOracleFactory(signers[0]).deploy(
-      factoryV2.address,
-      weth.address,
-      [tBtc0.address, tBtc1.address]
-    );
+    oracle = await new BtcPriceOracleFactory(signers[0]).deploy(factoryV2.address, weth.address, [
+      tBtc0.address,
+      tBtc1.address,
+    ]);
   });
 
   it('update', async () => {
@@ -95,11 +93,33 @@ describe('BtcPriceOracle', () => {
     await ethers.provider.send('evm_increaseTime', [60 * 60 * 1]);
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
-
-    console.log('here0');
-    expect(await oracle.priceAverage()).to.eq(encodePrice(wethAmount, expandTo18Decimals(10) ));
-    console.log('here');
-    expect(await oracle.consult(tBtc0Amount)).to.eq(tBtc1Amount);
-    expect(await oracle.consult(tBtc1Amount)).to.eq(tBtc0Amount);
+    const oracleState = await oracle.priceAverage();
+    // ((400 / 9) + (400 / 11)) / 2 = 40.404..
+    expect(round(oracleState)).to.eq(40);
+    const feedPrice = await oracle.consult(tBtc0Amount);
+    expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
   });
+
+  it('increase BTC price', async () => {
+    // do some swaps
+    const devAddr = await signers[0].getAddress();
+    await weth.transfer(pair0.address, expandTo18Decimals(200));
+    await pair0.swap(0, '2991000000000000000', devAddr, '0x');
+    await weth.transfer(pair1.address, expandTo18Decimals(480));
+    await pair1.swap(0, '5982000000000000000', devAddr, '0x');
+    // update the oracle
+    await ethers.provider.send('evm_increaseTime', [60 * 60 * 24]);
+    await ethers.provider.send('evm_mine', []);
+    await oracle.update();
+    // check result
+    const oracleState = await oracle.priceAverage();
+    // TODO: should be ((600 / 6) + (880 / 5.019)) / 2 = 137.66686591
+    expect(round(oracleState)).to.eq(137);
+    const feedPrice = await oracle.consult(tBtc0Amount);
+    expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
+  });
+
+  it('add pool', async () => {});
+
+  it('remove pool', async () => {});
 });
