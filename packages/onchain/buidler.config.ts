@@ -22,7 +22,7 @@ const config = {
   },
   typechain: {
     outDir: 'typechain',
-    target: 'ethers',
+    target: 'ethers-v4',
   },
   networks: {
     buidlerevm: {},

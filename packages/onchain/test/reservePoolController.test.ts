@@ -4,8 +4,8 @@ import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {ReservePoolController} from '../typechain/ReservePoolController';
 import {ReservePoolControllerFactory} from '../typechain/ReservePoolControllerFactory';
-import {MockERC20} from '../typechain/MockERC20';
-import {MockERC20Factory} from '../typechain/MockERC20Factory';
+import {MockErc20} from '../typechain/MockErc20';
+import {MockErc20Factory} from '../typechain/MockErc20Factory';
 import {MockBFactory} from '../typechain/MockBFactory';
 import {MockBFactoryFactory} from '../typechain/MockBFactoryFactory';
 import {BPool} from '../typechain/BPool';
@@ -22,8 +22,8 @@ const pBtcAddr = '0x5228a22e72ccC52d415EcFd199F99D0665E7733b';
 
 describe('ReservePoolController', async () => {
   let signers: Signer[];
-  let vBtc: MockERC20;
-  let wEth: MockERC20;
+  let vBtc: MockErc20;
+  let wEth: MockErc20;
   let bFactory: MockBFactory;
   let uniRouter: MockUniRouter;
   let btcOracle: BtcPriceOracle;
@@ -32,9 +32,9 @@ describe('ReservePoolController', async () => {
   before(async () => {
     signers = await ethers.signers();
     // address _vBtcAddr,
-    vBtc = await new MockERC20Factory(signers[0]).deploy('vBTC', 'VBTC', '10000000000');
+    vBtc = await new MockErc20Factory(signers[0]).deploy('vBTC', 'VBTC', '10000000000');
     // address _wEthAddr,
-    wEth = await new MockERC20Factory(signers[0]).deploy('wEth', 'WETH', '10000000000');
+    wEth = await new MockErc20Factory(signers[0]).deploy('wEth', 'WETH', '10000000000');
     // address _bPoolFactory,
     bFactory = await new MockBFactoryFactory(signers[0]).deploy();
     // IUniswapV2Router01 _uniRouter,

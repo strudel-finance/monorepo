@@ -8,8 +8,8 @@ import {StrudelToken} from '../typechain/StrudelToken';
 import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
 import {TorchShip} from '../typechain/TorchShip';
 import {TorchShipFactory} from '../typechain/TorchShipFactory';
-import {MockERC20} from '../typechain/MockERC20';
-import {MockERC20Factory} from '../typechain/MockERC20Factory';
+import {MockErc20} from '../typechain/MockErc20';
+import {MockErc20Factory} from '../typechain/MockErc20Factory';
 
 chai.use(solidity);
 const {expect} = chai;
@@ -81,17 +81,17 @@ describe('TorchShip', async () => {
   });
 
   describe('With ERC/LP token added to the field', () => {
-    let lp: MockERC20;
-    let lp2: MockERC20;
+    let lp: MockErc20;
+    let lp2: MockErc20;
     beforeEach(async () => {
-      lp = await new MockERC20Factory(minter).deploy('LPToken', 'LP', '10000000000');
+      lp = await new MockErc20Factory(minter).deploy('LPToken', 'LP', '10000000000');
       const aliceAddr = await alice.getAddress();
       await lp.connect(minter).transfer(aliceAddr, '1000');
       const bobAddr = await bob.getAddress();
       await lp.transfer(bobAddr, '1000');
       const carolAddr = await carol.getAddress();
       await lp.transfer(carolAddr, '1000');
-      lp2 = await new MockERC20Factory(minter).deploy('LPToken2', 'LP2', '10000000000');
+      lp2 = await new MockErc20Factory(minter).deploy('LPToken2', 'LP2', '10000000000');
       await lp2.transfer(aliceAddr, '1000');
       await lp2.transfer(bobAddr, '1000');
       await lp2.transfer(carolAddr, '1000');

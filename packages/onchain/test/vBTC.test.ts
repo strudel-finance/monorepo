@@ -3,8 +3,8 @@ import {Signer} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
 import vector from './testVector.json';
-import {VBTCToken} from '../typechain/VBTCToken';
-import {VBTCTokenFactory} from '../typechain/VBTCTokenFactory';
+import {VbtcToken} from '../typechain/VbtcToken';
+import {VbtcTokenFactory} from '../typechain/VbtcTokenFactory';
 import {StrudelToken} from '../typechain/StrudelToken';
 import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
 import {MockRelay} from '../typechain/MockRelay';
@@ -25,10 +25,10 @@ function makeCompressedOutpoint(hash: string, index: number): string {
   return `0x${hashBuf.toString('hex')}`;
 }
 
-async function deploy(signer: Signer, relay: MockRelay): Promise<VBTCToken> {
+async function deploy(signer: Signer, relay: MockRelay): Promise<VbtcToken> {
   let strudelFactory = new StrudelTokenFactory(signer);
   let strudel = await strudelFactory.deploy();
-  let factory = new VBTCTokenFactory(signer);
+  let factory = new VbtcTokenFactory(signer);
   let vbtc = await factory.deploy(relay.address, strudel.address, 0, 50);
   await strudel.addMinter(vbtc.address);
   return vbtc;
@@ -36,7 +36,7 @@ async function deploy(signer: Signer, relay: MockRelay): Promise<VBTCToken> {
 
 describe('VBTC', async () => {
   let signers: Signer[];
-  let instance: VBTCToken;
+  let instance: VbtcToken;
   let relay: MockRelay;
 
   before(async () => {
