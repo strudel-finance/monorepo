@@ -4,17 +4,29 @@ pragma solidity >=0.4.22 <0.8.0;
 
 /** @title IRelay */
 
-contract IRelay {
+interface IRelay {
+    event Extension(bytes32 indexed _first, bytes32 indexed _last);
+    event NewTip(
+        bytes32 indexed _from,
+        bytes32 indexed _to,
+        bytes32 indexed _gcd
+    );
+
     /// @notice     Getter for bestKnownDigest
     /// @dev        This updated only by calling markNewHeaviest
     /// @return     The hash of the best marked chain tip
-    function getBestKnownDigest() public view returns (bytes32) {}
+    function getBestKnownDigest() external view returns (bytes32);
+
+    /// @notice     Getter for relayGenesis
+    /// @dev        This is updated only by calling markNewHeaviest
+    /// @return     The hash of the shared ancestor of the most recent fork
+    function getLastReorgCommonAncestor() external view returns (bytes32);
 
     /// @notice         Finds the height of a header by its digest
     /// @dev            Will fail if the header is unknown
     /// @param _digest  The header digest to search for
     /// @return         The height of the header, or error if unknown
-    function findHeight(bytes32 _digest) external view returns (uint256) {}
+    function findHeight(bytes32 _digest) external view returns (uint256);
 
     /// @notice             Checks if a digest is an ancestor of the current one
     /// @dev                Limit the amount of lookups (and thus gas usage) with _limit
@@ -26,10 +38,22 @@ contract IRelay {
         bytes32 _ancestor,
         bytes32 _descendant,
         uint256 _limit
-    ) external view returns (bool) {}
+    ) external view returns (bool);
 
-    /// @notice     Getter for relayGenesis
-    /// @dev        This is updated only by calling markNewHeaviest
-    /// @return     The hash of the shared ancestor of the most recent fork
-    function getLastReorgCommonAncestor() public view returns (bytes32) {}
+    function addHeaders(bytes calldata _anchor, bytes calldata _headers)
+        external
+        returns (bool);
+
+    function addHeadersWithRetarget(
+        bytes calldata _oldPeriodStartHeader,
+        bytes calldata _oldPeriodEndHeader,
+        bytes calldata _headers
+    ) external returns (bool);
+
+    function markNewHeaviest(
+        bytes32 _ancestor,
+        bytes calldata _currentBest,
+        bytes calldata _newBest,
+        uint256 _limit
+    ) external returns (bool);
 }

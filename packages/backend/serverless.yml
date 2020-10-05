@@ -1,0 +1,132 @@
+service: strudel-finance
+
+custom:
+  serverless-offline:
+    port: 3001
+  table: strudel-${opt:stage}
+  region: eu-west-1
+  bcdRpc: '90.179.1.59'
+  bcdPost: 10666
+
+
+package:
+  exclude:
+    - src/**/*.test.js
+
+provider:
+  name: aws
+  region: ${self:custom.region}
+  runtime: nodejs10.x
+  timeout: 30
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+       - sdb:GetAttributes
+       - sdb:PutAttributes
+       - sdb:Select
+       - sdb:PutAttributes
+      Resource: 
+        - Fn::Join:
+          - ""
+          - - "arn:aws:sdb:*:*:domain/"
+            - Ref: strudelDb
+
+responseMappings: &response_mappings
+  headers:
+    Content-Type: "'application/json'"
+  statusCodes:
+      200:
+          pattern: ''
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      204:
+          pattern: 'Created'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      400:
+          pattern: 'Bad Request: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      404:
+          pattern: 'Not Found: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      408:
+          pattern: 'Not Found: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+          template:
+            application/json: ""
+      500:
+          pattern: 'Error: .*'
+          headers:
+            Access-Control-Allow-Origin: "'*'"
+
+functions:
+  bridge-service:
+    timeout: 30
+    handler: src/strudel.handler
+    environment:
+      PROVIDER_URL: ${env:PROVIDER_URL}
+      BCD_RPC: ${env:BCD_RPC, self:custom.bcdRpc}
+      BCD_PORT: ${env:BCD_PORT, self:custom.bcdPost}
+      BCD_USERNAME: ${env:BCD_USERNAME}
+      BCD_PASSWORD: ${env:BCD_PASSWORD}
+      TABLE_NAME:
+        Ref: strudelDb
+    events:
+      - http:
+          method: get
+          path: /account/{account}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /account/{account}/addSig
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /payment/{txHash}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /payment/{txHash}/output/{outputIndex}/addEthTx
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: get
+          path: /watchlist
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /proof/{txHash}/{blockHash}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+
+plugins:
+  - serverless-offline
+
+resources:
+  Resources:
+    strudelDb:
+      Type: "AWS::SDB::Domain"
+      Properties:
+        DomainName : ${self:custom.table}
+        Description: "SDB Domain to store metadata"
