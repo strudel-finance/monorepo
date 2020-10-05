@@ -1,4 +1,4 @@
-pragma solidity ^0.6.0;
+pragma solidity 0.6.6;
 
 import {TypedMemView} from "../summa-tx/TypedMemView.sol";
 import {ViewBTC} from "../summa-tx/ViewBTC.sol";
@@ -76,14 +76,11 @@ contract MockRelay is IRelay {
 
   /// @notice             Checks if a digest is an ancestor of the current one
   /// @dev                Limit the amount of lookups (and thus gas usage) with _limit
-  /// @param _ancestor    The prospective ancestor
-  /// @param _descendant  The descendant to check
-  /// @param _limit       The maximum number of blocks to check
   /// @return             true if ancestor is at most limit blocks lower than descendant, otherwise false
   function isAncestor(
-    bytes32 _ancestor,
-    bytes32 _descendant,
-    uint256 _limit
+    bytes32,
+    bytes32,
+    uint256
   ) external override view returns (bool) {
     return true;
   }
@@ -136,7 +133,7 @@ contract MockRelay is IRelay {
   }
 
   function addHeadersWithRetarget(
-    bytes calldata _oldPeriodStartHeader,
+    bytes calldata,
     bytes calldata _oldPeriodEndHeader,
     bytes calldata _headers
   ) external override returns (bool) {

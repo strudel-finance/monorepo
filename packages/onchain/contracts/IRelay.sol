@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity ^0.6.0;
+pragma solidity 0.6.6;
 
 /** @title IRelay */
 

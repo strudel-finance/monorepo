@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity ^0.6.0;
+pragma solidity 0.6.6;
 
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import {FlashERC20} from "./FlashERC20.sol";
 import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
@@ -16,7 +16,7 @@ import {IRelay} from "./IRelay.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
+contract VBTCToken is FlashERC20, ERC20Capped {
   using SafeMath for uint256;
   using TypedMemView for bytes;
   using TypedMemView for bytes29;
@@ -37,10 +37,9 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   uint256 public numConfs;
   IRelay public relay;
   ERC20Mintable public strudel;
-  uint256 public devFundDivRate = 50;
   uint256 public relayReward;
 
-  // storing all sucessfully processed outputs
+  // marking all sucessfully processed outputs
   mapping(bytes32 => bool) public knownOutpoints;
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
@@ -49,13 +48,11 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     address _relay,
     address _strudel,
     uint256 _minConfs,
-    address _devFund,
     uint256 _relayReward
   ) public FlashERC20("vBTC", "VBTC") ERC20Capped(BTC_CAP) {
     relay = IRelay(_relay);
     strudel = ERC20Mintable(_strudel);
     numConfs = _minConfs;
-    devFund = _devFund;
     relayReward = _relayReward;
   }
 
@@ -70,19 +67,6 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   function makeCompressedOutpoint(bytes32 _txid, uint32 _index) internal pure returns (bytes32) {
     // sacrifice 4 bytes instead of hashing
     return ((_txid >> 32) << 32) | bytes32(uint256(_index));
-  }
-
-  function sqrt(uint256 y) internal pure returns (uint256 z) {
-    if (y > 3) {
-      z = y;
-      uint256 x = y / 2 + 1;
-      while (x < z) {
-        z = x;
-        x = (y / x + x) / 2;
-      }
-    } else if (y != 0) {
-      z = 1;
-    }
   }
 
   /// @notice             Verifies inclusion of a tx in a header, and that header in the Relay chain
@@ -122,7 +106,7 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
   /// @param _version  version
   /// @param _locktime locktime
   /// @param _index    tx index in block
-  /// @param _crossingOutputIndex    output index that 
+  /// @param _crossingOutputIndex    output index that
   /// @param _vin      vin
   /// @param _vout     vout
   function proofOpReturnAndMint(
@@ -136,7 +120,16 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     bytes calldata _vout
   ) external returns (bool) {
     return
-      _provideProof(_header, _proof, _version, _locktime, _index, _crossingOutputIndex, _vin, _vout);
+      _provideProof(
+        _header,
+        _proof,
+        _version,
+        _locktime,
+        _index,
+        _crossingOutputIndex,
+        _vin,
+        _vout
+      );
   }
 
   function _provideProof(
@@ -186,9 +179,9 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
     require(bytes3(opReturnPayload.index(0, 3)) == PROTOCOL_ID, "invalid protocol id");
     account = address(bytes20(opReturnPayload.index(3, ADDR_LEN)));
 
-    uint256 sqrtVbtcBefore = sqrt(totalSupply());
+    uint256 sqrtVbtcBefore = Babylonian.sqrt(totalSupply());
     _mint(account, amount);
-    uint256 sqrtVbtcAfter = sqrt(totalSupply());
+    uint256 sqrtVbtcAfter = Babylonian.sqrt(totalSupply());
 
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
@@ -202,7 +195,7 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
       .div(3)
       .div(BTC_CAP_SQRT);
     strudel.mint(account, rewardAmount);
-    strudel.mint(devFund, rewardAmount.div(devFundDivRate));
+    strudel.mint(owner(), rewardAmount.div(devFundDivRate));
   }
 
   // function proofP2FSHAndMint(
@@ -291,11 +284,6 @@ contract VBTCToken is FlashERC20, ERC20Capped, Ownable {
       return true;
     }
     return false;
-  }
-
-  function setDevFundDivRate(uint256 _devFundDivRate) public onlyOwner {
-    require(_devFundDivRate > 0, "!devFundDivRate-0");
-    devFundDivRate = _devFundDivRate;
   }
 
   function setRelayReward(uint256 _newRelayReward) public onlyOwner {

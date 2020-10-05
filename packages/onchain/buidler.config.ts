@@ -13,7 +13,7 @@ const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
 const config = {
   defaultNetwork: 'buidlerevm',
   solc: {
-    version: '0.6.2',
+    version: '0.6.6',
     optimizer: {enabled: true, runs: 500},
   },
   paths: {
@@ -22,7 +22,7 @@ const config = {
   },
   typechain: {
     outDir: 'typechain',
-    target: 'ethers',
+    target: 'ethers-v4',
   },
   networks: {
     buidlerevm: {},

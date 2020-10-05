@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity ^0.6.0;
+pragma solidity 0.6.6;
 
 import {FlashERC20} from "./FlashERC20.sol";
 import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
