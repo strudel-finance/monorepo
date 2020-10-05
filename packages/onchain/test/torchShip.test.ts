@@ -137,7 +137,7 @@ describe('TorchShip', async () => {
       await advanceBlock(4);
       await chef.connect(bob).deposit(0, '0'); // block 95
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('0');
-      await advanceBlock(4);
+      await advanceBlock(3);
       await chef.connect(bob).deposit(0, '0'); // block 100
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('0');
       await chef.connect(bob).deposit(0, '0'); // block 101

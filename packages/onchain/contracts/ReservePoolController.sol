@@ -2,10 +2,10 @@
 pragma solidity 0.6.6;
 
 // Imports
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import "./uniswap/UniswapV2Library.sol";
@@ -13,7 +13,6 @@ import "./uniswap/IUniswapV2Router01.sol";
 import "./uniswap/IBtcPriceOracle.sol";
 import "./balancer/IBFactory.sol";
 import "./balancer/IBPool.sol";
-import "./balancer/utils/BalancerReentrancyGuard.sol";
 import "./balancer/BMath.sol";
 import "./IBorrower.sol";
 import "./IFlashERC20.sol";
@@ -380,7 +379,6 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
     }
 
     _burn(msg.sender, poolAmountIn);
-
 
     for (uint256 i = 0; i < tokens.length; i++) {
       uint256 tokenAmountOut = actualAmountsOut[i];
