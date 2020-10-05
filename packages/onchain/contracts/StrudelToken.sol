@@ -1,22 +1,20 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity 0.6.6;
 
-import {ERC20Detailed} from "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import {ERC20Mintable} from "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
+import {FlashERC20} from "./FlashERC20.sol";
+import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract StrudelToken is ERC20Mintable, ERC20Detailed {
+contract StrudelToken is FlashERC20, ERC20Mintable {
   using SafeMath for uint256;
 
   /// @dev Constructor, calls ERC20 constructor to set Token info
   ///      ERC20(TokenName, TokenSymbol)
-  constructor()
-    ERC20Detailed("Strudel Finance", "STRDL", 18)
-  public {
+  constructor() public FlashERC20("Strudel Finance", "STRDL") {
     // solhint-disable-previous-line no-empty-blocks
   }
 
@@ -26,7 +24,13 @@ contract StrudelToken is ERC20Mintable, ERC20Detailed {
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    _burnFrom(_account, _amount);
+    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
+      _amount,
+      "ERC20: burn amount exceeds allowance"
+    );
+
+    _approve(_account, _msgSender(), decreasedAllowance);
+    _burn(_account, _amount);
   }
 
   /// @dev Destroys `amount` tokens from `msg.sender`, reducing the
@@ -51,7 +55,8 @@ contract StrudelToken is ERC20Mintable, ERC20Detailed {
     ITokenRecipient _spender,
     uint256 _value,
     bytes memory _extraData
-  ) public returns (bool) { // not external to allow bytes memory parameters
+  ) public returns (bool) {
+    // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
       _spender.receiveApproval(msg.sender, _value, address(this), _extraData);
       return true;

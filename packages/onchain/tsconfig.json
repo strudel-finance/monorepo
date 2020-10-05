@@ -8,6 +8,9 @@
     "declaration": true,
     "resolveJsonModule": true
   },
+  "ts-node": {
+    "files": true
+  },
   "include": [
     "typechain",
     "scripts",

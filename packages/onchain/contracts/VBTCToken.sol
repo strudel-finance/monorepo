@@ -1,34 +1,29 @@
 // SPDX-License-Identifier: MPL
 
-pragma solidity >=0.4.22 <0.8.0;
+pragma solidity 0.6.6;
 
 import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
-import {
-    ERC20Detailed
-} from "@openzeppelin/contracts/token/ERC20/ERC20Detailed.sol";
-import {
-    ERC20Mintable
-} from "@openzeppelin/contracts/token/ERC20/ERC20Mintable.sol";
-import {Ownable} from "@openzeppelin/contracts/ownership/Ownable.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import "@uniswap/lib/contracts/libraries/Babylonian.sol";
+import {FlashERC20} from "./FlashERC20.sol";
+import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 import {ITokenRecipient} from "./ITokenRecipient.sol";
-import {
-    TypedMemView
-} from "@summa-tx/bitcoin-spv-sol/contracts/TypedMemView.sol";
-import {ViewBTC} from "@summa-tx/bitcoin-spv-sol/contracts/ViewBTC.sol";
-import {ViewSPV} from "@summa-tx/bitcoin-spv-sol/contracts/ViewSPV.sol";
+import {TypedMemView} from "./summa-tx/TypedMemView.sol";
+import {ViewBTC} from "./summa-tx/ViewBTC.sol";
+import {ViewSPV} from "./summa-tx/ViewSPV.sol";
 import {IRelay} from "./IRelay.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
+contract VBTCToken is FlashERC20, ERC20Capped {
     using SafeMath for uint256;
     using TypedMemView for bytes;
     using TypedMemView for bytes29;
     using ViewBTC for bytes29;
     using ViewSPV for bytes29;
 
-    event Burn(
+    event Crossing(
         bytes32 indexed btcTxHash,
         address indexed receiver,
         uint256 amount,
@@ -36,19 +31,16 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     );
 
     uint8 constant ADDR_LEN = 20;
-    uint256 constant BTC_CAP = 21 * 10**24;
     uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
     bytes3 constant PROTOCOL_ID = 0x07ffff; // a mersenne prime
 
     uint256 public numConfs;
     IRelay public relay;
     ERC20Mintable public strudel;
-    address public devFund;
-    uint256 public devFundDivRate = 50;
     uint256 public relayReward;
 
-    // storing all sucessfully processed outputs
-    mapping(bytes32 => bool) knownOutputs;
+    // marking all sucessfully processed outputs
+    mapping(bytes32 => bool) public knownOutpoints;
 
     /// @dev Constructor, calls ERC20 constructor to set Token info
     ///      ERC20(TokenName, TokenSymbol)
@@ -56,36 +48,29 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
         address _relay,
         address _strudel,
         uint256 _minConfs,
-        address _devFund,
         uint256 _relayReward
-    ) public ERC20Detailed("vBTC", "VBTC", 18) ERC20Capped(BTC_CAP) {
+    ) public FlashERC20("vBTC", "VBTC") ERC20Capped(BTC_CAP) {
         relay = IRelay(_relay);
         strudel = ERC20Mintable(_strudel);
         numConfs = _minConfs;
-        devFund = _devFund;
         relayReward = _relayReward;
     }
 
-    function makeOutpoint(uint256 _index, bytes32 _txid)
+    function _beforeTokenTransfer(
+        address from,
+        address to,
+        uint256 amount
+    ) internal virtual override(ERC20, ERC20Capped) {
+        super._beforeTokenTransfer(from, to, amount);
+    }
+
+    function makeCompressedOutpoint(bytes32 _txid, uint32 _index)
         internal
         pure
         returns (bytes32)
     {
-        // sacrifice 1 byte instead of hashing
-        return ((_txid >> 1) << 1) | bytes32(uint256(uint8(_index)));
-    }
-
-    function sqrt(uint256 y) internal pure returns (uint256 z) {
-        if (y > 3) {
-            z = y;
-            uint256 x = y / 2 + 1;
-            while (x < z) {
-                z = x;
-                x = (y / x + x) / 2;
-            }
-        } else if (y != 0) {
-            z = 1;
-        }
+        // sacrifice 4 bytes instead of hashing
+        return ((_txid >> 32) << 32) | bytes32(uint256(_index));
     }
 
     /// @notice             Verifies inclusion of a tx in a header, and that header in the Relay chain
@@ -116,9 +101,9 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
 
         // check offset to tip
         bytes32 bestKnownDigest = relay.getBestKnownDigest();
-        uint256 offset = relay.findHeight(bestKnownDigest).sub(
-            relay.findHeight(headerHash)
-        );
+        uint256 height = relay.findHeight(headerHash);
+        require(height > 0, "height not found in relay");
+        uint256 offset = relay.findHeight(bestKnownDigest).sub(height);
         require(offset >= numConfs, "Insufficient confirmations");
 
         return true;
@@ -128,19 +113,19 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     ///                  Uses the internal _mint function.
     /// @param _header   header
     /// @param _proof    proof
-    /// @param _version    index
-    /// @param _locktime    index
-    /// @param _burnOutputIndex    index
-    /// @param _index    index
-    /// @param _vin    index
-    /// @param _vout    index
+    /// @param _version  version
+    /// @param _locktime locktime
+    /// @param _index    tx index in block
+    /// @param _crossingOutputIndex    output index that
+    /// @param _vin      vin
+    /// @param _vout     vout
     function proofOpReturnAndMint(
         bytes calldata _header,
         bytes calldata _proof,
         bytes4 _version,
         bytes4 _locktime,
         uint256 _index,
-        uint32 _burnOutputIndex,
+        uint32 _crossingOutputIndex,
         bytes calldata _vin,
         bytes calldata _vout
     ) external returns (bool) {
@@ -151,7 +136,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
                 _version,
                 _locktime,
                 _index,
-                _burnOutputIndex,
+                _crossingOutputIndex,
                 _vin,
                 _vout
             );
@@ -163,7 +148,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
         bytes4 _version,
         bytes4 _locktime,
         uint256 _index,
-        uint32 _burnOutputIndex,
+        uint32 _crossingOutputIndex,
         bytes memory _vin,
         bytes memory _vout
     ) internal returns (bool) {
@@ -171,8 +156,8 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
             .encodePacked(_version, _vin, _vout, _locktime)
             .ref(0)
             .hash256();
-        bytes32 outpoint = makeOutpoint(_index, txId);
-        require(!knownOutputs[outpoint], "already processed outputs");
+        bytes32 outpoint = makeCompressedOutpoint(txId, _crossingOutputIndex);
+        require(!knownOutpoints[outpoint], "already processed outputs");
 
         _checkInclusion(
             _header.ref(0).tryAsHeader().assertValid(),
@@ -182,24 +167,24 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
         );
 
         // mark processed
-        knownOutputs[outpoint] = true;
+        knownOutpoints[outpoint] = true;
 
         // do payouts
         address account;
         uint256 amount;
         (account, amount) = doPayouts(
             _vout.ref(0).tryAsVout(),
-            _burnOutputIndex
+            _crossingOutputIndex
         );
-        emit Burn(txId, account, amount, _burnOutputIndex);
+        emit Crossing(txId, account, amount, _crossingOutputIndex);
         return true;
     }
 
-    function doPayouts(bytes29 _vout, uint32 _burnOutputIndex)
+    function doPayouts(bytes29 _vout, uint32 _crossingOutputIndex)
         internal
         returns (address account, uint256 amount)
     {
-        bytes29 output = _vout.indexVout(_burnOutputIndex);
+        bytes29 output = _vout.indexVout(_crossingOutputIndex);
 
         // extract receiver and address
         amount = output.value() * 10**10; // wei / satosh = 10^18 / 10^8 = 10^10
@@ -212,14 +197,13 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
         );
         require(
             bytes3(opReturnPayload.index(0, 3)) == PROTOCOL_ID,
-            "invalid burn protocol"
+            "invalid protocol id"
         );
         account = address(bytes20(opReturnPayload.index(3, ADDR_LEN)));
-        account = msg.sender;
 
-        uint256 sqrtVbtcBefore = sqrt(totalSupply());
+        uint256 sqrtVbtcBefore = Babylonian.sqrt(totalSupply());
         _mint(account, amount);
-        uint256 sqrtVbtcAfter = sqrt(totalSupply());
+        uint256 sqrtVbtcAfter = Babylonian.sqrt(totalSupply());
 
         // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
         // pay out only the delta to the previous claim: H(after) - H(before)
@@ -233,7 +217,7 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
             .div(3)
             .div(BTC_CAP_SQRT);
         strudel.mint(account, rewardAmount);
-        strudel.mint(devFund, rewardAmount.div(devFundDivRate));
+        strudel.mint(owner(), rewardAmount.div(devFundDivRate));
     }
 
     // function proofP2FSHAndMint(
@@ -291,7 +275,13 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
     /// @param _account  The account whose tokens will be burnt.
     /// @param _amount   The amount of tokens that will be burnt.
     function burnFrom(address _account, uint256 _amount) external {
-        _burnFrom(_account, _amount);
+        uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
+            _amount,
+            "ERC20: burn amount exceeds allowance"
+        );
+
+        _approve(_account, _msgSender(), decreasedAllowance);
+        _burn(_account, _amount);
     }
 
     /// @dev Destroys `amount` tokens from `msg.sender`, reducing the
@@ -330,13 +320,13 @@ contract VBTCToken is ERC20Detailed, ERC20Capped, Ownable {
         return false;
     }
 
-    function setDevFundDivRate(uint256 _devFundDivRate) public onlyOwner {
-        require(_devFundDivRate > 0, "!devFundDivRate-0");
-        devFundDivRate = _devFundDivRate;
-    }
-
     function setRelayReward(uint256 _newRelayReward) public onlyOwner {
         require(_newRelayReward > 0, "!newRelayReward-0");
         relayReward = _newRelayReward;
+    }
+
+    function setRelayAddress(address _newRelayAddr) public onlyOwner {
+        require(_newRelayAddr != address(0), "!newRelayAddr-0");
+        relay = IRelay(_newRelayAddr);
     }
 }

@@ -1,10 +1,9 @@
-pragma solidity ^0.5.10;
+pragma solidity 0.6.6;
 
-import {TypedMemView} from "@summa-tx/bitcoin-spv-sol/contracts/TypedMemView.sol";
-import {ViewBTC} from "@summa-tx/bitcoin-spv-sol/contracts/ViewBTC.sol";
-import {ViewSPV} from "@summa-tx/bitcoin-spv-sol/contracts/ViewSPV.sol";
+import {TypedMemView} from "../summa-tx/TypedMemView.sol";
+import {ViewBTC} from "../summa-tx/ViewBTC.sol";
+import {ViewSPV} from "../summa-tx/ViewSPV.sol";
 import {IRelay} from "../IRelay.sol";
-
 
 /** @title MockRelay */
 /** half-hearted implementation for testing */
@@ -18,13 +17,14 @@ contract MockRelay is IRelay {
   bytes32 bestKnownDigest;
   bytes32 lastReorgCommonAncestor;
   uint256 public currentEpochDiff;
-  mapping(bytes32 => uint256) heights;
+  mapping(bytes32 => uint256) public heights;
 
   constructor(
     bytes32 _bestKnownDigest,
     uint256 _bestKnownHeight,
     bytes32 _lastReorgCommonAncestor,
-    uint256 _lastReorgHeight) public {
+    uint256 _lastReorgHeight
+  ) public {
     bestKnownDigest = _bestKnownDigest;
     heights[_bestKnownDigest] = _bestKnownHeight;
     lastReorgCommonAncestor = _lastReorgCommonAncestor;
@@ -38,20 +38,20 @@ contract MockRelay is IRelay {
   /// @notice     Getter for bestKnownDigest
   /// @dev        This updated only by calling markNewHeaviest
   /// @return     The hash of the best marked chain tip
-  function getBestKnownDigest() public view returns (bytes32) {
+  function getBestKnownDigest() public override view returns (bytes32) {
     return bestKnownDigest;
   }
 
   /// @notice     Getter for relayGenesis
   /// @dev        This is updated only by calling markNewHeaviest
   /// @return     The hash of the shared ancestor of the most recent fork
-  function getLastReorgCommonAncestor() public view returns (bytes32) {
+  function getLastReorgCommonAncestor() public override view returns (bytes32) {
     return lastReorgCommonAncestor;
   }
 
   /// @notice     Getter for bestKnownDigest
   /// @dev        This updated only by calling markNewHeaviest
-  /// @return     The hash of the best marked chain tip
+
   function setBestKnownDigest(bytes32 _bestKnownDigest) external {
     require(heights[_bestKnownDigest] > 0, "not found");
     bestKnownDigest = _bestKnownDigest;
@@ -59,8 +59,8 @@ contract MockRelay is IRelay {
 
   /// @notice     Getter for relayGenesis
   /// @dev        This is updated only by calling markNewHeaviest
-  /// @return     The hash of the shared ancestor of the most recent fork
-  function LastReorgCommonAncestor(bytes32 _lrca) external {
+
+  function setLastReorgCommonAncestor(bytes32 _lrca) external {
     require(heights[_lrca] > 0, "not found");
     require(heights[_lrca] <= heights[bestKnownDigest], "ahead of tip");
     lastReorgCommonAncestor = _lrca;
@@ -70,21 +70,26 @@ contract MockRelay is IRelay {
   /// @dev            Will fail if the header is unknown
   /// @param _digest  The header digest to search for
   /// @return         The height of the header, or error if unknown
-  function findHeight(bytes32 _digest) external view returns (uint256) {
+  function findHeight(bytes32 _digest) external override view returns (uint256) {
     return heights[_digest];
   }
 
   /// @notice             Checks if a digest is an ancestor of the current one
   /// @dev                Limit the amount of lookups (and thus gas usage) with _limit
-  /// @param _ancestor    The prospective ancestor
-  /// @param _descendant  The descendant to check
-  /// @param _limit       The maximum number of blocks to check
   /// @return             true if ancestor is at most limit blocks lower than descendant, otherwise false
-  function isAncestor(bytes32 _ancestor, bytes32 _descendant, uint256 _limit) external view returns (bool) {
+  function isAncestor(
+    bytes32,
+    bytes32,
+    uint256
+  ) external override view returns (bool) {
     return true;
   }
 
-  function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
+  function addHeaders(bytes calldata _anchor, bytes calldata _headers)
+    external
+    override
+    returns (bool)
+  {
     bytes29 _headersView = _headers.ref(0).tryAsHeaderArray();
     bytes29 _anchorView = _anchor.ref(0).tryAsHeader();
 
@@ -103,7 +108,7 @@ contract MockRelay is IRelay {
     bytes32 _currentDigest;
     bytes32 _previousDigest = _anchor.hash256();
 
-    uint256 _anchorHeight = heights[_previousDigest];  /* NB: errors if unknown */
+    uint256 _anchorHeight = heights[_previousDigest]; /* NB: errors if unknown */
     require(_anchorHeight > 0, "anchor height can not be 0");
     require(_headers.length % 80 == 0, "Header array length must be divisible by 80");
 
@@ -123,17 +128,15 @@ contract MockRelay is IRelay {
       _previousDigest = _currentDigest;
     }
 
-    emit Extension(
-        _anchor.hash256(),
-        _currentDigest);
+    emit Extension(_anchor.hash256(), _currentDigest);
     return true;
   }
 
   function addHeadersWithRetarget(
-    bytes calldata _oldPeriodStartHeader,
+    bytes calldata,
     bytes calldata _oldPeriodEndHeader,
     bytes calldata _headers
-  ) external returns (bool) {
+  ) external override returns (bool) {
     bytes29 _headersView = _headers.ref(0).tryAsHeaderArray();
     bytes29 _anchorView = _oldPeriodEndHeader.ref(0).tryAsHeader();
 
@@ -147,13 +150,10 @@ contract MockRelay is IRelay {
     bytes calldata _currentBest,
     bytes calldata _newBest,
     uint256 _limit
-  ) external returns (bool) {
+  ) external override returns (bool) {
     bytes29 _new = _newBest.ref(0).tryAsHeader();
     bytes29 _current = _currentBest.ref(0).tryAsHeader();
-    require(
-        _new.notNull() && _current.notNull(),
-        "Bad args. Check header and array byte lengths."
-    );
+    require(_new.notNull() && _current.notNull(), "Bad args. Check header and array byte lengths.");
     return _markNewHeaviest(_ancestor, _current, _new, _limit);
   }
 
@@ -165,8 +165,8 @@ contract MockRelay is IRelay {
   /// @return                   True if successfully updates bestKnownDigest, error otherwise
   function _markNewHeaviest(
     bytes32 _ancestor,
-    bytes29 _current,  // Header
-    bytes29 _new,      // Header
+    bytes29 _current, // Header
+    bytes29 _new, // Header
     uint256 _limit
   ) internal returns (bool) {
     require(_limit <= 2016, "Requested limit is greater than 1 difficulty period");
@@ -183,11 +183,7 @@ contract MockRelay is IRelay {
       currentEpochDiff = _newDiff;
     }
 
-    emit NewTip(
-      _currentBestDigest,
-      _newBestDigest,
-      _ancestor);
+    emit NewTip(_currentBestDigest, _newBestDigest, _ancestor);
     return true;
   }
-
 }
