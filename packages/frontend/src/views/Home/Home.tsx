@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { useWallet } from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
-
+import Countdown from 'react-countdown'
 import strudel from '../../assets/img/Strudel.png'
 import Button from '../../components/Button'
 //import Container from '../../components/Container'
@@ -11,6 +11,8 @@ import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
 import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
+import { StyledCount, RenderProps } from '../../utils/countHelper'
+
 import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
 import Lottie from '../../components/Lottie'
@@ -26,6 +28,7 @@ import { makeStyles } from '@material-ui/core'
 import { Transaction, LoadingStatus } from '../../types/types'
 import sb from 'satoshi-bitcoin'
 import { apiServer } from '../../constants/backendAddresses'
+import { startDate } from '../../constants/countdown'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
 import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
@@ -60,6 +63,7 @@ const Home: React.FC = () => {
     '0x0000000000000000000000000000000000000000',
   )
   const [isLoading, setLoading] = useState({})
+  const [isCountComplete, setCountComplete] = useState(false)
 
   const wallet = useWallet()
   const account = wallet.account
@@ -261,82 +265,107 @@ const Home: React.FC = () => {
     },
     [setVal],
   )
+  const handleCountEnd = () => {
+    setCountComplete(true)
+  }
   // icon={<img src={strudel} height={120} />}
-
+  const renderer = ({ days, hours, minutes, seconds }: RenderProps) => {
+    // Render a countdown
+    return (
+      <StyledCount>
+        {days}:{hours}:{minutes}:{seconds}
+      </StyledCount>
+    )
+  }
+  const isPast = startDate < new Date()
   return (
     <Page>
       <StyledLottieContainer>
         <Lottie />
       </StyledLottieContainer>
-      <PageHeader
-        title="The Vortex is ready"
-        subtitle="Burn BTC to receive vBTC and $STRDL!"
-      />
-      {wallet.status === 'connected' ? (
-        <Container fixed maxWidth="lg">
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={4}>
-              <Container>
-                <AddressInput
-                  address={formatAddress(account)}
-                  value={formatAddress(account)}
-                />
-                <BurnAmountInput
-                  onChange={handleAmountChange}
-                  value={val}
-                  symbol="BTC"
-                />
-                <Button text={'Get vBTC'} onClick={onPresentBurn} />
-              </Container>
-            </Grid>
-            <Grid item xs={12} sm={12} md={8}>
-              <TransactionsTableContainer
-                transactions={transactions}
-                confirmations={confirmations}
-                handleLoading={handleLoading}
-                isLoading={isLoading}
-                lastRequest={lastRequest}
-              />
-            </Grid>
-          </Grid>
-        </Container>
-      ) : (
-        <div
-          style={{
-            alignItems: 'center',
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'center',
-          }}
-        >
-          <Button
-            onClick={onPresentWalletProviderModal}
-            text="🔓 Unlock Wallet"
+      {isCountComplete || isPast ? (
+        <>
+          <PageHeader
+            title="Enter the Strudel"
+            subtitle="Turn your BTC in vBTC and earn intergalactical $TRDL rewards."
           />
-        </div>
+          {wallet.status === 'connected' ? (
+            <Container fixed maxWidth="lg">
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={4}>
+                  <Container>
+                    <AddressInput
+                      address={formatAddress(account)}
+                      value={formatAddress(account)}
+                    />
+                    <BurnAmountInput
+                      onChange={handleAmountChange}
+                      value={val}
+                      symbol="BTC"
+                    />
+                    <Button text={'Get vBTC'} onClick={onPresentBurn} />
+                  </Container>
+                </Grid>
+                <Grid item xs={12} sm={12} md={8}>
+                  <TransactionsTableContainer
+                    transactions={transactions}
+                    confirmations={confirmations}
+                    handleLoading={handleLoading}
+                    isLoading={isLoading}
+                    lastRequest={lastRequest}
+                  />
+                </Grid>
+              </Grid>
+            </Container>
+          ) : (
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            >
+              <Button
+                onClick={onPresentWalletProviderModal}
+                text="🔓 Unlock Wallet"
+              />
+            </div>
+          )}
+          <>
+            <Spacer size="lg" />
+            <StyledInfo>
+              ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
+            </StyledInfo>
+            <Spacer size="lg" />
+            <Container>
+              <Balances />
+            </Container>
+            <Spacer size="lg" />
+            <Container>
+              <BalanceStrudel />
+            </Container>
+            <Spacer size="lg" />
+            <div
+              style={{
+                margin: '0 auto',
+              }}
+            >
+              <Button
+                text="🌋 See Terra Farms"
+                to="/farms"
+                variant="secondary"
+              />
+            </div>
+          </>
+        </>
+      ) : (
+        <Countdown
+          date={startDate}
+          renderer={renderer}
+          onComplete={handleCountEnd}
+        />
       )}
-      <Container>
-        <Spacer size="lg" />
-        <StyledInfo>
-          🏆<b>Degen Tip</b>: Strudel only works in one direction.
-        </StyledInfo>
-        <Spacer size="lg" />
-        <Container>
-          <Balances />
-        </Container>
-        <Spacer size="lg" />
-        <Container>
-          <BalanceStrudel />
-        </Container>
-        <Spacer size="lg" />
-        <div
-          style={{
-            margin: '0 auto',
-          }}
-        >
-          <Button text="🔪 See the Menu" to="/farms" variant="secondary" />
-        </div>
-      </Container>
     </Page>
   )
 }

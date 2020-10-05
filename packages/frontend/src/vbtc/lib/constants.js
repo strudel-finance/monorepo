@@ -78,6 +78,8 @@ UNI-V2 LP Address on mainnet for reference
 export const supportedPools = [
   {
     pid: 1,
+    isBalancer: false,
+    url: '',
     lpAddresses: {
       1: '',
       5: '0x040dad5d12da37b670159326c0117638f5f1871e',
@@ -93,6 +95,25 @@ export const supportedPools = [
   },
   {
     pid: 0,
+    isBalancer: false,
+    url: '',
+    lpAddresses: {
+      1: '',
+      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
+    },
+    tokenAddresses: {
+      1: '',
+      5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
+    },
+    name: 'Vortex Vampire',
+    symbol: 'VBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'VBTC',
+    icon: '🧛',
+  },
+  {
+    pid: 0,
+    isBalancer: true,
+    url: '',
     lpAddresses: {
       1: '',
       5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',

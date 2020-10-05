@@ -1,22 +1,30 @@
 import BigNumber from 'bignumber.js'
-import React, {useCallback, useMemo, useState} from 'react'
+import { withStyles } from '@material-ui/core'
+
+import React, { useCallback, useMemo, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
 import CardIcon from '../../../components/CardIcon'
-import Modal, {ModalProps} from '../../../components/Modal'
+import Modal, { ModalProps } from '../../../components/Modal'
 import ModalActions from '../../../components/ModalActions'
 import ModalTitle from '../../../components/ModalTitle'
 import ModalContent from '../../../components/ModalContent'
 import TokenInput from '../../../components/TokenInput'
-import {getFullDisplayBalance} from '../../../utils/formatBalance'
+import { getFullDisplayBalance } from '../../../utils/formatBalance'
 import Value from '../../../components/Value'
-import Label from '../../../components/Label'
 import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
-import {Transaction} from '../../../types/types'
+import { Transaction } from '../../../types/types'
 import QRCode from 'qrcode.react'
 import StrudelIcon from '../../../components/StrudelIcon'
+import useVBTC from '../../../hooks/useVBTC'
+import { getVbtcSupply } from '../../../vbtc/utils'
+import BitcoinIcon from '../../../components/BitcoinIcon'
+import VBTCIcon from '../../../components/VBTCIcon'
+import vortex from '../../../assets/img/vortex.png'
+
+import MuiGrid from '@material-ui/core/Grid'
 
 import sb from 'satoshi-bitcoin'
 
@@ -27,6 +35,18 @@ interface BurnModalProps extends ModalProps {
   onAddition?: (tx: Transaction) => void
   continueV?: boolean
 }
+
+const Label = styled.div`
+  color: #51473f;
+  font-weight: 700;
+  font-size: 20px;
+`
+
+const Grid = withStyles({
+  item: {
+    margin: 'auto',
+  },
+})(MuiGrid)
 
 const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   value,
@@ -40,6 +60,8 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   const [pendingTx, setPendingTx] = useState(false)
   const [checked, setChecked] = useState(false)
   const [continued, setContinued] = useState(continueV)
+  const [strudelAmount, setStrudelAmount] = useState(null)
+  const vbtc = useVBTC()
 
   const handleChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
@@ -47,6 +69,25 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     },
     [setVal],
   )
+  const getInStrudelCurve = (x: number): number => {
+    return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21))
+  }
+
+  const calculateStrudel = async () => {
+    const supply = await getVbtcSupply(vbtc)
+    console.log(supply.toString())
+    let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
+    console.log(dividedSupply)
+    console.log(Number(value))
+    let calculatedStrudel =
+      getInStrudelCurve(dividedSupply + Number(value)) -
+      getInStrudelCurve(dividedSupply)
+    setStrudelAmount(calculatedStrudel.toFixed(0).toString())
+  }
+
+  useEffect(() => {
+    calculateStrudel()
+  }, [])
 
   const handleClick = (event: any) => {
     event.target.firstElementChild.checked = !event.target.firstElementChild
@@ -71,41 +112,59 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     <Modal>
       <ModalTitle text={`Confirm Transaction`} />
       <ModalContent>
-        <Spacer />
+        <Spacer size="sm" />
         {!continued ? (
-          <div>
-            <div style={{display: 'flex'}}>
+          <>
+            <div style={{ display: 'flex' }}>
               <StyledBalanceWrapper>
-                <StrudelIcon size={80} />
                 <StyledBalance>
-                  <Label text="Bitcoin sent" />
-                  <Value value={value} />
+                  <BitcoinIcon size={60} />
+                  <Label>{value.toString() + 'BTC'} </Label>
                 </StyledBalance>
               </StyledBalanceWrapper>
             </div>
-            <div style={{display: 'flex'}}>
+            <div style={{ display: 'flex' }}>
               <StyledBalanceWrapper>
                 <StyledBalance>
-                  <Label text="Exchange Rate" />
-                  <Label text="1 BTC = 1 vBTC" />
+                  <img src={vortex} height="120" />
                 </StyledBalance>
               </StyledBalanceWrapper>
             </div>
-            <div style={{display: 'flex'}}>
+            <Grid container spacing={1}>
+              <Grid item xs={5}>
+                <StyledBalance>
+                  <VBTCIcon size={60} />
+                  <Label>{value.toString() + ' vBTC'} </Label>
+                </StyledBalance>
+              </Grid>
+
+              <Grid item xs={2}>
+                <Label style={{ textAlign: 'center' }}>+</Label>
+              </Grid>
+
+              <Grid item xs={5}>
+                <StyledBalance>
+                  <StrudelIcon size={60} />
+                  <Label>{'~ ' + strudelAmount + ' $RTDL'} </Label>
+                </StyledBalance>
+              </Grid>
+            </Grid>
+            <Spacer size="sm" />
+            <div style={{ display: 'flex' }}>
               <StyledBalanceWrapper>
                 <StyledBalance>
                   <DangerLabel
                     checkbox={<Checkbox onChange={handleCheckboxChange} />}
-                    text="Danger: Your bitcoins will be irretrievably burnt."
+                    text="❗️Attention: You can only mint vBTC when burning BTC ❗️"
                     onClick={handleClick}
                   />
                 </StyledBalance>
               </StyledBalanceWrapper>
             </div>
-          </div>
+          </>
         ) : (
-          <div>
-            <div style={{display: 'flex'}}>
+          <>
+            <div style={{ display: 'flex' }}>
               <StyledBalanceWrapper>
                 <QRCode
                   size={256}
@@ -115,16 +174,16 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 />
               </StyledBalanceWrapper>
             </div>
-            <div style={{display: 'flex'}}>
+            <div style={{ display: 'flex' }}>
               <StyledBalanceWrapper>
                 <StyledBalance>
-                  <Label text="Please scan the following QR code" />
+                  <Label>Please scan the following QR code</Label>
                 </StyledBalance>
               </StyledBalanceWrapper>
             </div>
-          </div>
+          </>
         )}
-        <Spacer />
+        <Spacer size="sm" />
       </ModalContent>
       {!continued ? (
         <ModalActions>
