@@ -97,9 +97,6 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
   function initialize(uint256 initialSwapFee) external onlyOwner {
     require(address(bPool) == address(0), "already initialized");
 
-    // To the extent possible, modify state variables before calling functions
-    _mint(msg.sender, MIN_POOL_SUPPLY);
-
     // get price
     uint256 vBtcBal = vBtc.balanceOf(address(this));
     require(vBtcBal > 0, "missing initial vBTC bal");
@@ -120,9 +117,10 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
     bPool.bind(address(vBtc), vBtcBal, DEFAULT_WEIGHT);
     bPool.bind(address(wEth), btcInEthPrice, DEFAULT_WEIGHT);
 
-    // set fee
+    // set fee, go public and issue shares
     bPool.setSwapFee(initialSwapFee);
     bPool.setPublicSwap(true);
+    _mint(msg.sender, MIN_POOL_SUPPLY);
   }
 
   /**

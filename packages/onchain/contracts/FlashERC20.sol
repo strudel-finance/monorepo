@@ -7,6 +7,7 @@ import {IFlashERC20} from "./IFlashERC20.sol";
 
 contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
   uint256 constant BTC_CAP = 21 * 10**24;
+  uint256 constant FEE_FACTOR = 100;
 
   // Dev fund (2%, initially)
   uint256 public devFundDivRate = 50;
@@ -26,7 +27,7 @@ contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
     // hand control to borrower
     IBorrower(msg.sender).executeOnFlashMint(amount, data);
 
-    uint256 fee = amount.div(devFundDivRate);
+    uint256 fee = amount.div(devFundDivRate.mul(FEE_FACTOR));
 
     // burn tokens
     _burn(msg.sender, amount.add(fee)); // reverts if `msg.sender` does not have enough
