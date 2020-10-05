@@ -3,9 +3,10 @@ pragma solidity 0.6.6;
 import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {IBorrower} from "./IBorrower.sol";
+import "./balancer/ReentrancyGuard.sol";
 import {IFlashERC20} from "./IFlashERC20.sol";
 
-contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
+contract FlashERC20 is ERC20, Ownable, IFlashERC20, ReentrancyGuard {
   uint256 constant BTC_CAP = 21 * 10**24;
   uint256 constant FEE_FACTOR = 100;
 
@@ -17,7 +18,7 @@ contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
   constructor(string memory name, string memory symbol) public ERC20(name, symbol) {}
 
   // Allows anyone to mint tokens as long as it gets burned by the end of the transaction.
-  function flashMint(uint256 amount, bytes32 data) external override {
+  function flashMint(uint256 amount, bytes32 data) external override lock {
     // do not exceed cap
     require(totalSupply().add(amount) <= BTC_CAP, "can not borrow more than BTC cap");
 

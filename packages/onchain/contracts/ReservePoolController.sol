@@ -49,8 +49,9 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
   IBFactory public immutable bFactory;
 
   IBPool public bPool; // IBPool
-  address public oracle; //
+  address public oracle; // 24 hour price feed for BTC
   uint256 public maxVbtcWeight = 3 * DEFAULT_WEIGHT; // denormmalized, like in Balancer
+  uint32 public blockTimestampLast;
 
   /**
    * @notice Construct a new Configurable Rights Pool (wrapper around BPool)
@@ -131,8 +132,6 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
    *      NOTE: The BPool.rebind function CAN REVERT if the updated weights go beyond the enforced bounds.
    */
   function resyncWeights() external {
-    // Todo: check that bPool and uniPool are set up
-
     // simple check for re-entrancy
     require(msg.sender == tx.origin, "caller not EOA");
     // read FEED price of BTC ()
@@ -163,17 +162,17 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
 
     // deal with reserve pool
     uint256 vBtcToBorrow = tradeAmount;
+    uint256 vBtcWeight = bPool.getDenormalizedWeight(address(vBtc));
     if (ethToBtc) {
       // calculate amount vBTC to get the needed ETH from reserve pool
       {
         uint256 tokenBalanceIn = bPool.getBalance(address(vBtc));
-        uint256 tokenWeightIn = bPool.getDenormalizedWeight(address(vBtc));
         uint256 tokenBalanceOut = bPool.getBalance(address(wEth));
         uint256 tokenWeightOut = bPool.getDenormalizedWeight(address(wEth));
         uint256 swapFee = bPool.getSwapFee();
         vBtcToBorrow = calcInGivenOut(
           tokenBalanceIn,
-          tokenWeightIn,
+          vBtcWeight,
           tokenBalanceOut,
           tokenWeightOut,
           tradeAmount, // amount of ETH we want to get out
@@ -181,8 +180,10 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
         );
       }
     }
+    // ecode diruction and old Weight together
+    bytes32 data = bytes32((uint256(ethToBtc ? 1 : 0) << 248) | vBtcWeight);
     // get the loan
-    IFlashERC20(address(vBtc)).flashMint(vBtcToBorrow, bytes32(uint256(ethToBtc ? 1 : 0)));
+    IFlashERC20(address(vBtc)).flashMint(vBtcToBorrow, data);
   }
 
   function executeOnFlashMint(uint256 amount, bytes32 data) external override {
@@ -192,7 +193,8 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
     require(vBtc.balanceOf(address(this)) >= amount, "loan error");
     // we received a bunch of vBTC here
     // read direction, then do the trade, trust that amounts were calculated correctly
-    bool ethToBtc = uint256(data) != 0;
+    bool ethToBtc = (uint256(data) >> 248) != 0;
+    uint256 oldVbtcWeight = (uint256(data) << 8) >> 8;
     address tokenIn = ethToBtc ? address(wEth) : address(vBtc);
     address tokenOut = ethToBtc ? address(vBtc) : address(wEth);
     uint256 tradeAmount = amount;
@@ -250,6 +252,11 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
       uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(reserveVbtc).div(vBtcBalance).div(
         reserveWeth
       );
+      // if trade moves away from equal balance, slow it down
+      if (newVbtcWeight > oldVbtcWeight && newVbtcWeight > DEFAULT_WEIGHT) {
+        require(now.sub(blockTimestampLast) > 24 hours, "hold the horses");
+      }
+      blockTimestampLast = uint32(now);
       require(newVbtcWeight < maxVbtcWeight, "max weight error");
       // adjust weights so there is no arbitrage
       IBPool(bPool).rebind(address(vBtc), vBtcBalance, newVbtcWeight);

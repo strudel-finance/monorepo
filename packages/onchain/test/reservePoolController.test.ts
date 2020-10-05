@@ -140,12 +140,17 @@ describe('ReservePoolController', async () => {
     let vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
     let priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
     let priceUni = reserves.reserve0.div(reserves.reserve1);
+    console.log(priceUni);
     expect(priceBPool).to.eq(priceUni);
 
     // do some swaps, get pools out of sync
     const devAddr = await signers[0].getAddress();
     await wEth.transfer(spotPair.address, expandTo18Decimals(4));
     await spotPair.swap(0, '90636363636363636', devAddr, '0x');
+
+    reserves = await spotPair.getReserves();
+    priceUni = reserves.reserve0.div(reserves.reserve1);
+    console.log(priceUni);
 
     // update the oracle
     await ethers.provider.send('evm_increaseTime', [60 * 60 * 24]);
@@ -163,6 +168,7 @@ describe('ReservePoolController', async () => {
     vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
     priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
     priceUni = reserves.reserve0.div(reserves.reserve1);
+    console.log(priceUni);
     expect(priceBPool).to.eq(priceUni);
   });
 
@@ -199,4 +205,5 @@ describe('ReservePoolController', async () => {
     priceUni = reserves.reserve0.div(reserves.reserve1);
     expect(priceBPool).to.eq(priceUni);
   });
+
 });

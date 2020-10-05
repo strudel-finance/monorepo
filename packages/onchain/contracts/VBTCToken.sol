@@ -34,11 +34,12 @@ contract VBTCToken is FlashERC20, ERC20Capped {
   uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
   bytes3 constant PROTOCOL_ID = 0x07ffff; // a mersenne prime
 
-  uint256 public numConfs;
-  IRelay public relay;
-  ERC20Mintable public strudel;
-  uint256 public relayReward;
+  ERC20Mintable public immutable strudel;
 
+  IRelay public relay;
+
+  uint256 public numConfs;
+  uint256 public relayReward;
   // marking all sucessfully processed outputs
   mapping(bytes32 => bool) public knownOutpoints;
 

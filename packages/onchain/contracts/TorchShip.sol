@@ -45,7 +45,7 @@ contract TorchShip is Ownable {
   // The STRDL TOKEN!
   ERC20Mintable public strudel;
   // Dev fund (2%, initially)
-  uint256 public devFundDivRate = 50;
+  uint256 public devFundDivRate = 17;
   // Dev address.
   address public devaddr;
   // Block number when bonus STRDL period ends.
@@ -53,7 +53,7 @@ contract TorchShip is Ownable {
   // STRDL tokens created per block.
   uint256 public strudelPerBlock;
   // Bonus muliplier for early strudel makers.
-  uint256 public constant BONUS_MULTIPLIER = 10;
+  uint256 public immutable bonusMultiplier;
 
   // Info of each pool.
   PoolInfo[] public poolInfo;
@@ -75,13 +75,16 @@ contract TorchShip is Ownable {
     address _devaddr,
     uint256 _strudelPerBlock,
     uint256 _startBlock,
-    uint256 _bonusEndBlock
+    uint256 _bonusEndBlock,
+    uint256 _bonusMultiplier
   ) public {
     strudel = ERC20Mintable(_strudel);
     devaddr = _devaddr;
+    require(_strudelPerBlock >= 10**15, "forgot the decimals for $TRDL?");
     strudelPerBlock = _strudelPerBlock;
     bonusEndBlock = _bonusEndBlock;
     startBlock = _startBlock;
+    bonusMultiplier = _bonusMultiplier;
   }
 
   function poolLength() external view returns (uint256) {
@@ -126,11 +129,11 @@ contract TorchShip is Ownable {
   // Return reward multiplier over the given _from to _to block.
   function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
     if (_to <= bonusEndBlock) {
-      return _to.sub(_from).mul(BONUS_MULTIPLIER);
+      return _to.sub(_from).mul(bonusMultiplier);
     } else if (_from >= bonusEndBlock) {
       return _to.sub(_from);
     } else {
-      return bonusEndBlock.sub(_from).mul(BONUS_MULTIPLIER).add(_to.sub(bonusEndBlock));
+      return bonusEndBlock.sub(_from).mul(bonusMultiplier).add(_to.sub(bonusEndBlock));
     }
   }
 
