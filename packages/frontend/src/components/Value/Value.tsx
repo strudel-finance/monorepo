@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, {useState, useEffect} from 'react'
 import CountUp from 'react-countup'
 
 import styled from 'styled-components'
@@ -8,7 +8,7 @@ interface ValueProps {
   decimals?: number
 }
 
-const Value: React.FC<ValueProps> = ({ value, decimals }) => {
+const Value: React.FC<ValueProps> = ({value, decimals}) => {
   const [start, updateStart] = useState(0)
   const [end, updateEnd] = useState(0)
 

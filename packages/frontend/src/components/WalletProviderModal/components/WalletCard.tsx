@@ -5,6 +5,7 @@ import CardContent from '../../CardContent'
 import CardIcon from '../../CardIcon'
 import CardTitle from '../../CardTitle'
 import Spacer from '../../Spacer'
+import styled from 'styled-components'
 
 interface WalletCardProps {
   icon: React.ReactNode

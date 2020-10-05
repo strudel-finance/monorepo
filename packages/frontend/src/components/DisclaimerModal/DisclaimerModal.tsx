@@ -1,8 +1,8 @@
-import React, { useCallback, useState, useMemo } from 'react'
+import React, {useCallback, useState, useMemo} from 'react'
 
 import Button from '../Button'
 import CardIcon from '../CardIcon'
-import Modal, { ModalProps } from '..//Modal'
+import Modal, {ModalProps} from '..//Modal'
 import ModalActions from '..//ModalActions'
 import ModalContent from '../ModalContent'
 import ModalTitle from '../ModalTitle'
@@ -11,10 +11,7 @@ interface DisclaimerModal extends ModalProps {
   onConfirm: () => void
 }
 
-const DisclaimerModal: React.FC<DisclaimerModal> = ({
-  onConfirm,
-  onDismiss,
-}) => {
+const DisclaimerModal: React.FC<DisclaimerModal> = ({onConfirm, onDismiss}) => {
   const [step, setStep] = useState('disclaimer')
 
   const handleConfirm = useCallback(() => {
@@ -28,7 +25,7 @@ const DisclaimerModal: React.FC<DisclaimerModal> = ({
         <div>
           <p>Audits: None.</p>
           <p>
-            While the initial creators of the Sushi protocol have made
+            While the initial creators of the Strudel protocol have made
             reasonable efforts to attempt to ensure the security of the
             contracts, including forking much of the codebase from existing
             well-audited projects and soliciting review from friends, nothing
@@ -44,13 +41,8 @@ const DisclaimerModal: React.FC<DisclaimerModal> = ({
     } else {
       return (
         <div>
-          <p>Attention SUSHI Uniswap LPs</p>
-          <p>
-            The only Uniswap pool that is compatible with SUSHI is SUSHI/yCRV
-            (Curve yPool tokens)
-          </p>
-          <p>Providing liquidity for other Uniswap pools is dangerous</p>
-          <p>You will LOSE your share of rebases</p>
+          <p>Attention vBTC exchange</p>
+          <p>By converting BTC into vBTC, your Bitcoin are irrevocably lost.</p>
         </div>
       )
     }

@@ -1,20 +1,21 @@
-import React, { useEffect, useMemo } from 'react'
-import { useParams } from 'react-router-dom'
+import React, {useEffect, useMemo} from 'react'
+import {useParams} from 'react-router-dom'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
-import { provider } from 'web3-core'
+import {useWallet} from 'use-wallet'
+import {provider} from 'web3-core'
 import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
 import useFarm from '../../hooks/useFarm'
 import useRedeem from '../../hooks/useRedeem'
-import useSushi from '../../hooks/useSushi'
-import { getMasterChefContract } from '../../sushi/utils'
-import { getContract } from '../../utils/erc20'
+import Button from '../../components/Button'
+import useVBTC from '../../hooks/useVBTC'
+import {getMasterChefContract} from '../../vbtc/utils'
+import {getContract} from '../../utils/erc20'
 import Harvest from './components/Harvest'
 import Stake from './components/Stake'
 
 const Farm: React.FC = () => {
-  const { farmId } = useParams()
+  const {farmId} = useParams()
   const {
     pid,
     lpToken,
@@ -37,14 +38,14 @@ const Farm: React.FC = () => {
     window.scrollTo(0, 0)
   }, [])
 
-  const sushi = useSushi()
-  const { ethereum } = useWallet()
+  const vbtc = useVBTC()
+  const {ethereum} = useWallet()
 
   const lpContract = useMemo(() => {
     return getContract(ethereum as provider, lpTokenAddress)
   }, [ethereum, lpTokenAddress])
 
-  const { onRedeem } = useRedeem(getMasterChefContract(sushi))
+  const {onRedeem} = useRedeem(getMasterChefContract(vbtc))
 
   const lpTokenName = useMemo(() => {
     return lpToken.toUpperCase()
@@ -61,6 +62,11 @@ const Farm: React.FC = () => {
         subtitle={`Deposit ${lpTokenName}  Tokens and earn ${earnTokenName}`}
         title={name}
       />
+      <Spacer size="sm" />
+      <div style={{  margin: '0 auto' }}>
+          <Button text="<- Back" to="/farms" variant="secondary" size="lg" />
+      </div>
+      <Spacer size="lg" />
       <StyledFarm>
         <StyledCardsWrapper>
           <StyledCardWrapper>
@@ -78,7 +84,7 @@ const Farm: React.FC = () => {
         <Spacer size="lg" />
         <StyledInfo>
           ⭐️ Every time you stake and unstake LP tokens, the contract will
-          automagically harvest SUSHI rewards for you!
+          automagically harvest STRUDEL rewards for you!
         </StyledInfo>
         <Spacer size="lg" />
       </StyledFarm>

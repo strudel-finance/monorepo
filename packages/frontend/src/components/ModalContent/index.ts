@@ -1,1 +1,1 @@
-export { default } from './ModalContent'
+export { default, StyledModalContent } from './ModalContent'
