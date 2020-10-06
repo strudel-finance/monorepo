@@ -80,3 +80,4 @@ artifacts
 cache
 typechain
 dist/
+deployments

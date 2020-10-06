@@ -154,7 +154,7 @@ describe('TorchShip', async () => {
         dev,
         instance,
         100, // $TRDL per block
-        100, // start block
+        150, // start block
         1000, // reward end block
         10
       );
@@ -162,20 +162,20 @@ describe('TorchShip', async () => {
       await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(bob).approve(torchShip.address, '1000');
       await torchShip.connect(bob).deposit(0, '100');
-      await advanceBlock(89);
-      await torchShip.connect(bob).deposit(0, '0'); // block 90
+      await advanceBlock(139);
+      await torchShip.connect(bob).deposit(0, '0'); // block 140
       const bobAddr = await bob.getAddress();
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      await advanceBlock(94);
-      await torchShip.connect(bob).deposit(0, '0'); // block 95
+      await advanceBlock(144);
+      await torchShip.connect(bob).deposit(0, '0'); // block 145
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      await advanceBlock(99);
-      await torchShip.connect(bob).deposit(0, '0'); // block 100
+      await advanceBlock(149);
+      await torchShip.connect(bob).deposit(0, '0'); // block 150
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      await torchShip.connect(bob).deposit(0, '0'); // block 101
+      await torchShip.connect(bob).deposit(0, '0'); // block 151
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(1000));
-      await advanceBlock(104);
-      await torchShip.connect(bob).deposit(0, '0'); // block 105
+      await advanceBlock(154);
+      await torchShip.connect(bob).deposit(0, '0'); // block 155
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(5000));
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(100));
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(5100));

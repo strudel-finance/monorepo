@@ -26,6 +26,7 @@ chai.use(solidity);
 const {expect} = chai;
 const wEthAmount = expandTo18Decimals(40);
 const tBtcAmount = expandTo18Decimals(1);
+const MAX = ethers.constants.MaxUint256;
 
 describe('ReservePoolController', async () => {
   let signers: Signer[];
@@ -104,14 +105,15 @@ describe('ReservePoolController', async () => {
 
     // create the controller
     const ReservePoolController = await ethers.getContractFactory('ReservePoolController');
-    controller = (await upgrades.deployProxy(ReservePoolController, [
+    const pendingController = await upgrades.deployProxy(ReservePoolController, [
       vBtc.address,
       wEth.address,
       bFactory.address,
       router.address,
       oracle.address,
-    ])) as ReservePoolController;
-    await controller.deployed();
+    ]);
+    await pendingController.deployed();
+    controller = pendingController as ReservePoolController;
   });
 
   it('should deploy', async () => {
@@ -203,5 +205,63 @@ describe('ReservePoolController', async () => {
     priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
     priceUni = reserves.reserve0.div(reserves.reserve1);
     expect(priceBPool).to.eq(priceUni);
+  });
+
+  describe('standard pool interaction', async () => {
+    it('JoinPool should not revert if smart pool is not finalized', async () => {
+      const bPoolAddr = await controller.bPool();
+      const alice = await signers[0].getAddress();
+      let currentPoolBalance = await controller.balanceOf(alice);
+      const previousPoolBalance = currentPoolBalance;
+      let previousbPoolVbtcBalance = await vBtc.balanceOf(bPoolAddr);
+      let previousbPoolWethBalance = await wEth.balanceOf(bPoolAddr);
+
+      const poolAmountOut = expandTo18Decimals(1);
+      await wEth.connect(signers[0]).approve(controller.address, MAX);
+      await vBtc.connect(signers[0]).approve(controller.address, MAX);
+      await controller.connect(signers[0]).joinPool(poolAmountOut, [MAX, MAX]);
+
+      currentPoolBalance = currentPoolBalance.add(poolAmountOut);
+
+      const balance = await controller.balanceOf(alice);
+      const bPoolVbtcBalance = await vBtc.balanceOf(bPoolAddr);
+      const bPoolWethBalance = await wEth.balanceOf(bPoolAddr);
+
+      // Balances of all tokens increase proportionally to the pool balance
+      expect(balance).to.eq(currentPoolBalance);
+      let balanceChange = poolAmountOut.mul(previousbPoolWethBalance).div(previousPoolBalance);
+      const currentWethBalance = previousbPoolWethBalance.add(balanceChange);
+      expect(bPoolWethBalance.div(10)).to.eq(currentWethBalance.div(10));
+      balanceChange = poolAmountOut.mul(previousbPoolVbtcBalance).div(previousPoolBalance);
+      const currentVbtcBalance = previousbPoolVbtcBalance.add(balanceChange);
+      expect(bPoolVbtcBalance.div(10)).to.eq(currentVbtcBalance.div(10));
+    });
+    it('should exitpool', async () => {
+      const bPoolAddr = await controller.bPool();
+      const alice = await signers[0].getAddress();
+
+      let currentPoolBalance = await controller.balanceOf(alice);
+      let previousbPoolWethBalance = await wEth.balanceOf(bPoolAddr);
+      let previousbPoolVbtcBalance = await vBtc.balanceOf(bPoolAddr);
+      const previousPoolBalance = currentPoolBalance;
+
+      const poolAmountIn = expandTo18Decimals(99);
+      await controller.exitPool(poolAmountIn, [0, 0]);
+
+      currentPoolBalance = currentPoolBalance.sub(poolAmountIn);
+
+      const poolBalance = await controller.balanceOf(alice);
+      const bPoolWethBalance = await wEth.balanceOf(bPoolAddr);
+      const bPoolVbtcBalance = await vBtc.balanceOf(bPoolAddr);
+
+      // Balances of all tokens increase proportionally to the pool balance
+      expect(poolBalance).to.eq(currentPoolBalance);
+      let balanceChange = poolAmountIn.mul(previousbPoolWethBalance).div(previousPoolBalance);
+      const currentWethBalance = previousbPoolWethBalance.sub(balanceChange);
+      expect(currentWethBalance.div(10)).to.eq(bPoolWethBalance.div(10));
+      balanceChange = poolAmountIn.mul(previousbPoolVbtcBalance).div(previousPoolBalance);
+      const currentVbtcBalance = previousbPoolVbtcBalance.sub(balanceChange);
+      expect(currentVbtcBalance.div(10)).to.eq(bPoolVbtcBalance.div(10));
+    });
   });
 });

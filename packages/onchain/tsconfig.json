@@ -15,7 +15,8 @@
     "typechain",
     "scripts",
     "test",
-    "index.ts"
+    "index.ts",
+    "deploy"
     ],
   "files": [
     "./buidler.config.ts",
