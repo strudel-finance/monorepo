@@ -1,10 +1,10 @@
 pragma solidity 0.6.6;
 
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
+import {IERC20} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import {SafeMath} from "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import {StrudelToken} from "./StrudelToken.sol";
 
 // The torchship has brought them to Ganymede, where they have to pulverize boulders and lava flows, and seed the resulting dust with carefully formulated organic material.
 //
@@ -13,7 +13,7 @@ import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
 // distributed and the community can show to govern itself.
 //
 // Have fun reading it. Hopefully it's bug-free. God bless.
-contract TorchShip is Ownable {
+contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
 
@@ -43,24 +43,22 @@ contract TorchShip is Ownable {
   }
 
   // The STRDL TOKEN!
-  ERC20Mintable public strudel;
+  StrudelToken public strudel;
   // Dev fund (2%, initially)
-  uint256 public devFundDivRate = 17;
-  // Dev address.
-  address public devaddr;
+  uint256 public devFundDivRate;
   // Block number when bonus STRDL period ends.
   uint256 public bonusEndBlock;
   // STRDL tokens created per block.
   uint256 public strudelPerBlock;
   // Bonus muliplier for early strudel makers.
-  uint256 public immutable bonusMultiplier;
+  uint256 public bonusMultiplier;
 
   // Info of each pool.
   PoolInfo[] public poolInfo;
   // Info of each user that stakes LP tokens.
   mapping(uint256 => mapping(address => UserInfo)) public userInfo;
   // Total allocation points. Must be the sum of all allocation points in all pools.
-  uint256 public totalAllocPoint = 0;
+  uint256 public totalAllocPoint;
   // The block number when STRDL mining starts.
   uint256 public startBlock;
 
@@ -70,21 +68,22 @@ contract TorchShip is Ownable {
   event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
   event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
-  constructor(
+  function initialize(
     address _strudel,
-    address _devaddr,
     uint256 _strudelPerBlock,
     uint256 _startBlock,
     uint256 _bonusEndBlock,
     uint256 _bonusMultiplier
-  ) public {
-    strudel = ERC20Mintable(_strudel);
-    devaddr = _devaddr;
+  ) public initializer {
+    __Ownable_init();
+    strudel = StrudelToken(_strudel);
     require(_strudelPerBlock >= 10**15, "forgot the decimals for $TRDL?");
     strudelPerBlock = _strudelPerBlock;
     bonusEndBlock = _bonusEndBlock;
     startBlock = _startBlock;
     bonusMultiplier = _bonusMultiplier;
+    totalAllocPoint = 0;
+    devFundDivRate = 17;
   }
 
   function poolLength() external view returns (uint256) {
@@ -176,7 +175,7 @@ contract TorchShip is Ownable {
     uint256 strudelReward = multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(
       totalAllocPoint
     );
-    strudel.mint(devaddr, strudelReward.div(devFundDivRate));
+    strudel.mint(owner(), strudelReward.div(devFundDivRate));
     strudel.mint(address(this), strudelReward);
     pool.accStrudelPerShare = pool.accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));
     pool.lastRewardBlock = block.number;
@@ -229,12 +228,6 @@ contract TorchShip is Ownable {
     } else {
       strudel.transfer(_to, _amount);
     }
-  }
-
-  // Update dev address by the previous dev.
-  function dev(address _devaddr) public {
-    require(msg.sender == devaddr, "dev: wut?");
-    devaddr = _devaddr;
   }
 
   // **** Additional functions separate from the original masterchef contract ****

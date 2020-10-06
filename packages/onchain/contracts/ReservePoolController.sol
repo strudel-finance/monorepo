@@ -2,10 +2,10 @@
 pragma solidity 0.6.6;
 
 // Imports
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import "./uniswap/UniswapV2Library.sol";
@@ -29,7 +29,7 @@ import "./IFlashERC20.sol";
  *        the setWeight function is used after trades by this priviliged contract.
  *
  */
-contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
+contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpgradeSafe {
   using SafeMath for uint256;
 
   uint256 constant DEFAULT_WEIGHT = 5 * 10**18;
@@ -39,38 +39,18 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
 
   event Trade(bool indexed direction, uint256 amount);
   event LogJoin(address indexed caller, address indexed tokenIn, uint256 tokenAmountIn);
-
   event LogExit(address indexed caller, address indexed tokenOut, uint256 tokenAmountOut);
 
   //  immutable (only assigned in constructor)
-  IERC20 public immutable vBtc;
-  IERC20 public immutable wEth;
-  IUniswapV2Router01 public immutable uniRouter; // IUniswapV2Router01
-  IBFactory public immutable bFactory;
+  IERC20 private vBtc;
+  IERC20 private wEth;
+  IUniswapV2Router01 private uniRouter; // IUniswapV2Router01
+  IBFactory private bFactory;
 
   IBPool public bPool; // IBPool
-  address public oracle; // 24 hour price feed for BTC
-  uint256 public maxVbtcWeight = 3 * DEFAULT_WEIGHT; // denormmalized, like in Balancer
-  uint32 public blockTimestampLast;
-
-  /**
-   * @notice Construct a new Configurable Rights Pool (wrapper around BPool)
-   * @param _bPoolFactory - the BPoolFactory used to create the underlying pool
-   * @param _uniRouter - uniswap router
-   */
-  constructor(
-    address _vBtcAddr,
-    address _wEthAddr,
-    address _bPoolFactory,
-    IUniswapV2Router01 _uniRouter,
-    address _oracle
-  ) public ERC20("Strudel vBTC++", "vBTC++") {
-    vBtc = IERC20(_vBtcAddr);
-    wEth = IERC20(_wEthAddr);
-    bFactory = IBFactory(_bPoolFactory);
-    uniRouter = _uniRouter;
-    oracle = _oracle;
-  }
+  address private oracle; // 24 hour price feed for BTC
+  uint256 private maxVbtcWeight; // denormmalized, like in Balancer
+  uint32 private blockTimestampLast;
 
   // computes the direction and magnitude of the profit-maximizing trade
   function computeProfitMaximizingTrade(
@@ -95,7 +75,26 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
 
   // External functions
 
-  function initialize(uint256 initialSwapFee) external onlyOwner {
+  function initialize(address _vBtcAddr,
+    address _wEthAddr,
+    address _bPoolFactory,
+    IUniswapV2Router01 _uniRouter,
+    address _oracle) external initializer {
+
+    vBtc = IERC20(_vBtcAddr);
+    wEth = IERC20(_wEthAddr);
+    bFactory = IBFactory(_bPoolFactory);
+    uniRouter = _uniRouter;
+    oracle = _oracle;
+    maxVbtcWeight = 3 * DEFAULT_WEIGHT;
+    // chain constructors?
+    __ERC20_init("Strudel vBTC++", "vBTC++");
+    __Ownable_init();
+  }
+
+  // External functions
+
+  function deployPool(uint256 initialSwapFee) external {
     require(address(bPool) == address(0), "already initialized");
 
     // get price
@@ -287,20 +286,20 @@ contract ReservePoolController is ERC20, BMath, IBorrower, Ownable {
     bPool.setSwapFee(swapFee);
   }
 
-  /**
-   * @notice Getter for the publicSwap field on the underlying pool
-   */
-  function isPublicSwap() external view returns (bool) {
-    return bPool.isPublicSwap();
-  }
+  // /**
+  //  * @notice Getter for the publicSwap field on the underlying pool
+  //  */
+  // function isPublicSwap() external view returns (bool) {
+  //   return bPool.isPublicSwap();
+  // }
 
-  /**
-   * @notice Set the public swap flag on the underlying pool
-   * @param publicSwap new value of the swap
-   */
-  function setPublicSwap(bool publicSwap) external onlyOwner {
-    bPool.setPublicSwap(publicSwap);
-  }
+  // *
+  //  * @notice Set the public swap flag on the underlying pool
+  //  * @param publicSwap new value of the swap
+   
+  // function setPublicSwap(bool publicSwap) external onlyOwner {
+  //   bPool.setPublicSwap(publicSwap);
+  // }
 
   /**
    * @notice Join a pool

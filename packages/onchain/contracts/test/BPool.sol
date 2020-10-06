@@ -13,12 +13,12 @@
 
 pragma solidity 0.6.6;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "../balancer/BMath.sol";
 import "../balancer/IBPool.sol";
 
-contract BPool is ERC20, BMath, IBPool {
+contract BPool is ERC20UpgradeSafe, BMath, IBPool {
   struct Record {
     bool bound; // is token bound to pool
     uint256 index; // private
@@ -72,12 +72,13 @@ contract BPool is ERC20, BMath, IBPool {
   mapping(address => Record) private _records;
   uint256 private _totalWeight;
 
-  constructor(address controller) public ERC20("poolName", "POS") {
+  constructor(address controller) public {
     _controller = controller;
     _factory = msg.sender;
     _swapFee = MIN_FEE;
     _publicSwap = false;
     _finalized = false;
+    __ERC20_init("poolName", "POS");
   }
 
   function isPublicSwap() external override view returns (bool) {

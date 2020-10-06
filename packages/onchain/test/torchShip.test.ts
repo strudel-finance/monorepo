@@ -1,11 +1,13 @@
-import {ethers} from '@nomiclabs/buidler';
-import {Signer} from 'ethers';
-import {BigNumberish} from 'ethers/utils';
+import {ethers, upgrades} from '@nomiclabs/buidler';
+import {Signer, Contract} from 'ethers';
+import { getAdminAddress } from '@openzeppelin/upgrades-core';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
-import {expandTo18Decimals} from './shared/utilities';
+import {expandTo18Decimals, advanceBlock} from './shared/utilities';
 import {StrudelToken} from '../typechain/StrudelToken';
 import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
+import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
+import AdminUpgradeabilityProxy from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
 import {TorchShip} from '../typechain/TorchShip';
 import {TorchShipFactory} from '../typechain/TorchShipFactory';
 import {MockErc20} from '../typechain/MockErc20';
@@ -14,19 +16,54 @@ import {MockErc20Factory} from '../typechain/MockErc20Factory';
 chai.use(solidity);
 const {expect} = chai;
 
-async function advanceBlock(blocks: number): Promise<StrudelToken> {
-  while (blocks > 1) {
-    await ethers.provider.send('evm_increaseTime', [1]);
-    await ethers.provider.send('evm_mine', []);
-    blocks--;
-  }
-  await ethers.provider.send('evm_increaseTime', [1]);
-  return ethers.provider.send('evm_mine', []);
-}
-
 async function deployStrudel(signer: Signer): Promise<StrudelToken> {
   let factory = new StrudelTokenFactory(signer);
   return factory.deploy();
+}
+
+async function deployShip(
+    dev: Signer,
+    strudel: StrudelToken,
+    strudelPerBlock: number,
+    startBlock: number,
+    bonusEndBlock: number,
+    bonusMultiplier: number
+  ): Promise<TorchShip> {
+  let [alice] = await ethers.getSigners();
+
+  // deploy the thing
+  const TorchShip = (await ethers.getContractFactory("TorchShip")).connect(dev);
+  const torchShip = await upgrades.deployProxy(TorchShip, [
+    strudel.address,
+    expandTo18Decimals(strudelPerBlock),
+    startBlock,
+    bonusEndBlock,
+    bonusMultiplier
+  ], {unsafeAllowCustomTypes: true });
+  await torchShip.deployed();
+
+  // const devAddr = await dev.getAddress();
+  // let owner = await torchShip.owner();
+  // let admin = await getAdminAddress(ethers.provider, torchShip.address);
+  // console.log('before:', owner, admin);
+
+
+  // take control back from proxy admin
+  // const proxyAdmin = new Contract(
+  //   admin,
+  //   JSON.stringify(ProxyAdminArtifact.abi),
+  //   ethers.provider
+  // ).connect(dev);
+  
+  // await proxyAdmin.connect(dev).functions.changeProxyAdmin(torchShip.address, devAddr);
+
+  // admin = await getAdminAddress(ethers.provider, torchShip.address);
+  // owner = await torchShip.connect(alice).owner();
+  // console.log('after:', admin, owner);
+
+  // prepare strudel
+  await strudel.addMinter(torchShip.address);
+  return torchShip as TorchShip;
 }
 
 describe('TorchShip', async () => {
@@ -38,34 +75,48 @@ describe('TorchShip', async () => {
   let minter: Signer;
 
   beforeEach(async () => {
-    [alice, bob, carol, dev, minter] = await ethers.signers();
+    [alice, bob, carol, dev, minter] = await ethers.getSigners();
     instance = await deployStrudel(dev);
   });
 
   it('should set correct state variables', async () => {
-    const factory = new TorchShipFactory(alice);
-    const devAddr = await dev.getAddress();
-    const torchShip = await factory.deploy(instance.address, devAddr, expandTo18Decimals(1000), '0', '1000', 1);
-    await instance.addMinter(torchShip.address);
-    const strudel = await torchShip.strudel();
-    const devaddr = await torchShip.devaddr();
+    const torchShip = await deployShip(
+      dev,
+      instance,
+      1000,
+      0,
+      1000,
+      1
+    );
+    const strudel = await torchShip.connect(alice).strudel();
     expect(strudel.valueOf()).to.eq(instance.address);
-    expect(devaddr.valueOf()).to.eq(devAddr);
     expect(await instance.isMinter(torchShip.address)).to.be.true;
   });
 
   it('should allow dev and only dev to update dev', async () => {
-    const factory = new TorchShipFactory(alice);
-    const devAddr = await dev.getAddress();
-    const torchShip = await factory.deploy(instance.address, devAddr, expandTo18Decimals(1000), '0', '1000', 1);
-    expect((await torchShip.devaddr()).valueOf()).to.eq(devAddr);
-    const bobAddr = await bob.getAddress();
-    await expect(torchShip.connect(bob).dev(bobAddr)).to.be.revertedWith('dev: wut?');
-    await torchShip.connect(dev).dev(bobAddr);
-    expect((await torchShip.devaddr()).valueOf()).to.eq(bobAddr);
+    const torchShip = await deployShip(
+      dev,
+      instance,
+      1000,
+      0,
+      1000,
+      1
+    );
     const aliceAddr = await alice.getAddress();
-    await torchShip.connect(bob).dev(aliceAddr);
-    expect((await torchShip.devaddr()).valueOf()).to.eq(aliceAddr);
+    const bobAddr = await bob.getAddress();
+
+    const proxy = new Contract(
+      (await torchShip.address),
+      JSON.stringify(AdminUpgradeabilityProxy.abi),
+      ethers.provider
+    );
+    const devAddr = await dev.getAddress();
+    expect((await torchShip.connect(alice).owner()).valueOf()).to.eq(devAddr);
+    await expect(torchShip.connect(bob).transferOwnership(devAddr)).to.be.revertedWith('caller is not the owner');
+    await torchShip.connect(dev).functions.transferOwnership(bobAddr);
+    expect((await torchShip.owner()).valueOf()).to.eq(bobAddr);
+    await torchShip.connect(bob).functions.transferOwnership(aliceAddr);
+    expect((await torchShip.owner()).valueOf()).to.eq(aliceAddr);
   });
 
   describe('With ERC/LP token added to the field', () => {
@@ -88,15 +139,15 @@ describe('TorchShip', async () => {
     it('should allow emergency withdraw', async () => {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await new TorchShipFactory(alice).deploy(
-        instance.address,
-        devAddr,
-        expandTo18Decimals(100), // $TRDL per block
-        '100', // start block
-        '1000', // bonus end block
+      const torchShip = await deployShip(
+        dev,
+        instance,
+        100, // $TRDL per block
+        100, // start block
+        1000, // bonus end block
         1
       );
-      await torchShip.add('100', lp.address, true);
+      await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(bob).approve(torchShip.address, '1000');
       await torchShip.connect(bob).deposit(0, '100');
       const bobAddr = await bob.getAddress();
@@ -108,32 +159,31 @@ describe('TorchShip', async () => {
     it('should give out $TRDL only after farming start time', async () => {
       // 100 per block farming rate starting at block 100 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await new TorchShipFactory(alice).deploy(
-        instance.address,
-        devAddr,
-        expandTo18Decimals(100), // $TRDL per block
-        '100', // start block
-        '1000', // reward end block
+      const torchShip = await deployShip(
+        dev,
+        instance,
+        100, // $TRDL per block
+        100, // start block
+        1000, // reward end block
         10
       );
-      await torchShip.setDevFundDivRate(50);
-      await instance.addMinter(torchShip.address);
-      await torchShip.add('100', lp.address, true);
+      await torchShip.connect(dev).setDevFundDivRate(50);
+      await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(bob).approve(torchShip.address, '1000');
       await torchShip.connect(bob).deposit(0, '100');
-      await advanceBlock(89 - (await ethers.provider.getBlock('latest')).number);
+      await advanceBlock(89);
       await torchShip.connect(bob).deposit(0, '0'); // block 90
       const bobAddr = await bob.getAddress();
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      await advanceBlock(4);
+      await advanceBlock(94);
       await torchShip.connect(bob).deposit(0, '0'); // block 95
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      await advanceBlock(4);
+      await advanceBlock(99);
       await torchShip.connect(bob).deposit(0, '0'); // block 100
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
       await torchShip.connect(bob).deposit(0, '0'); // block 101
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(1000));
-      await advanceBlock(3);
+      await advanceBlock(104);
       await torchShip.connect(bob).deposit(0, '0'); // block 105
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(5000));
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(100));
@@ -143,30 +193,29 @@ describe('TorchShip', async () => {
     it('should not distribute $TRDL if no one deposit', async () => {
       // 100 per block farming rate starting at block 200 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await new TorchShipFactory(alice).deploy(
-        instance.address,
-        devAddr,
-        expandTo18Decimals(100),
-        '200',
-        '1000',
+      const torchShip = await deployShip(
+        dev,
+        instance,
+        100,
+        200,
+        1000,
         10
       );
-      await torchShip.setDevFundDivRate(50);
-      await instance.addMinter(torchShip.address);
-      await torchShip.add('100', lp.address, true);
+      await torchShip.connect(dev).setDevFundDivRate(50);
+      await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(bob).approve(torchShip.address, '1000');
-      await advanceBlock(199 - (await ethers.provider.getBlock('latest')).number);
+      await advanceBlock(199);
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(0));
-      await advanceBlock(5);
+      await advanceBlock(205);
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(0));
-      await advanceBlock(5);
+      await advanceBlock(209);
       await torchShip.connect(bob).deposit(0, '10'); // block 210
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(0));
       const bobAddr = await bob.getAddress();
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(0));
       expect((await lp.balanceOf(bobAddr)).valueOf()).to.eq(990);
-      await advanceBlock(9);
+      await advanceBlock(219);
       await torchShip.connect(bob).withdraw(0, '10'); // block 220
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(10200));
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(10000));
@@ -177,33 +226,32 @@ describe('TorchShip', async () => {
     it('should distribute $TRDL properly for each staker', async () => {
       // 100 per block farming rate starting at block 300 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await new TorchShipFactory(alice).deploy(
-        instance.address,
-        devAddr,
-        expandTo18Decimals(100),
-        '300',
-        '1000',
+      const torchShip = await deployShip(
+        dev,
+        instance,
+        100,
+        300,
+        1000,
         10
       );
-      await torchShip.setDevFundDivRate(50);
-      await instance.addMinter(torchShip.address);
-      await torchShip.add('100', lp.address, true);
+      await torchShip.connect(dev).setDevFundDivRate(50);
+      await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(alice).approve(torchShip.address, '1000');
       await lp.connect(bob).approve(torchShip.address, '1000');
       await lp.connect(carol).approve(torchShip.address, '1000');
       // Alice deposits 10 LPs at block 310
-      await advanceBlock(309 - (await ethers.provider.getBlock('latest')).number);
+      await advanceBlock(309);
       await torchShip.connect(alice).deposit(0, '10');
       // Bob deposits 20 LPs at block 314
-      await advanceBlock(3);
+      await advanceBlock(313);
       await torchShip.connect(bob).deposit(0, '20');
       // Carol deposits 30 LPs at block 318
-      await advanceBlock(3);
+      await advanceBlock(317);
       await torchShip.connect(carol).deposit(0, '30');
       // Alice deposits 10 more LPs at block 320. At this point:
       //   Alice should have: 4*1000 + 4*1/3*1000 + 2*1/6*1000 = 5666
       //   TorchShip should have the remaining: 10000 - 5666 = 4334
-      await advanceBlock(1);
+      await advanceBlock(319);
       await torchShip.connect(alice).deposit(0, '10');
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(10200));
       const aliceAddr = await alice.getAddress();
@@ -212,26 +260,30 @@ describe('TorchShip', async () => {
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq(expandTo18Decimals(0));
       const carolAddr = await carol.getAddress();
       expect((await instance.balanceOf(carolAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      expect((await instance.balanceOf(torchShip.address)).valueOf()).to.eq('4333333333333333333334');
+      expect((await instance.balanceOf(torchShip.address)).valueOf()).to.eq(
+        '4333333333333333333334'
+      );
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(200));
       // Bob withdraws 5 LPs at block 330. At this point:
       //   Bob should have: 4*2/3*1000 + 2*2/6*1000 + 10*2/7*1000 = 6190
-      await advanceBlock(9);
+      await advanceBlock(329);
       await torchShip.connect(bob).withdraw(0, '5');
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(20400));
       expect((await instance.balanceOf(aliceAddr)).valueOf()).to.eq('5666666666666666666666');
       expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('6190476190476190476190');
       expect((await instance.balanceOf(carolAddr)).valueOf()).to.eq(expandTo18Decimals(0));
-      expect((await instance.balanceOf(torchShip.address)).valueOf()).to.eq('8142857142857142857144');
+      expect((await instance.balanceOf(torchShip.address)).valueOf()).to.eq(
+        '8142857142857142857144'
+      );
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(400));
       // Alice withdraws 20 LPs at block 340.
       // Bob withdraws 15 LPs at block 350.
       // Carol withdraws 30 LPs at block 360.
-      await advanceBlock(9);
+      await advanceBlock(339);
       await torchShip.connect(alice).withdraw(0, '20');
-      await advanceBlock(9);
+      await advanceBlock(349);
       await torchShip.connect(bob).withdraw(0, '15');
-      await advanceBlock(9);
+      await advanceBlock(359);
       await torchShip.connect(carol).withdraw(0, '30');
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(51000));
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(1000));
@@ -250,63 +302,71 @@ describe('TorchShip', async () => {
     it('should give proper $TRDL allocation to each pool', async () => {
       // 100 per block farming rate starting at block 400 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await new TorchShipFactory(alice).deploy(
-        instance.address,
-        devAddr,
-        expandTo18Decimals(100),
-        '400',
-        '1000',
+      const torchShip = await deployShip(
+        dev,
+        instance,
+        100,
+        400,
+        1000,
         10
       );
-      await torchShip.setDevFundDivRate(50);
-      await instance.addMinter(torchShip.address);
+      await torchShip.connect(dev).setDevFundDivRate(50);
       await lp.connect(alice).approve(torchShip.address, '1000');
       await lp2.connect(bob).approve(torchShip.address, '1000');
       // Add first LP to the pool with allocation 1
-      await torchShip.add('10', lp.address, true);
+      await torchShip.connect(dev).add('10', lp.address, true);
       // Alice deposits 10 LPs at block 410
-      await advanceBlock(409 - (await ethers.provider.getBlock('latest')).number);
+      await advanceBlock(409);
       await torchShip.connect(alice).deposit(0, '10');
       // Add LP2 to the pool with allocation 2 at block 420
-      await advanceBlock(9);
-      await torchShip.add('20', lp2.address, true);
+      await advanceBlock(419);
+      await torchShip.connect(dev).add('20', lp2.address, true);
       // Alice should have 10*1000 pending reward
       const aliceAddr = await alice.getAddress();
-      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(expandTo18Decimals(10000));
+      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(
+        expandTo18Decimals(10000)
+      );
       // Bob deposits 10 LP2s at block 425
-      await advanceBlock(4);
+      await advanceBlock(424);
       await torchShip.connect(bob).deposit(1, '5');
       // Alice should have 10000 + 5*1/3*1000 = 11666 pending reward
-      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq('11666666666666666666666');
-      await advanceBlock(5);
+      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(
+        '11666666666666666666666'
+      );
+      await advanceBlock(430);
       // At block 430. Bob should get 5*2/3*1000 = 3333. Alice should get ~1666 more.
-      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq('13333333333333333333333');
+      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(
+        '13333333333333333333333'
+      );
       const bobAddr = await bob.getAddress();
-      expect((await torchShip.pendingStrudel(1, bobAddr)).valueOf()).to.eq('3333333333333333333333');
+      expect((await torchShip.pendingStrudel(1, bobAddr)).valueOf()).to.eq(
+        '3333333333333333333333'
+      );
     });
 
     it('should stop giving bonus $TRDL after the bonus period ends', async () => {
       // 100 per block farming rate starting at block 500 with bonus until block 600
       const devAddr = await dev.getAddress();
-      const torchShip = await new TorchShipFactory(alice).deploy(
-        instance.address,
-        devAddr,
-        expandTo18Decimals(100),
-        '500',
-        '600',
+      const torchShip = await deployShip(
+        dev,
+        instance,
+        100,
+        500,
+        600,
         10
       );
-      await torchShip.setDevFundDivRate(50);
-      await instance.addMinter(torchShip.address);
+      await torchShip.connect(dev).setDevFundDivRate(50);
       await lp.connect(alice).approve(torchShip.address, '1000');
-      await torchShip.add('1', lp.address, true);
+      await torchShip.connect(dev).add('1', lp.address, true);
       // Alice deposits 10 LPs at block 590
-      await advanceBlock(589 - (await ethers.provider.getBlock('latest')).number);
+      await advanceBlock(589);
       await torchShip.connect(alice).deposit(0, '10');
       // At block 605, she should have 1000*10 + 100*5 = 10500 pending.
-      await advanceBlock(15);
+      await advanceBlock(605);
       const aliceAddr = await alice.getAddress();
-      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(expandTo18Decimals(10500));
+      expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(
+        expandTo18Decimals(10500)
+      );
       // At block 606, Alice withdraws all pending rewards and should get 10600.
       await torchShip.connect(alice).deposit(0, '0');
       expect((await torchShip.pendingStrudel(0, aliceAddr)).valueOf()).to.eq(expandTo18Decimals(0));

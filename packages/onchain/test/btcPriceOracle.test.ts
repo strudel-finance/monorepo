@@ -33,7 +33,7 @@ describe('BtcPriceOracle', () => {
   let router: UniswapV2Router01;
 
   before(async () => {
-    signers = await ethers.signers();
+    signers = await ethers.getSigners();
     const devAddr = await signers[0].getAddress();
     tBtc0 = await new MockErc20Factory(signers[0]).deploy(
       'WBTC',

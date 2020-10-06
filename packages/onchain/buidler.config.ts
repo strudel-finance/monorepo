@@ -2,8 +2,10 @@ import {usePlugin} from '@nomiclabs/buidler/config';
 
 usePlugin('@nomiclabs/buidler-ganache');
 usePlugin('@nomiclabs/buidler-waffle');
+usePlugin('@nomiclabs/buidler-ethers');
 usePlugin('buidler-typechain');
 usePlugin('buidler-gas-reporter');
+usePlugin('@openzeppelin/buidler-upgrades');
 
 const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
 const ROPSTEN_PRIVATE_KEY = process.env.ROPSTEN_PRIVATE_KEY || '';
@@ -22,7 +24,7 @@ const config = {
   },
   typechain: {
     outDir: 'typechain',
-    target: 'ethers-v4',
+    target: 'ethers-v5',
   },
   networks: {
     buidlerevm: {},

@@ -1,4 +1,4 @@
-import {ethers} from '@nomiclabs/buidler';
+import {ethers, upgrades} from '@nomiclabs/buidler';
 import {Signer, Contract, Wallet} from 'ethers';
 import chai from 'chai';
 import {deployContract, solidity} from 'ethereum-waffle';
@@ -44,7 +44,7 @@ describe('ReservePoolController', async () => {
   let controller: ReservePoolController;
 
   before(async () => {
-    signers = await ethers.signers();
+    signers = await ethers.getSigners();
     const devAddr = await signers[0].getAddress();
     // address _wEthAddr,
     wEth = await new MockErc20Factory(signers[0]).deploy('wEth', 'WETH', expandTo18Decimals(10000));
@@ -103,13 +103,15 @@ describe('ReservePoolController', async () => {
     bFactory = await new MockBFactoryFactory(signers[0]).deploy();
 
     // create the controller
-    controller = await new ReservePoolControllerFactory(signers[0]).deploy(
+    const ReservePoolController = await ethers.getContractFactory("ReservePoolController");
+    controller = (await upgrades.deployProxy(ReservePoolController, [
       vBtc.address,
       wEth.address,
       bFactory.address,
       router.address,
       oracle.address
-    );
+    ])) as ReservePoolController;
+    await controller.deployed();
   });
 
   it('should deploy', async () => {
@@ -121,10 +123,10 @@ describe('ReservePoolController', async () => {
     await wEth.transfer(controller.address, wEthAmount.mul(10));
     await vBtc.transfer(controller.address, tBtcAmount.mul(10));
     const initialTradeFee = expandTo18Decimals(1).div(200); // 0.5%
-    await controller.initialize(initialTradeFee);
+    await controller.deployPool(initialTradeFee);
 
     // try initialize again
-    await expect(controller.initialize(initialTradeFee)).to.be.reverted;
+    await expect(controller.deployPool(initialTradeFee)).to.be.reverted;
     // try some trade
     await expect(controller.resyncWeights()).to.be.reverted;
     // set pool for later
@@ -140,7 +142,6 @@ describe('ReservePoolController', async () => {
     let vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
     let priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
     let priceUni = reserves.reserve0.div(reserves.reserve1);
-    console.log(priceUni);
     expect(priceBPool).to.eq(priceUni);
 
     // do some swaps, get pools out of sync
@@ -150,7 +151,6 @@ describe('ReservePoolController', async () => {
 
     reserves = await spotPair.getReserves();
     priceUni = reserves.reserve0.div(reserves.reserve1);
-    console.log(priceUni);
 
     // update the oracle
     await ethers.provider.send('evm_increaseTime', [60 * 60 * 24]);
@@ -168,7 +168,6 @@ describe('ReservePoolController', async () => {
     vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
     priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
     priceUni = reserves.reserve0.div(reserves.reserve1);
-    console.log(priceUni);
     expect(priceBPool).to.eq(priceUni);
   });
 
@@ -205,5 +204,4 @@ describe('ReservePoolController', async () => {
     priceUni = reserves.reserve0.div(reserves.reserve1);
     expect(priceBPool).to.eq(priceUni);
   });
-
 });
