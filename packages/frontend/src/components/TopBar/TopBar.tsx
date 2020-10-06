@@ -22,9 +22,11 @@ const TopBar: React.FC<TopBarProps> = ({ onPresentMobileMenu }) => {
           <StyledNavWrapper>
             <Nav />
           </StyledNavWrapper>
-          <StyledAccountButtonWrapper>
-            <AccountButton />
-          </StyledAccountButtonWrapper>
+          {false && (
+            <StyledAccountButtonWrapper>
+              <AccountButton />
+            </StyledAccountButtonWrapper>
+          )}
           <StyledMenuButton onClick={onPresentMobileMenu}>
             <svg height="24" viewBox="0 0 24 24" width="24">
               <path d="M0 0h24v24H0z" fill="none"></path>
