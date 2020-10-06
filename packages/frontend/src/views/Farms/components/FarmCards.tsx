@@ -19,6 +19,9 @@ import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
 import Farm1 from '../../../assets/img/Farm1.png'
 import Farm2 from '../../../assets/img/Farm2.png'
+import Farm3 from '../../../assets/img/Farm1.png'
+import Farm4 from '../../../assets/img/Farm2.png'
+import Farm5 from '../../../assets/img/Farm1.png'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -120,11 +123,17 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
     )
   }
   const getBackground = (): string => {
-    switch (index % 2) {
+    switch (index % 5) {
       case 0:
         return Farm1
       case 1:
         return Farm2
+      case 2:
+        return Farm3
+      case 3:
+        return Farm4
+      case 4:
+        return Farm5
     }
   }
   useEffect(() => {

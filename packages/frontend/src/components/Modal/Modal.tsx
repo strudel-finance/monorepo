@@ -23,6 +23,7 @@ const mobileKeyframes = keyframes`
 `
 
 const StyledResponsiveWrapper = styled.div`
+  height: 100%;
   align-items: center;
   display: flex;
   flex-direction: column;
@@ -42,6 +43,7 @@ const StyledResponsiveWrapper = styled.div`
 `
 
 const StyledModal = styled.div`
+  margin: auto;
   padding: 0 20px;
   background: ${(props) => props.theme.color.grey[200]};
   border: 1px solid ${(props) => props.theme.color.grey[300]}ff;

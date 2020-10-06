@@ -287,7 +287,7 @@ const Home: React.FC = () => {
         <>
           <PageHeader
             title="Enter the Strudel"
-            subtitle="Turn your BTC in vBTC and earn intergalactical $TRDL rewards."
+            subtitle="Turn your BTC in vBTC and  earn intergalactical $TRDL rewards."
           />
           {wallet.status === 'connected' ? (
             <Container fixed maxWidth="lg">
@@ -338,6 +338,22 @@ const Home: React.FC = () => {
               ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
             </StyledInfo>
             <Spacer size="lg" />
+            <Container maxWidth="sm">
+              <p style={{ textAlign: 'center' }}>
+                The Strudel is the first one-way, trustless bridge linking
+                Bitcoin and Ethereum. 
+              </p>
+              <p style={{ textAlign: 'center' }}>
+                You can only enter the Strudel from one direction so be aware!
+                This action is irreversible.  
+              </p>
+              <p style={{ textAlign: 'center' }}>
+                The bravest explorers that arrive on the other side will get
+                extra STRDL rewards.
+              </p>
+            </Container>
+            <Spacer size="lg" />
+
             <Container>
               <Balances />
             </Container>
