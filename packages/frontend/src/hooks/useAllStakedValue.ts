@@ -41,11 +41,13 @@ const useAllStakedValue = () => {
           pid,
           lpContract,
           tokenContract,
+          balancerPoolContract,
         }: {
           isBalancer: boolean
           pid: number
           lpContract: Contract
           tokenContract: Contract
+          balancerPoolContract: Contract
         }) =>
           getTotalLPWethValue(
             isBalancer,
@@ -55,6 +57,7 @@ const useAllStakedValue = () => {
             tokenContract,
             pid,
             vbtcContract,
+            balancerPoolContract,
           ),
       ),
     )

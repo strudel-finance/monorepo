@@ -11,7 +11,7 @@ interface TopBarProps {
   onPresentMobileMenu: () => void
 }
 
-const TopBar: React.FC<TopBarProps> = ({onPresentMobileMenu}) => {
+const TopBar: React.FC<TopBarProps> = ({ onPresentMobileMenu }) => {
   return (
     <StyledTopBar>
       <Container size="lg">
@@ -19,10 +19,18 @@ const TopBar: React.FC<TopBarProps> = ({onPresentMobileMenu}) => {
           <StyledLogoWrapper>
             <Logo />
           </StyledLogoWrapper>
-          <Nav />
+          <StyledNavWrapper>
+            <Nav />
+          </StyledNavWrapper>
           <StyledAccountButtonWrapper>
             <AccountButton />
           </StyledAccountButtonWrapper>
+          <StyledMenuButton onClick={onPresentMobileMenu}>
+            <svg height="24" viewBox="0 0 24 24" width="24">
+              <path d="M0 0h24v24H0z" fill="none"></path>
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+            </svg>
+          </StyledMenuButton>
         </StyledTopBarInner>
       </Container>
     </StyledTopBar>
@@ -31,7 +39,7 @@ const TopBar: React.FC<TopBarProps> = ({onPresentMobileMenu}) => {
 
 const StyledLogoWrapper = styled.div`
   width: 260px;
-  @media (max-width: 400px) {
+  @media (max-width: 500px) {
     width: auto;
   }
 `
@@ -56,7 +64,7 @@ const StyledNavWrapper = styled.div`
   display: flex;
   flex: 1;
   justify-content: center;
-  @media (max-width: 400px) {
+  @media (max-width: 500px) {
     display: none;
   }
 `
@@ -66,7 +74,7 @@ const StyledAccountButtonWrapper = styled.div`
   display: flex;
   justify-content: flex-end;
   width: 156px;
-  @media (max-width: 400px) {
+  @media (max-width: 500px) {
     justify-content: center;
     width: auto;
   }
@@ -79,7 +87,7 @@ const StyledMenuButton = styled.button`
   outline: 0;
   padding: 0;
   display: none;
-  @media (max-width: 400px) {
+  @media (max-width: 500px) {
     align-items: center;
     display: flex;
     height: 44px;

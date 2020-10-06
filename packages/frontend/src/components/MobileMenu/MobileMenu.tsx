@@ -1,14 +1,14 @@
 import React from 'react'
-import styled, {keyframes} from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
-import {NavLink} from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 interface MobileMenuProps {
   onDismiss: () => void
   visible?: boolean
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({onDismiss, visible}) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
   if (visible) {
     return (
       <StyledMobileMenuWrapper>
@@ -23,7 +23,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({onDismiss, visible}) => {
             to="/farms"
             onClick={onDismiss}
           >
-            Farms
+            Terra Farming
           </StyledLink>
           {false && (
             <StyledLink

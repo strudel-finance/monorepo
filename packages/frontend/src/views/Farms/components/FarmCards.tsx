@@ -17,6 +17,8 @@ import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
 import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
+import Farm1 from '../../../assets/img/Farm1.png'
+import Farm2 from '../../../assets/img/Farm2.png'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -78,7 +80,7 @@ const FarmCards: React.FC = () => {
           <StyledRow key={i}>
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
-                <FarmCard farm={farm} />
+                <FarmCard farm={farm} index={i + j} />
                 {(j === 0 || j === 1) && <StyledSpacer />}
               </React.Fragment>
             ))}
@@ -95,9 +97,10 @@ const FarmCards: React.FC = () => {
 
 interface FarmCardProps {
   farm: FarmWithStakedValue
+  index: number
 }
 
-const FarmCard: React.FC<FarmCardProps> = ({ farm }) => {
+const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
@@ -116,7 +119,14 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm }) => {
       </span>
     )
   }
-
+  const getBackground = (): string => {
+    switch (index % 2) {
+      case 0:
+        return Farm1
+      case 1:
+        return Farm2
+    }
+  }
   useEffect(() => {
     async function fetchEarned() {
       if (vbtc) return
@@ -138,7 +148,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm }) => {
     <StyledCardWrapper>
       {farm.isBalancer && <StyledCardAccent />}
       <Card>
-        <CardContent>
+        <CardContent style={{ backgroundImage: `url(${getBackground()})` }}>
           <StyledContent>
             <CardIcon>{farm.icon}</CardIcon>
             <StyledTitle>{farm.name}</StyledTitle>
@@ -279,6 +289,7 @@ const StyledContent = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
+  background-size: 100%;
 `
 
 const StyledSpacer = styled.div`

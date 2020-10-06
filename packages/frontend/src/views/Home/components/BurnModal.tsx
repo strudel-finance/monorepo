@@ -75,10 +75,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
 
   const calculateStrudel = async () => {
     const supply = await getVbtcSupply(vbtc)
-    console.log(supply.toString())
     let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
-    console.log(dividedSupply)
-    console.log(Number(value))
     let calculatedStrudel =
       getInStrudelCurve(dividedSupply + Number(value)) -
       getInStrudelCurve(dividedSupply)

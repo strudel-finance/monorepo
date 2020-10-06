@@ -112,7 +112,11 @@ export const supportedPools = [
   },
   {
     pid: 0,
-    isBalancer: true,
+    isBalancer: false,
+    balancerPoolAddresses: {
+      1: '',
+      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
+    },
     url: '',
     lpAddresses: {
       1: '',

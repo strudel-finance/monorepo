@@ -55,6 +55,8 @@ export const getFarms = (vbtc) => {
           tokenContract,
           lpAddress,
           lpContract,
+          balancerPoolAddress,
+          balancerPoolContract,
         }) => ({
           pid,
           isBalancer,
@@ -70,6 +72,8 @@ export const getFarms = (vbtc) => {
           earnToken: '$TRDL',
           earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
+          balancerPoolAddress,
+          balancerPoolContract,
         }),
       )
     : []
@@ -95,6 +99,7 @@ export const getTotalLPWethValue = async (
   tokenContract,
   pid,
   vbtcContract,
+  balancerPoolContract,
 ) => {
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
@@ -107,6 +112,11 @@ export const getTotalLPWethValue = async (
     .call()
   // Convert that into the portion of total lpContract = p1
   const totalSupply = await lpContract.methods.totalSupply().call()
+
+  //switch to Balancer Pool to get included wETH amount as ReservePoolController holds LP token and pool assets
+  if (isBalancer) {
+    lpContract = balancerPoolContract
+  }
   // Get total weth value for the lpContract = w1
   const lpContractWeth = await wethContract.methods
     .balanceOf(lpContract.options.address)
@@ -115,6 +125,8 @@ export const getTotalLPWethValue = async (
   const portionLp = new BigNumber(balance).div(new BigNumber(totalSupply))
   const lpWethWorth = new BigNumber(lpContractWeth)
   let totalLpWethValue
+
+  //include weight into account if it is the Balancer Pool
   if (isBalancer) {
     totalLpWethValue = portionLp
       .times(lpWethWorth)

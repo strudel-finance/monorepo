@@ -371,8 +371,10 @@ const Home: React.FC = () => {
 }
 const StyledLottieContainer = styled.div`
   width: 100%;
-  height: 50vh;
   z-index: -99;
+  @media (min-width: 600px) and (orientation: landscape) {
+    height: 50vh;
+  }
 `
 const StyledInfo = styled.h3`
   color: ${(props) => props.theme.color.grey[500]};

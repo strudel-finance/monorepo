@@ -33,9 +33,13 @@ export class Contracts {
         lpAddress: pool.lpAddresses[networkId],
         tokenAddress: pool.tokenAddresses[networkId],
         lpContract: pool.isBalancer
-          ? new this.web3.eth.Contract(BalancerPool)
+          ? new this.web3.eth.Contract(ERC20Abi)
           : new this.web3.eth.Contract(UNIV2PairAbi),
         tokenContract: new this.web3.eth.Contract(ERC20Abi),
+        balancerPoolAddress: pool.balancerPoolAddresses
+          ? pool.balancerPoolAddresses[networkId]
+          : undefined,
+        balancerPoolContract: new this.web3.eth.Contract(BalancerPool),
       }),
     )
 
@@ -55,7 +59,17 @@ export class Contracts {
     setProvider(this.masterChef, contractAddresses.masterChef[networkId])
     setProvider(this.weth, contractAddresses.weth[networkId])
     this.pools.forEach(
-      ({ lpContract, lpAddress, tokenContract, tokenAddress }) => {
+      ({
+        lpContract,
+        lpAddress,
+        tokenContract,
+        tokenAddress,
+        balancerPoolAddress,
+        balancerPoolContract,
+      }) => {
+        if (balancerPoolAddress) {
+          setProvider(balancerPoolContract, balancerPoolAddress)
+        }
         setProvider(lpContract, lpAddress)
         setProvider(tokenContract, tokenAddress)
       },
