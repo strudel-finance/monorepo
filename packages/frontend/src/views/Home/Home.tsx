@@ -12,7 +12,7 @@ import Spacer from '../../components/Spacer'
 import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
 import { StyledCount, RenderProps } from '../../utils/countHelper'
-
+import Grid from '@material-ui/core/Grid'
 import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
 import Lottie from '../../components/Lottie'
@@ -22,14 +22,14 @@ import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import useInterval from '../../hooks/useInterval'
 import Container from '@material-ui/core/Container'
-import Grid from '@material-ui/core/Grid'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
-import { makeStyles } from '@material-ui/core'
+import { makeStyles, withStyles } from '@material-ui/core'
 import { Transaction, LoadingStatus } from '../../types/types'
 import sb from 'satoshi-bitcoin'
 import { apiServer } from '../../constants/backendAddresses'
 import { startDate } from '../../constants/countdown'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
+import AstroFlying from '../../assets/img/AstroFlying.png'
 import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -51,6 +51,12 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
   },
 }))
+const AstroGrid = withStyles({
+  item: {
+    margin: 'auto',
+    textAlign: 'center',
+  },
+})(Grid)
 
 const Home: React.FC = () => {
   const POLL_DURATION_TXS = 1500
@@ -338,20 +344,27 @@ const Home: React.FC = () => {
               ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
             </StyledInfo>
             <Spacer size="lg" />
-            <Container maxWidth="sm">
-              <p style={{ textAlign: 'center' }}>
-                The Strudel is the first one-way, trustless bridge linking
-                Bitcoin and Ethereum. 
-              </p>
-              <p style={{ textAlign: 'center' }}>
-                You can only enter the Strudel from one direction so be aware!
-                This action is irreversible.  
-              </p>
-              <p style={{ textAlign: 'center' }}>
-                The bravest explorers that arrive on the other side will get
-                extra STRDL rewards.
-              </p>
-            </Container>
+
+            <Grid container spacing={1}>
+              <AstroGrid item xs={2}>
+                <img src={AstroFlying} height="100" />
+              </AstroGrid>
+              <AstroGrid item xs={5}>
+                <StyledP>
+                  The Strudel is the first one-way, trustless bridge linking
+                  Bitcoin and Ethereum. 
+                </StyledP>
+                <StyledP>
+                  You can only enter the Strudel from one direction so be aware!
+                  This action is irreversible.  
+                </StyledP>
+                <StyledP>
+                  The bravest explorers that arrive on the other side will get
+                  extra STRDL rewards.
+                </StyledP>
+              </AstroGrid>
+              <AstroGrid item xs={2}></AstroGrid>
+            </Grid>
             <Spacer size="lg" />
 
             <Container>
@@ -404,5 +417,7 @@ const StyledInfo = styled.h3`
     color: ${(props) => props.theme.color.grey[600]};
   }
 `
-
+const StyledP = styled.p`
+  textalign: 'center';
+`
 export default Home
