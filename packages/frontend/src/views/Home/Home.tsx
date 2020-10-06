@@ -15,7 +15,7 @@ import { StyledCount, RenderProps } from '../../utils/countHelper'
 import Grid from '@material-ui/core/Grid'
 import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
-import Lottie from '../../components/Lottie'
+import Lottie, { MobileLottie } from '../../components/Lottie'
 import formatAddress from '../../utils/formatAddress'
 import showError, { handleErrors } from '../../utils/showError'
 import useModal from '../../hooks/useModal'
@@ -23,6 +23,8 @@ import BurnModal from './components/BurnModal'
 import useInterval from '../../hooks/useInterval'
 import Container from '@material-ui/core/Container'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
+import { StyledLink } from '../../components/Footer/components/Nav'
+
 import { makeStyles, withStyles } from '@material-ui/core'
 import { Transaction, LoadingStatus } from '../../types/types'
 import sb from 'satoshi-bitcoin'
@@ -30,6 +32,7 @@ import { apiServer } from '../../constants/backendAddresses'
 import { startDate } from '../../constants/countdown'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
 import AstroFlying from '../../assets/img/AstroFlying.png'
+
 import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -57,7 +60,13 @@ const AstroGrid = withStyles({
     textAlign: 'center',
   },
 })(Grid)
-
+const MyStyledLink = styled(StyledLink)`
+  display: none;
+  @media (min-width: 600px) and (orientation: landscape) {
+    display: block;
+  }
+  font-size: 50px;
+`
 const Home: React.FC = () => {
   const POLL_DURATION_TXS = 1500
   const BTC_ACCEPTANCE = 6
@@ -184,9 +193,6 @@ const Home: React.FC = () => {
   }, [vbtc])
   */
   useEffect(() => {
-    console.log(account)
-    console.log('previous:' + previousAccount)
-
     if (account == null || previousAccount !== account) {
       setTransactions([])
       setLastRequest(undefined)
@@ -200,6 +206,7 @@ const Home: React.FC = () => {
       // get transactions at first
       handleTransactionUpdate()
     }
+    return undefined
   }, [account])
 
   useInterval(async () => {
@@ -279,7 +286,7 @@ const Home: React.FC = () => {
     // Render a countdown
     return (
       <StyledCount>
-        {days}:{hours}:{minutes}:{seconds}
+        {days}d:{hours}h:{minutes}min:{seconds}s
       </StyledCount>
     )
   }
@@ -289,6 +296,9 @@ const Home: React.FC = () => {
       <StyledLottieContainer>
         <Lottie />
       </StyledLottieContainer>
+      <StyledLottieMobileContainer>
+        <MobileLottie />
+      </StyledLottieMobileContainer>
       {isCountComplete || isPast ? (
         <>
           <PageHeader
@@ -311,6 +321,11 @@ const Home: React.FC = () => {
                     />
                     <Button text={'Get vBTC'} onClick={onPresentBurn} />
                   </Container>
+                  <Spacer size="md" />
+
+                  <StyledInfo>
+                    ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
+                  </StyledInfo>
                 </Grid>
                 <Grid item xs={12} sm={12} md={8}>
                   <TransactionsTableContainer
@@ -340,10 +355,6 @@ const Home: React.FC = () => {
           )}
           <>
             <Spacer size="lg" />
-            <StyledInfo>
-              ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
-            </StyledInfo>
-            <Spacer size="lg" />
 
             <Grid container spacing={1}>
               <AstroGrid item xs={2}>
@@ -360,7 +371,7 @@ const Home: React.FC = () => {
                 </StyledP>
                 <StyledP>
                   The bravest explorers that arrive on the other side will get
-                  extra STRDL rewards.
+                  extra $TRDL rewards.
                 </StyledP>
               </AstroGrid>
               <AstroGrid item xs={2}></AstroGrid>
@@ -389,11 +400,16 @@ const Home: React.FC = () => {
           </>
         </>
       ) : (
-        <Countdown
-          date={startDate}
-          renderer={renderer}
-          onComplete={handleCountEnd}
-        />
+        <>
+          <Countdown
+            date={startDate}
+            renderer={renderer}
+            onComplete={handleCountEnd}
+          />
+          <MyStyledLink target="_blank" href="https://discord.gg/fBuHJCs">
+            Join the Discord
+          </MyStyledLink>
+        </>
       )}
     </Page>
   )
@@ -401,10 +417,22 @@ const Home: React.FC = () => {
 const StyledLottieContainer = styled.div`
   width: 100%;
   z-index: -99;
+  display: none;
   @media (min-width: 600px) and (orientation: landscape) {
     height: 50vh;
+    display: block;
   }
 `
+
+const StyledLottieMobileContainer = styled.div`
+  width: 100%;
+  z-index: -99;
+  height: 45vh;
+  @media (min-width: 600px) and (orientation: landscape) {
+    display: none;
+  }
+`
+
 const StyledInfo = styled.h3`
   color: ${(props) => props.theme.color.grey[500]};
   font-size: 16px;
@@ -418,6 +446,6 @@ const StyledInfo = styled.h3`
   }
 `
 const StyledP = styled.p`
-  textalign: 'center';
+  text-align: center;
 `
 export default Home

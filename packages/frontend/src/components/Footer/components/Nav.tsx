@@ -28,7 +28,7 @@ const StyledNav = styled.nav`
   display: flex;
 `
 
-const StyledLink = styled.a`
+export const StyledLink = styled.a`
   color: ${(props) => props.theme.color.grey[400]};
   padding-left: ${(props) => props.theme.spacing[3]}px;
   padding-right: ${(props) => props.theme.spacing[3]}px;

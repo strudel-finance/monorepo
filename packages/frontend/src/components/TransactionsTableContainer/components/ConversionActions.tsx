@@ -1,9 +1,9 @@
 // eslint-disable jsx-a11y/anchor-is-valid
 
-import {makeStyles} from '@material-ui/core'
+import { makeStyles } from '@material-ui/core'
 import React from 'react'
 
-import {ExternalLink} from './ExternalLink'
+import { ExternalLink } from './ExternalLink'
 import {
   SoChainConfirmedGetTx,
   Proof,
@@ -11,18 +11,20 @@ import {
   LoadingStatus,
 } from '../../../types/types'
 import useModal from '../../../hooks/useModal'
-import {apiServer} from '../../../constants/backendAddresses'
+import { apiServer } from '../../../constants/backendAddresses'
 
 import BurnModal from '../../../views/Home/components/BurnModal'
+import Button from '../../Button'
+
 import useVBTC from '../../../hooks/useVBTC'
-import {getVbtcContract, proofOpReturnAndMint} from '../../../vbtc/utils'
-import {useWallet} from 'use-wallet'
-import showError, {handleErrors} from '../../../utils/showError'
+import { getVbtcContract, proofOpReturnAndMint } from '../../../vbtc/utils'
+import { useWallet } from 'use-wallet'
+import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
-    fontSize: 12,
+    fontSize: 14,
     marginRight: theme.spacing(1),
     textDecoration: 'underline',
     cursor: 'pointer',
@@ -67,7 +69,7 @@ const getProof = async (
       'Content-Type': 'application/json',
       // 'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: JSON.stringify({txData: tx_data}),
+    body: JSON.stringify({ txData: tx_data }),
   }
   return fetch(url, opts)
 }
@@ -117,15 +119,12 @@ const callProofOpReturnAndMint = async (
   vbtcContract: any,
   vbtc: any,
 ) => {
-  let loadingStatus = {tx: tx.btcTxHash, status: true}
+  let loadingStatus = { tx: tx.btcTxHash, status: true }
   handleLoading(loadingStatus)
   loadingStatus.status = false
   let proof
 
   if (!tx.hasOwnProperty('proof')) {
-    const txHash = await new Promise<string>((res, rej) => {
-      res('0x89AB6D3C799d35f5b17194Ee7F07253856A67949')
-    })
     let res = await fetch(
       `https://sochain.com/api/v2/get_tx/BTC/${tx.btcTxHash}`,
     )
@@ -183,7 +182,7 @@ const callProofOpReturnAndMint = async (
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
 
-    await pushEthTxHash({ethTxHash: ethTxHash}, tx)
+    await pushEthTxHash({ ethTxHash: ethTxHash }, tx)
       .then(handleErrors)
       .catch((e) => {
         RollbarErrorTracking.logErrorInRollbar(
@@ -207,7 +206,7 @@ const ConversionActions: React.FC<Props> = ({
   handleLoading,
   isLoading,
 }) => {
-  const {account} = useWallet()
+  const { account } = useWallet()
   const vbtc = useVBTC()
   const vbtcContract = getVbtcContract(vbtc)
 
@@ -217,12 +216,17 @@ const ConversionActions: React.FC<Props> = ({
   const [showModal] = useModal(
     <BurnModal value={tx.value} address={tx.ethAddress} continueV={true} />,
   )
+
   return (
     <React.Fragment>
-      <div>
+      <div style={{ textAlign: 'center' }}>
         {!tx.hasOwnProperty('confirmed') && (
           <React.Fragment>
-            <a className={classes.viewLink} onClick={showModal}>
+            <a
+              className={classes.viewLink}
+              href="javascript:void(0)"
+              onClick={showModal}
+            >
               View Bridge Address
             </a>
           </React.Fragment>
@@ -246,8 +250,8 @@ const ConversionActions: React.FC<Props> = ({
         {(tx.confirmed || isConfirmed) && !tx.ethTxHash && (
           <React.Fragment>
             {!isLoading[tx.btcTxHash] ? (
-              <a
-                className={classes.viewLink}
+              <Button
+                size="xs"
                 onClick={() => {
                   callProofOpReturnAndMint(
                     tx,
@@ -258,10 +262,12 @@ const ConversionActions: React.FC<Props> = ({
                   )
                 }}
               >
-                Claim vBTC
-              </a>
+                Claim vBTC & $TRDL
+              </Button>
             ) : (
-              <a className={classes.viewLink}>Loading</a>
+              <a className={classes.viewLink} href="javascript:void(0)">
+                Loading
+              </a>
             )}
           </React.Fragment>
         )}

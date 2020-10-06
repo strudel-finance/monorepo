@@ -1,1 +1,1 @@
-export {default} from './Lottie'
+export { default, MobileLottie } from './Lottie'

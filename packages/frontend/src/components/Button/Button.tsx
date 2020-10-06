@@ -8,7 +8,7 @@ interface ButtonProps {
   disabled?: boolean
   href?: string
   onClick?: () => void
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg'
   text?: string
   to?: string
   variant?: 'default' | 'secondary' | 'tertiary'
@@ -41,6 +41,12 @@ const Button: React.FC<ButtonProps> = ({
   let buttonPadding: number
   let fontSize: number
   switch (size) {
+    case 'xs':
+      boxShadow = `2px 2px 5px ${color.grey[300]}`
+      buttonPadding = spacing[2]
+      buttonSize = 20
+      fontSize = 14
+      break
     case 'sm':
       boxShadow = `4px 4px 8px ${color.grey[300]}`
       buttonPadding = spacing[3]
@@ -76,18 +82,34 @@ const Button: React.FC<ButtonProps> = ({
   }, [href, text, to])
 
   return (
-    <StyledButton
-      boxShadow={boxShadow}
-      color={buttonColor}
-      disabled={disabled}
-      fontSize={fontSize}
-      onClick={onClick}
-      padding={buttonPadding}
-      size={buttonSize}
-    >
-      {children}
-      {ButtonChild}
-    </StyledButton>
+    <>
+      {size !== 'xs' ? (
+        <StyledButton
+          boxShadow={boxShadow}
+          color={buttonColor}
+          disabled={disabled}
+          fontSize={fontSize}
+          onClick={onClick}
+          padding={buttonPadding}
+          size={buttonSize}
+        >
+          {children}
+          {ButtonChild}
+        </StyledButton>
+      ) : (
+        <StyledSmallButton
+          boxShadow={boxShadow}
+          color={buttonColor}
+          disabled={disabled}
+          fontSize={fontSize}
+          onClick={onClick}
+          padding={buttonPadding}
+          size={buttonSize}
+        >
+          {children}
+        </StyledSmallButton>
+      )}
+    </>
   )
 }
 
@@ -122,6 +144,31 @@ const StyledButton = styled.button<StyledButtonProps>`
   padding-right: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
   width: 100%;
+  &:hover {
+    background-color: ${(props) => props.theme.color.grey[100]};
+    color: ${(props) => props.theme.color.black};
+  }
+`
+
+const StyledSmallButton = styled.button<StyledButtonProps>`
+  align-items: center;
+  background-color: ${(props) =>
+    !props.disabled
+      ? props.theme.color.purple[100]
+      : props.theme.color.purple[50]};
+  border: 0;
+  border-radius: 4px;
+  box-shadow: ${(props) => props.boxShadow};
+  color: ${(props) =>
+    !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
+  cursor: pointer;
+  font-size: ${(props) => props.fontSize}px;
+  font-weight: 700;
+  justify-content: center;
+  outline: none;
+  padding-top: ${(props) => props.padding}px;
+  padding-bottom: ${(props) => props.padding}px;
+  pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
   &:hover {
     background-color: ${(props) => props.theme.color.grey[100]};
     color: ${(props) => props.theme.color.black};

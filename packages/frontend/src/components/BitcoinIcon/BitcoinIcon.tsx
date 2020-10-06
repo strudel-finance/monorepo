@@ -7,7 +7,7 @@ interface StrudelIconProps {
 }
 
 const BitcoinIcon: React.FC<StrudelIconProps> = ({ size = 60, v1 }) => (
-  <img src={bitcoin} height={size} />
+  <img src={bitcoin} alt="Bitcoin Icon" height={size} />
 )
 
 export default BitcoinIcon
