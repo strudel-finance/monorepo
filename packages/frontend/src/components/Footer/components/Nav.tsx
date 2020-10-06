@@ -10,7 +10,7 @@ const Nav: React.FC = () => {
           <StyledLink target="_blank" href=""></StyledLink>
         </>
       )}
-      <StyledLink target="_blank" href="https://discord.gg/fBuHJCs">
+      <StyledLink target="_blank" href="https://discord.gg/CcEE5mC">
         Discord
       </StyledLink>
       <StyledLink target="_blank" href="https://github.com/strudel-finance/">
