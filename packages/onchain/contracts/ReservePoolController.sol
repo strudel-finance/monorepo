@@ -70,7 +70,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     amountIn = leftSide.sub(rightSide);
   }
 
-
   // Rebind BPool and pull tokens from address
   // bPool is a contract interface; function calls on it are external
   function _pullUnderlying(
@@ -102,7 +101,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     bool xfer = IERC20(erc20).transfer(to, amount);
     require(xfer, "ERR_ERC20_FALSE");
   }
-
 
   function initialize(
     address _vBtcAddr,
@@ -153,7 +151,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     _mint(msg.sender, MIN_POOL_SUPPLY);
   }
 
-
   /**
    * @notice Getter for the publicSwap field on the underlying pool
    */
@@ -161,11 +158,26 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     return bPool.isPublicSwap();
   }
 
-  function getParams() external view returns (address, address, uint256, uint32) {
+  function getParams()
+    external
+    view
+    returns (
+      address,
+      address,
+      uint256,
+      uint32
+    )
+  {
     return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast);
   }
 
-  function setParams(address _uniRouter, address _oracle, uint256 _maxVbtcWeight, uint256 _swapFee, bool _isPublicSwap) external onlyOwner {
+  function setParams(
+    address _uniRouter,
+    address _oracle,
+    uint256 _maxVbtcWeight,
+    uint256 _swapFee,
+    bool _isPublicSwap
+  ) external onlyOwner {
     uniRouter = IUniswapV2Router01(_uniRouter);
 
     require(_oracle != address(0), "!oracle-0");
@@ -546,5 +558,4 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // 6. repay loan
     // TODO: don't forget that we need to pay a flash loan fee
   }
-
 }
