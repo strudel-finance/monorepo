@@ -103,13 +103,13 @@ describe('ReservePoolController', async () => {
     bFactory = await new MockBFactoryFactory(signers[0]).deploy();
 
     // create the controller
-    const ReservePoolController = await ethers.getContractFactory("ReservePoolController");
+    const ReservePoolController = await ethers.getContractFactory('ReservePoolController');
     controller = (await upgrades.deployProxy(ReservePoolController, [
       vBtc.address,
       wEth.address,
       bFactory.address,
       router.address,
-      oracle.address
+      oracle.address,
     ])) as ReservePoolController;
     await controller.deployed();
   });

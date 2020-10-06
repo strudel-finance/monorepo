@@ -1,4 +1,4 @@
-import {ethers, upgrades } from '@nomiclabs/buidler';
+import {ethers, upgrades} from '@nomiclabs/buidler';
 import {Signer} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
@@ -28,8 +28,10 @@ async function deploy(signer: Signer, relay: MockRelay): Promise<VbtcToken> {
   let strudelFactory = new StrudelTokenFactory(signer);
   let strudel = await strudelFactory.deploy();
 
-  const VbtcToken = await ethers.getContractFactory("VbtcToken");
-  const vbtc = await upgrades.deployProxy(VbtcToken, [relay.address, strudel.address, 0, 50], {unsafeAllowCustomTypes: true});
+  const VbtcToken = await ethers.getContractFactory('VbtcToken');
+  const vbtc = await upgrades.deployProxy(VbtcToken, [relay.address, strudel.address, 0, 50], {
+    unsafeAllowCustomTypes: true,
+  });
   await vbtc.deployed();
 
   await strudel.addMinter(vbtc.address);

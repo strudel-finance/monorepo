@@ -2,7 +2,9 @@
 
 pragma solidity 0.6.6;
 
-import {ERC20CappedUpgradeSafe} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Capped.sol";
+import {
+  ERC20CappedUpgradeSafe
+} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Capped.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import "./FlashERC20.sol";
@@ -57,11 +59,11 @@ contract VBTCToken is FlashERC20, ERC20CappedUpgradeSafe {
   }
 
   function _beforeTokenTransfer(
-     address from,
-     address to,
-     uint256 amount
+    address from,
+    address to,
+    uint256 amount
   ) internal virtual override(ERC20CappedUpgradeSafe, ERC20UpgradeSafe) {
-     super._beforeTokenTransfer(from, to, amount);
+    super._beforeTokenTransfer(from, to, amount);
   }
 
   function makeCompressedOutpoint(bytes32 _txid, uint32 _index) internal pure returns (bytes32) {

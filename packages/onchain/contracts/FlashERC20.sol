@@ -5,7 +5,13 @@ import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "./IBorrower.sol";
 import "./IFlashERC20.sol";
 
-contract FlashERC20 is Initializable, ContextUpgradeSafe, ERC20UpgradeSafe, IFlashERC20, OwnableUpgradeSafe {
+contract FlashERC20 is
+  Initializable,
+  ContextUpgradeSafe,
+  ERC20UpgradeSafe,
+  IFlashERC20,
+  OwnableUpgradeSafe
+{
   uint256 constant BTC_CAP = 21 * 10**24;
   uint256 constant FEE_FACTOR = 100;
   uint256 private constant _NOT_ENTERED = 1;

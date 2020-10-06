@@ -1,6 +1,6 @@
 import {ethers, upgrades} from '@nomiclabs/buidler';
 import {Signer, Contract} from 'ethers';
-import { getAdminAddress } from '@openzeppelin/upgrades-core';
+import {getAdminAddress} from '@openzeppelin/upgrades-core';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
 import {expandTo18Decimals, advanceBlock} from './shared/utilities';
@@ -22,24 +22,28 @@ async function deployStrudel(signer: Signer): Promise<StrudelToken> {
 }
 
 async function deployShip(
-    dev: Signer,
-    strudel: StrudelToken,
-    strudelPerBlock: number,
-    startBlock: number,
-    bonusEndBlock: number,
-    bonusMultiplier: number
-  ): Promise<TorchShip> {
+  dev: Signer,
+  strudel: StrudelToken,
+  strudelPerBlock: number,
+  startBlock: number,
+  bonusEndBlock: number,
+  bonusMultiplier: number
+): Promise<TorchShip> {
   let [alice] = await ethers.getSigners();
 
   // deploy the thing
-  const TorchShip = (await ethers.getContractFactory("TorchShip")).connect(dev);
-  const torchShip = await upgrades.deployProxy(TorchShip, [
-    strudel.address,
-    expandTo18Decimals(strudelPerBlock),
-    startBlock,
-    bonusEndBlock,
-    bonusMultiplier
-  ], {unsafeAllowCustomTypes: true });
+  const TorchShip = (await ethers.getContractFactory('TorchShip')).connect(dev);
+  const torchShip = await upgrades.deployProxy(
+    TorchShip,
+    [
+      strudel.address,
+      expandTo18Decimals(strudelPerBlock),
+      startBlock,
+      bonusEndBlock,
+      bonusMultiplier,
+    ],
+    {unsafeAllowCustomTypes: true}
+  );
   await torchShip.deployed();
 
   // const devAddr = await dev.getAddress();
@@ -47,14 +51,13 @@ async function deployShip(
   // let admin = await getAdminAddress(ethers.provider, torchShip.address);
   // console.log('before:', owner, admin);
 
-
   // take control back from proxy admin
   // const proxyAdmin = new Contract(
   //   admin,
   //   JSON.stringify(ProxyAdminArtifact.abi),
   //   ethers.provider
   // ).connect(dev);
-  
+
   // await proxyAdmin.connect(dev).functions.changeProxyAdmin(torchShip.address, devAddr);
 
   // admin = await getAdminAddress(ethers.provider, torchShip.address);
@@ -80,39 +83,27 @@ describe('TorchShip', async () => {
   });
 
   it('should set correct state variables', async () => {
-    const torchShip = await deployShip(
-      dev,
-      instance,
-      1000,
-      0,
-      1000,
-      1
-    );
+    const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 1);
     const strudel = await torchShip.connect(alice).strudel();
     expect(strudel.valueOf()).to.eq(instance.address);
     expect(await instance.isMinter(torchShip.address)).to.be.true;
   });
 
   it('should allow dev and only dev to update dev', async () => {
-    const torchShip = await deployShip(
-      dev,
-      instance,
-      1000,
-      0,
-      1000,
-      1
-    );
+    const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 1);
     const aliceAddr = await alice.getAddress();
     const bobAddr = await bob.getAddress();
 
     const proxy = new Contract(
-      (await torchShip.address),
+      await torchShip.address,
       JSON.stringify(AdminUpgradeabilityProxy.abi),
       ethers.provider
     );
     const devAddr = await dev.getAddress();
     expect((await torchShip.connect(alice).owner()).valueOf()).to.eq(devAddr);
-    await expect(torchShip.connect(bob).transferOwnership(devAddr)).to.be.revertedWith('caller is not the owner');
+    await expect(torchShip.connect(bob).transferOwnership(devAddr)).to.be.revertedWith(
+      'caller is not the owner'
+    );
     await torchShip.connect(dev).functions.transferOwnership(bobAddr);
     expect((await torchShip.owner()).valueOf()).to.eq(bobAddr);
     await torchShip.connect(bob).functions.transferOwnership(aliceAddr);
@@ -193,14 +184,7 @@ describe('TorchShip', async () => {
     it('should not distribute $TRDL if no one deposit', async () => {
       // 100 per block farming rate starting at block 200 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await deployShip(
-        dev,
-        instance,
-        100,
-        200,
-        1000,
-        10
-      );
+      const torchShip = await deployShip(dev, instance, 100, 200, 1000, 10);
       await torchShip.connect(dev).setDevFundDivRate(50);
       await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(bob).approve(torchShip.address, '1000');
@@ -226,14 +210,7 @@ describe('TorchShip', async () => {
     it('should distribute $TRDL properly for each staker', async () => {
       // 100 per block farming rate starting at block 300 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await deployShip(
-        dev,
-        instance,
-        100,
-        300,
-        1000,
-        10
-      );
+      const torchShip = await deployShip(dev, instance, 100, 300, 1000, 10);
       await torchShip.connect(dev).setDevFundDivRate(50);
       await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(alice).approve(torchShip.address, '1000');
@@ -302,14 +279,7 @@ describe('TorchShip', async () => {
     it('should give proper $TRDL allocation to each pool', async () => {
       // 100 per block farming rate starting at block 400 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await deployShip(
-        dev,
-        instance,
-        100,
-        400,
-        1000,
-        10
-      );
+      const torchShip = await deployShip(dev, instance, 100, 400, 1000, 10);
       await torchShip.connect(dev).setDevFundDivRate(50);
       await lp.connect(alice).approve(torchShip.address, '1000');
       await lp2.connect(bob).approve(torchShip.address, '1000');
@@ -347,14 +317,7 @@ describe('TorchShip', async () => {
     it('should stop giving bonus $TRDL after the bonus period ends', async () => {
       // 100 per block farming rate starting at block 500 with bonus until block 600
       const devAddr = await dev.getAddress();
-      const torchShip = await deployShip(
-        dev,
-        instance,
-        100,
-        500,
-        600,
-        10
-      );
+      const torchShip = await deployShip(dev, instance, 100, 500, 600, 10);
       await torchShip.connect(dev).setDevFundDivRate(50);
       await lp.connect(alice).approve(torchShip.address, '1000');
       await torchShip.connect(dev).add('1', lp.address, true);

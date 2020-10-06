@@ -75,12 +75,13 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
   // External functions
 
-  function initialize(address _vBtcAddr,
+  function initialize(
+    address _vBtcAddr,
     address _wEthAddr,
     address _bPoolFactory,
     IUniswapV2Router01 _uniRouter,
-    address _oracle) external initializer {
-
+    address _oracle
+  ) external initializer {
     vBtc = IERC20(_vBtcAddr);
     wEth = IERC20(_wEthAddr);
     bFactory = IBFactory(_bPoolFactory);
@@ -296,7 +297,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   // *
   //  * @notice Set the public swap flag on the underlying pool
   //  * @param publicSwap new value of the swap
-   
+
   // function setPublicSwap(bool publicSwap) external onlyOwner {
   //   bPool.setPublicSwap(publicSwap);
   // }

@@ -13,8 +13,8 @@ contract StrudelToken is ERC20UpgradeSafe, MinterRole {
   using SafeMath for uint256;
 
   constructor() public {
-   __ERC20_init("Strudel Finance", "STRDL"); 
-   __Ownable_init();
+    __ERC20_init("Strudel Finance", "STRDL");
+    __Ownable_init();
   }
 
   /**
