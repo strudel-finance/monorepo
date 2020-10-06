@@ -1,14 +1,14 @@
-import React, {useCallback} from 'react'
+import React, { useCallback } from 'react'
 import styled from 'styled-components'
-import {useWallet} from 'use-wallet'
+import { useWallet } from 'use-wallet'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import {getStrudelAddress, getVbtcAddress} from '../../../vbtc/utils'
-import {getBalanceNumber} from '../../../utils/formatBalance'
+import { getStrudelAddress, getVbtcAddress } from '../../../vbtc/utils'
+import { getBalanceNumber } from '../../../utils/formatBalance'
 import Button from '../../Button'
 import CardIcon from '../../CardIcon'
 import Label from '../../Label'
-import Modal, {ModalProps} from '../../Modal'
+import Modal, { ModalProps } from '../../Modal'
 import ModalActions from '../../ModalActions'
 import ModalContent from '../../ModalContent'
 import ModalTitle from '../../ModalTitle'
@@ -17,8 +17,8 @@ import Value from '../../Value'
 import ValueBTC from '../../ValueBTC'
 import StrudelIcon from '../../StrudelIcon'
 
-const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
-  const {account, reset} = useWallet()
+const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
+  const { account, reset } = useWallet()
 
   const handleSignOutClick = useCallback(() => {
     onDismiss!()
@@ -32,13 +32,13 @@ const AccountModal: React.FC<ModalProps> = ({onDismiss}) => {
     <Modal>
       <ModalTitle text="My Account" />
       <ModalContent>
-        <div style={{display: 'flex'}}>
+        <div style={{ display: 'flex' }}>
           <StyledBalanceWrapper>
             <StrudelIcon size={80} />
             <Spacer />
             <StyledBalance>
               <Value value={getBalanceNumber(strudelBalance)} />
-              <Label text="Strudel Balance" />
+              <Label text="$TRDL Balance" />
             </StyledBalance>
             <StyledBalance>
               <ValueBTC value={getBalanceNumber(vbtcBalance)} />

@@ -1,8 +1,8 @@
 import BigNumber from 'bignumber.js'
-import React, {useEffect, useState} from 'react'
+import React, { useEffect, useState } from 'react'
 import CountUp from 'react-countup'
 import styled from 'styled-components'
-import {useWallet} from 'use-wallet'
+import { useWallet } from 'use-wallet'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
@@ -14,8 +14,8 @@ import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import {getStrudelAddress, getStrudelSupply} from '../../../vbtc/utils'
-import {getBalanceNumber} from '../../../utils/formatBalance'
+import { getStrudelAddress, getStrudelSupply } from '../../../vbtc/utils'
+import { getBalanceNumber } from '../../../utils/formatBalance'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -35,7 +35,7 @@ const PendingRewards: React.FC = () => {
 
   if (allStakedValue && allStakedValue.length) {
     const sumWeth = farms.reduce(
-      (c, {id}, i) => c + (allStakedValue[i].totalWethValue.toNumber() || 0),
+      (c, { id }, i) => c + (allStakedValue[i].totalWethValue.toNumber() || 0),
       0,
     )
   }
@@ -74,7 +74,7 @@ const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
-  const {account, ethereum}: {account: any; ethereum: any} = useWallet()
+  const { account, ethereum }: { account: any; ethereum: any } = useWallet()
 
   useEffect(() => {
     async function fetchTotalSupply() {
@@ -94,8 +94,8 @@ const BalanceStrudel: React.FC = () => {
             <StyledBalance>
               <StrudelIcon />
               <Spacer />
-              <div style={{flex: 1}}>
-                <Label text="Your Strudel Balance" />
+              <div style={{ flex: 1 }}>
+                <Label text="Your $TRDL Balance" />
                 <Value
                   value={
                     !!account ? getBalanceNumber(strudelBalance) : 'Locked'
@@ -108,7 +108,7 @@ const BalanceStrudel: React.FC = () => {
         <Footnote>
           Pending harvest
           <FootnoteValue>
-            <PendingRewards /> STRUDEL
+            <PendingRewards /> $TRDL
           </FootnoteValue>
         </Footnote>
       </Card>
@@ -116,14 +116,14 @@ const BalanceStrudel: React.FC = () => {
 
       <Card>
         <CardContent>
-          <Label text="Total Strudel Supply" />
+          <Label text="Total $TRDL Supply" />
           <Value
             value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
         </CardContent>
         <Footnote>
           New rewards per block
-          <FootnoteValue>1,000 STRUDEL</FootnoteValue>
+          <FootnoteValue>4 $TRDL</FootnoteValue>
         </Footnote>
       </Card>
     </StyledWrapper>

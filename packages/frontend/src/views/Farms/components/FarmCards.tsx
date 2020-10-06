@@ -1,32 +1,42 @@
 import BigNumber from 'bignumber.js'
-import React, {useEffect, useState} from 'react'
-import Countdown, {CountdownRenderProps} from 'react-countdown'
-import styled, {keyframes} from 'styled-components'
-import {useWallet} from 'use-wallet'
+import React, { useEffect, useState } from 'react'
+import Countdown, { CountdownRenderProps } from 'react-countdown'
+import styled, { keyframes } from 'styled-components'
+import { useWallet } from 'use-wallet'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import CardIcon from '../../../components/CardIcon'
 import Loader from '../../../components/Loader'
 import Spacer from '../../../components/Spacer'
-import {Farm} from '../../../contexts/Farms'
-import useAllStakedValue, {StakedValue} from '../../../hooks/useAllStakedValue'
+import { Farm } from '../../../contexts/Farms'
+import useAllStakedValue, {
+  StakedValue,
+} from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
-import {getEarned, getMasterChefContract} from '../../../vbtc/utils'
-import {bnToDec} from '../../../utils'
+import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
+import { bnToDec } from '../../../utils'
+import Farm1 from '../../../assets/img/Farm1.png'
+import Farm2 from '../../../assets/img/Farm2.png'
+import Farm3 from '../../../assets/img/Farm3.png'
+import Farm4 from '../../../assets/img/Farm4.png'
+import Farm5 from '../../../assets/img/Farm5.png'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
+  isBalancer?: boolean
+  url?: string
   apy: BigNumber
+  percentage: string
 }
 
 const FarmCards: React.FC = () => {
   const [farms] = useFarms()
-  const {account} = useWallet()
+  const { account } = useWallet()
   const stakedValue = useAllStakedValue()
 
   const strudelIndex = farms.findIndex(
-    ({tokenSymbol}) => tokenSymbol === 'STRDL',
+    ({ tokenSymbol }) => tokenSymbol === 'STRDL',
   )
 
   const vbtcPrice =
@@ -49,6 +59,11 @@ const FarmCards: React.FC = () => {
               .times(stakedValue[i].poolWeight)
               .div(stakedValue[i].totalWethValue)
           : null,
+        percentage: stakedValue[i]
+          ? Number(Number(stakedValue[i].poolWeight) * Number(100))
+              .toFixed(2)
+              .toString()
+          : null,
       }
       const newFarmRows = [...farmRows]
       if (newFarmRows[newFarmRows.length - 1].length === 3) {
@@ -68,7 +83,7 @@ const FarmCards: React.FC = () => {
           <StyledRow key={i}>
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
-                <FarmCard farm={farm} />
+                <FarmCard farm={farm} index={i + j} />
                 {(j === 0 || j === 1) && <StyledSpacer />}
               </React.Fragment>
             ))}
@@ -76,7 +91,7 @@ const FarmCards: React.FC = () => {
         ))
       ) : (
         <StyledLoadingWrapper>
-          <Loader text="Cooking the rice ..." />
+          <Loader text="Exploring new planets ..." />
         </StyledLoadingWrapper>
       )}
     </StyledCards>
@@ -85,26 +100,51 @@ const FarmCards: React.FC = () => {
 
 interface FarmCardProps {
   farm: FarmWithStakedValue
+  index: number
 }
 
-const FarmCard: React.FC<FarmCardProps> = ({farm}) => {
+const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
-  const {account} = useWallet()
-  const {lpTokenAddress} = farm
+  const { account } = useWallet()
+  const { lpTokenAddress } = farm
   const vbtc = useVBTC()
 
   const renderer = (countdownProps: CountdownRenderProps) => {
-    const {hours, minutes, seconds} = countdownProps
+    const { hours, minutes, seconds } = countdownProps
     const paddedSeconds = seconds < 10 ? `0${seconds}` : seconds
     const paddedMinutes = minutes < 10 ? `0${minutes}` : minutes
     const paddedHours = hours < 10 ? `0${hours}` : hours
     return (
-      <span style={{width: '100%'}}>
+      <span style={{ width: '100%' }}>
         {paddedHours}:{paddedMinutes}:{paddedSeconds}
       </span>
     )
+  }
+  const getBackground = (): string => {
+    switch (index % 5) {
+      case 0:
+        return Farm1
+      case 1:
+        return Farm2
+      case 2:
+        return Farm3
+      case 3:
+        return Farm4
+      case 4:
+        return Farm5
+    }
+  }
+  const getIcon = (icon: number): string => {
+    switch (icon) {
+      case 0:
+        return
+      case 1:
+        return
+      case 2:
+        return
+    }
   }
 
   useEffect(() => {
@@ -126,15 +166,21 @@ const FarmCard: React.FC<FarmCardProps> = ({farm}) => {
 
   return (
     <StyledCardWrapper>
-      {farm.tokenSymbol === 'STRDL' && <StyledCardAccent />}
+      {farm.isBalancer && <StyledCardAccent />}
       <Card>
-        <CardContent>
+        <CardContent style={{ backgroundImage: `url(${getBackground()})` }}>
           <StyledContent>
             <CardIcon>{farm.icon}</CardIcon>
             <StyledTitle>{farm.name}</StyledTitle>
             <StyledDetails>
-              <StyledDetail>Deposit {farm.lpToken.toUpperCase()}</StyledDetail>
+              <StyledDetail>
+                Deposit{' '}
+                <a href={farm.url} target="_blank">
+                  {farm.lpToken.toUpperCase()}
+                </a>
+              </StyledDetail>
               <StyledDetail>Earn {farm.earnToken.toUpperCase()}</StyledDetail>
+              <StyledDetail>{farm.percentage}% of rewards</StyledDetail>
             </StyledDetails>
             <Spacer />
             <Button
@@ -263,6 +309,7 @@ const StyledContent = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
+  background-size: 100%;
 `
 
 const StyledSpacer = styled.div`

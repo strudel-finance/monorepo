@@ -1,16 +1,16 @@
-import {useCallback, useEffect, useState} from 'react'
-import {provider} from 'web3-core'
+import { useCallback, useEffect, useState } from 'react'
+import { provider } from 'web3-core'
 
 import BigNumber from 'bignumber.js'
-import {useWallet} from 'use-wallet'
+import { useWallet } from 'use-wallet'
 
-import {getEarned, getMasterChefContract} from '../vbtc/utils'
+import { getEarned, getMasterChefContract } from '../vbtc/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 
 const useEarnings = (pid: number) => {
   const [balance, setBalance] = useState(new BigNumber(0))
-  const {account, ethereum}: {account: string; ethereum: provider} = useWallet()
+  const { account }: { account: string } = useWallet()
   const vbtc = useVBTC()
   const masterChefContract = getMasterChefContract(vbtc)
   const block = useBlock()

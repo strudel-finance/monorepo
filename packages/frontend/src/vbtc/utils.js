@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js'
-import {ethers} from 'ethers'
+import { ethers } from 'ethers'
+import { getWeight } from '../utils/bpool'
 
 BigNumber.config({
   EXPONENTIAL_AT: 1000,
@@ -44,6 +45,8 @@ export const getFarms = (vbtc) => {
     ? vbtc.contracts.pools.map(
         ({
           pid,
+          isBalancer,
+          url,
           name,
           symbol,
           icon,
@@ -52,8 +55,12 @@ export const getFarms = (vbtc) => {
           tokenContract,
           lpAddress,
           lpContract,
+          balancerPoolAddress,
+          balancerPoolContract,
         }) => ({
           pid,
+          isBalancer,
+          url,
           id: symbol,
           name,
           lpToken: symbol,
@@ -62,16 +69,18 @@ export const getFarms = (vbtc) => {
           tokenAddress,
           tokenSymbol,
           tokenContract,
-          earnToken: 'STRUDEL',
+          earnToken: '$TRDL',
           earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
+          balancerPoolAddress,
+          balancerPoolContract,
         }),
       )
     : []
 }
 
 export const getPoolWeight = async (masterChefContract, pid) => {
-  const {allocPoint} = await masterChefContract.methods.poolInfo(pid).call()
+  const { allocPoint } = await masterChefContract.methods.poolInfo(pid).call()
   const totalAllocPoint = await masterChefContract.methods
     .totalAllocPoint()
     .call()
@@ -83,11 +92,14 @@ export const getEarned = async (masterChefContract, pid, account) => {
 }
 
 export const getTotalLPWethValue = async (
+  isBalancer,
   masterChefContract,
   wethContract,
   lpContract,
   tokenContract,
   pid,
+  vbtcContract,
+  balancerPoolContract,
 ) => {
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
@@ -100,6 +112,11 @@ export const getTotalLPWethValue = async (
     .call()
   // Convert that into the portion of total lpContract = p1
   const totalSupply = await lpContract.methods.totalSupply().call()
+
+  //switch to Balancer Pool to get included wETH amount as ReservePoolController holds LP token and pool assets
+  if (isBalancer) {
+    lpContract = balancerPoolContract
+  }
   // Get total weth value for the lpContract = w1
   const lpContractWeth = await wethContract.methods
     .balanceOf(lpContract.options.address)
@@ -107,7 +124,20 @@ export const getTotalLPWethValue = async (
   // Return p1 * w1 * 2
   const portionLp = new BigNumber(balance).div(new BigNumber(totalSupply))
   const lpWethWorth = new BigNumber(lpContractWeth)
-  const totalLpWethValue = portionLp.times(lpWethWorth).times(new BigNumber(2))
+  let totalLpWethValue
+
+  //include weight into account if it is the Balancer Pool
+  if (isBalancer) {
+    totalLpWethValue = portionLp
+      .times(lpWethWorth)
+      .times(
+        new BigNumber(1).plus(
+          new BigNumber(await getWeight(lpContract, vbtcContract)),
+        ),
+      )
+  } else {
+    totalLpWethValue = portionLp.times(lpWethWorth).times(new BigNumber(2))
+  }
   // Calculate
   const tokenAmount = new BigNumber(tokenAmountWholeLP)
     .times(portionLp)
@@ -128,7 +158,7 @@ export const getTotalLPWethValue = async (
 export const approve = async (lpContract, masterChefContract, account) => {
   return lpContract.methods
     .approve(masterChefContract.options.address, ethers.constants.MaxUint256)
-    .send({from: account})
+    .send({ from: account })
 }
 
 export const getVbtcSupply = async (vbtc) => {
@@ -158,7 +188,7 @@ export const proofOpReturnAndMint = async (
       proof.vin,
       proof.vout,
     )
-    .send({from: account})
+    .send({ from: account })
     .on('transactionHash', (tx) => {
       return tx.transactionHash
     })
@@ -170,7 +200,7 @@ export const stake = async (masterChefContract, pid, amount, account) => {
       pid,
       new BigNumber(amount).times(new BigNumber(10).pow(18)).toString(),
     )
-    .send({from: account})
+    .send({ from: account })
     .on('transactionHash', (tx) => {
       console.log(tx)
       return tx.transactionHash
@@ -183,7 +213,7 @@ export const unstake = async (masterChefContract, pid, amount, account) => {
       pid,
       new BigNumber(amount).times(new BigNumber(10).pow(18)).toString(),
     )
-    .send({from: account})
+    .send({ from: account })
     .on('transactionHash', (tx) => {
       console.log(tx)
       return tx.transactionHash
@@ -192,7 +222,7 @@ export const unstake = async (masterChefContract, pid, amount, account) => {
 export const harvest = async (masterChefContract, pid, account) => {
   return masterChefContract.methods
     .deposit(pid, '0')
-    .send({from: account})
+    .send({ from: account })
     .on('transactionHash', (tx) => {
       //console.log(tx)
       return tx.transactionHash
@@ -201,7 +231,7 @@ export const harvest = async (masterChefContract, pid, account) => {
 
 export const getStaked = async (masterChefContract, pid, account) => {
   try {
-    const {amount} = await masterChefContract.methods
+    const { amount } = await masterChefContract.methods
       .userInfo(pid, account)
       .call()
     return new BigNumber(amount)
@@ -215,7 +245,7 @@ export const redeem = async (masterChefContract, account) => {
   if (now >= 1597172400) {
     return masterChefContract.methods
       .exit()
-      .send({from: account})
+      .send({ from: account })
       .on('transactionHash', (tx) => {
         console.log(tx)
         return tx.transactionHash

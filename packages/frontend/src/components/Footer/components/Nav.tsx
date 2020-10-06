@@ -4,16 +4,16 @@ import styled from 'styled-components'
 const Nav: React.FC = () => {
   return (
     <StyledNav>
-      <StyledLink target="_blank" href="">
-        //TODO add links Vortex Contract
-      </StyledLink>
-      <StyledLink target="_blank" href="">
-        //TODO add links Uniswap STRDL-ETH
-      </StyledLink>
+      {false && (
+        <>
+          <StyledLink target="_blank" href=""></StyledLink>
+          <StyledLink target="_blank" href=""></StyledLink>
+        </>
+      )}
       <StyledLink target="_blank" href="https://discord.gg/fBuHJCs">
         Discord
       </StyledLink>
-      <StyledLink target="_blank" href="">
+      <StyledLink target="_blank" href="https://github.com/strudel-finance/">
         Github
       </StyledLink>
       <StyledLink target="_blank" href="https://twitter.com/strudelfinance">
@@ -28,7 +28,7 @@ const StyledNav = styled.nav`
   display: flex;
 `
 
-const StyledLink = styled.a`
+export const StyledLink = styled.a`
   color: ${(props) => props.theme.color.grey[400]};
   padding-left: ${(props) => props.theme.spacing[3]}px;
   padding-right: ${(props) => props.theme.spacing[3]}px;

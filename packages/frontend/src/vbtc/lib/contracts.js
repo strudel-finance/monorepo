@@ -5,6 +5,7 @@ import StrudelAbi from './abi/StrudelToken.json'
 import VBTCAbi from './abi/vbtc.json'
 import UNIV2PairAbi from './abi/uni_v2_lp.json'
 import WETHAbi from './abi/weth.json'
+import BalancerPool from './abi/BPool.json'
 import {
   contractAddresses,
   SUBTRACT_GAS_LIMIT,
@@ -31,8 +32,14 @@ export class Contracts {
       Object.assign(pool, {
         lpAddress: pool.lpAddresses[networkId],
         tokenAddress: pool.tokenAddresses[networkId],
-        lpContract: new this.web3.eth.Contract(UNIV2PairAbi),
+        lpContract: pool.isBalancer
+          ? new this.web3.eth.Contract(ERC20Abi)
+          : new this.web3.eth.Contract(UNIV2PairAbi),
         tokenContract: new this.web3.eth.Contract(ERC20Abi),
+        balancerPoolAddress: pool.balancerPoolAddresses
+          ? pool.balancerPoolAddresses[networkId]
+          : undefined,
+        balancerPoolContract: new this.web3.eth.Contract(BalancerPool),
       }),
     )
 
@@ -52,7 +59,17 @@ export class Contracts {
     setProvider(this.masterChef, contractAddresses.masterChef[networkId])
     setProvider(this.weth, contractAddresses.weth[networkId])
     this.pools.forEach(
-      ({lpContract, lpAddress, tokenContract, tokenAddress}) => {
+      ({
+        lpContract,
+        lpAddress,
+        tokenContract,
+        tokenAddress,
+        balancerPoolAddress,
+        balancerPoolContract,
+      }) => {
+        if (balancerPoolAddress) {
+          setProvider(balancerPoolContract, balancerPoolAddress)
+        }
         setProvider(lpContract, lpAddress)
         setProvider(tokenContract, tokenAddress)
       },
@@ -94,9 +111,9 @@ export class Contracts {
           gasEstimate = await method.estimateGas(txOptions)
         } catch (error) {
           const data = method.encodeABI()
-          const {from, value} = options
+          const { from, value } = options
           const to = method._parent._address
-          error.transactionData = {from, value, data, to}
+          error.transactionData = { from, value, data, to }
           throw error
         }
 
@@ -108,7 +125,7 @@ export class Contracts {
 
       if (confirmationType === Types.ConfirmationType.Simulate) {
         let g = txOptions.gas
-        return {gasEstimate, g}
+        return { gasEstimate, g }
       }
     }
 
@@ -212,7 +229,7 @@ export class Contracts {
       if (this.notifier) {
         this.notifier.hash(transactionHash)
       }
-      return {transactionHash}
+      return { transactionHash }
     }
 
     if (t === Types.ConfirmationType.Confirmed) {
@@ -231,7 +248,7 @@ export class Contracts {
 
   async callConstantContractFunction(method, options) {
     const m2 = method
-    const {blockNumber, ...txOptions} = options
+    const { blockNumber, ...txOptions } = options
     return m2.call(txOptions, blockNumber)
   }
 

@@ -1,14 +1,14 @@
 import React from 'react'
-import styled, {keyframes} from 'styled-components'
+import styled, { keyframes } from 'styled-components'
 
-import {NavLink} from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 
 interface MobileMenuProps {
   onDismiss: () => void
   visible?: boolean
 }
 
-const MobileMenu: React.FC<MobileMenuProps> = ({onDismiss, visible}) => {
+const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
   if (visible) {
     return (
       <StyledMobileMenuWrapper>
@@ -23,7 +23,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({onDismiss, visible}) => {
             to="/farms"
             onClick={onDismiss}
           >
-            Farms
+            Terra-Farms
           </StyledLink>
           {false && (
             <StyledLink
@@ -35,6 +35,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({onDismiss, visible}) => {
               Staking
             </StyledLink>
           )}
+          <StyledAbsoluteLink
+            href="https://medium.com/@strudelfinance/strudel-manifesto-580759f9634b"
+            target="_blank"
+          >
+            About
+          </StyledAbsoluteLink>
         </StyledMobileMenu>
       </StyledMobileMenuWrapper>
     )
@@ -86,6 +92,24 @@ const StyledMobileMenu = styled.div`
 `
 
 const StyledLink = styled(NavLink)`
+  box-sizing: border-box;
+  color: ${(props) => props.theme.color.grey[400]};
+  font-size: 24px;
+  font-weight: 700;
+  padding: ${(props) => props.theme.spacing[3]}px
+    ${(props) => props.theme.spacing[4]}px;
+  text-align: center;
+  text-decoration: none;
+  width: 100%;
+  &:hover {
+    color: ${(props) => props.theme.color.grey[500]};
+  }
+  &.active {
+    color: ${(props) => props.theme.color.primary.main};
+  }
+`
+
+const StyledAbsoluteLink = styled.a`
   box-sizing: border-box;
   color: ${(props) => props.theme.color.grey[400]};
   font-size: 24px;

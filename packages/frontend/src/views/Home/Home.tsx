@@ -2,7 +2,7 @@ import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { useWallet } from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
-
+import Countdown from 'react-countdown'
 import strudel from '../../assets/img/Strudel.png'
 import Button from '../../components/Button'
 //import Container from '../../components/Container'
@@ -11,22 +11,28 @@ import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
 import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
+import { StyledCount, RenderProps } from '../../utils/countHelper'
+import Grid from '@material-ui/core/Grid'
 import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
-import Lottie from '../../components/Lottie'
+import Lottie, { MobileLottie } from '../../components/Lottie'
 import formatAddress from '../../utils/formatAddress'
 import showError, { handleErrors } from '../../utils/showError'
 import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import useInterval from '../../hooks/useInterval'
 import Container from '@material-ui/core/Container'
-import Grid from '@material-ui/core/Grid'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
-import { makeStyles } from '@material-ui/core'
+import { StyledLink } from '../../components/Footer/components/Nav'
+
+import { makeStyles, withStyles } from '@material-ui/core'
 import { Transaction, LoadingStatus } from '../../types/types'
 import sb from 'satoshi-bitcoin'
 import { apiServer } from '../../constants/backendAddresses'
+import { startDate } from '../../constants/countdown'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
+import AstroFlying from '../../assets/img/AstroFlying.png'
+
 import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -48,7 +54,19 @@ const useStyles = makeStyles((theme) => ({
     height: '100%',
   },
 }))
-
+const AstroGrid = withStyles({
+  item: {
+    margin: 'auto',
+    textAlign: 'center',
+  },
+})(Grid)
+const MyStyledLink = styled(StyledLink)`
+  display: none;
+  @media (min-width: 600px) and (orientation: landscape) {
+    display: block;
+  }
+  font-size: 50px;
+`
 const Home: React.FC = () => {
   const POLL_DURATION_TXS = 1500
   const BTC_ACCEPTANCE = 6
@@ -60,6 +78,7 @@ const Home: React.FC = () => {
     '0x0000000000000000000000000000000000000000',
   )
   const [isLoading, setLoading] = useState({})
+  const [isCountComplete, setCountComplete] = useState(false)
 
   const wallet = useWallet()
   const account = wallet.account
@@ -174,9 +193,6 @@ const Home: React.FC = () => {
   }, [vbtc])
   */
   useEffect(() => {
-    console.log(account)
-    console.log('previous:' + previousAccount)
-
     if (account == null || previousAccount !== account) {
       setTransactions([])
       setLastRequest(undefined)
@@ -190,6 +206,7 @@ const Home: React.FC = () => {
       // get transactions at first
       handleTransactionUpdate()
     }
+    return undefined
   }, [account])
 
   useInterval(async () => {
@@ -261,90 +278,161 @@ const Home: React.FC = () => {
     },
     [setVal],
   )
+  const handleCountEnd = () => {
+    setCountComplete(true)
+  }
   // icon={<img src={strudel} height={120} />}
-
+  const renderer = ({ days, hours, minutes, seconds }: RenderProps) => {
+    // Render a countdown
+    return (
+      <StyledCount>
+        {days}d:{hours}h:{minutes}min:{seconds}s
+      </StyledCount>
+    )
+  }
+  const isPast = startDate < new Date()
   return (
     <Page>
       <StyledLottieContainer>
         <Lottie />
       </StyledLottieContainer>
-      <PageHeader
-        title="The Vortex is ready"
-        subtitle="Burn BTC to receive vBTC and $STRDL!"
-      />
-      {wallet.status === 'connected' ? (
-        <Container fixed maxWidth="lg">
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={4}>
-              <Container>
-                <AddressInput
-                  address={formatAddress(account)}
-                  value={formatAddress(account)}
-                />
-                <BurnAmountInput
-                  onChange={handleAmountChange}
-                  value={val}
-                  symbol="BTC"
-                />
-                <Button text={'Get vBTC'} onClick={onPresentBurn} />
-              </Container>
-            </Grid>
-            <Grid item xs={12} sm={12} md={8}>
-              <TransactionsTableContainer
-                transactions={transactions}
-                confirmations={confirmations}
-                handleLoading={handleLoading}
-                isLoading={isLoading}
-                lastRequest={lastRequest}
-              />
-            </Grid>
-          </Grid>
-        </Container>
-      ) : (
-        <div
-          style={{
-            alignItems: 'center',
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'center',
-          }}
-        >
-          <Button
-            onClick={onPresentWalletProviderModal}
-            text="🔓 Unlock Wallet"
+      <StyledLottieMobileContainer>
+        <MobileLottie />
+      </StyledLottieMobileContainer>
+      {isCountComplete || isPast ? (
+        <>
+          <PageHeader
+            title="Enter the Strudel"
+            subtitle="Turn your BTC in vBTC and  earn intergalactical $TRDL rewards."
           />
-        </div>
+          {wallet.status === 'connected' ? (
+            <Container fixed maxWidth="lg">
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={12} md={4}>
+                  <Container>
+                    <AddressInput
+                      address={formatAddress(account)}
+                      value={formatAddress(account)}
+                    />
+                    <BurnAmountInput
+                      onChange={handleAmountChange}
+                      value={val}
+                      symbol="BTC"
+                    />
+                    <Button text={'Get vBTC'} onClick={onPresentBurn} />
+                  </Container>
+                  <Spacer size="md" />
+
+                  <StyledInfo>
+                    ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
+                  </StyledInfo>
+                </Grid>
+                <Grid item xs={12} sm={12} md={8}>
+                  <TransactionsTableContainer
+                    transactions={transactions}
+                    confirmations={confirmations}
+                    handleLoading={handleLoading}
+                    isLoading={isLoading}
+                    lastRequest={lastRequest}
+                  />
+                </Grid>
+              </Grid>
+            </Container>
+          ) : (
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            >
+              <Button
+                onClick={onPresentWalletProviderModal}
+                text="🔓 Unlock Wallet"
+              />
+            </div>
+          )}
+          <>
+            <Spacer size="lg" />
+
+            <Grid container spacing={1}>
+              <AstroGrid item xs={2}>
+                <img src={AstroFlying} height="100" />
+              </AstroGrid>
+              <AstroGrid item xs={5}>
+                <StyledP>
+                  The Strudel is the first one-way, trustless bridge linking
+                  Bitcoin and Ethereum. 
+                </StyledP>
+                <StyledP>
+                  You can only enter the Strudel from one direction so be aware!
+                  This action is irreversible.  
+                </StyledP>
+                <StyledP>
+                  The bravest explorers that arrive on the other side will get
+                  extra $TRDL rewards.
+                </StyledP>
+              </AstroGrid>
+              <AstroGrid item xs={2}></AstroGrid>
+            </Grid>
+            <Spacer size="lg" />
+
+            <Container>
+              <Balances />
+            </Container>
+            <Spacer size="lg" />
+            <Container>
+              <BalanceStrudel />
+            </Container>
+            <Spacer size="lg" />
+            <div
+              style={{
+                margin: '0 auto',
+              }}
+            >
+              <Button
+                text="🌋 See Terra Farms"
+                to="/farms"
+                variant="secondary"
+              />
+            </div>
+          </>
+        </>
+      ) : (
+        <>
+          <Countdown
+            date={startDate}
+            renderer={renderer}
+            onComplete={handleCountEnd}
+          />
+          <MyStyledLink target="_blank" href="https://discord.gg/fBuHJCs">
+            Join the Discord
+          </MyStyledLink>
+        </>
       )}
-      <Container>
-        <Spacer size="lg" />
-        <StyledInfo>
-          🏆<b>Degen Tip</b>: Strudel only works in one direction.
-        </StyledInfo>
-        <Spacer size="lg" />
-        <Container>
-          <Balances />
-        </Container>
-        <Spacer size="lg" />
-        <Container>
-          <BalanceStrudel />
-        </Container>
-        <Spacer size="lg" />
-        <div
-          style={{
-            margin: '0 auto',
-          }}
-        >
-          <Button text="🔪 See the Menu" to="/farms" variant="secondary" />
-        </div>
-      </Container>
     </Page>
   )
 }
 const StyledLottieContainer = styled.div`
   width: 100%;
-  height: 50vh;
   z-index: -99;
+  display: none;
+  @media (min-width: 600px) and (orientation: landscape) {
+    height: 50vh;
+    display: block;
+  }
 `
+
+const StyledLottieMobileContainer = styled.div`
+  width: 100%;
+  z-index: -99;
+  height: 45vh;
+  @media (min-width: 600px) and (orientation: landscape) {
+    display: none;
+  }
+`
+
 const StyledInfo = styled.h3`
   color: ${(props) => props.theme.color.grey[500]};
   font-size: 16px;
@@ -357,5 +445,7 @@ const StyledInfo = styled.h3`
     color: ${(props) => props.theme.color.grey[600]};
   }
 `
-
+const StyledP = styled.p`
+  text-align: center;
+`
 export default Home
