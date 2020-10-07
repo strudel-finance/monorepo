@@ -3,7 +3,7 @@ pragma solidity 0.6.6;
 import {TypedMemView} from "../summa-tx/TypedMemView.sol";
 import {ViewBTC} from "../summa-tx/ViewBTC.sol";
 import {ViewSPV} from "../summa-tx/ViewSPV.sol";
-import {IRelay} from "../IRelay.sol";
+import {IRelay} from "../summa-tx/IRelay.sol";
 
 /** @title MockRelay */
 /** half-hearted implementation for testing */

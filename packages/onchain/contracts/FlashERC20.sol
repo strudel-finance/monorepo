@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MPL-2.0
+
 pragma solidity 0.6.6;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
@@ -14,11 +16,14 @@ contract FlashERC20 is
 {
   uint256 constant BTC_CAP = 21 * 10**24;
   uint256 constant FEE_FACTOR = 100;
+
+  // used for reentrance guard
   uint256 private constant _NOT_ENTERED = 1;
   uint256 private constant _ENTERED = 2;
 
   event FlashMint(address indexed src, uint256 wad, bytes32 data);
 
+  // working memory
   uint256 private _status;
   // Dev fund
   uint256 public devFundDivRate;
@@ -69,6 +74,7 @@ contract FlashERC20 is
     emit FlashMint(msg.sender, amount, data);
   }
 
+  // governance function
   function setDevFundDivRate(uint256 _devFundDivRate) external onlyOwner {
     require(_devFundDivRate > 0, "!devFundDivRate-0");
     devFundDivRate = _devFundDivRate;

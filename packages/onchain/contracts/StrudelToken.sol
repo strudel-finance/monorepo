@@ -1,19 +1,19 @@
-// SPDX-License-Identifier: MPL
+// SPDX-License-Identifier: MPL-2.0
 
 pragma solidity 0.6.6;
 
-import "./ERC20Mintable/MinterRole.sol";
-import {SafeMath} from "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
-import {ITokenRecipient} from "./ITokenRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "./erc20/MinterRole.sol";
+import "./erc20/ITokenRecipient.sol";
 
-/// @title  VBTC Token.
-/// @notice This is the VBTC ERC20 contract.
+/// @title  Strudel Token.
+/// @notice This is the Strudel ERC20 contract.
 contract StrudelToken is ERC20UpgradeSafe, MinterRole {
   using SafeMath for uint256;
 
   constructor() public {
-    __ERC20_init("Strudel Finance", "STRDL");
+    __ERC20_init("Strudel Finance", "$TRDL");
     __Ownable_init();
   }
 
@@ -24,7 +24,7 @@ contract StrudelToken is ERC20UpgradeSafe, MinterRole {
    *
    * - the caller must have the {MinterRole}.
    */
-  function mint(address account, uint256 amount) public onlyMinter returns (bool) {
+  function mint(address account, uint256 amount) external onlyMinter returns (bool) {
     _mint(account, amount);
     return true;
   }

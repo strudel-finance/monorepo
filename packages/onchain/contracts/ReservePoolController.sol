@@ -1,4 +1,5 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier: MPL-2.0
+
 pragma solidity 0.6.6;
 
 // Imports
@@ -10,7 +11,7 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import "./uniswap/UniswapV2Library.sol";
 import "./uniswap/IUniswapV2Router01.sol";
-import "./uniswap/IBtcPriceOracle.sol";
+import "./IBtcPriceOracle.sol";
 import "./balancer/IBFactory.sol";
 import "./balancer/IBPool.sol";
 import "./balancer/BMath.sol";
@@ -22,11 +23,12 @@ import "./IFlashERC20.sol";
  * Reference:
  * https://github.com/balancer-labs/configurable-rights-pool/blob/master/contracts/templates/ElasticSupplyPool.sol
  *
- * @title vBTC Reserve Pool.
+ * @title Reserve Pool Controller.
  *
  * @dev   Extension of Balancer labs' configurable rights pool (smart-pool).
  *        The reserve pool holds liquidity to affect the peg of vBTC in the spot pool.
- *        the setWeight function is used after trades by this priviliged contract.
+ *        The setWeight function is used to shift liquidity between pools and follow
+ *        the peg within a bounded range. The bounds are imposed by liquidity and MAX_WEIGHT param.
  *
  */
 contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpgradeSafe {
@@ -39,15 +41,37 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   event LogJoin(address indexed caller, address indexed tokenIn, uint256 tokenAmountIn);
   event LogExit(address indexed caller, address indexed tokenOut, uint256 tokenAmountOut);
 
+  // immutable
   IERC20 private vBtc;
   IERC20 private wEth;
-  IUniswapV2Router01 private uniRouter; // IUniswapV2Router01
   IBFactory private bFactory;
 
-  IBPool public bPool; // IBPool
+  // goverance params
+  IUniswapV2Router01 private uniRouter; // IUniswapV2Router01
   address private oracle; // 24 hour price feed for BTC
   uint256 private maxVbtcWeight; // denormmalized, like in Balancer
+
+  // working memory
+  IBPool public bPool; // IBPool
   uint32 private blockTimestampLast;
+
+  function initialize(
+    address _vBtcAddr,
+    address _wEthAddr,
+    address _bPoolFactory,
+    IUniswapV2Router01 _uniRouter,
+    address _oracle
+  ) external initializer {
+    vBtc = IERC20(_vBtcAddr);
+    wEth = IERC20(_wEthAddr);
+    bFactory = IBFactory(_bPoolFactory);
+    uniRouter = _uniRouter;
+    oracle = _oracle;
+    maxVbtcWeight = 3 * DEFAULT_WEIGHT;
+    // chain constructors?
+    __ERC20_init("Strudel vBTC++", "vBTC++");
+    __Ownable_init();
+  }
 
   // computes the direction and magnitude of the profit-maximizing trade
   function computeProfitMaximizingTrade(
@@ -102,25 +126,27 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     require(xfer, "ERR_ERC20_FALSE");
   }
 
-  function initialize(
-    address _vBtcAddr,
-    address _wEthAddr,
-    address _bPoolFactory,
-    IUniswapV2Router01 _uniRouter,
-    address _oracle
-  ) external initializer {
-    vBtc = IERC20(_vBtcAddr);
-    wEth = IERC20(_wEthAddr);
-    bFactory = IBFactory(_bPoolFactory);
-    uniRouter = _uniRouter;
-    oracle = _oracle;
-    maxVbtcWeight = 3 * DEFAULT_WEIGHT;
-    // chain constructors?
-    __ERC20_init("Strudel vBTC++", "vBTC++");
-    __Ownable_init();
+  // External functions
+
+  /**
+   * @notice Getter for the publicSwap field on the underlying pool
+   */
+  function isPublicSwap() external view returns (bool) {
+    return bPool.isPublicSwap();
   }
 
-  // External functions
+  function getParams()
+    external
+    view
+    returns (
+      address,
+      address,
+      uint256,
+      uint32
+    )
+  {
+    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast);
+  }
 
   function deployPool(uint256 initialSwapFee) external {
     require(address(bPool) == address(0), "already initialized");
@@ -149,46 +175,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     bPool.setSwapFee(initialSwapFee);
     bPool.setPublicSwap(true);
     _mint(msg.sender, MIN_POOL_SUPPLY);
-  }
-
-  /**
-   * @notice Getter for the publicSwap field on the underlying pool
-   */
-  function isPublicSwap() external view returns (bool) {
-    return bPool.isPublicSwap();
-  }
-
-  function getParams()
-    external
-    view
-    returns (
-      address,
-      address,
-      uint256,
-      uint32
-    )
-  {
-    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast);
-  }
-
-  function setParams(
-    address _uniRouter,
-    address _oracle,
-    uint256 _maxVbtcWeight,
-    uint256 _swapFee,
-    bool _isPublicSwap
-  ) external onlyOwner {
-    uniRouter = IUniswapV2Router01(_uniRouter);
-
-    require(_oracle != address(0), "!oracle-0");
-    oracle = _oracle;
-
-    require(_maxVbtcWeight >= DEFAULT_WEIGHT / 5, "set max weight too low error");
-    require(_maxVbtcWeight <= DEFAULT_WEIGHT * 9, "set max weight too high error");
-    maxVbtcWeight = _maxVbtcWeight;
-
-    bPool.setSwapFee(_swapFee);
-    bPool.setPublicSwap(_isPublicSwap);
   }
 
   /**
@@ -557,5 +543,26 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
     // 6. repay loan
     // TODO: don't forget that we need to pay a flash loan fee
+  }
+
+  // governance function
+  function setParams(
+    address _uniRouter,
+    address _oracle,
+    uint256 _maxVbtcWeight,
+    uint256 _swapFee,
+    bool _isPublicSwap
+  ) external onlyOwner {
+    uniRouter = IUniswapV2Router01(_uniRouter);
+
+    require(_oracle != address(0), "!oracle-0");
+    oracle = _oracle;
+
+    require(_maxVbtcWeight >= DEFAULT_WEIGHT / 5, "set max weight too low error");
+    require(_maxVbtcWeight <= DEFAULT_WEIGHT * 9, "set max weight too high error");
+    maxVbtcWeight = _maxVbtcWeight;
+
+    bPool.setSwapFee(_swapFee);
+    bPool.setPublicSwap(_isPublicSwap);
   }
 }

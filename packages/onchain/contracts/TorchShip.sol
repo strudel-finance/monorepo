@@ -1,12 +1,12 @@
+// SPDX-License-Identifier: MPL-2.0
+
 pragma solidity 0.6.6;
 
-import {IERC20} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import {
-  SafeERC20
-} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
-import {SafeMath} from "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/SafeERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
-import {StrudelToken} from "./StrudelToken.sol";
+import "./StrudelToken.sol";
 
 // The torchship has brought them to Ganymede, where they have to pulverize boulders and lava flows, and seed the resulting dust with carefully formulated organic material.
 //
@@ -18,6 +18,11 @@ import {StrudelToken} from "./StrudelToken.sol";
 contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   using SafeMath for uint256;
   using SafeERC20 for IERC20;
+
+  // Events
+  event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
+  event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
+  event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
   // Info of each user.
   struct UserInfo {
@@ -44,9 +49,11 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 accStrudelPerShare; // Accumulated STRDLs per share, times 1e12. See below.
   }
 
-  // The STRDL TOKEN!
-  StrudelToken public strudel;
-  // Dev fund (2%, initially)
+  // immutable
+  StrudelToken private strudel;
+
+  // governance params
+  // Dev fund
   uint256 public devFundDivRate;
   // Block number when bonus STRDL period ends.
   uint256 public bonusEndBlock;
@@ -54,21 +61,16 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   uint256 public strudelPerBlock;
   // Bonus muliplier for early strudel makers.
   uint256 public bonusMultiplier;
+  // The block number when STRDL mining starts.
+  uint256 public startBlock;
 
+  // working memory
   // Info of each pool.
   PoolInfo[] public poolInfo;
   // Info of each user that stakes LP tokens.
   mapping(uint256 => mapping(address => UserInfo)) public userInfo;
   // Total allocation points. Must be the sum of all allocation points in all pools.
   uint256 public totalAllocPoint;
-  // The block number when STRDL mining starts.
-  uint256 public startBlock;
-
-  // Events
-  event Recovered(address token, uint256 amount);
-  event Deposit(address indexed user, uint256 indexed pid, uint256 amount);
-  event Withdraw(address indexed user, uint256 indexed pid, uint256 amount);
-  event EmergencyWithdraw(address indexed user, uint256 indexed pid, uint256 amount);
 
   function initialize(
     address _strudel,
@@ -88,43 +90,18 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     devFundDivRate = 17;
   }
 
+  // Safe strudel transfer function, just in case if rounding error causes pool to not have enough STRDLs.
+  function safeStrudelTransfer(address _to, uint256 _amount) internal {
+    uint256 strudelBal = strudel.balanceOf(address(this));
+    if (_amount > strudelBal) {
+      strudel.transfer(_to, strudelBal);
+    } else {
+      strudel.transfer(_to, _amount);
+    }
+  }
+
   function poolLength() external view returns (uint256) {
     return poolInfo.length;
-  }
-
-  // Add a new lp to the pool. Can only be called by the owner.
-  // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
-  function add(
-    uint256 _allocPoint,
-    IERC20 _lpToken,
-    bool _withUpdate
-  ) public onlyOwner {
-    if (_withUpdate) {
-      massUpdatePools();
-    }
-    uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
-    totalAllocPoint = totalAllocPoint.add(_allocPoint);
-    poolInfo.push(
-      PoolInfo({
-        lpToken: _lpToken,
-        allocPoint: _allocPoint,
-        lastRewardBlock: lastRewardBlock,
-        accStrudelPerShare: 0
-      })
-    );
-  }
-
-  // Update the given pool's STRDL allocation point. Can only be called by the owner.
-  function set(
-    uint256 _pid,
-    uint256 _allocPoint,
-    bool _withUpdate
-  ) public onlyOwner {
-    if (_withUpdate) {
-      massUpdatePools();
-    }
-    totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
-    poolInfo[_pid].allocPoint = _allocPoint;
   }
 
   // Return reward multiplier over the given _from to _to block.
@@ -183,8 +160,8 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     pool.lastRewardBlock = block.number;
   }
 
-  // Deposit LP tokens to MasterChef for STRDL allocation.
-  function deposit(uint256 _pid, uint256 _amount) public {
+  // Deposit LP tokens to TorchShip for STRDL allocation.
+  function deposit(uint256 _pid, uint256 _amount) external {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
     updatePool(_pid);
@@ -198,8 +175,8 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     emit Deposit(msg.sender, _pid, _amount);
   }
 
-  // Withdraw LP tokens from MasterChef.
-  function withdraw(uint256 _pid, uint256 _amount) public {
+  // Withdraw LP tokens from TorchShip.
+  function withdraw(uint256 _pid, uint256 _amount) external {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
     require(user.amount >= _amount, "withdraw: not good");
@@ -213,7 +190,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   }
 
   // Withdraw without caring about rewards. EMERGENCY ONLY.
-  function emergencyWithdraw(uint256 _pid) public {
+  function emergencyWithdraw(uint256 _pid) external {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
     pool.lpToken.safeTransfer(address(msg.sender), user.amount);
@@ -222,30 +199,59 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     user.rewardDebt = 0;
   }
 
-  // Safe strudel transfer function, just in case if rounding error causes pool to not have enough STRDLs.
-  function safeStrudelTransfer(address _to, uint256 _amount) internal {
-    uint256 strudelBal = strudel.balanceOf(address(this));
-    if (_amount > strudelBal) {
-      strudel.transfer(_to, strudelBal);
-    } else {
-      strudel.transfer(_to, _amount);
+  // governance functions:
+
+  // Add a new lp to the pool. Can only be called by the owner.
+  // XXX DO NOT add the same LP token more than once. Rewards will be messed up if you do.
+  function add(
+    uint256 _allocPoint,
+    IERC20 _lpToken,
+    bool _withUpdate
+  ) public onlyOwner {
+    if (_withUpdate) {
+      massUpdatePools();
     }
+    uint256 lastRewardBlock = block.number > startBlock ? block.number : startBlock;
+    totalAllocPoint = totalAllocPoint.add(_allocPoint);
+    poolInfo.push(
+      PoolInfo({
+        lpToken: _lpToken,
+        allocPoint: _allocPoint,
+        lastRewardBlock: lastRewardBlock,
+        accStrudelPerShare: 0
+      })
+    );
   }
 
-  // **** Additional functions separate from the original masterchef contract ****
+  // Update the given pool's STRDL allocation point. Can only be called by the owner.
+  function set(
+    uint256 _pid,
+    uint256 _allocPoint,
+    bool _withUpdate
+  ) public onlyOwner {
+    if (_withUpdate) {
+      massUpdatePools();
+    }
+    totalAllocPoint = totalAllocPoint.sub(poolInfo[_pid].allocPoint).add(_allocPoint);
+    poolInfo[_pid].allocPoint = _allocPoint;
+  }
 
-  function setStrudelPerBlock(uint256 _strudelPerBlock) public onlyOwner {
-    require(_strudelPerBlock > 0, "!strudelPerBlock-0");
-
-    strudelPerBlock = _strudelPerBlock;
+  function setDevFundDivRate(uint256 _devFundDivRate) public onlyOwner {
+    require(_devFundDivRate > 0, "!devFundDivRate-0");
+    devFundDivRate = _devFundDivRate;
   }
 
   function setBonusEndBlock(uint256 _bonusEndBlock) public onlyOwner {
     bonusEndBlock = _bonusEndBlock;
   }
 
-  function setDevFundDivRate(uint256 _devFundDivRate) public onlyOwner {
-    require(_devFundDivRate > 0, "!devFundDivRate-0");
-    devFundDivRate = _devFundDivRate;
+  function setStrudelPerBlock(uint256 _strudelPerBlock) public onlyOwner {
+    require(_strudelPerBlock > 0, "!strudelPerBlock-0");
+    strudelPerBlock = _strudelPerBlock;
+  }
+
+  function setBonusMultiplier(uint256 _bonusMultiplier) public onlyOwner {
+    require(_bonusMultiplier > 0, "!bonusMultiplier-0");
+    bonusMultiplier = _bonusMultiplier;
   }
 }
