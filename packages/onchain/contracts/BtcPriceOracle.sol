@@ -23,7 +23,7 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
   address public immutable factory;
 
   // governance params
-  address[] public pairs;
+  address[] public referenceTokens;
 
   // working memory
   mapping(address => uint256) public priceCumulativeLast;
@@ -50,27 +50,35 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
   ) internal {
     // check inputs
     require(tokenizedBtc != address(0), "zero token");
+    require(priceCumulativeLast[tokenizedBtc] == 0, "already known");
 
     // check pair
     IUniswapV2Pair pair = IUniswapV2Pair(UniswapV2Library.pairFor(_factory, _weth, tokenizedBtc));
-    require(priceCumulativeLast[address(pair)] == 0, "already known");
+    require(address(pair) != address(0), "no pair");
     uint112 reserve0;
     uint112 reserve1;
     (reserve0, reserve1, blockTimestampLast) = pair.getReserves();
-    require(reserve0 != 0 && reserve1 != 0, "ExampleOracleSimple: NO_RESERVES"); // ensure that there's liquidity in the pair
+    require(reserve0 != 0 && reserve1 != 0, "BtcOracle: NO_RESERVES"); // ensure that there's liquidity in the pair
 
+    // fetch the current accumulated price value (0 / 1)
+    priceCumulativeLast[tokenizedBtc] = (pair.token0() == _weth)
+      ? pair.price1CumulativeLast()
+      : pair.price0CumulativeLast();
     // add to storage
-    priceCumulativeLast[address(pair)] = pair.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
-    pairs.push(address(pair));
+    referenceTokens.push(tokenizedBtc);
   }
 
   function update() external {
     uint32 blockTimestamp;
     uint224 priceSum = 0;
-    for (uint256 i = 0; i < pairs.length; i++) {
-      address pair = pairs[i];
-      uint256 priceCumulative;
-      (, priceCumulative, blockTimestamp) = UniswapV2OracleLibrary.currentCumulativePrices(pair);
+    for (uint256 i = 0; i < referenceTokens.length; i++) {
+      address tokenizedBtc = referenceTokens[i];
+      IUniswapV2Pair pair = IUniswapV2Pair(UniswapV2Library.pairFor(factory, weth, tokenizedBtc));
+      uint256 price0Cumulative;
+      uint256 price1Cumulative;
+      (price0Cumulative, price1Cumulative, blockTimestamp) = UniswapV2OracleLibrary
+        .currentCumulativePrices(address(pair));
+      uint256 priceCumulative = (pair.token0() == weth) ? price1Cumulative : price0Cumulative;
       uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
 
       // ensure that at least one full period has passed since the last update
@@ -78,20 +86,21 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
 
       // overflow is desired, casting never truncates
       // cumulative price is in (uq112x112 price * seconds) units so we simply wrap it after division by time elapsed
-      uint256 price = (priceCumulative - priceCumulativeLast[pair]) / timeElapsed;
+      uint256 price = (priceCumulative - priceCumulativeLast[tokenizedBtc]) / timeElapsed;
       emit Price(price);
       priceSum += FixedPoint.uq112x112(uint224(price))._x;
 
-      priceCumulativeLast[pair] = priceCumulative;
+      priceCumulativeLast[tokenizedBtc] = priceCumulative;
     }
     // TODO: use weights
     // TODO: use geometric
-    priceAverage = FixedPoint.uq112x112(priceSum).div(uint112(pairs.length));
+    priceAverage = FixedPoint.uq112x112(priceSum).div(uint112(referenceTokens.length));
     blockTimestampLast = blockTimestamp;
   }
 
   // note this will always return 0 before update has been called successfully for the first time.
   function consult(uint256 amountIn) external override view returns (uint256 amountOut) {
+    require(referenceTokens.length > 0, "nothing to track");
     return priceAverage.mul(amountIn).decode144();
   }
 
@@ -101,12 +110,11 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
   }
 
   function removePair(address tokenizedBtc) external onlyOwner {
-    for (uint256 i = 0; i < pairs.length; i++) {
-      address tokenAddr = IUniswapV2Pair(pairs[i]).token1();
-      if (tokenAddr == tokenizedBtc) {
-        priceCumulativeLast[pairs[i]] = 0;
-        pairs[i] = pairs[pairs.length - 1];
-        pairs.pop();
+    for (uint256 i = 0; i < referenceTokens.length; i++) {
+      if (referenceTokens[i] == tokenizedBtc) {
+        priceCumulativeLast[tokenizedBtc] = 0;
+        referenceTokens[i] = referenceTokens[referenceTokens.length - 1];
+        referenceTokens.pop();
         return;
       }
     }

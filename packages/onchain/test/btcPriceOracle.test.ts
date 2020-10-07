@@ -54,7 +54,7 @@ describe('BtcPriceOracle', () => {
     // deploy router
     router = await new UniswapV2Router01Factory(signers[0]).deploy(factoryV2.address, weth.address);
 
-    // create pairs
+    // create pair
     await factoryV2.createPair(weth.address, tBtc0.address);
     const pair0Address = await factoryV2.getPair(weth.address, tBtc0.address);
     pair0 = new Contract(
@@ -63,30 +63,16 @@ describe('BtcPriceOracle', () => {
       ethers.provider
     ).connect(signers[0]) as IUniswapV2Pair;
 
-    await factoryV2.createPair(weth.address, tBtc1.address);
-    const pair1Address = await factoryV2.getPair(weth.address, tBtc1.address);
-    pair1 = new Contract(
-      pair1Address,
-      JSON.stringify(IUniswapV2PairArtefact.abi),
-      ethers.provider
-    ).connect(signers[0]) as IUniswapV2Pair;
-
     // add addLiquidity
     await weth.transfer(pair0.address, wethAmount);
     await tBtc0.transfer(pair0.address, tBtc0Amount);
     await pair0.mint(devAddr);
-    await weth.transfer(pair1.address, wethAmount);
-    await tBtc1.transfer(pair1.address, tBtc1Amount);
-    await pair1.mint(devAddr);
 
     // deploy oracle
     oracle = await new BtcPriceOracleFactory(signers[0]).deploy(factoryV2.address, weth.address, [
       tBtc0.address,
-      tBtc1.address,
     ]);
   });
-
-  it('should test all governance functions');
 
   it('update', async () => {
     await ethers.provider.send('evm_increaseTime', [60 * 15]);
@@ -96,8 +82,8 @@ describe('BtcPriceOracle', () => {
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
     const oracleState = await oracle.priceAverage();
-    // ((400 / 9) + (400 / 11)) / 2 = 40.404..
-    expect(round(oracleState)).to.eq(40);
+    // (400 / 9) = 44.4..
+    expect(round(oracleState)).to.eq(44);
     const feedPrice = await oracle.consult(tBtc0Amount);
     expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
   });
@@ -107,21 +93,84 @@ describe('BtcPriceOracle', () => {
     const devAddr = await signers[0].getAddress();
     await weth.transfer(pair0.address, expandTo18Decimals(200));
     await pair0.swap(0, '2991000000000000000', devAddr, '0x');
-    await weth.transfer(pair1.address, expandTo18Decimals(480));
-    await pair1.swap(0, '5982000000000000000', devAddr, '0x');
-    // update the oracle
-    await ethers.provider.send('evm_increaseTime', [60 * 60 * 24]);
+    await ethers.provider.send('evm_increaseTime', [60 * 20]);
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
     // check result
     const oracleState = await oracle.priceAverage();
-    // TODO: should be ((600 / 6) + (880 / 5.019)) / 2 = 137.66686591
-    expect(round(oracleState)).to.eq(137);
+    // should be (600 / 6.009) = 99.99
+    expect(round(oracleState)).to.eq(99);
     const feedPrice = await oracle.consult(tBtc0Amount);
     expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
   });
 
-  it('add pool', async () => {});
+  it('add pool', async () => {
+    // try adding existing
+    await expect(oracle.addPair(tBtc0.address)).to.be.revertedWith('already known');
+    // try adding without registered pair
+    await expect(oracle.addPair(tBtc1.address)).to.be.revertedWith(
+      'function call to a non-contract account' // expect "no pair" here actually
+    );
+    // create pair and add liquidity
+    await factoryV2.createPair(tBtc1.address, weth.address);
+    const pairAddress = await factoryV2.getPair(weth.address, tBtc1.address);
+    pair1 = new Contract(
+      pairAddress,
+      JSON.stringify(IUniswapV2PairArtefact.abi),
+      ethers.provider
+    ).connect(signers[0]) as IUniswapV2Pair;
+    // try adding without liquidity
+    await expect(oracle.addPair(tBtc1.address)).to.be.revertedWith('BtcOracle: NO_RESERVES');
+    // add liquidity
+    const devAddr = await signers[0].getAddress();
+    await weth.transfer(pair1.address, wethAmount);
+    await tBtc1.transfer(pair1.address, tBtc1Amount);
+    await pair1.mint(devAddr);
 
-  it('remove pool', async () => {});
+    // add to oracle
+    await oracle.addPair(tBtc1.address);
+    // try
+    await ethers.provider.send('evm_increaseTime', [60 * 20]);
+    await ethers.provider.send('evm_mine', []);
+    await oracle.update();
+    // check result
+    let oracleState = await oracle.priceAverage();
+    // should be ((600 / 6.009) + (400 / 11)) / 2 = 68.1
+    expect(round(oracleState)).to.eq(68);
+    let feedPrice = await oracle.consult(tBtc0Amount);
+    expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
+
+    // do some swap
+    await weth.transfer(pair1.address, expandTo18Decimals(480));
+    await pair1.swap(0, '5982000000000000000', devAddr, '0x');
+    //update the oracle
+    await ethers.provider.send('evm_increaseTime', [60 * 20]);
+    await ethers.provider.send('evm_mine', []);
+    await oracle.update();
+    oracleState = await oracle.priceAverage();
+    // should be ((600 / 6.009) + (880 / 5.02)) / 2 = 137.57
+    expect(round(oracleState)).to.eq(137);
+    feedPrice = await oracle.consult(tBtc0Amount);
+    expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
+  });
+
+  it('remove pool', async () => {
+    // try non existing
+    await expect(oracle.removePair(router.address)).to.be.revertedWith('remove not found');
+    // remove
+    await oracle.removePair(tBtc0.address);
+    //update the oracle
+    await ethers.provider.send('evm_increaseTime', [60 * 20]);
+    await ethers.provider.send('evm_mine', []);
+    await oracle.update();
+    // check price
+    const oracleState = await oracle.priceAverage();
+    // should be (880 / 5.02) = 175.29
+    expect(round(oracleState)).to.eq(175);
+    const feedPrice = await oracle.consult(tBtc0Amount);
+    expect(feedPrice).to.eq(normalize(tBtc0Amount.mul(oracleState)));
+    // destroy
+    await oracle.removePair(tBtc1.address);
+    await expect(oracle.consult(tBtc0Amount)).to.be.revertedWith('nothing to track');
+  });
 });
