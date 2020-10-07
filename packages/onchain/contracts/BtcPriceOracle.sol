@@ -1,35 +1,41 @@
+// SPDX-License-Identifier: MPL-2.0
+
 pragma solidity 0.6.6;
 
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/FixedPoint.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import "./UniswapV2OracleLibrary.sol";
-import "./UniswapV2Library.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "./uniswap/UniswapV2OracleLibrary.sol";
+import "./uniswap/UniswapV2Library.sol";
 import "./IBtcPriceOracle.sol";
 
 // fixed window oracle that recomputes the average price for the entire period once every period
 // note that the price average is only guaranteed to be over at least 1 period, but may be over a longer period
-contract BtcPriceOracle is Ownable, IBtcPriceOracle {
+contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
   using FixedPoint for *;
 
-  uint256 public constant PERIOD = 24 hours;
+  uint256 public constant PERIOD = 20 minutes;
+
+  event Price(uint256 price);
 
   address public immutable weth;
   address public immutable factory;
 
+  // governance params
   address[] public pairs;
+
+  // working memory
   mapping(address => uint256) public priceCumulativeLast;
   uint32 public blockTimestampLast;
   FixedPoint.uq112x112 public priceAverage;
-
-  event Price(uint256 price);
 
   constructor(
     address _factory,
     address _weth,
     address[] memory tokenizedBtcs
   ) public {
+    __Ownable_init();
     factory = _factory;
     weth = _weth;
     for (uint256 i = 0; i < tokenizedBtcs.length; i++) {
@@ -56,23 +62,6 @@ contract BtcPriceOracle is Ownable, IBtcPriceOracle {
     // add to storage
     priceCumulativeLast[address(pair)] = pair.price1CumulativeLast(); // fetch the current accumulated price value (0 / 1)
     pairs.push(address(pair));
-  }
-
-  function addPair(address tokenizedBtc) external onlyOwner {
-    _addPair(tokenizedBtc, factory, weth);
-  }
-
-  function removePair(address tokenizedBtc) external onlyOwner {
-    for (uint256 i = 0; i < pairs.length; i++) {
-      address tokenAddr = IUniswapV2Pair(pairs[i]).token1();
-      if (tokenAddr == tokenizedBtc) {
-        priceCumulativeLast[pairs[i]] = 0;
-        pairs[i] = pairs[pairs.length - 1];
-        pairs.pop();
-        return;
-      }
-    }
-    require(false, "remove not found");
   }
 
   function update() external {
@@ -104,5 +93,23 @@ contract BtcPriceOracle is Ownable, IBtcPriceOracle {
   // note this will always return 0 before update has been called successfully for the first time.
   function consult(uint256 amountIn) external override view returns (uint256 amountOut) {
     return priceAverage.mul(amountIn).decode144();
+  }
+
+  // governance functions
+  function addPair(address tokenizedBtc) external onlyOwner {
+    _addPair(tokenizedBtc, factory, weth);
+  }
+
+  function removePair(address tokenizedBtc) external onlyOwner {
+    for (uint256 i = 0; i < pairs.length; i++) {
+      address tokenAddr = IUniswapV2Pair(pairs[i]).token1();
+      if (tokenAddr == tokenizedBtc) {
+        priceCumulativeLast[pairs[i]] = 0;
+        pairs[i] = pairs[pairs.length - 1];
+        pairs.pop();
+        return;
+      }
+    }
+    require(false, "remove not found");
   }
 }

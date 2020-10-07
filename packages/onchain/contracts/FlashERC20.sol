@@ -1,23 +1,61 @@
+// SPDX-License-Identifier: MPL-2.0
+
 pragma solidity 0.6.6;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {IBorrower} from "./IBorrower.sol";
-import {IFlashERC20} from "./IFlashERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
+import "./IBorrower.sol";
+import "./IFlashERC20.sol";
 
-contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
+contract FlashERC20 is
+  Initializable,
+  ContextUpgradeSafe,
+  ERC20UpgradeSafe,
+  IFlashERC20,
+  OwnableUpgradeSafe
+{
   uint256 constant BTC_CAP = 21 * 10**24;
   uint256 constant FEE_FACTOR = 100;
 
-  // Dev fund (2%, initially)
-  uint256 public devFundDivRate = 50;
+  // used for reentrance guard
+  uint256 private constant _NOT_ENTERED = 1;
+  uint256 private constant _ENTERED = 2;
 
   event FlashMint(address indexed src, uint256 wad, bytes32 data);
 
-  constructor(string memory name, string memory symbol) public ERC20(name, symbol) {}
+  // working memory
+  uint256 private _status;
+  // Dev fund
+  uint256 public devFundDivRate;
+
+  function __Flash_init(string memory name, string memory symbol) internal initializer {
+    devFundDivRate = 17;
+    _status = _NOT_ENTERED;
+    __ERC20_init(name, symbol);
+    __Ownable_init();
+  }
+
+  /**
+   * @dev Prevents a contract from calling itself, directly or indirectly.
+   * Calling a `_lock_` function from another `_lock_`
+   * function is not supported. It is possible to prevent this from happening
+   * by making the `_lock_` function external, and make it call a
+   * `private` function that does the actual work.
+   */
+  modifier lock() {
+    // On the first call to _lock_, _notEntered will be true
+    require(_status != _ENTERED, "ERR_REENTRY");
+
+    // Any calls to _lock_ after this point will fail
+    _status = _ENTERED;
+    _;
+    // By storing the original value once again, a refund is triggered (see
+    // https://eips.ethereum.org/EIPS/eip-2200)
+    _status = _NOT_ENTERED;
+  }
 
   // Allows anyone to mint tokens as long as it gets burned by the end of the transaction.
-  function flashMint(uint256 amount, bytes32 data) external override {
+  function flashMint(uint256 amount, bytes32 data) external override lock {
     // do not exceed cap
     require(totalSupply().add(amount) <= BTC_CAP, "can not borrow more than BTC cap");
 
@@ -36,7 +74,8 @@ contract FlashERC20 is ERC20, Ownable, IFlashERC20 {
     emit FlashMint(msg.sender, amount, data);
   }
 
-  function setDevFundDivRate(uint256 _devFundDivRate) public onlyOwner {
+  // governance function
+  function setDevFundDivRate(uint256 _devFundDivRate) external onlyOwner {
     require(_devFundDivRate > 0, "!devFundDivRate-0");
     devFundDivRate = _devFundDivRate;
   }

@@ -1,21 +1,32 @@
-// SPDX-License-Identifier: MPL
+// SPDX-License-Identifier: MPL-2.0
 
 pragma solidity 0.6.6;
 
-import {FlashERC20} from "./FlashERC20.sol";
-import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import {ITokenRecipient} from "./ITokenRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "./erc20/MinterRole.sol";
+import "./erc20/ITokenRecipient.sol";
 
-/// @title  VBTC Token.
-/// @notice This is the VBTC ERC20 contract.
-contract StrudelToken is FlashERC20, ERC20Mintable {
+/// @title  Strudel Token.
+/// @notice This is the Strudel ERC20 contract.
+contract StrudelToken is ERC20UpgradeSafe, MinterRole {
   using SafeMath for uint256;
 
-  /// @dev Constructor, calls ERC20 constructor to set Token info
-  ///      ERC20(TokenName, TokenSymbol)
-  constructor() public FlashERC20("Strudel Finance", "STRDL") {
-    // solhint-disable-previous-line no-empty-blocks
+  constructor() public {
+    __ERC20_init("Strudel Finance", "$TRDL");
+    __Ownable_init();
+  }
+
+  /**
+   * @dev See {ERC20-_mint}.
+   *
+   * Requirements:
+   *
+   * - the caller must have the {MinterRole}.
+   */
+  function mint(address account, uint256 amount) external onlyMinter returns (bool) {
+    _mint(account, amount);
+    return true;
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.

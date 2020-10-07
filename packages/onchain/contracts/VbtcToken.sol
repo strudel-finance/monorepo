@@ -1,22 +1,21 @@
-// SPDX-License-Identifier: MPL
+// SPDX-License-Identifier: MPL-2.0
 
 pragma solidity 0.6.6;
 
-import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Capped.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
-import {FlashERC20} from "./FlashERC20.sol";
-import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
-import {ITokenRecipient} from "./ITokenRecipient.sol";
 import {TypedMemView} from "./summa-tx/TypedMemView.sol";
 import {ViewBTC} from "./summa-tx/ViewBTC.sol";
 import {ViewSPV} from "./summa-tx/ViewSPV.sol";
-import {IRelay} from "./IRelay.sol";
+import "./erc20/ITokenRecipient.sol";
+import "./summa-tx/IRelay.sol";
+import "./StrudelToken.sol";
+import "./FlashERC20.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is FlashERC20, ERC20Capped {
+contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   using SafeMath for uint256;
   using TypedMemView for bytes;
   using TypedMemView for bytes29;
@@ -34,33 +33,38 @@ contract VBTCToken is FlashERC20, ERC20Capped {
   uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
   bytes3 constant PROTOCOL_ID = 0x07ffff; // a mersenne prime
 
-  uint256 public numConfs;
+  // immutable
+  StrudelToken private strudel;
+
+  // gov params
   IRelay public relay;
-  ERC20Mintable public strudel;
+  uint256 public numConfs;
   uint256 public relayReward;
 
+  // working memory
   // marking all sucessfully processed outputs
   mapping(bytes32 => bool) public knownOutpoints;
 
-  /// @dev Constructor, calls ERC20 constructor to set Token info
-  ///      ERC20(TokenName, TokenSymbol)
-  constructor(
+  function initialize(
     address _relay,
     address _strudel,
     uint256 _minConfs,
     uint256 _relayReward
-  ) public FlashERC20("vBTC", "VBTC") ERC20Capped(BTC_CAP) {
+  ) public initializer {
     relay = IRelay(_relay);
-    strudel = ERC20Mintable(_strudel);
+    strudel = StrudelToken(_strudel);
     numConfs = _minConfs;
     relayReward = _relayReward;
+    // chain constructors?
+    __Flash_init("Strudel BTC", "VBTC");
+    __ERC20Capped_init(BTC_CAP);
   }
 
   function _beforeTokenTransfer(
     address from,
     address to,
     uint256 amount
-  ) internal virtual override(ERC20, ERC20Capped) {
+  ) internal virtual override(ERC20CappedUpgradeSafe, ERC20UpgradeSafe) {
     super._beforeTokenTransfer(from, to, amount);
   }
 
@@ -198,6 +202,7 @@ contract VBTCToken is FlashERC20, ERC20Capped {
     strudel.mint(owner(), rewardAmount.div(devFundDivRate));
   }
 
+  // TODO: implement
   // function proofP2FSHAndMint(
   //   bytes calldata _header,
   //   bytes calldata _proof,
@@ -276,8 +281,8 @@ contract VBTCToken is FlashERC20, ERC20Capped {
   function approveAndCall(
     ITokenRecipient _spender,
     uint256 _value,
-    bytes memory _extraData
-  ) public returns (bool) {
+    bytes calldata _extraData
+  ) external returns (bool) {
     // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
       _spender.receiveApproval(msg.sender, _value, address(this), _extraData);
@@ -286,13 +291,19 @@ contract VBTCToken is FlashERC20, ERC20Capped {
     return false;
   }
 
-  function setRelayReward(uint256 _newRelayReward) public onlyOwner {
+  function setRelayReward(uint256 _newRelayReward) external onlyOwner {
     require(_newRelayReward > 0, "!newRelayReward-0");
     relayReward = _newRelayReward;
   }
 
-  function setRelayAddress(address _newRelayAddr) public onlyOwner {
+  function setRelayAddress(address _newRelayAddr) external onlyOwner {
     require(_newRelayAddr != address(0), "!newRelayAddr-0");
     relay = IRelay(_newRelayAddr);
+  }
+
+  function setNumConfs(uint256 _numConfs) external onlyOwner {
+    require(_numConfs > 0, "!newNumConfs-0");
+    require(_numConfs < 100, "!newNumConfs-useless");
+    numConfs = _numConfs;
   }
 }

@@ -1,19 +1,16 @@
 pragma solidity 0.6.6;
 
-import "@openzeppelin/contracts/GSN/Context.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/GSN/Context.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "./Roles.sol";
 
-contract MinterRole is Context {
+contract MinterRole is ContextUpgradeSafe, OwnableUpgradeSafe {
   using Roles for Roles.Role;
 
   event MinterAdded(address indexed account);
   event MinterRemoved(address indexed account);
 
   Roles.Role private _minters;
-
-  constructor() internal {
-    _addMinter(_msgSender());
-  }
 
   modifier onlyMinter() {
     require(isMinter(_msgSender()), "MinterRole: caller does not have the Minter role");
@@ -24,7 +21,7 @@ contract MinterRole is Context {
     return _minters.has(account);
   }
 
-  function addMinter(address account) public onlyMinter {
+  function addMinter(address account) public onlyOwner {
     _addMinter(account);
   }
 

@@ -2,8 +2,11 @@ import {usePlugin} from '@nomiclabs/buidler/config';
 
 usePlugin('@nomiclabs/buidler-ganache');
 usePlugin('@nomiclabs/buidler-waffle');
+usePlugin('@nomiclabs/buidler-ethers');
 usePlugin('buidler-typechain');
 usePlugin('buidler-gas-reporter');
+usePlugin('@openzeppelin/buidler-upgrades');
+usePlugin('buidler-deploy');
 
 const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
 const ROPSTEN_PRIVATE_KEY = process.env.ROPSTEN_PRIVATE_KEY || '';
@@ -22,7 +25,11 @@ const config = {
   },
   typechain: {
     outDir: 'typechain',
-    target: 'ethers-v4',
+    target: 'ethers-v5',
+  },
+  namedAccounts: {
+    deployer: 0,
+    relayer: '0x1531b6e3d51bf80f634957df81a990b92da4b154', // suma relayer
   },
   networks: {
     buidlerevm: {},
@@ -33,8 +40,8 @@ const config = {
       timeout: 0,
       logger: console,
     },
-    ropsten: {
-      url: `https://ropsten.infura.io/v3/${INFURA_API_KEY}`,
+    goerli: {
+      url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [ROPSTEN_PRIVATE_KEY],
     },
   },
