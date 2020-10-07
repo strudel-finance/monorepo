@@ -85,16 +85,7 @@ describe('TorchShip', async () => {
   it('should set correct state variables', async () => {
     const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 4);
 
-  // uint256 public devFundDivRate;
-  // // Block number when bonus STRDL period ends.
-  // uint256 public bonusEndBlock;
-  // // STRDL tokens created per block.
-  // uint256 public strudelPerBlock;
-  // // Bonus muliplier for early strudel makers.
-  // uint256 public bonusMultiplier;
-  // // The block number when STRDL mining starts.
-  // uint256 public startBlock;
-
+    // check params
     const devFundDivRate = await torchShip.connect(alice).devFundDivRate();
     expect(devFundDivRate).to.eq(17);
     const bonusEndBlock = await torchShip.bonusEndBlock();

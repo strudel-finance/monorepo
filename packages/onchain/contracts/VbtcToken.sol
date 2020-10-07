@@ -15,7 +15,7 @@ import "./FlashERC20.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is FlashERC20, ERC20CappedUpgradeSafe {
+contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   using SafeMath for uint256;
   using TypedMemView for bytes;
   using TypedMemView for bytes29;
