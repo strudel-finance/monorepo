@@ -41,15 +41,15 @@ export const addressMap = {
 export const contractAddresses = {
   vbtc: {
     1: '',
-    5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
+    5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
   },
   strudel: {
     1: '',
-    5: '0xc1829e963717cf1ccd9d849266b1b2456a1dbf77',
+    5: '0x611f48792751271328f5192d83343f0bfad8b78f',
   },
   masterChef: {
     1: '',
-    5: '0x980b0d3b7f304a7ff23f56257403ae442d8ff759',
+    5: '0xc80a91101adb246c286de0200bbb25f644aa1f56',
   },
   weth: {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -82,11 +82,11 @@ export const supportedPools = [
     url: '',
     lpAddresses: {
       1: '',
-      5: '0x040dad5d12da37b670159326c0117638f5f1871e',
+      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
     },
     tokenAddresses: {
       1: '',
-      5: '0xc1829e963717cf1ccd9d849266b1b2456a1dbf77',
+      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
     },
     name: 'Strudel Party!',
     symbol: 'STRDL-ETH UNI-V2 LP',
@@ -94,53 +94,37 @@ export const supportedPools = [
     icon: '🌪️',
   },
   {
-    pid: 0,
-    isBalancer: false,
-    url: '',
-    lpAddresses: {
-      1: '',
-      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
-    },
-    tokenAddresses: {
-      1: '',
-      5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
-    },
-    name: 'Vortex Vampire',
-    symbol: 'VBTC-ETH UNI-V2 LP',
-    tokenSymbol: 'VBTC',
-    icon: '🧛',
-  },
-  {
-    pid: 0,
-    isBalancer: false,
+    pid: 5,
+    isBalancer: true,
     balancerPoolAddresses: {
       1: '',
-      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
+      5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03',
     },
     url: '',
     lpAddresses: {
       1: '',
-      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
+      5: '0xcd43a034efbf5b314ab48d77b4cece93e6e7876b',
     },
     tokenAddresses: {
       1: '',
-      5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
+      5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
     },
     name: 'Vortex Vampire',
-    symbol: 'VBTC-ETH UNI-V2 LP',
+    symbol: 'VBTC-ETH LP',
     tokenSymbol: 'VBTC',
     icon: '🧛',
   },
-  /*
   {
-    pid: 1,
+    pid: 2,
+    isBalancer: false,
+    url: '',
     lpAddresses: {
       1: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
-      5: ''
+      5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
     },
     tokenAddresses: {
       1: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-      5: ''
+      5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
     },
     name: 'WBTC Whale',
     symbol: 'WBTC-ETH UNI-V2 LP',
@@ -148,14 +132,34 @@ export const supportedPools = [
     icon: '🐋',
   },
   {
+    pid: 2,
+    isBalancer: false,
+    url: '',
+    lpAddresses: {
+      1: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
+      5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
+    },
+    tokenAddresses: {
+      1: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+      5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
+    },
+    name: 'REN Rhino',
+    symbol: 'REN-ETH UNI-V2 LP',
+    tokenSymbol: 'REN',
+    icon: '🦏',
+  },
+  /*
+  {
     pid: 13,
+    isBalancer: false,
+    url: '',
     lpAddresses: {
       1: '0x8bd1661da98ebdd3bd080f0be4e6d9be8ce9858c',
-      5: ''
+      5: '0xddc7c682d57704b21e5d04da68403dfd4577ba57'
     },
     tokenAddresses: {
       1: '0x408e41876cccdc0f92210600ef50372656052a38',
-      5: ''
+      5: '0x9A46EF4CB19CEB63eFd2D3AbAC6eb19D73BA53FB'
     },
     name: 'REN Rhino',
     symbol: 'REN-ETH UNI-V2 LP',

@@ -39,13 +39,13 @@ const FarmCards: React.FC = () => {
     ({ tokenSymbol }) => tokenSymbol === 'STRDL',
   )
 
-  const vbtcPrice =
+  const strudelPrice =
     strudelIndex >= 0 && stakedValue[strudelIndex]
       ? stakedValue[strudelIndex].tokenPriceInWeth
       : new BigNumber(0)
-
+  //console.log(strudelPrice.toString())
   const BLOCKS_PER_YEAR = new BigNumber(2336000)
-  const STRUDEL_PER_BLOCK = new BigNumber(1000)
+  const STRUDEL_PER_BLOCK = new BigNumber(4)
 
   const rows = farms.reduce<FarmWithStakedValue[][]>(
     (farmRows, farm, i) => {
@@ -53,7 +53,7 @@ const FarmCards: React.FC = () => {
         ...farm,
         ...stakedValue[i],
         apy: stakedValue[i]
-          ? vbtcPrice
+          ? strudelPrice
               .times(STRUDEL_PER_BLOCK)
               .times(BLOCKS_PER_YEAR)
               .times(stakedValue[i].poolWeight)

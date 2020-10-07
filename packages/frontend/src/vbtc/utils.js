@@ -117,10 +117,12 @@ export const getTotalLPWethValue = async (
   if (isBalancer) {
     lpContract = balancerPoolContract
   }
+
   // Get total weth value for the lpContract = w1
   const lpContractWeth = await wethContract.methods
     .balanceOf(lpContract.options.address)
     .call()
+
   // Return p1 * w1 * 2
   const portionLp = new BigNumber(balance).div(new BigNumber(totalSupply))
   const lpWethWorth = new BigNumber(lpContractWeth)

@@ -13,9 +13,8 @@ export const getWeight = async (
     const denormWeight: string = await lpContract.methods
       .getDenormalizedWeight(vBtcContract.options.address)
       .call()
-
     return new BigNumber(denormWeight)
-      .div(new BigNumber(5 * (10 ^ 18)))
+      .div(new BigNumber(5).times(new BigNumber(10e17)))
       .toString()
   } catch (e) {
     return '1'
