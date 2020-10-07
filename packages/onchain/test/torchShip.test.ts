@@ -83,11 +83,30 @@ describe('TorchShip', async () => {
   });
 
   it('should set correct state variables', async () => {
-    const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 1);
-    const strudel = await torchShip.connect(alice).strudel();
-    expect(strudel.valueOf()).to.eq(instance.address);
+    const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 4);
+
+  // uint256 public devFundDivRate;
+  // // Block number when bonus STRDL period ends.
+  // uint256 public bonusEndBlock;
+  // // STRDL tokens created per block.
+  // uint256 public strudelPerBlock;
+  // // Bonus muliplier for early strudel makers.
+  // uint256 public bonusMultiplier;
+  // // The block number when STRDL mining starts.
+  // uint256 public startBlock;
+
+    const devFundDivRate = await torchShip.connect(alice).devFundDivRate();
+    expect(devFundDivRate).to.eq(17);
+    const bonusEndBlock = await torchShip.bonusEndBlock();
+    expect(bonusEndBlock).to.eq(1000);
+    const strudelPerBlock = await torchShip.strudelPerBlock();
+    expect(strudelPerBlock).to.eq(expandTo18Decimals(1000));
+    const bonusMultiplier = await torchShip.bonusMultiplier();
+    expect(bonusMultiplier).to.eq(4);
     expect(await instance.isMinter(torchShip.address)).to.be.true;
   });
+
+  it('should test governance functions');
 
   it('should allow dev and only dev to update dev', async () => {
     const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 1);

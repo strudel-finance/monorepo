@@ -53,6 +53,8 @@ describe('VBTC', async () => {
     instance = await deploy(signers[0], relay);
   });
 
+  it('should test all governance functions');
+
   describe('#provideProof', async () => {
     it('should pass test vector', async () => {
       for (let i = 0; i < vector.length; i++) {
@@ -82,4 +84,6 @@ describe('VBTC', async () => {
       }
     });
   });
+
+  it('should walk unhappy path, to grow strong');
 });

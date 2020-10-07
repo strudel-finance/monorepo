@@ -86,11 +86,13 @@ describe('BtcPriceOracle', () => {
     ]);
   });
 
+  it('should test all governance functions');
+
   it('update', async () => {
-    await ethers.provider.send('evm_increaseTime', [60 * 60 * 23]);
+    await ethers.provider.send('evm_increaseTime', [60 * 15]);
     await ethers.provider.send('evm_mine', []);
     await expect(oracle.update()).to.be.reverted;
-    await ethers.provider.send('evm_increaseTime', [60 * 60 * 1]);
+    await ethers.provider.send('evm_increaseTime', [60 * 5 + 1]);
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
     const oracleState = await oracle.priceAverage();

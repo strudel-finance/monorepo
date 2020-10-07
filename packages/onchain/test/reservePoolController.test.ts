@@ -135,6 +135,8 @@ describe('ReservePoolController', async () => {
     bPool = new BPoolFactory(signers[0]).attach(await controller.bPool());
   });
 
+  it('should test all governance functions');
+
   it('should resync when SPOT under FEED', async () => {
     // check prices before trades
     let reserves = await spotPair.getReserves();

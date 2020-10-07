@@ -532,7 +532,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       );
       // if trade moves away from equal balance, slow it down
       if (newVbtcWeight > oldVbtcWeight && newVbtcWeight > DEFAULT_WEIGHT) {
-        require(now.sub(blockTimestampLast) > 24 hours, "hold the horses");
+        require(now.sub(blockTimestampLast) > 24 hours, "hold the unicorns");
       }
       blockTimestampLast = uint32(now);
       require(newVbtcWeight < maxVbtcWeight, "max weight error");
