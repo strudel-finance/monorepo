@@ -223,17 +223,18 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   }
 
   // TODO: implement
-  // function proofP2FSHAndMint(
-  //   bytes calldata _header,
-  //   bytes calldata _proof,
-  //   uint256 _index,
-  //   bytes32 _txid,
-  //   bytes32 _r,
-  //   bytes32 _s,
-  //   uint8 _v
-  // ) external returns (bool) {
-  //   return false;
-  // }
+    // bytes calldata _header,
+    // bytes calldata _proof,
+    // uint256 _index,
+    // bytes32 _txid,
+  function proofP2FSHAndMint(
+    bytes calldata _header,
+    bytes calldata _proof,
+    uint256 _index,
+    bytes32 _txid
+  ) external virtual returns (bool) {
+    require(false, "not implemented");
+  }
 
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
     require(relay.addHeaders(_anchor, _headers), "add header failed");
