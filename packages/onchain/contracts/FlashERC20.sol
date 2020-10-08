@@ -5,13 +5,14 @@ pragma solidity 0.6.6;
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "./IBorrower.sol";
-import "./IFlashERC20.sol";
+import "./ILender.sol";
 
+// inspired by https://github.com/Austin-Williams/flash-mintable-tokens/blob/master/FlashERC20/FlashERC20.sol
 contract FlashERC20 is
   Initializable,
   ContextUpgradeSafe,
   ERC20UpgradeSafe,
-  IFlashERC20,
+  ILender,
   OwnableUpgradeSafe
 {
   uint256 constant BTC_CAP = 21 * 10**24;
@@ -21,7 +22,7 @@ contract FlashERC20 is
   uint256 private constant _NOT_ENTERED = 1;
   uint256 private constant _ENTERED = 2;
 
-  event FlashMint(address indexed src, uint256 wad, bytes32 data);
+  event FlashMint(address indexed src, uint256 wad, bytes32 data, uint256 fee);
 
   // working memory
   uint256 private _status;
@@ -71,7 +72,7 @@ contract FlashERC20 is
     _burn(msg.sender, amount.add(fee)); // reverts if `msg.sender` does not have enough
     _mint(owner(), fee);
 
-    emit FlashMint(msg.sender, amount, data);
+    emit FlashMint(msg.sender, amount, data, fee);
   }
 
   // governance function

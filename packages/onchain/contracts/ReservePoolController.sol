@@ -16,7 +16,7 @@ import "./balancer/IBFactory.sol";
 import "./balancer/IBPool.sol";
 import "./balancer/BMath.sol";
 import "./IBorrower.sol";
-import "./IFlashERC20.sol";
+import "./ILender.sol";
 
 /**
  *
@@ -217,6 +217,8 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
     _mint(msg.sender, poolAmountOut);
   }
+
+  // TODO: join pool with ether and vBtc permit, so no approval is needed
 
   /**
    * @notice Exit a pool - redeem pool tokens for underlying assets
@@ -420,7 +422,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     require(truePriceBtc != 0, "ReservePool: ZERO_PRICE");
 
     // deal with spot pool
-    bool ethToBtc;
+    bool isEthToVbtc;
     uint256 tradeAmount;
     {
       // read SPOT price of vBTC
@@ -430,7 +432,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
         address(vBtc)
       );
       // how much ETH (including UNI fee) is needed to lift SPOT to FEED?
-      (ethToBtc, tradeAmount) = computeProfitMaximizingTrade(
+      (isEthToVbtc, tradeAmount) = computeProfitMaximizingTrade(
         truePriceEth,
         truePriceBtc,
         reserveWeth,
@@ -441,7 +443,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // deal with reserve pool
     uint256 vBtcToBorrow = tradeAmount;
     uint256 vBtcWeight = bPool.getDenormalizedWeight(address(vBtc));
-    if (ethToBtc) {
+    if (isEthToVbtc) {
       // calculate amount vBTC to get the needed ETH from reserve pool
       {
         uint256 tokenBalanceIn = bPool.getBalance(address(vBtc));
@@ -458,10 +460,16 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
         );
       }
     }
-    // ecode diruction and old Weight together
-    bytes32 data = bytes32((uint256(ethToBtc ? 1 : 0) << 248) | vBtcWeight);
+    // encode direction and old weight together
+    bytes32 data = bytes32((uint256(isEthToVbtc ? 1 : 0) << 248) | vBtcWeight);
     // get the loan
-    IFlashERC20(address(vBtc)).flashMint(vBtcToBorrow, data);
+    ILender(address(vBtc)).flashMint(vBtcToBorrow, data);
+
+    // if any earnings remain (rounding error?), reward msg.sender
+    uint256 remainder = vBtc.balanceOf(address(this));
+    if (remainder > 0) {
+      vBtc.transfer(msg.sender, remainder);
+    }
   }
 
   function executeOnFlashMint(uint256 amount, bytes32 data) external override {
@@ -471,14 +479,14 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     require(vBtc.balanceOf(address(this)) >= amount, "loan error");
     // we received a bunch of vBTC here
     // read direction, then do the trade, trust that amounts were calculated correctly
-    bool ethToBtc = (uint256(data) >> 248) != 0;
+    bool isEthToVbtc = (uint256(data) >> 248) != 0;
     uint256 oldVbtcWeight = (uint256(data) << 8) >> 8;
-    address tokenIn = ethToBtc ? address(wEth) : address(vBtc);
-    address tokenOut = ethToBtc ? address(vBtc) : address(wEth);
+    address tokenIn = isEthToVbtc ? address(wEth) : address(vBtc);
+    address tokenOut = isEthToVbtc ? address(vBtc) : address(wEth);
     uint256 tradeAmount = amount;
-    emit Trade(ethToBtc, tradeAmount);
+    emit Trade(isEthToVbtc, tradeAmount);
 
-    if (ethToBtc) {
+    if (isEthToVbtc) {
       // we want to trade eth to vBTC in UNI, so let's get the ETH
       // 4. buy ETH in reserve pool with all vBTC
       (tradeAmount, ) = bPool.swapExactAmountIn( // returns uint tokenAmountOut, uint spotPriceAfter
@@ -505,7 +513,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       MAX_UINT // deadline
     );
 
-    if (!ethToBtc) {
+    if (!isEthToVbtc) {
       // we traded vBTC for ETH in uni, now let's use it in balancer
       (tradeAmount, ) = bPool.swapExactAmountIn( // returns uint tokenAmountOut, uint spotPriceAfter
         address(wEth), // address tokenIn,
@@ -541,8 +549,8 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       IBPool(bPool).rebind(address(wEth), wEthBalance, DEFAULT_WEIGHT);
     }
 
-    // 6. repay loan
-    // TODO: don't forget that we need to pay a flash loan fee
+    // repay loan
+    // TODO: what about the flash loan fee?
   }
 
   // governance function
@@ -564,5 +572,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
     bPool.setSwapFee(_swapFee);
     bPool.setPublicSwap(_isPublicSwap);
+    //TODO: swipe contract, if needed
   }
 }

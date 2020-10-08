@@ -1,13 +1,18 @@
 import {ethers, upgrades} from '@nomiclabs/buidler';
-import {Signer} from 'ethers';
+import {Signer, Contract} from 'ethers';
+import {getAdminAddress} from '@openzeppelin/upgrades-core';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
 import vector from './testVector.json';
+import {expandTo18Decimals} from './shared/utilities';
+import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import {VbtcToken} from '../typechain/VbtcToken';
 import {StrudelToken} from '../typechain/StrudelToken';
 import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
 import {MockRelay} from '../typechain/MockRelay';
 import {MockRelayFactory} from '../typechain/MockRelayFactory';
+import {MockBorrower} from '../typechain/MockBorrower';
+import {MockBorrowerFactory} from '../typechain/MockBorrowerFactory';
 
 chai.use(solidity);
 const {expect} = chai;
@@ -24,43 +29,97 @@ function makeCompressedOutpoint(hash: string, index: number): string {
   return `0x${hashBuf.toString('hex')}`;
 }
 
-async function deploy(signer: Signer, relay: MockRelay): Promise<VbtcToken> {
-  let strudelFactory = new StrudelTokenFactory(signer);
-  let strudel = await strudelFactory.deploy();
-
-  const VbtcToken = await ethers.getContractFactory('VbtcToken');
-  const vbtc = await upgrades.deployProxy(VbtcToken, [relay.address, strudel.address, 0, 50], {
-    unsafeAllowCustomTypes: true,
-  });
-  await vbtc.deployed();
-
-  await strudel.addMinter(vbtc.address);
-  return vbtc as VbtcToken;
-}
-
 describe('VBTC', async () => {
-  let signers: Signer[];
-  let instance: VbtcToken;
+  let bob: Signer;
+  let owner: Signer;
+  let admin: Signer;
+  let vBtc: VbtcToken;
   let relay: MockRelay;
 
+  before(async () => {});
+
   before(async () => {
-    signers = await ethers.getSigners();
-    let relayFactory = new MockRelayFactory(signers[0]);
-    relay = await relayFactory.deploy(BYTES32_0, 210, BYTES32_0, 211);
-  });
+    [bob, owner, admin] = await ethers.getSigners();
 
-  beforeEach(async () => {
-    instance = await deploy(signers[0], relay);
-  });
+    relay = await new MockRelayFactory(owner).deploy(BYTES32_0, 210, BYTES32_0, 211);
+    let strudel = await new StrudelTokenFactory(owner).deploy();
 
-  it('should test all governance functions');
+    const VbtcToken = await ethers.getContractFactory('VbtcToken');
+    vBtc = (await upgrades.deployProxy(VbtcToken, [relay.address, strudel.address, 0, 50], {
+      unsafeAllowCustomTypes: true,
+    })) as VbtcToken;
+    await vBtc.deployed();
+
+    // const devAddr = await dev.getAddress();
+    // let owner = await torchShip.owner();
+    let proxyAdminAddr = await getAdminAddress(ethers.provider, vBtc.address);
+    console.log('before:', proxyAdminAddr);
+
+    // take control back from proxy admin
+    const proxyAdmin = new Contract(
+      proxyAdminAddr,
+      JSON.stringify(ProxyAdminArtifact.abi),
+      ethers.provider
+    ).connect(bob);
+    const adminAddr = await admin.getAddress();
+    await proxyAdmin.functions.changeProxyAdmin(vBtc.address, adminAddr);
+
+    proxyAdminAddr = await getAdminAddress(ethers.provider, vBtc.address);
+    // owner = await torchShip.connect(alice).owner();
+    console.log('after:', proxyAdminAddr);
+
+    await strudel.addMinter(vBtc.address);
+  });
 
   describe('#provideProof', async () => {
+    it('should exit on invalid proofs', async () => {
+      const test = vector[2];
+      await expect(
+        vBtc.proofOpReturnAndMint(
+          test.HEADER,
+          test.PROOF,
+          test.VERSION,
+          test.LOCKTIME,
+          test.INDEX,
+          0, // burn output index in transaction
+          test.VIN,
+          test.VOUT
+        )
+      ).to.be.revertedWith('height not found in relay');
+
+      await relay.addHeader(test.BLOCK_HASH, 200);
+      await expect(
+        vBtc.proofOpReturnAndMint(
+          test.HEADER,
+          test.PROOF,
+          test.VERSION,
+          test.LOCKTIME,
+          test.INDEX,
+          0, // burn output index in transaction
+          test.VIN,
+          test.VOUT
+        )
+      ).to.be.revertedWith('invalid op-return payload length');
+
+      await expect(
+        vBtc.proofOpReturnAndMint(
+          test.HEADER,
+          test.PROOF,
+          test.VERSION,
+          test.LOCKTIME,
+          test.INDEX,
+          1, // burn output index in transaction
+          test.VIN,
+          test.VOUT
+        )
+      ).to.be.revertedWith('output has 0 value');
+    });
+
     it('should pass test vector', async () => {
-      for (let i = 0; i < vector.length; i++) {
+      for (let i = 0; i < 2; i++) {
         const test = vector[i];
         await relay.addHeader(test.BLOCK_HASH, 200);
-        const tx = await instance.proofOpReturnAndMint(
+        const tx = await vBtc.proofOpReturnAndMint(
           test.HEADER,
           test.PROOF,
           test.VERSION,
@@ -79,11 +138,13 @@ describe('VBTC', async () => {
         expect(args.outputIndex).to.eq(test.OUT_INDEX);
 
         const outpoint = makeCompressedOutpoint(args.btcTxHash, test.OUT_INDEX);
-        const isKnown = await instance.knownOutpoints(outpoint);
+        const isKnown = await vBtc.knownOutpoints(outpoint);
         expect(isKnown).to.be.true;
       }
     });
   });
 
-  it('should walk unhappy path, to grow strong');
+  it('should test all governance functions', async () => {
+    //const devAddr = await signers[0].getAddress();
+  });
 });

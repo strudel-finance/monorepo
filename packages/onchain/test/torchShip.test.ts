@@ -46,24 +46,6 @@ async function deployShip(
   );
   await torchShip.deployed();
 
-  // const devAddr = await dev.getAddress();
-  // let owner = await torchShip.owner();
-  // let admin = await getAdminAddress(ethers.provider, torchShip.address);
-  // console.log('before:', owner, admin);
-
-  // take control back from proxy admin
-  // const proxyAdmin = new Contract(
-  //   admin,
-  //   JSON.stringify(ProxyAdminArtifact.abi),
-  //   ethers.provider
-  // ).connect(dev);
-
-  // await proxyAdmin.connect(dev).functions.changeProxyAdmin(torchShip.address, devAddr);
-
-  // admin = await getAdminAddress(ethers.provider, torchShip.address);
-  // owner = await torchShip.connect(alice).owner();
-  // console.log('after:', admin, owner);
-
   // prepare strudel
   await strudel.addMinter(torchShip.address);
   return torchShip as TorchShip;
@@ -99,7 +81,7 @@ describe('TorchShip', async () => {
 
   it('should test governance functions');
 
-  it('should allow dev and only dev to update dev', async () => {
+  it('should allow owner and only owner to transfer ownership', async () => {
     const torchShip = await deployShip(dev, instance, 1000, 0, 1000, 1);
     const aliceAddr = await alice.getAddress();
     const bobAddr = await bob.getAddress();
