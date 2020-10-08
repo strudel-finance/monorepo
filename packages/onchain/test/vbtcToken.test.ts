@@ -137,7 +137,7 @@ describe('VBTC', async () => {
           test.VOUT
         );
         // check
-        const events = (await tx.wait(1)).events!;  
+        const events = (await tx.wait(1)).events!;
         const args: any = events[3].args;
         expect(args.btcTxHash).to.eq(reverse(test.TX_ID_LE));
         expect(args.receiver).to.eq(test.OUT_RECEIVER);
@@ -153,22 +153,38 @@ describe('VBTC', async () => {
     it('should allow to claim dev pool funds through timelock', async () => {
       const bobAddr = await bob.getAddress();
       const devPoolBalBefore = await strudel.balanceOf(ownerLock.address);
-      const msgData = `0xa9059cbb000000000000000000000000${bobAddr.replace('0x', '')}0000000000000000000000000000000000000000000000000000000000000064`;
+      const msgData = `0xa9059cbb000000000000000000000000${bobAddr.replace(
+        '0x',
+        ''
+      )}0000000000000000000000000000000000000000000000000000000000000064`;
       const timestamp = (await ethers.provider.getBlock('latest')).timestamp;
-      await ownerLock.queueTransaction(strudel.address, 0, "", msgData, timestamp + 60 * 60 * 24 + 5);
+      await ownerLock.queueTransaction(
+        strudel.address,
+        0,
+        '',
+        msgData,
+        timestamp + 60 * 60 * 24 + 5
+      );
       await ethers.provider.send('evm_increaseTime', [60 * 60 * 48]);
       await ethers.provider.send('evm_mine', []);
-      await ownerLock.executeTransaction(strudel.address, 0, "", msgData, timestamp + 60 * 60 * 24 + 5);
+      await ownerLock.executeTransaction(
+        strudel.address,
+        0,
+        '',
+        msgData,
+        timestamp + 60 * 60 * 24 + 5
+      );
       const devPoolBalAfter = await strudel.balanceOf(ownerLock.address);
       expect(devPoolBalAfter).to.eq(devPoolBalBefore.sub(100));
     });
   });
 
-
   describe('upgradeabliity', async () => {
     it('should allow upgrade', async () => {
       // before
-      await expect(vBtc.proofP2FSHAndMint("0x", "0x", 0, BYTES32_0)).to.be.revertedWith('not implemented');
+      await expect(vBtc.proofP2FSHAndMint('0x', '0x', 0, BYTES32_0)).to.be.revertedWith(
+        'not implemented'
+      );
 
       // upgarde
       const newImpl = await new MockVbtcUpgradedFactory(owner).deploy();
@@ -177,11 +193,13 @@ describe('VBTC', async () => {
         JSON.stringify(AdminUpgradeabilityProxyArtifact.abi),
         ethers.provider
       );
-      await expect(proxy.connect(bob).functions.upgradeTo(newImpl.address)).to.be.revertedWith('function selector was not recognized and there\'s no fallback function');
+      await expect(proxy.connect(bob).functions.upgradeTo(newImpl.address)).to.be.revertedWith(
+        "function selector was not recognized and there's no fallback function"
+      );
       await proxy.connect(admin).functions.upgradeTo(newImpl.address);
 
       // after
-      expect((await vBtc.proofP2FSHAndMint("0x", "0x", 0, BYTES32_0)));
+      expect(await vBtc.proofP2FSHAndMint('0x', '0x', 0, BYTES32_0));
     });
   });
 });

@@ -223,10 +223,10 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   }
 
   // TODO: implement
-    // bytes calldata _header,
-    // bytes calldata _proof,
-    // uint256 _index,
-    // bytes32 _txid,
+  // bytes calldata _header,
+  // bytes calldata _proof,
+  // uint256 _index,
+  // bytes32 _txid,
   function proofP2FSHAndMint(
     bytes calldata _header,
     bytes calldata _proof,
