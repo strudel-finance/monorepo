@@ -72,7 +72,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
         keccak256(
           "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
         ),
-        keccak256(bytes("Strudel vBTC")),
+        keccak256(bytes("Strudel BTC")),
         keccak256(bytes("1")),
         chainId,
         address(this)
@@ -238,7 +238,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
 
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
     require(relay.addHeaders(_anchor, _headers), "add header failed");
-    strudel.mint(msg.sender, relayReward);
+    strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
   }
 
   function addHeadersWithRetarget(
@@ -250,7 +250,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
       relay.addHeadersWithRetarget(_oldPeriodStartHeader, _oldPeriodEndHeader, _headers),
       "add header with retarget failed"
     );
-    strudel.mint(msg.sender, relayReward);
+    strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
   }
 
   function markNewHeaviest(
@@ -263,7 +263,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
       relay.markNewHeaviest(_ancestor, _currentBest, _newBest, _limit),
       "mark new heaviest failed"
     );
-    strudel.mint(msg.sender, relayReward.div(2));
+    strudel.mint(msg.sender, relayReward);
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.

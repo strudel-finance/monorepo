@@ -1,12 +1,12 @@
 import {ethers, upgrades} from '@nomiclabs/buidler';
 import {Signer, Contract, Wallet, BigNumber} from 'ethers';
 import chai from 'chai';
-import {deployContract, solidity} from 'ethereum-waffle';
+import {deployContract, solidity, MockProvider} from 'ethereum-waffle';
 import UniswapV2FactoryArtifact from '@uniswap/v2-core/build/UniswapV2Factory.json';
 import IUniswapV2PairArtifact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 import {ReservePoolController} from '../typechain/ReservePoolController';
 import {ReservePoolControllerFactory} from '../typechain/ReservePoolControllerFactory';
-import {expandTo18Decimals} from './shared/utilities';
+import {expandTo18Decimals, getApprovalDigest} from './shared/utilities';
 import {BtcPriceOracle} from '../typechain/BtcPriceOracle';
 import {BtcPriceOracleFactory} from '../typechain/BtcPriceOracleFactory';
 import {MockErc20} from '../typechain/MockErc20';
@@ -21,6 +21,7 @@ import {MockBFactory} from '../typechain/MockBFactory';
 import {MockBFactoryFactory} from '../typechain/MockBFactoryFactory';
 import {BPool} from '../typechain/BPool';
 import {BPoolFactory} from '../typechain/BPoolFactory';
+import {ecsign} from 'ethereumjs-util';
 
 chai.use(solidity);
 const {expect} = chai;
@@ -30,9 +31,9 @@ const MAX = ethers.constants.MaxUint256;
 
 describe('ReservePoolController', async () => {
   let signers: Signer[];
-  let wEth: MockErc20;
+  let wEth: MockFlashErc20;
   let tBtc: MockErc20; // abstract tokenized bitcoin - used for feed
-  let vBtc: MockErc20;
+  let vBtc: MockFlashErc20;
   let feedPair: IUniswapV2Pair;
   let spotPair: IUniswapV2Pair;
 
@@ -48,7 +49,11 @@ describe('ReservePoolController', async () => {
     signers = await ethers.getSigners();
     const devAddr = await signers[0].getAddress();
     // address _wEthAddr,
-    wEth = await new MockErc20Factory(signers[0]).deploy('wEth', 'WETH', expandTo18Decimals(10000));
+    wEth = await new MockFlashErc20Factory(signers[0]).deploy(
+      'wEth',
+      'WETH',
+      expandTo18Decimals(10000)
+    );
     // address _wEthAddr,
     tBtc = await new MockErc20Factory(signers[0]).deploy(
       'tokenized BTC',
@@ -57,7 +62,7 @@ describe('ReservePoolController', async () => {
     );
     // address _vBtcAddr,
     vBtc = await new MockFlashErc20Factory(signers[0]).deploy(
-      'vBTC',
+      'Strudel BTC',
       'VBTC',
       expandTo18Decimals(10000)
     );
@@ -367,6 +372,62 @@ describe('ReservePoolController', async () => {
       const currentVbtcBalance = previousbPoolVbtcBalance.add(balanceChange);
       expect(bPoolVbtcBalance.div(1000)).to.eq(currentVbtcBalance.div(1000));
     });
+
+    it('should join pool directly', async () => {
+      const bPoolAddr = await controller.bPool();
+      const alice = await signers[0].getAddress();
+      let currentPoolBalance = await controller.balanceOf(alice);
+      const previousPoolBalance = currentPoolBalance;
+      let previousbPoolVbtcBalance = await vBtc.balanceOf(bPoolAddr);
+      let previousbPoolWethBalance = await wEth.balanceOf(bPoolAddr);
+
+      const poolAmountOut = expandTo18Decimals(1);
+      // get off-chain approval
+
+      const priv = '0x043a569345b08ead19d1d4ba3462b30632feba623a2a85a3b000eb97f709f09f';
+      const provider = new MockProvider({
+        ganacheOptions: {
+          accounts: [{balance: '100', secretKey: priv}],
+        },
+      });
+      const [wallet] = provider.getWallets();
+
+      const nonce = await vBtc.nonces(wallet.address);
+      const deadline = MAX;
+      const digest = await getApprovalDigest(
+        vBtc,
+        {owner: wallet.address, spender: controller.address, value: MAX},
+        nonce,
+        deadline
+      );
+      const {v, r, s} = ecsign(
+        Buffer.from(digest.slice(2), 'hex'),
+        Buffer.from(priv.replace('0x', ''), 'hex')
+      );
+
+      const bPool = await controller.bPool();
+      const value = poolAmountOut
+        .div((await controller.totalSupply()).sub(1))
+        .mul((await wEth.balanceOf(bPool)).add(1));
+      await controller
+        .connect(signers[0])
+        .joinPoolDirectly(poolAmountOut, [MAX, MAX], deadline, v, r, s, {value});
+      currentPoolBalance = currentPoolBalance.add(poolAmountOut);
+
+      const balance = await controller.balanceOf(alice);
+      const bPoolVbtcBalance = await vBtc.balanceOf(bPoolAddr);
+      const bPoolWethBalance = await wEth.balanceOf(bPoolAddr);
+
+      // Balances of all tokens increase proportionally to the pool balance
+      expect(balance).to.eq(currentPoolBalance);
+      let balanceChange = poolAmountOut.mul(previousbPoolWethBalance).div(previousPoolBalance);
+      const currentWethBalance = previousbPoolWethBalance.add(balanceChange);
+      expect(bPoolWethBalance.div(1000)).to.eq(currentWethBalance.div(1000));
+      balanceChange = poolAmountOut.mul(previousbPoolVbtcBalance).div(previousPoolBalance);
+      const currentVbtcBalance = previousbPoolVbtcBalance.add(balanceChange);
+      expect(bPoolVbtcBalance.div(1000)).to.eq(currentVbtcBalance.div(1000));
+    });
+
     it('should exit pool', async () => {
       const bPoolAddr = await controller.bPool();
       const alice = await signers[0].getAddress();

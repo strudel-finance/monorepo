@@ -9,12 +9,14 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
-import "./uniswap/UniswapV2Library.sol";
 import "./uniswap/IUniswapV2Router01.sol";
-import "./IBtcPriceOracle.sol";
+import "./uniswap/UniswapV2Library.sol";
 import "./balancer/IBFactory.sol";
 import "./balancer/IBPool.sol";
+import "./IBtcPriceOracle.sol";
 import "./balancer/BMath.sol";
+import "./uniswap/IWETH9.sol";
+import "./VbtcToken.sol";
 import "./IBorrower.sol";
 import "./ILender.sol";
 
@@ -35,6 +37,8 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   using SafeMath for uint256;
 
   uint256 constant DEFAULT_WEIGHT = 5 * 10**18;
+  // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+  bytes32 constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // Event declarations
   event Trade(bool indexed direction, uint256 amount);
@@ -42,9 +46,10 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   event LogExit(address indexed caller, address indexed tokenOut, uint256 tokenAmountOut);
 
   // immutable
-  IERC20 private vBtc;
-  IERC20 private wEth;
+  VbtcToken private vBtc;
+  IWETH9 private wEth;
   IBFactory private bFactory;
+  bytes32 public DOMAIN_SEPARATOR;
 
   // goverance params
   IUniswapV2Router01 private uniRouter; // IUniswapV2Router01
@@ -54,16 +59,17 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   // working memory
   IBPool public bPool; // IBPool
   uint32 private blockTimestampLast;
+  mapping(address => uint256) private nonces;
 
   function initialize(
     address _vBtcAddr,
-    address _wEthAddr,
+    IWETH9 _wEthAddr,
     address _bPoolFactory,
     IUniswapV2Router01 _uniRouter,
     address _oracle
   ) external initializer {
-    vBtc = IERC20(_vBtcAddr);
-    wEth = IERC20(_wEthAddr);
+    vBtc = VbtcToken(_vBtcAddr);
+    wEth = _wEthAddr;
     bFactory = IBFactory(_bPoolFactory);
     uniRouter = _uniRouter;
     oracle = _oracle;
@@ -71,6 +77,21 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // chain constructors?
     __ERC20_init("Strudel vBTC++", "vBTC++");
     __Ownable_init();
+    uint256 chainId;
+    assembly {
+      chainId := chainid()
+    }
+    DOMAIN_SEPARATOR = keccak256(
+      abi.encode(
+        keccak256(
+          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        ),
+        keccak256(bytes("Strudel vBTC++")),
+        keccak256(bytes("1")),
+        chainId,
+        address(this)
+      )
+    );
   }
 
   // computes the direction and magnitude of the profit-maximizing trade
@@ -98,11 +119,11 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   // bPool is a contract interface; function calls on it are external
   function _pullUnderlying(
     address erc20,
+    uint256 tokenBalance,
     address from,
     uint256 amount
   ) internal {
     // Gets current Balance of token i, Bi, and weight of token i, Wi, from BPool.
-    uint256 tokenBalance = bPool.getBalance(erc20);
     uint256 tokenWeight = bPool.getDenormalizedWeight(erc20);
 
     bool xfer = IERC20(erc20).transferFrom(from, address(this), amount);
@@ -124,6 +145,55 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
     bool xfer = IERC20(erc20).transfer(to, amount);
     require(xfer, "ERR_ERC20_FALSE");
+  }
+
+  function _joinPool(
+    uint256 poolAmountOut,
+    uint256[] memory maxAmountsIn,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) internal {
+    // Library computes actualAmountsIn, and does many validations
+    // Cannot call the push/pull/min from an external library for
+    // any of these pool functions. Since msg.sender can be anybody,
+    // they must be internal
+    address[] memory tokens = bPool.getCurrentTokens();
+
+    require(maxAmountsIn.length == tokens.length, "ERR_AMOUNTS_MISMATCH");
+
+    // Subtract  1 to ensure any rounding errors favor the pool
+    uint256 ratio = bdiv(poolAmountOut, bsub(totalSupply(), 1));
+
+    require(ratio != 0, "ERR_MATH_APPROX");
+
+    // This loop contains external calls
+    // External calls are to math libraries or the underlying pool, so low risk
+    for (uint256 i = 0; i < tokens.length; i++) {
+      address t = tokens[i];
+      uint256 bal = bPool.getBalance(t);
+      // Add 1 to ensure any rounding errors favor the pool
+      uint256 tokenAmountIn = bmul(ratio, badd(bal, 1));
+
+      require(tokenAmountIn != 0, "ERR_MATH_APPROX");
+      require(tokenAmountIn <= maxAmountsIn[i], "ERR_LIMIT_IN");
+
+      emit LogJoin(msg.sender, t, tokenAmountIn);
+
+      if (deadline > 0 && t == address(wEth) && msg.value > 0) {
+        // either convert ether
+        require(msg.value == tokenAmountIn, "wrong eth amount supplied");
+        wEth.deposit{value: tokenAmountIn}();
+        bPool.rebind(t, badd(bal, tokenAmountIn), bPool.getDenormalizedWeight(t));
+      } else {
+        if (deadline > 0 && t == address(vBtc)) {
+          vBtc.permit(msg.sender, address(this), MAX_UINT, deadline, v, r, s);
+        }
+        _pullUnderlying(t, bal, msg.sender, tokenAmountIn);
+      }
+    }
+    _mint(msg.sender, poolAmountOut);
   }
 
   // External functions
@@ -177,6 +247,28 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     _mint(msg.sender, MIN_POOL_SUPPLY);
   }
 
+  // function permit(
+  //   address owner,
+  //   address spender,
+  //   uint256 value,
+  //   uint256 deadline,
+  //   uint8 v,
+  //   bytes32 r,
+  //   bytes32 s
+  // ) external {
+  //   require(deadline >= block.timestamp, "vBTC: EXPIRED");
+  //   bytes32 digest = keccak256(
+  //     abi.encodePacked(
+  //       "\x19\x01",
+  //       DOMAIN_SEPARATOR,
+  //       keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+  //     )
+  //   );
+  //   address recoveredAddress = ecrecover(digest, v, r, s);
+  //   require(recoveredAddress != address(0) && recoveredAddress == owner, "VBTC: INVALID_SIGNATURE");
+  //   _approve(owner, spender, value);
+  // }
+
   /**
    * @notice Join a pool
    * @dev Emits a LogJoin event (for each token)
@@ -185,40 +277,22 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
    * @param maxAmountsIn - Max amount of asset tokens to spend
    */
   function joinPool(uint256 poolAmountOut, uint256[] calldata maxAmountsIn) external {
-    // Library computes actualAmountsIn, and does many validations
-    // Cannot call the push/pull/min from an external library for
-    // any of these pool functions. Since msg.sender can be anybody,
-    // they must be internal
-    address[] memory tokens = bPool.getCurrentTokens();
-
-    require(maxAmountsIn.length == tokens.length, "ERR_AMOUNTS_MISMATCH");
-
-    uint256 poolTotal = totalSupply();
-    // Subtract  1 to ensure any rounding errors favor the pool
-    uint256 ratio = bdiv(poolAmountOut, bsub(poolTotal, 1));
-
-    require(ratio != 0, "ERR_MATH_APPROX");
-
-    // This loop contains external calls
-    // External calls are to math libraries or the underlying pool, so low risk
-    for (uint256 i = 0; i < tokens.length; i++) {
-      address t = tokens[i];
-      uint256 bal = bPool.getBalance(t);
-      // Add 1 to ensure any rounding errors favor the pool
-      uint256 tokenAmountIn = bmul(ratio, badd(bal, 1));
-
-      require(tokenAmountIn != 0, "ERR_MATH_APPROX");
-      require(tokenAmountIn <= maxAmountsIn[i], "ERR_LIMIT_IN");
-
-      emit LogJoin(msg.sender, t, tokenAmountIn);
-
-      _pullUnderlying(t, msg.sender, tokenAmountIn);
-    }
-
-    _mint(msg.sender, poolAmountOut);
+    _joinPool(poolAmountOut, maxAmountsIn, 0, 0, 0x0, 0x0);
   }
 
   // TODO: join pool with ether and vBtc permit, so no approval is needed
+  // signature is only for vBtc
+  // the function also takes ETH or WETH
+  function joinPoolDirectly(
+    uint256 poolAmountOut,
+    uint256[] calldata maxAmountsIn,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external payable {
+    _joinPool(poolAmountOut, maxAmountsIn, deadline, v, r, s);
+  }
 
   /**
    * @notice Exit a pool - redeem pool tokens for underlying assets
@@ -285,7 +359,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     emit LogJoin(msg.sender, tokenIn, tokenAmountIn);
 
     _mint(msg.sender, poolAmountOut);
-    _pullUnderlying(tokenIn, msg.sender, tokenAmountIn);
+    _pullUnderlying(tokenIn, balTokenIn, msg.sender, tokenAmountIn);
 
     return poolAmountOut;
   }
@@ -324,7 +398,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     emit LogJoin(msg.sender, tokenIn, tokenAmountIn);
 
     _mint(msg.sender, poolAmountOut);
-    _pullUnderlying(tokenIn, msg.sender, tokenAmountIn);
+    _pullUnderlying(tokenIn, balTokenIn, msg.sender, tokenAmountIn);
 
     return tokenAmountIn;
   }
