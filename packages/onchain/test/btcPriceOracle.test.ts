@@ -2,15 +2,15 @@ import {ethers} from '@nomiclabs/buidler';
 import {Signer, Contract, Wallet} from 'ethers';
 import chai from 'chai';
 import {deployContract, solidity} from 'ethereum-waffle';
-import UniswapV2FactoryArtefact from '@uniswap/v2-core/build/UniswapV2Factory.json';
-import IUniswapV2PairArtefact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
+import UniswapV2FactoryArtifact from '@uniswap/v2-core/build/UniswapV2Factory.json';
+import IUniswapV2PairArtifact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
+import UniswapV2Router02Artifact from '@uniswap/v2-periphery/build/UniswapV2Router02.json';
 import {expandTo18Decimals, encodePrice, round, normalize} from './shared/utilities';
 import {BtcPriceOracle} from '../typechain/BtcPriceOracle';
 import {BtcPriceOracleFactory} from '../typechain/BtcPriceOracleFactory';
 import {MockErc20} from '../typechain/MockErc20';
 import {MockErc20Factory} from '../typechain/MockErc20Factory';
-import {UniswapV2Router01} from '../typechain/UniswapV2Router01';
-import {UniswapV2Router01Factory} from '../typechain/UniswapV2Router01Factory';
+import {IUniswapV2Router02} from '../typechain/IUniswapV2Router02';
 import {IUniswapV2Factory} from '../typechain/IUniswapV2Factory';
 import {IUniswapV2Pair} from '../typechain/IUniswapV2Pair';
 
@@ -30,7 +30,7 @@ describe('BtcPriceOracle', () => {
   let pair0: IUniswapV2Pair;
   let pair1: IUniswapV2Pair;
   let factoryV2: IUniswapV2Factory;
-  let router: UniswapV2Router01;
+  let router: IUniswapV2Router02;
 
   before(async () => {
     signers = await ethers.getSigners();
@@ -48,18 +48,21 @@ describe('BtcPriceOracle', () => {
     weth = await new MockErc20Factory(signers[0]).deploy('wEth', 'WETH', expandTo18Decimals(10000));
 
     // deploy V2
-    factoryV2 = (await deployContract(<Wallet>signers[0], UniswapV2FactoryArtefact, [
+    factoryV2 = (await deployContract(<Wallet>signers[0], UniswapV2FactoryArtifact, [
       devAddr,
     ])) as IUniswapV2Factory;
+
     // deploy router
-    router = await new UniswapV2Router01Factory(signers[0]).deploy(factoryV2.address, weth.address);
+    router = (await deployContract(<Wallet>signers[0], UniswapV2Router02Artifact, [
+      factoryV2.address, weth.address
+    ], {gasLimit: 5000000})) as IUniswapV2Router02;
 
     // create pair
     await factoryV2.createPair(weth.address, tBtc0.address);
     const pair0Address = await factoryV2.getPair(weth.address, tBtc0.address);
     pair0 = new Contract(
       pair0Address,
-      JSON.stringify(IUniswapV2PairArtefact.abi),
+      JSON.stringify(IUniswapV2PairArtifact.abi),
       ethers.provider
     ).connect(signers[0]) as IUniswapV2Pair;
 
@@ -116,7 +119,7 @@ describe('BtcPriceOracle', () => {
     const pairAddress = await factoryV2.getPair(weth.address, tBtc1.address);
     pair1 = new Contract(
       pairAddress,
-      JSON.stringify(IUniswapV2PairArtefact.abi),
+      JSON.stringify(IUniswapV2PairArtifact.abi),
       ethers.provider
     ).connect(signers[0]) as IUniswapV2Pair;
     // try adding without liquidity

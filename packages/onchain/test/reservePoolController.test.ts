@@ -4,6 +4,7 @@ import chai from 'chai';
 import {deployContract, solidity, MockProvider} from 'ethereum-waffle';
 import UniswapV2FactoryArtifact from '@uniswap/v2-core/build/UniswapV2Factory.json';
 import IUniswapV2PairArtifact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
+import UniswapV2Router02Artifact from '@uniswap/v2-periphery/build/UniswapV2Router02.json';
 import {ReservePoolController} from '../typechain/ReservePoolController';
 import {ReservePoolControllerFactory} from '../typechain/ReservePoolControllerFactory';
 import {expandTo18Decimals, getApprovalDigest} from './shared/utilities';
@@ -13,8 +14,7 @@ import {MockErc20} from '../typechain/MockErc20';
 import {MockErc20Factory} from '../typechain/MockErc20Factory';
 import {MockFlashErc20} from '../typechain/MockFlashErc20';
 import {MockFlashErc20Factory} from '../typechain/MockFlashErc20Factory';
-import {UniswapV2Router01} from '../typechain/UniswapV2Router01';
-import {UniswapV2Router01Factory} from '../typechain/UniswapV2Router01Factory';
+import {IUniswapV2Router02} from '../typechain/IUniswapV2Router02';
 import {IUniswapV2Factory} from '../typechain/IUniswapV2Factory';
 import {IUniswapV2Pair} from '../typechain/IUniswapV2Pair';
 import {MockBFactory} from '../typechain/MockBFactory';
@@ -40,7 +40,7 @@ describe('ReservePoolController', async () => {
   let bFactory: MockBFactory;
   let bPool: BPool;
   let factoryV2: IUniswapV2Factory;
-  let router: UniswapV2Router01;
+  let router: IUniswapV2Router02;
 
   let oracle: BtcPriceOracle;
   let controller: ReservePoolController;
@@ -71,8 +71,11 @@ describe('ReservePoolController', async () => {
     factoryV2 = (await deployContract(<Wallet>signers[0], UniswapV2FactoryArtifact, [
       devAddr,
     ])) as IUniswapV2Factory;
+
     // deploy router
-    router = await new UniswapV2Router01Factory(signers[0]).deploy(factoryV2.address, wEth.address);
+    router = (await deployContract(<Wallet>signers[0], UniswapV2Router02Artifact, [
+      factoryV2.address, wEth.address
+    ], {gasLimit: 5000000})) as IUniswapV2Router02;
 
     // create FEED - WETH/tBTC pair
     await factoryV2.createPair(wEth.address, tBtc.address);
