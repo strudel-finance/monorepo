@@ -52,12 +52,14 @@ describe('ReservePoolController', async () => {
     wEth = await new MockFlashErc20Factory(signers[0]).deploy(
       'wEth',
       'WETH',
+      18,
       expandTo18Decimals(10000)
     );
     // address _wEthAddr,
     tBtc = await new MockErc20Factory(signers[0]).deploy(
       'tokenized BTC',
       'TBTC',
+      18,
       expandTo18Decimals(10000)
     );
     // address _vBtcAddr,
@@ -73,9 +75,12 @@ describe('ReservePoolController', async () => {
     ])) as IUniswapV2Factory;
 
     // deploy router
-    router = (await deployContract(<Wallet>signers[0], UniswapV2Router02Artifact, [
-      factoryV2.address, wEth.address
-    ], {gasLimit: 5000000})) as IUniswapV2Router02;
+    router = (await deployContract(
+      <Wallet>signers[0],
+      UniswapV2Router02Artifact,
+      [factoryV2.address, wEth.address],
+      {gasLimit: 5000000}
+    )) as IUniswapV2Router02;
 
     // create FEED - WETH/tBTC pair
     await factoryV2.createPair(wEth.address, tBtc.address);

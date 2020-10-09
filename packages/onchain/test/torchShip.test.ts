@@ -106,14 +106,14 @@ describe('TorchShip', async () => {
     let lp: MockErc20;
     let lp2: MockErc20;
     beforeEach(async () => {
-      lp = await new MockErc20Factory(minter).deploy('LPToken', 'LP', '10000000000');
+      lp = await new MockErc20Factory(minter).deploy('LPToken', 'LP', 18, '10000000000');
       const aliceAddr = await alice.getAddress();
       await lp.connect(minter).transfer(aliceAddr, '1000');
       const bobAddr = await bob.getAddress();
       await lp.transfer(bobAddr, '1000');
       const carolAddr = await carol.getAddress();
       await lp.transfer(carolAddr, '1000');
-      lp2 = await new MockErc20Factory(minter).deploy('LPToken2', 'LP2', '10000000000');
+      lp2 = await new MockErc20Factory(minter).deploy('LPToken2', 'LP2', 18, '10000000000');
       await lp2.transfer(aliceAddr, '1000');
       await lp2.transfer(bobAddr, '1000');
       await lp2.transfer(carolAddr, '1000');

@@ -111,7 +111,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     // check the header is included in the chain
     bytes32 headerHash = _header.hash256();
     bytes32 GCD = relay.getLastReorgCommonAncestor();
-    require(relay.isAncestor(headerHash, GCD, 240), "GCD does not confirm header");
+    require(relay.isAncestor(headerHash, GCD, 2500), "GCD does not confirm header");
 
     // check offset to tip
     bytes32 bestKnownDigest = relay.getBestKnownDigest();

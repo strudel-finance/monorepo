@@ -57,7 +57,7 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
     require(address(pair) != address(0), "no pair");
     uint112 reserve0;
     uint112 reserve1;
-    (reserve0, reserve1, blockTimestampLast) = pair.getReserves();
+    (reserve0, reserve1, ) = pair.getReserves();
     require(reserve0 != 0 && reserve1 != 0, "BtcOracle: NO_RESERVES"); // ensure that there's liquidity in the pair
 
     // fetch the current accumulated price value (0 / 1)
@@ -101,7 +101,7 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IBtcPriceOracle {
   // note this will always return 0 before update has been called successfully for the first time.
   function consult(uint256 amountIn) external override view returns (uint256 amountOut) {
     require(referenceTokens.length > 0, "nothing to track");
-    return priceAverage.mul(amountIn).decode144();
+    return priceAverage.mul(amountIn / 10**10).decode144();
   }
 
   // governance functions

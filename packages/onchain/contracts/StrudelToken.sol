@@ -114,7 +114,10 @@ contract StrudelToken is ERC20UpgradeSafe, MinterRole {
       )
     );
     address recoveredAddress = ecrecover(digest, v, r, s);
-    require(recoveredAddress != address(0) && recoveredAddress == owner, "Strudel: INVALID_SIGNATURE");
+    require(
+      recoveredAddress != address(0) && recoveredAddress == owner,
+      "Strudel: INVALID_SIGNATURE"
+    );
     _approve(owner, spender, value);
   }
 }
