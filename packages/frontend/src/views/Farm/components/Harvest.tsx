@@ -1,4 +1,4 @@
-import React, {useState} from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
@@ -8,23 +8,25 @@ import Label from '../../../components/Label'
 import Value from '../../../components/Value'
 import useEarnings from '../../../hooks/useEarnings'
 import useReward from '../../../hooks/useReward'
-import {getBalanceNumber} from '../../../utils/formatBalance'
-
+import { getBalanceNumber } from '../../../utils/formatBalance'
+import StrudelIcon from '../../../assets/img/STRDL_icon.svg'
 interface HarvestProps {
   pid: number
 }
 
-const Harvest: React.FC<HarvestProps> = ({pid}) => {
+const Harvest: React.FC<HarvestProps> = ({ pid }) => {
   const earnings = useEarnings(pid)
   const [pendingTx, setPendingTx] = useState(false)
-  const {onReward} = useReward(pid)
+  const { onReward } = useReward(pid)
 
   return (
     <Card>
       <CardContent>
         <StyledCardContentInner>
           <StyledCardHeader>
-            <CardIcon>🌪️</CardIcon>
+            <CardIcon>
+              <img src={StrudelIcon} height="55px" />
+            </CardIcon>
             <Value value={getBalanceNumber(earnings)} />
             <Label text="STRUDEL Earned" />
           </StyledCardHeader>

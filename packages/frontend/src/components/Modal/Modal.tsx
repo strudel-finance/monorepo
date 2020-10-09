@@ -35,6 +35,7 @@ const StyledResponsiveWrapper = styled.div`
 
 const StyledModal = styled.div`
   margin: auto;
+  overflow-y: auto;
   background: ${(props) => props.theme.color.grey[200]};
   border: 1px solid ${(props) => props.theme.color.grey[300]}ff;
   border-radius: 12px;
@@ -44,7 +45,8 @@ const StyledModal = styled.div`
   position: relative;
   width: 100%;
   min-height: 0;
-  @media (min-width: ${(props) => props.theme.breakpoints.mobile}px) {
+  @media (min-width: ${(props) =>
+      props.theme.breakpoints.mobile}px) and (orientation: landscape) {
     padding: 0 20px;
   }
 `

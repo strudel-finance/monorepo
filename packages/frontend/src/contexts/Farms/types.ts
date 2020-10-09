@@ -9,7 +9,7 @@ export interface Farm {
   tokenAddress: string
   earnToken: string
   earnTokenAddress: string
-  icon: React.ReactNode
+  icon: string
   id: string
   tokenSymbol: string
 }

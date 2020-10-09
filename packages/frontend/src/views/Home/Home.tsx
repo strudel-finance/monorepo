@@ -202,12 +202,12 @@ const Home: React.FC = () => {
                   Bitcoin and Ethereum. 
                 </StyledP>
                 <StyledP>
-                  You can only enter the Strudel from one direction so be aware!
-                  This action is irreversible.  
-                </StyledP>
-                <StyledP>
                   The bravest explorers that arrive on the other side will get
                   extra $TRDL rewards.
+                </StyledP>
+                <StyledP>
+                  You can only enter the Strudel from one direction so be aware!
+                  This action is irreversible.  
                 </StyledP>
               </AstroGrid>
               <AstroGrid item xs={2}></AstroGrid>
