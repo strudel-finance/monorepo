@@ -16,7 +16,6 @@ pragma solidity 0.6.6;
 import "./BNum.sol";
 
 contract BMath is BNum {
-
   /**********************************************************************************************
     // calcInGivenOut                                                                            //
     // aI = tokenAmountIn                                                                        //

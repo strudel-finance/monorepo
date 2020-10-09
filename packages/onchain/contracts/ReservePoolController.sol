@@ -9,7 +9,7 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
-import "./uniswap/IUniswapV2Router01.sol";
+import "@uniswap/v2-periphery/contracts/interfaces/IUniswapV2Router02.sol";
 import "./balancer/IBFactory.sol";
 import "./balancer/IBPool.sol";
 import "./IBtcPriceOracle.sol";
@@ -37,7 +37,8 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
   uint256 internal constant DEFAULT_WEIGHT = 5 * 10**18;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-  bytes32 internal constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+  bytes32
+    internal constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // Event declarations
   event Trade(bool indexed direction, uint256 amount);
@@ -92,7 +93,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       )
     );
   }
-
 
   // returns sorted token addresses, used to handle return values from pairs sorted in this order
   function sortTokens(address tokenA, address tokenB)
@@ -241,7 +241,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   }
 
   // External functions
-
 
   function getParams()
     external

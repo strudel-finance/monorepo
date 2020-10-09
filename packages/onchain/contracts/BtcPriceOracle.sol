@@ -6,8 +6,8 @@ import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Factory.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/FixedPoint.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
-import "./uniswap/UniswapV2OracleLibrary.sol";
-import "./uniswap/UniswapV2Library.sol";
+import "@uniswap/v2-periphery/contracts/libraries/UniswapV2OracleLibrary.sol";
+import "@uniswap/v2-periphery/contracts/libraries/UniswapV2Library.sol";
 import "./IBtcPriceOracle.sol";
 
 // fixed window oracle that recomputes the average price for the entire period once every period
