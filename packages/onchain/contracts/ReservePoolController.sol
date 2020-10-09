@@ -10,7 +10,6 @@ import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@uniswap/v2-core/contracts/interfaces/IUniswapV2Pair.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
 import "./uniswap/IUniswapV2Router01.sol";
-import "./uniswap/UniswapV2Library.sol";
 import "./balancer/IBFactory.sol";
 import "./balancer/IBPool.sol";
 import "./IBtcPriceOracle.sol";
@@ -36,9 +35,9 @@ import "./ILender.sol";
 contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpgradeSafe {
   using SafeMath for uint256;
 
-  uint256 constant DEFAULT_WEIGHT = 5 * 10**18;
+  uint256 internal constant DEFAULT_WEIGHT = 5 * 10**18;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-  bytes32 constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+  bytes32 internal constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // Event declarations
   event Trade(bool indexed direction, uint256 amount);
@@ -92,6 +91,51 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
         address(this)
       )
     );
+  }
+
+
+  // returns sorted token addresses, used to handle return values from pairs sorted in this order
+  function sortTokens(address tokenA, address tokenB)
+    internal
+    pure
+    returns (address token0, address token1)
+  {
+    require(tokenA != tokenB, "UniswapV2Library: IDENTICAL_ADDRESSES");
+    (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
+    require(token0 != address(0), "UniswapV2Library: ZERO_ADDRESS");
+  }
+
+  // calculates the CREATE2 address for a pair without making any external calls
+  function pairFor(
+    address factory,
+    address tokenA,
+    address tokenB
+  ) internal pure returns (address pair) {
+    (address token0, address token1) = sortTokens(tokenA, tokenB);
+    pair = address(
+      uint256(
+        keccak256(
+          abi.encodePacked(
+            hex"ff",
+            factory,
+            keccak256(abi.encodePacked(token0, token1)),
+            hex"96e8ac4277198ff8b6f785478aa9a39f403cb768dd02cbee326c3e7da348845f" // init code hash
+          )
+        )
+      )
+    );
+  }
+
+  // fetches and sorts the reserves for a pair
+  function getReserves(
+    address factory,
+    address tokenA,
+    address tokenB
+  ) internal view returns (uint256 reserveA, uint256 reserveB) {
+    (address token0, ) = sortTokens(tokenA, tokenB);
+    (uint256 reserve0, uint256 reserve1, ) = IUniswapV2Pair(pairFor(factory, tokenA, tokenB))
+      .getReserves();
+    (reserveA, reserveB) = tokenA == token0 ? (reserve0, reserve1) : (reserve1, reserve0);
   }
 
   // computes the direction and magnitude of the profit-maximizing trade
@@ -198,12 +242,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
 
   // External functions
 
-  /**
-   * @notice Getter for the publicSwap field on the underlying pool
-   */
-  function isPublicSwap() external view returns (bool) {
-    return bPool.isPublicSwap();
-  }
 
   function getParams()
     external
@@ -247,27 +285,27 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     _mint(msg.sender, MIN_POOL_SUPPLY);
   }
 
-  // function permit(
-  //   address owner,
-  //   address spender,
-  //   uint256 value,
-  //   uint256 deadline,
-  //   uint8 v,
-  //   bytes32 r,
-  //   bytes32 s
-  // ) external {
-  //   require(deadline >= block.timestamp, "vBTC: EXPIRED");
-  //   bytes32 digest = keccak256(
-  //     abi.encodePacked(
-  //       "\x19\x01",
-  //       DOMAIN_SEPARATOR,
-  //       keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-  //     )
-  //   );
-  //   address recoveredAddress = ecrecover(digest, v, r, s);
-  //   require(recoveredAddress != address(0) && recoveredAddress == owner, "VBTC: INVALID_SIGNATURE");
-  //   _approve(owner, spender, value);
-  // }
+  function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external {
+    require(deadline >= block.timestamp, "vBTC: EXPIRED");
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+      )
+    );
+    address recoveredAddress = ecrecover(digest, v, r, s);
+    require(recoveredAddress != address(0) && recoveredAddress == owner, "VBTC: INVALID_SIGNATURE");
+    _approve(owner, spender, value);
+  }
 
   /**
    * @notice Join a pool
@@ -404,44 +442,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   }
 
   /**
-   * @notice Exit a pool - redeem a specific number of pool tokens for an underlying asset
-   *         Asset must be present in the pool, and will incur an EXIT_FEE (if set to non-zero)
-   * @dev Emits a LogExit event for the token
-   * @param tokenOut - which token the caller wants to receive
-   * @param poolAmountIn - amount of pool tokens to redeem
-   * @param minAmountOut - minimum asset tokens to receive
-   * @return tokenAmountOut - amount of asset tokens returned
-   */
-  function exitswapPoolAmountIn(
-    address tokenOut,
-    uint256 poolAmountIn,
-    uint256 minAmountOut
-  ) external returns (uint256 tokenAmountOut) {
-    // Calculates final amountOut, and the fee and final amount in
-    require(bPool.isBound(tokenOut), "ERR_NOT_BOUND");
-
-    uint256 balTokenIn = bPool.getBalance(tokenOut);
-    tokenAmountOut = calcSingleOutGivenPoolIn(
-      balTokenIn,
-      bPool.getDenormalizedWeight(tokenOut),
-      totalSupply(),
-      bPool.getTotalDenormalizedWeight(),
-      poolAmountIn,
-      bPool.getSwapFee()
-    );
-
-    require(tokenAmountOut >= minAmountOut, "ERR_LIMIT_OUT");
-    require(tokenAmountOut <= bmul(balTokenIn, MAX_OUT_RATIO), "ERR_MAX_OUT_RATIO");
-
-    emit LogExit(msg.sender, tokenOut, tokenAmountOut);
-
-    _burn(msg.sender, poolAmountIn);
-    _pushUnderlying(tokenOut, msg.sender, tokenAmountOut);
-
-    return tokenAmountOut;
-  }
-
-  /**
    * @notice Exit a pool - redeem pool tokens for a specific amount of underlying assets
    *         Asset must be present in the pool
    * @dev Emits a LogExit event for the token
@@ -500,7 +500,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     uint256 tradeAmount;
     {
       // read SPOT price of vBTC
-      (uint256 reserveWeth, uint256 reserveVbtc) = UniswapV2Library.getReserves(
+      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
         uniRouter.factory(),
         address(wEth),
         address(vBtc)
@@ -601,7 +601,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 reserveWeth, uint256 reserveVbtc) = UniswapV2Library.getReserves(
+      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
         uniRouter.factory(),
         address(wEth),
         address(vBtc)
