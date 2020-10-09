@@ -179,7 +179,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 <Label>Please scan the following QR code</Label>
                 <Label style={{ fontWeight: 500 }}>
                   Check compatible{' '}
-                  <a href="" target="_blank">
+                  <a href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8" target="_blank">
                     wallets
                   </a>
                 </Label>
