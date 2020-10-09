@@ -83,7 +83,7 @@ export const supportedPools = [
       1: '0xe044bC87a030D370D64a6cA4531a08a4e67444E0',
       5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03',
     },
-    url: '',
+    url: 'https://pool.strudel.finance/#/',
     lpAddresses: {
       1: '0xd439932fbc03c0f646324ef09a4a0c28c0d4008b',
       5: '0xcd43a034efbf5b314ab48d77b4cece93e6e7876b',
