@@ -17,6 +17,8 @@ import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
 import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
+import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
+
 import Farm1 from '../../../assets/img/Farm1.png'
 import Farm2 from '../../../assets/img/Farm2.png'
 import Farm3 from '../../../assets/img/Farm3.png'
@@ -39,13 +41,13 @@ const FarmCards: React.FC = () => {
     ({ tokenSymbol }) => tokenSymbol === 'STRDL',
   )
 
-  const vbtcPrice =
+  const strudelPrice =
     strudelIndex >= 0 && stakedValue[strudelIndex]
       ? stakedValue[strudelIndex].tokenPriceInWeth
       : new BigNumber(0)
-
+  //console.log(strudelPrice.toString())
   const BLOCKS_PER_YEAR = new BigNumber(2336000)
-  const STRUDEL_PER_BLOCK = new BigNumber(1000)
+  const STRUDEL_PER_BLOCK = new BigNumber(4)
 
   const rows = farms.reduce<FarmWithStakedValue[][]>(
     (farmRows, farm, i) => {
@@ -53,7 +55,7 @@ const FarmCards: React.FC = () => {
         ...farm,
         ...stakedValue[i],
         apy: stakedValue[i]
-          ? vbtcPrice
+          ? strudelPrice
               .times(STRUDEL_PER_BLOCK)
               .times(BLOCKS_PER_YEAR)
               .times(stakedValue[i].poolWeight)
@@ -66,7 +68,11 @@ const FarmCards: React.FC = () => {
           : null,
       }
       const newFarmRows = [...farmRows]
-      if (newFarmRows[newFarmRows.length - 1].length === 3) {
+      if (
+        newFarmRows[newFarmRows.length - 1].length === 3 ||
+        (newFarmRows.length - 1 == 0 &&
+          newFarmRows[newFarmRows.length - 1].length === 2)
+      ) {
         newFarmRows.push([farmWithStakedValue])
       } else {
         newFarmRows[newFarmRows.length - 1].push(farmWithStakedValue)
@@ -136,16 +142,6 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
         return Farm5
     }
   }
-  const getIcon = (icon: number): string => {
-    switch (icon) {
-      case 0:
-        return
-      case 1:
-        return
-      case 2:
-        return
-    }
-  }
 
   useEffect(() => {
     async function fetchEarned() {
@@ -162,15 +158,29 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
     }
   }, [vbtc, lpTokenAddress, account, setHarvestable])
 
+  const getSymbol = (icon: string): any => {
+    switch (icon) {
+      case '1':
+        return <StrudelMoving />
+      case '2':
+        return <VBTCSpin />
+      default:
+        return icon
+    }
+  }
+
   const poolActive = true // startTime * 1000 - Date.now() <= 0
 
   return (
     <StyledCardWrapper>
       {farm.isBalancer && <StyledCardAccent />}
-      <Card>
-        <CardContent style={{ backgroundImage: `url(${getBackground()})` }}>
+      <Card style={{ backgroundImage: `url(${getBackground()})` }}>
+        <CardContent>
           <StyledContent>
-            <CardIcon>{farm.icon}</CardIcon>
+            <CardIcon>
+              <StyledMoving>{getSymbol(farm.icon)}</StyledMoving>
+            </CardIcon>
+
             <StyledTitle>{farm.name}</StyledTitle>
             <StyledDetails>
               <StyledDetail>
@@ -179,8 +189,13 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
                   {farm.lpToken.toUpperCase()}
                 </a>
               </StyledDetail>
-              <StyledDetail>Earn {farm.earnToken.toUpperCase()}</StyledDetail>
-              <StyledDetail>{farm.percentage}% of rewards</StyledDetail>
+              <StyledDetail style={{ paddingTop: '10px' }}>
+                <span style={{ fontWeight: 700, fontSize: '24px' }}>
+                  {farm.percentage}%
+                </span>{' '}
+                <br />
+                of {farm.earnToken.toUpperCase()} rewards
+              </StyledDetail>
             </StyledDetails>
             <Spacer />
             <Button
@@ -284,6 +299,8 @@ const StyledRow = styled.div`
   display: flex;
   margin-bottom: ${(props) => props.theme.spacing[4]}px;
   flex-flow: row wrap;
+  align-items: center;
+  justify-content: center;
   @media (max-width: 768px) {
     width: 100%;
     flex-flow: column nowrap;
@@ -340,6 +357,11 @@ const StyledInsight = styled.div`
   border: 1px solid #e6dcd5;
   text-align: center;
   padding: 0 12px;
+`
+const StyledMoving = styled.div`
+  & > div {
+    height: 60px;
+  }
 `
 
 export default FarmCards

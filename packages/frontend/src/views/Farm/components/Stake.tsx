@@ -20,14 +20,19 @@ import useUnstake from '../../../hooks/useUnstake'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import DepositModal from './DepositModal'
 import WithdrawModal from './WithdrawModal'
+import VBtcEth from '../../../assets/img/vBTC-ETH.png'
+import StrudelEth from '../../../assets/img/STRDL-ETH.png'
+import renBTC from '../../../assets/img/renBTC-ETH.png'
+import wBTC from '../../../assets/img/wBTC-ETH.png'
 
 interface StakeProps {
   lpContract: Contract
   pid: number
   tokenName: string
+  icon: string
 }
 
-const Stake: React.FC<StakeProps> = ({ lpContract, pid, tokenName }) => {
+const Stake: React.FC<StakeProps> = ({ lpContract, pid, tokenName, icon }) => {
   const [requestedApproval, setRequestedApproval] = useState(false)
 
   const allowance = useAllowance(lpContract)
@@ -68,12 +73,26 @@ const Stake: React.FC<StakeProps> = ({ lpContract, pid, tokenName }) => {
     }
   }, [onApprove, setRequestedApproval])
 
+  const getLPIcon = (icon: string): any => {
+    switch (icon) {
+      case '1':
+        return <LPImage src={StrudelEth} />
+      case '2':
+        return <LPImage src={VBtcEth} />
+      case '🐋':
+        return <LPImage src={wBTC} />
+      case '🦏':
+        return <LPImage src={renBTC} />
+      default:
+        return '🌪️'
+    }
+  }
   return (
     <Card>
       <CardContent>
         <StyledCardContentInner>
           <StyledCardHeader>
-            <CardIcon>👨🏻‍🍳</CardIcon>
+            <CardIcon>{getLPIcon(icon)}</CardIcon>
             <Value value={getBalanceNumber(stakedBalance)} />
             <Label text={`${tokenName} Tokens Staked`} />
           </StyledCardHeader>
@@ -127,6 +146,10 @@ const StyledCardContentInner = styled.div`
   flex: 1;
   flex-direction: column;
   justify-content: space-between;
+`
+
+const LPImage = styled.img`
+  height: 55px;
 `
 
 export default Stake

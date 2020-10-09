@@ -222,11 +222,7 @@ const ConversionActions: React.FC<Props> = ({
       <div style={{ textAlign: 'center' }}>
         {!tx.hasOwnProperty('confirmed') && (
           <React.Fragment>
-            <a
-              className={classes.viewLink}
-              href="javascript:void(0)"
-              onClick={showModal}
-            >
+            <a className={classes.viewLink} href="" onClick={showModal}>
               View Bridge Address
             </a>
           </React.Fragment>
@@ -265,7 +261,7 @@ const ConversionActions: React.FC<Props> = ({
                 Claim vBTC & $TRDL
               </Button>
             ) : (
-              <a className={classes.viewLink} href="javascript:void(0)">
+              <a className={classes.viewLink} href="">
                 Loading
               </a>
             )}
