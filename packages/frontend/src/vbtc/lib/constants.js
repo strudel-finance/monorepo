@@ -89,7 +89,7 @@ export const supportedPools = [
       5: '0xcd43a034efbf5b314ab48d77b4cece93e6e7876b',
     },
     tokenAddresses: {
-      1: '',
+      1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
       5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
     },
     name: 'Power vBTC',
