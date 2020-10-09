@@ -142,7 +142,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
               <Grid item xs={5}>
                 <StyledBalance>
                   <StrudelIcon size={60} />
-                  <Label>{'~ ' + strudelAmount + ' $RTDL'} </Label>
+                  <Label>{'~ ' + strudelAmount + ' $TRDL'} </Label>
                 </StyledBalance>
               </Grid>
             </Grid>
@@ -161,23 +161,30 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
           </>
         ) : (
           <>
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <QRCode
-                  size={256}
-                  value={`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
-                    .toSatoshi(value)
-                    .toString()}`}
-                />
-              </StyledBalanceWrapper>
-            </div>
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <Label>Please scan the following QR code</Label>
-                </StyledBalance>
-              </StyledBalanceWrapper>
-            </div>
+            <StyledBalanceWrapper>
+              <QRCode
+                size={256}
+                value={`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
+                  .toSatoshi(value)
+                  .toString()}`}
+              />
+            </StyledBalanceWrapper>
+            <StyledBalanceWrapper>
+              <StyledBalance>
+                <p
+                  style={{ wordBreak: 'break-all', textAlign: 'center' }}
+                >{`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
+                  .toSatoshi(value)
+                  .toString()}`}</p>
+                <Label>Please scan the following QR code</Label>
+                <Label style={{ fontWeight: 500 }}>
+                  Check compatible{' '}
+                  <a href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8" target="_blank">
+                    wallets
+                  </a>
+                </Label>
+              </StyledBalance>
+            </StyledBalanceWrapper>
           </>
         )}
         <Spacer size="sm" />

@@ -1,7 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
+type StyleProps = {
+  style?: any
+}
 
-const Card: React.FC = ({ children }) => <StyledCard>{children}</StyledCard>
+const Card: React.FC<StyleProps> = ({ children, style = {} }) => (
+  <StyledCard style={style}>{children}</StyledCard>
+)
 
 const StyledCard = styled.div`
   background: ${(props) => props.theme.color.grey[200]};

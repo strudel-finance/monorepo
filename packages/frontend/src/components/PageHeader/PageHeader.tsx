@@ -5,11 +5,27 @@ import Container from '../Container'
 
 interface PageHeaderProps {
   icon?: React.ReactNode
+  iconSize?: number
   subtitle?: string
   title?: string
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ icon, subtitle, title }) => {
+const PageHeader: React.FC<PageHeaderProps> = ({
+  icon,
+  iconSize = 120,
+  subtitle,
+  title,
+}) => {
+  const StyledIcon = styled.div`
+    & > div {
+      height: ${iconSize}px;
+    }
+    font-size: ${iconSize}px;
+    height: ${iconSize}px;
+    line-height: ${iconSize}px;
+    text-align: center;
+    width: ${iconSize}px;
+  `
   return (
     <Container size="sm">
       <StyledPageHeader>
@@ -29,14 +45,6 @@ const StyledPageHeader = styled.div`
   padding-bottom: ${(props) => props.theme.spacing[6]}px;
   padding-top: ${(props) => props.theme.spacing[6]}px;
   margin: 0 auto;
-`
-
-const StyledIcon = styled.div`
-  font-size: 120px;
-  height: 120px;
-  line-height: 120px;
-  text-align: center;
-  width: 120px;
 `
 
 const StyledTitle = styled.h1`

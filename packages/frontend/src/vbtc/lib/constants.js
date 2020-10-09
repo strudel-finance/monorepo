@@ -40,16 +40,16 @@ export const addressMap = {
 
 export const contractAddresses = {
   vbtc: {
-    1: '',
-    5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
+    1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+    5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
   },
   strudel: {
-    1: '',
-    5: '0xc1829e963717cf1ccd9d849266b1b2456a1dbf77',
+    1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
+    5: '0x611f48792751271328f5192d83343f0bfad8b78f',
   },
   masterChef: {
-    1: '',
-    5: '0x980b0d3b7f304a7ff23f56257403ae442d8ff759',
+    1: '0x517b091FdB87A42c879BbB849444E76A324D53c8',
+    5: '0xc80a91101adb246c286de0200bbb25f644aa1f56',
   },
   weth: {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
@@ -77,70 +77,56 @@ UNI-V2 LP Address on mainnet for reference
 
 export const supportedPools = [
   {
-    pid: 1,
-    isBalancer: false,
+    pid: 0,
+    isBalancer: true,
+    balancerPoolAddresses: {
+      1: '0xe044bC87a030D370D64a6cA4531a08a4e67444E0',
+      5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03',
+    },
     url: '',
     lpAddresses: {
-      1: '',
-      5: '0x040dad5d12da37b670159326c0117638f5f1871e',
+      1: '0xd439932fbc03c0f646324ef09a4a0c28c0d4008b',
+      5: '0xcd43a034efbf5b314ab48d77b4cece93e6e7876b',
     },
     tokenAddresses: {
-      1: '',
-      5: '0xc1829e963717cf1ccd9d849266b1b2456a1dbf77',
+      1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+      5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
     },
-    name: 'Strudel Party!',
+    name: 'Power vBTC',
+    symbol: 'VBTC-ETH LP',
+    tokenSymbol: 'VBTC',
+    icon: '2',
+  },
+  {
+    pid: 1,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+    lpAddresses: {
+      1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
+    },
+    tokenAddresses: {
+      1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
+      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
+    },
+    name: 'Spin Strudel',
     symbol: 'STRDL-ETH UNI-V2 LP',
     tokenSymbol: 'STRDL',
-    icon: '🌪️',
+    icon: '1',
   },
   {
-    pid: 0,
+    pid: 2,
     isBalancer: false,
-    url: '',
+    url:
+      'https://info.uniswap.org/pair/0xBb2b8038a1640196FbE3e38816F3e67Cba72D940',
     lpAddresses: {
-      1: '',
-      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
+      1: '0xBb2b8038a1640196FbE3e38816F3e67Cba72D940',
+      5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
     },
     tokenAddresses: {
-      1: '',
-      5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
-    },
-    name: 'Vortex Vampire',
-    symbol: 'VBTC-ETH UNI-V2 LP',
-    tokenSymbol: 'VBTC',
-    icon: '🧛',
-  },
-  {
-    pid: 0,
-    isBalancer: false,
-    balancerPoolAddresses: {
-      1: '',
-      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
-    },
-    url: '',
-    lpAddresses: {
-      1: '',
-      5: '0x1fea16558531a405dead7c664b2543a4cfc927ac',
-    },
-    tokenAddresses: {
-      1: '',
-      5: '0xe3f4d6080cf4bf0e7d46c34f5691399f136fc4ee',
-    },
-    name: 'Vortex Vampire',
-    symbol: 'VBTC-ETH UNI-V2 LP',
-    tokenSymbol: 'VBTC',
-    icon: '🧛',
-  },
-  /*
-  {
-    pid: 1,
-    lpAddresses: {
-      1: '0xb4e16d0168e52d35cacd2c6185b44281ec28c9dc',
-      5: ''
-    },
-    tokenAddresses: {
-      1: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
-      5: ''
+      1: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+      5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
     },
     name: 'WBTC Whale',
     symbol: 'WBTC-ETH UNI-V2 LP',
@@ -148,19 +134,53 @@ export const supportedPools = [
     icon: '🐋',
   },
   {
-    pid: 13,
+    pid: 3,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x81FbEf4704776cc5bBa0A5dF3a90056d2C6900B3',
     lpAddresses: {
-      1: '0x8bd1661da98ebdd3bd080f0be4e6d9be8ce9858c',
-      5: ''
+      1: '0x81FbEf4704776cc5bBa0A5dF3a90056d2C6900B3',
+      5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
     },
     tokenAddresses: {
-      1: '0x408e41876cccdc0f92210600ef50372656052a38',
-      5: ''
+      1: '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d',
+      5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
     },
     name: 'REN Rhino',
     symbol: 'REN-ETH UNI-V2 LP',
     tokenSymbol: 'REN',
     icon: '🦏',
   },
-  */
+  {
+    pid: 4,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
+    lpAddresses: {
+      1: '0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186d63980fd6e2ec61888f7b91c4bae4',
+    },
+    name: 'vBTC Spot',
+    symbol: 'vBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'vBTC',
+    icon: '2',
+  },
+  {
+    pid: 5,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x854056Fd40C1B52037166285B2e54Fee774d33f6',
+    lpAddresses: {
+      1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
+    },
+    tokenAddresses: {
+      1: '0x8daebade922df735c38c80c7ebd708af50815faa',
+    },
+    name: 'tBTC Dino',
+    symbol: 'tBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'tBTC',
+    icon: '🦕',
+  },
 ]
