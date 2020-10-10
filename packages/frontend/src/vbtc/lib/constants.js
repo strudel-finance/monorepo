@@ -55,6 +55,10 @@ export const contractAddresses = {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     5: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
   },
+  relay: {
+    1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
+    5: ''
+  }
 }
 
 /*
@@ -146,9 +150,9 @@ export const supportedPools = [
       1: '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d',
       5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
     },
-    name: 'REN Rhino',
-    symbol: 'REN-ETH UNI-V2 LP',
-    tokenSymbol: 'REN',
+    name: 'renBTC Rhino',
+    symbol: 'renBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'renBTC',
     icon: '🦏',
   },
   {
