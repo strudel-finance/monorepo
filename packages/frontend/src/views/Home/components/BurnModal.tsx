@@ -70,7 +70,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     [setVal],
   )
   const getInStrudelCurve = (x: number): number => {
-    return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21))
+    return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21)) / 3
   }
 
   const calculateStrudel = async () => {
@@ -179,7 +179,10 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 <Label>Please scan the following QR code</Label>
                 <Label style={{ fontWeight: 500 }}>
                   Check compatible{' '}
-                  <a href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8" target="_blank">
+                  <a
+                    href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
+                    target="_blank"
+                  >
                     wallets
                   </a>
                 </Label>
