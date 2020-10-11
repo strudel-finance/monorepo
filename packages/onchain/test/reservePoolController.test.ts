@@ -120,7 +120,11 @@ describe('ReservePoolController', async () => {
     ]);
 
     // deploy spot oracle
-    spotOracle = await new SpotPriceOracleFactory(signers[0]).deploy(factoryV2.address, wEth.address, vBtc.address);
+    spotOracle = await new SpotPriceOracleFactory(signers[0]).deploy(
+      factoryV2.address,
+      wEth.address,
+      vBtc.address
+    );
 
     // address _bPoolFactory,
     bFactory = await new MockBFactoryFactory(signers[0]).deploy();
@@ -162,8 +166,8 @@ describe('ReservePoolController', async () => {
       oracle.address,
       expandTo18Decimals(15),
       initialTradeFee,
-      true //,
-      //spotOracle.address
+      true,
+      spotOracle.address
     );
 
     // try initialize again

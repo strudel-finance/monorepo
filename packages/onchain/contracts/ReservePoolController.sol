@@ -258,7 +258,15 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   {
     uint256 swapFee = bPool.getSwapFee();
     bool isPublicSwap = bPool.isPublicSwap();
-    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast, swapFee, isPublicSwap, spotOracle);
+    return (
+      address(uniRouter),
+      oracle,
+      maxVbtcWeight,
+      blockTimestampLast,
+      swapFee,
+      isPublicSwap,
+      spotOracle
+    );
   }
 
   function deployPool(uint256 initialSwapFee) external {
@@ -454,7 +462,10 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   ) internal pure returns (bool) {
     uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
     uint256 bPrice = bWethWeight.mul(BONE).mul(bWethBalance).div(bVbtcWeight.mul(bVbtcBalance));
-    require(uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV), "price imbalance between pools");
+    require(
+      uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV),
+      "price imbalance between pools"
+    );
   }
 
   /**
@@ -488,6 +499,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       require(
         reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) ==
           IBtcPriceOracle(spotOracle).consult(BONE).div(POOL_PRICE_DIV),
+
         // use this for upgrade to get around governance delay
         //reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) ==
         //  IBtcPriceOracle(0x91AE9424B706616A531831Fb4A8988726B398837).consult(BONE).div(POOL_PRICE_DIV),
@@ -587,11 +599,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 a, uint256 b) = getReserves(
-        uniRouter.factory(),
-        address(wEth),
-        address(vBtc)
-      );
+      (uint256 a, uint256 b) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
       uint256 vBtcBalance = bPool.getBalance(address(vBtc));
       uint256 wEthBalance = bPool.getBalance(address(wEth));
 
