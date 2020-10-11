@@ -139,7 +139,7 @@ describe('BtcPriceOracle', () => {
     // check result
     const feedPrice = await oracle.consult(expandTo18Decimals(1));
     // (600 / 6 ) = 100h
-    expect(feedPrice).to.eq('66732780954873552867');
+    expect(feedPrice.div(DEC_FAC).div(100)).to.eq('66733400');
   });
 
   it('add pool', async () => {

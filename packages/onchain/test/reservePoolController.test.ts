@@ -167,13 +167,11 @@ describe('ReservePoolController', async () => {
       true,
       spotOracle.address
     );
-    console.log('here1');
+
     // try initialize again
     await expect(controller.deployPool(initialTradeFee)).to.be.reverted;
-    console.log('here2');
     // try some trade
     await expect(controller.resyncWeights()).to.be.reverted;
-    console.log('here3');
     // set pool for later
     bPool = new BPoolFactory(signers[0]).attach(await controller.bPool());
   });
@@ -200,17 +198,17 @@ describe('ReservePoolController', async () => {
     const wEthIn = expandTo18Decimals(4);
     await wEth.transfer(feedPair.address, wEthIn);
     if (token0 == wEth.address) {
-      let vBtcOut = reserves.reserve1.sub(
+      let tBtcOut = reserves.reserve1.sub(
         reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(wEthIn))
       );
-      vBtcOut = vBtcOut.sub(vBtcOut.mul(997).div(1000));
-      await feedPair.swap(0, vBtcOut, devAddr, '0x');
+      tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
+      await feedPair.swap(0, tBtcOut, devAddr, '0x');
     } else {
-      let vBtcOut = reserves.reserve0.sub(
+      let tBtcOut = reserves.reserve0.sub(
         reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(wEthIn))
       );
-      vBtcOut = vBtcOut.sub(vBtcOut.mul(997).div(1000));
-      await feedPair.swap(vBtcOut, 0, devAddr, '0x');
+      tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
+      await feedPair.swap(tBtcOut, 0, devAddr, '0x');
     }
 
     // update the oracle
@@ -305,71 +303,58 @@ describe('ReservePoolController', async () => {
     expect(feedPrice.div(one)).to.eq(priceUni);
   });
 
-  it('should resync when SPOT much over FEED', async () => {
-    // check prices before trades
+  it('should resync when SPOT much under FEED', async () => {
+    const devAddr = await signers[0].getAddress();
     const token0 = await spotPair.token0();
     let reserves = await spotPair.getReserves();
-    let wEthBal = await bPool.getBalance(wEth.address);
-    let vBtcBal = await bPool.getBalance(vBtc.address);
-    let wEthWeight = await bPool.getNormalizedWeight(wEth.address);
-    let vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
-    let priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
-    let priceUni =
-      token0 == wEth.address
-        ? reserves.reserve0.div(reserves.reserve1)
-        : reserves.reserve1.div(reserves.reserve0);
-    expect(priceBPool).to.eq(priceUni);
-
     // do some swaps, to get feed price much under feed
-    const devAddr = await signers[0].getAddress();
-    const wEthIn = expandTo18Decimals(60);
-    await wEth.transfer(feedPair.address, wEthIn);
+    const tBtcIn = BigNumber.from('30000000');  // 0.3 BTC in
+    await tBtc.transfer(feedPair.address, tBtcIn);
     if (token0 == wEth.address) {
-      let tBtcOut = reserves.reserve1.sub(
-        reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(wEthIn))
+      let wEthOut = reserves.reserve0.sub(
+        reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(tBtcIn))
       );
-      tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
-      await feedPair.swap(0, tBtcOut, devAddr, '0x');
+      wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
+      await feedPair.swap(wEthOut, 0, devAddr, '0x');
     } else {
-      let tBtcOut = reserves.reserve0.sub(
-        reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(wEthIn))
+      let wEthOut = reserves.reserve1.sub(
+        reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(tBtcIn))
       );
-      tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
-      await feedPair.swap(tBtcOut, 0, devAddr, '0x');
+      wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
+      await feedPair.swap(0, wEthOut, devAddr, '0x');
     }
 
-    await ethers.provider.send('evm_increaseTime', [60 * 1]);
-    await ethers.provider.send('evm_mine', []);
-    await spotOracle.update();
-    await ethers.provider.send('evm_increaseTime', [60 * 1]);
-    await ethers.provider.send('evm_mine', []);
-    await spotOracle.update();
-    // try to steal the unicorns
-    console.log('here0');
-    //await expect(controller.resyncWeights()).to.be.revertedWith('hold the unicorns');
-    // update the oracle
     await ethers.provider.send('evm_increaseTime', [60 * 21]);
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
+    await spotOracle.update();
+    // try to steal the unicorns
+    await expect(controller.resyncWeights()).to.be.revertedWith('hold the unicorns');
+    // update the oracle
+    await ethers.provider.send('evm_increaseTime', [60 * 60 * 24]);
+    await ethers.provider.send('evm_mine', []);
+    await oracle.update();
+    await spotOracle.update();
 
-    console.log('here');
     // resync pools
-    await controller.resyncWeights();
-    console.log('here1');
+    const tx = await controller.resyncWeights();
+    const events = (await tx.wait(1)).events!;
+
     // check price after trade
     reserves = await spotPair.getReserves();
-    wEthBal = await bPool.getBalance(wEth.address);
-    vBtcBal = await bPool.getBalance(vBtc.address);
-    wEthWeight = await bPool.getNormalizedWeight(wEth.address);
-    vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
-    priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
-    priceUni =
+    const wEthBal = await bPool.getBalance(wEth.address);
+    const vBtcBal = await bPool.getBalance(vBtc.address);
+    const dwEthWeight = await bPool.getDenormalizedWeight(wEth.address);
+    const dvBtcWeight = await bPool.getDenormalizedWeight(vBtc.address);
+    const priceBPool = dwEthWeight.mul(wEthBal).div(dvBtcWeight.mul(vBtcBal));
+    const priceUni =
       token0 == wEth.address
         ? reserves.reserve0.div(reserves.reserve1)
         : reserves.reserve1.div(reserves.reserve0);
-    console.log('b/u:', priceBPool, priceUni);
-    expect(priceBPool).to.eq(priceUni);
 
+    const feedPrice = await oracle.consult(expandTo18Decimals(1));
+    expect(feedPrice.div(one)).to.eq(priceUni);
+    expect(priceBPool).to.eq(priceUni);
     const remainingBal = await vBtc.balanceOf(controller.address);
     expect(remainingBal).to.eq(0);
   });
@@ -378,29 +363,27 @@ describe('ReservePoolController', async () => {
     const devAddr = await signers[0].getAddress();
     const token0 = await spotPair.token0();
     let reserves = await spotPair.getReserves();
-    const wEthIn = expandTo18Decimals(80);
-    await wEth.transfer(spotPair.address, wEthIn);
+    const tBtcIn = BigNumber.from('200000000');  // 0.3 BTC in
+    await tBtc.transfer(feedPair.address, tBtcIn);
     if (token0 == wEth.address) {
-      let vBtcOut = reserves.reserve1.sub(
-        reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(wEthIn))
+      let wEthOut = reserves.reserve0.sub(
+        reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(tBtcIn))
       );
-      vBtcOut = vBtcOut.sub(vBtcOut.mul(997).div(1000));
-      await spotPair.swap(0, vBtcOut, devAddr, '0x');
+      wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
+      await feedPair.swap(wEthOut, 0, devAddr, '0x');
     } else {
-      let vBtcOut = reserves.reserve0.sub(
-        reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(wEthIn))
+      let wEthOut = reserves.reserve1.sub(
+        reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(tBtcIn))
       );
-      vBtcOut = vBtcOut.sub(vBtcOut.mul(997).div(1000));
-      await spotPair.swap(vBtcOut, 0, devAddr, '0x');
+      wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
+      await feedPair.swap(0, wEthOut, devAddr, '0x');
     }
 
-    // try to steal the unicorns
-
     // update the oracle
-    await ethers.provider.send('evm_increaseTime', [60 * 21]);
+    await ethers.provider.send('evm_increaseTime', [60 * 60 * 24]);
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
-
+    await spotOracle.update();
     // resync pools
     await expect(controller.resyncWeights()).to.be.revertedWith('max weight error');
   });

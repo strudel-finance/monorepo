@@ -42,7 +42,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     internal constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // Event declarations
-  event Trade(bool indexed direction, uint256 amount);
+  event Trade(bool indexed direction, uint256 amount, int256 effect);
   event LogJoin(address indexed caller, address indexed tokenIn, uint256 tokenAmountIn);
   event LogExit(address indexed caller, address indexed tokenOut, uint256 tokenAmountOut);
 
@@ -452,8 +452,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     return poolAmountIn;
   }
 
-  event Data(uint256 a, uint256 b);
-
   function _checkPriceCloseEnough(
     uint256 bWethBalance,
     uint256 bWethWeight,
@@ -487,6 +485,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   function resyncWeights() external {
     // simple check for re-entrancy
     require(msg.sender == tx.origin, "caller not EOA");
+    require(bPool.isPublicSwap(), "pool not public");
     // read FEED price of BTC ()
     uint256 truePriceEth = IBtcPriceOracle(oracle).consult(BONE);
 
@@ -563,10 +562,10 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // we received a bunch of vBTC here
     // read direction, then do the trade, trust that amounts were calculated correctly
     bool isEthToVbtc = (uint256(data) >> 248) != 0;
-    address tokenIn = isEthToVbtc ? address(wEth) : address(vBtc);
-    address tokenOut = isEthToVbtc ? address(vBtc) : address(wEth);
+    address[] memory path = new address[](2);
+    path[0] = isEthToVbtc ? address(wEth) : address(vBtc);
+    path[1] = isEthToVbtc ? address(vBtc) : address(wEth);
     uint256 tradeAmount = amount;
-    emit Trade(isEthToVbtc, tradeAmount);
 
     if (isEthToVbtc) {
       // we want to trade eth to vBTC in UNI, so let's get the ETH
@@ -583,9 +582,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // approve should have been done in constructor
     // TransferHelper.safeApprove(tokenIn, address(router), tradeAmount);
 
-    address[] memory path = new address[](2);
-    path[0] = tokenIn;
-    path[1] = tokenOut;
     // 5. sell ETH in spot pool
     uint256[] memory amounts = IUniswapV2Router01(uniRouter).swapExactTokensForTokens(
       tradeAmount,
@@ -609,31 +605,37 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 a, uint256 b) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
+      // a = uni wEth reserve
+      // b = uni vBtc Reserve
+      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
       uint256 vBtcBalance = bPool.getBalance(address(vBtc));
       uint256 wEthBalance = bPool.getBalance(address(wEth));
+
+      // reusing a and b here, because ran out of stack
+      uint256 a = vBtc.balanceOf(address(this)); // vBtc on account
+      uint256 b = amount.add(amount.div(1700)); // loan to pay
+      if (a > b) {
+        // we earned something extra, add to LPs balance
+        vBtcBalance = vBtcBalance.add(a.sub(b));
+        emit Trade(isEthToVbtc, amount, int256(a.sub(b)));
+      } else {
+        // if we don't have enough vBTC to pay back loan, take it from LPs
+        vBtcBalance = vBtcBalance.sub(b.sub(a));
+        emit Trade(isEthToVbtc, amount, -int256(b.sub(a)));
+      }
+
       // check that new weight does not exceed max weight
-      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(b).div(vBtcBalance).div(a);
+      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(reserveVbtc).div(vBtcBalance).div(reserveWeth);
+      //uint256 newVbtcWeight = a.mul(vBtcBalance).div(b).div(bdiv(wEthBalance, DEFAULT_WEIGHT));
       // if trade moves away from equal balance, slow it down
       if (newVbtcWeight > ((uint256(data) << 8) >> 8) && newVbtcWeight > DEFAULT_WEIGHT) {
         require(now.sub(blockTimestampLast) > 24 hours, "hold the unicorns");
       }
       blockTimestampLast = uint32(now);
       require(newVbtcWeight < maxVbtcWeight, "max weight error");
-      a = vBtc.balanceOf(address(this));
-      b = amount.add(amount.div(1700));
-      if (a < b) {
-        // if we don't have enough vBTC to pay back loan, take it from LPs
-        // assumption: too small to affect price
-        vBtcBalance = vBtcBalance.sub(b.sub(a));
-      } else {
-        // we rearned something extra, add to LPs balance
-        // assumption: too small to affect price
-        vBtcBalance = vBtcBalance.add(a.sub(b));
-      }
+
       // adjust weights so there is no arbitrage
       IBPool(bPool).rebind(address(vBtc), vBtcBalance, newVbtcWeight);
-      IBPool(bPool).rebind(address(wEth), wEthBalance, DEFAULT_WEIGHT);
     }
 
     // repay loan
