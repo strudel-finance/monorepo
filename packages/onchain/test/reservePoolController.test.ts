@@ -172,10 +172,8 @@ describe('ReservePoolController', async () => {
 
     // try initialize again
     await expect(controller.deployPool(initialTradeFee)).to.be.reverted;
-    console.log('here2');
     // try some trade
     await expect(controller.resyncWeights()).to.be.reverted;
-    console.log('here3');
     // set pool for later
     bPool = new BPoolFactory(signers[0]).attach(await controller.bPool());
   });

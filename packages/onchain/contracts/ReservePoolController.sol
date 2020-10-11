@@ -599,7 +599,9 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 a, uint256 b) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
+      // a = uni wEth reserve
+      // b = uni vBtc Reserve
+      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
       uint256 vBtcBalance = bPool.getBalance(address(vBtc));
       uint256 wEthBalance = bPool.getBalance(address(wEth));
 
