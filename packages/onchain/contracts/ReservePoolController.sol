@@ -36,6 +36,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   using SafeMath for uint256;
 
   uint256 internal constant DEFAULT_WEIGHT = 5 * 10**18;
+  uint256 internal constant POOL_PRICE_DIV = 10**18; // allowed divergence of pool prices (cut out 17 of 18 decimals)
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
   bytes32
     internal constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
@@ -60,6 +61,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   IBPool public bPool; // IBPool
   uint32 private blockTimestampLast;
   mapping(address => uint256) private nonces;
+  address private spotOracle;
 
   function initialize(
     address _vBtcAddr,
@@ -241,7 +243,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   }
 
   // External functions
-
   function getParams()
     external
     view
@@ -249,10 +250,15 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       address,
       address,
       uint256,
-      uint32
+      uint32,
+      uint256,
+      bool,
+      address
     )
   {
-    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast);
+    uint256 swapFee = bPool.getSwapFee();
+    bool isPublicSwap = bPool.isPublicSwap();
+    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast, swapFee, isPublicSwap, spotOracle);
   }
 
   function deployPool(uint256 initialSwapFee) external {
@@ -402,45 +408,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   }
 
   /**
-   * @notice Join by swapping an external token in (must be present in the pool)
-   *         To receive an exact amount of pool tokens out. System calculates the deposit amount
-   * @dev emits a LogJoin event
-   * @param tokenIn - which token we're transferring in (system calculates amount required)
-   * @param poolAmountOut - amount of pool tokens to be received
-   * @param maxAmountIn - Maximum asset tokens that can be pulled to pay for the pool tokens
-   * @return tokenAmountIn - amount of asset tokens transferred in to purchase the pool tokens
-   */
-  function joinswapPoolAmountOut(
-    address tokenIn,
-    uint256 poolAmountOut,
-    uint256 maxAmountIn
-  ) external returns (uint256 tokenAmountIn) {
-    require(bPool.isBound(tokenIn), "ERR_NOT_BOUND");
-
-    uint256 balTokenIn = bPool.getBalance(tokenIn);
-    tokenAmountIn = calcSingleInGivenPoolOut(
-      balTokenIn,
-      bPool.getDenormalizedWeight(tokenIn),
-      totalSupply(),
-      bPool.getTotalDenormalizedWeight(),
-      poolAmountOut,
-      bPool.getSwapFee()
-    );
-
-    require(tokenAmountIn != 0, "ERR_MATH_APPROX");
-    require(tokenAmountIn <= maxAmountIn, "ERR_LIMIT_IN");
-
-    require(tokenAmountIn <= bmul(balTokenIn, MAX_IN_RATIO), "ERR_MAX_IN_RATIO");
-
-    emit LogJoin(msg.sender, tokenIn, tokenAmountIn);
-
-    _mint(msg.sender, poolAmountOut);
-    _pullUnderlying(tokenIn, balTokenIn, msg.sender, tokenAmountIn);
-
-    return tokenAmountIn;
-  }
-
-  /**
    * @notice Exit a pool - redeem pool tokens for a specific amount of underlying assets
    *         Asset must be present in the pool
    * @dev Emits a LogExit event for the token
@@ -477,6 +444,23 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     return poolAmountIn;
   }
 
+  event Data(uint256 a, uint256 b);
+
+  function _checkPriceCloseEnough(
+    uint256 bWethBalance,
+    uint256 bWethWeight,
+    uint256 bVbtcBalance,
+    uint256 bVbtcWeight,
+    uint256 uWethBalance,
+    uint256 uVbtcBalance
+    // ) internal pure returns (bool) {
+  ) internal returns (bool) {
+    uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
+    uint256 bPrice = bWethWeight.mul(BONE).mul(bWethBalance).div(bVbtcWeight.mul(bVbtcBalance));
+    //emit Data(uPrice.div(POOL_PRICE_DIV), bPrice.div(POOL_PRICE_DIV));
+    require(uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV), "price imbalance between pools");
+  }
+
   /**
    * @notice Update the weight of a token without changing the price (or transferring tokens)
    * @dev Checks if the token's current pool balance has deviated from cached balance,
@@ -488,61 +472,64 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // simple check for re-entrancy
     require(msg.sender == tx.origin, "caller not EOA");
     // read FEED price of BTC ()
-    uint256 truePriceBtc = 10**18;
-    uint256 truePriceEth = IBtcPriceOracle(oracle).consult(truePriceBtc);
+    uint256 truePriceEth = IBtcPriceOracle(oracle).consult(BONE);
 
     // true price is expressed as a ratio, so both values must be non-zero
-    require(truePriceBtc != 0, "ReservePool: ZERO_PRICE");
+    require(truePriceEth != 0, "ReservePool: ZERO_PRICE");
 
     // deal with spot pool
     bool isEthToVbtc;
     uint256 tradeAmount;
+    uint256 reserveWeth;
+    uint256 reserveVbtc;
     {
       // read SPOT price of vBTC
-      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
+      (reserveWeth, reserveVbtc) = getReserves(
         uniRouter.factory(),
         address(wEth),
         address(vBtc)
       );
+
+      // check pool ratio close to spot price
+      // prevent frontrunning
+      require(reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) == IBtcPriceOracle(spotOracle).consult(BONE).div(POOL_PRICE_DIV), "spot price not close to pair ratio");
+
       // how much ETH (including UNI fee) is needed to lift SPOT to FEED?
       (isEthToVbtc, tradeAmount) = computeProfitMaximizingTrade(
         truePriceEth,
-        truePriceBtc,
+        BONE,
         reserveWeth,
         reserveVbtc
       );
     }
 
-    // deal with reserve pool
     uint256 vBtcToBorrow = tradeAmount;
     uint256 vBtcWeight = bPool.getDenormalizedWeight(address(vBtc));
-    if (isEthToVbtc) {
-      // calculate amount vBTC to get the needed ETH from reserve pool
-      {
-        uint256 tokenBalanceIn = bPool.getBalance(address(vBtc));
-        uint256 tokenBalanceOut = bPool.getBalance(address(wEth));
-        uint256 tokenWeightOut = bPool.getDenormalizedWeight(address(wEth));
-        uint256 swapFee = bPool.getSwapFee();
-        vBtcToBorrow = calcInGivenOut(
-          tokenBalanceIn,
-          vBtcWeight,
-          tokenBalanceOut,
-          tokenWeightOut,
-          tradeAmount, // amount of ETH we want to get out
-          swapFee
-        );
+    // deal with reserve pool
+    {
+      uint256 tokenBalanceIn = bPool.getBalance(address(vBtc));
+      uint256 tokenBalanceOut = bPool.getBalance(address(wEth));
+      uint256 tokenWeightOut = bPool.getDenormalizedWeight(address(wEth));
+      _checkPriceCloseEnough(tokenBalanceOut, tokenWeightOut, tokenBalanceIn, vBtcWeight, reserveWeth, reserveVbtc);
+      if (isEthToVbtc) {
+        // calculate amount vBTC to get the needed ETH from reserve pool
+        {
+          uint256 swapFee = bPool.getSwapFee();
+          vBtcToBorrow = calcInGivenOut(
+            tokenBalanceIn,
+            vBtcWeight,
+            tokenBalanceOut,
+            tokenWeightOut,
+            tradeAmount, // amount of ETH we want to get out
+            swapFee
+          );
+        }
       }
     }
     // encode direction and old weight together
     bytes32 data = bytes32((uint256(isEthToVbtc ? 1 : 0) << 248) | vBtcWeight);
     // get the loan
     ILender(address(vBtc)).flashMint(vBtcToBorrow, data);
-
-    // if any earnings remain (rounding error?), reward msg.sender
-    uint256 remainder = vBtc.balanceOf(address(this));
-    if (remainder > 0) {
-      vBtc.transfer(msg.sender, remainder);
-    }
   }
 
   function executeOnFlashMint(uint256 amount, bytes32 data) external override {
@@ -553,7 +540,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // we received a bunch of vBTC here
     // read direction, then do the trade, trust that amounts were calculated correctly
     bool isEthToVbtc = (uint256(data) >> 248) != 0;
-    uint256 oldVbtcWeight = (uint256(data) << 8) >> 8;
     address tokenIn = isEthToVbtc ? address(wEth) : address(vBtc);
     address tokenOut = isEthToVbtc ? address(vBtc) : address(wEth);
     uint256 tradeAmount = amount;
@@ -600,7 +586,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
+      (uint256 a, uint256 b) = getReserves(
         uniRouter.factory(),
         address(wEth),
         address(vBtc)
@@ -608,15 +594,26 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       uint256 vBtcBalance = bPool.getBalance(address(vBtc));
       uint256 wEthBalance = bPool.getBalance(address(wEth));
       // check that new weight does not exceed max weight
-      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(reserveVbtc).div(vBtcBalance).div(
-        reserveWeth
+      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(b).div(vBtcBalance).div(
+        a
       );
       // if trade moves away from equal balance, slow it down
-      if (newVbtcWeight > oldVbtcWeight && newVbtcWeight > DEFAULT_WEIGHT) {
+      if (newVbtcWeight > ((uint256(data) << 8) >> 8) && newVbtcWeight > DEFAULT_WEIGHT) {
         require(now.sub(blockTimestampLast) > 24 hours, "hold the unicorns");
       }
       blockTimestampLast = uint32(now);
       require(newVbtcWeight < maxVbtcWeight, "max weight error");
+      a = vBtc.balanceOf(address(this));
+      b = amount.add(amount.div(1700));
+      if (a < b) {
+        // if we don't have enough vBTC to pay back loan, take it from LPs
+        // assumption: too small to affect price
+        vBtcBalance = vBtcBalance.sub(b.sub(a));
+      } else {
+        // we rearned something extra, add to LPs balance
+        // assumption: too small to affect price
+        vBtcBalance = vBtcBalance.add(a.sub(b));
+      }
       // adjust weights so there is no arbitrage
       IBPool(bPool).rebind(address(vBtc), vBtcBalance, newVbtcWeight);
       IBPool(bPool).rebind(address(wEth), wEthBalance, DEFAULT_WEIGHT);
@@ -632,12 +629,16 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     address _oracle,
     uint256 _maxVbtcWeight,
     uint256 _swapFee,
-    bool _isPublicSwap
+    bool _isPublicSwap,
+    address _spotOracle
   ) external onlyOwner {
     uniRouter = IUniswapV2Router01(_uniRouter);
 
     require(_oracle != address(0), "!oracle-0");
     oracle = _oracle;
+
+    require(_spotOracle != address(0), "!oracle-0");
+    spotOracle = _spotOracle;
 
     require(_maxVbtcWeight >= DEFAULT_WEIGHT / 5, "set max weight too low error");
     require(_maxVbtcWeight <= DEFAULT_WEIGHT * 9, "set max weight too high error");
