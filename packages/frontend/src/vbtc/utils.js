@@ -25,6 +25,10 @@ export const getStrudelAddress = (vbtc) => {
   return vbtc && vbtc.strudelAddress
 }
 
+export const getRelayContract = (vbtc) => {
+  return vbtc && vbtc.contracts && vbtc.contracts.relay
+}
+
 export const getWethContract = (vbtc) => {
   return vbtc && vbtc.contracts && vbtc.contracts.weth
 }
