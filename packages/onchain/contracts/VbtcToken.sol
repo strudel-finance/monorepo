@@ -236,7 +236,13 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     require(false, "not implemented");
   }
 
+  function _checkNew(bytes29 _headers) internal returns (bool) {
+    bytes29 _target = _headers.indexHeaderArray(0);
+    require(relay.findHeight(_target.hash256()) == 0, "already included");
+  }
+
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
+    _checkNew(_headers.ref(0).tryAsHeaderArray());
     require(relay.addHeaders(_anchor, _headers), "add header failed");
     strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
   }
@@ -246,6 +252,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     bytes calldata _oldPeriodEndHeader,
     bytes calldata _headers
   ) external returns (bool) {
+    _checkNew(_headers.ref(0).tryAsHeaderArray());
     require(
       relay.addHeadersWithRetarget(_oldPeriodStartHeader, _oldPeriodEndHeader, _headers),
       "add header with retarget failed"
