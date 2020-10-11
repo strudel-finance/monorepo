@@ -1,0 +1,37 @@
+{
+  "name": "backend",
+  "version": "0.1.0",
+  "description": "api and db to support ui functionality",
+  "main": "index.js",
+  "scripts": {
+    "lint": "eslint --fix src/**/*.js",
+    "test": "mocha --recursive 'src/**/*.test.js'",
+    "start": "serverless offline start -s dev",
+    "deploy": "sls deploy -s production"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:strudel-finance/monorepo.git"
+  },
+  "author": "Strudel",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "chai": "latest",
+    "eslint": "^5.13.0",
+    "eth-sig-util": "^2.5.3",
+    "mocha": "latest",
+    "serverless-offline": "latest",
+    "sinon": "^9.0.2",
+    "sinon-chai": "^3.5.0"
+  },
+  "dependencies": {
+    "@summa-tx/bitcoin-spv-js": "^4.0.2",
+    "bitcoinjs-lib": "^5.2.0",
+    "ethers": "^4.0.47",
+    "jsbi-utils": "^1.0.1",
+    "leap-lambda-boilerplate": "^1.3.0",
+    "node-fetch": "^2.3.0",
+    "pusher": "^3.0.1",
+    "request": "^2.88.2"
+  }
+}

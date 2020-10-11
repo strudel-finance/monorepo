@@ -1,0 +1,33 @@
+service: strudel-finance
+
+custom:
+  serverless-offline:
+    port: 3001
+  region: eu-west-1
+  bcdRpc: "bcd.strudel.finance"
+  bcdPost: 8332
+
+package:
+  exclude:
+    - src/**/*.test.js
+
+provider:
+  name: aws
+  region: ${self:custom.region}
+  runtime: nodejs12.x
+  timeout: 45
+
+functions:
+  relayer-service:
+    timeout: 45
+    handler: src/relayer.handler
+    environment:
+      PROVIDER_URL: ${env:PROVIDER_URL}
+      BCD_RPC: ${env:BCD_RPC, self:custom.bcdRpc}
+      BCD_PORT: ${env:BCD_PORT, self:custom.bcdPost}
+      BCD_USERNAME: ${env:BCD_USERNAME}
+      BCD_PASSWORD: ${env:BCD_PASSWORD}
+      PRIVATE_KEY: ${env:PRIVATE_KEY}
+
+plugins:
+  - serverless-offline
