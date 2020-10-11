@@ -68,9 +68,7 @@ contract SpotPriceOracle is IBtcPriceOracle {
 
     // overflow is desired, casting never truncates
     // cumulative price is in (uq112x112 price * seconds) units so we simply wrap it after division by time elapsed
-    priceAverage = FixedPoint.uq112x112(
-      uint224((priceCumulative - priceCumulativeLast) / timeElapsed)
-    );
+    priceAverage = FixedPoint.uq112x112(uint224((priceCumulative - priceCumulativeLast) / timeElapsed));
     priceCumulativeLast = priceCumulative;
     blockTimestampLast = blockTimestamp;
   }

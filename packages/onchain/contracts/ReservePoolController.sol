@@ -258,15 +258,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   {
     uint256 swapFee = bPool.getSwapFee();
     bool isPublicSwap = bPool.isPublicSwap();
-    return (
-      address(uniRouter),
-      oracle,
-      maxVbtcWeight,
-      blockTimestampLast,
-      swapFee,
-      isPublicSwap,
-      spotOracle
-    );
+    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast, swapFee, isPublicSwap, spotOracle);
   }
 
   function deployPool(uint256 initialSwapFee) external {
@@ -459,17 +451,10 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     uint256 bVbtcWeight,
     uint256 uWethBalance,
     uint256 uVbtcBalance
-  )
-    internal
-    returns (
-      // ) internal pure returns (bool) {
-      bool
-    )
-  {
+  ) internal pure returns (bool) {
     uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
-    uint256 bPrice = bVbtcWeight.mul(BONE).mul(bWethBalance).div(bWethWeight.mul(bVbtcBalance));
-    //emit Data(uPrice.div(POOL_PRICE_DIV), bPrice.div(POOL_PRICE_DIV));
-    require(uPrice.div(BONE) == bPrice.div(BONE), "price imbalance between pools");
+    uint256 bPrice = bWethWeight.mul(BONE).mul(bWethBalance).div(bVbtcWeight.mul(bVbtcBalance));
+    require(uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV), "price imbalance between pools");
   }
 
   /**
@@ -602,7 +587,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
+      (uint256 a, uint256 b) = getReserves(
         uniRouter.factory(),
         address(wEth),
         address(vBtc)
