@@ -29,7 +29,7 @@ chai.use(solidity);
 const {expect} = chai;
 const one = expandTo18Decimals(1);
 const wEthAmount = expandTo18Decimals(40);
-const tBtcAmount = BigNumber.from('100000000');  // 1 BTC
+const tBtcAmount = BigNumber.from('100000000'); // 1 BTC
 const vBtcAmount = expandTo18Decimals(1);
 const MAX = ethers.constants.MaxUint256;
 
@@ -118,7 +118,11 @@ describe('ReservePoolController', async () => {
     ]);
 
     // deploy spot oracle
-    spotOracle = await new SpotPriceOracleFactory(signers[0]).deploy(factoryV2.address, wEth.address, vBtc.address);
+    spotOracle = await new SpotPriceOracleFactory(signers[0]).deploy(
+      factoryV2.address,
+      wEth.address,
+      vBtc.address
+    );
 
     // address _bPoolFactory,
     bFactory = await new MockBFactoryFactory(signers[0]).deploy();
@@ -146,7 +150,7 @@ describe('ReservePoolController', async () => {
     await ethers.provider.send('evm_mine', []);
     await oracle.update();
     await spotOracle.update();
-    
+
     // initialize
     const amount = await oracle.consult(vBtcAmount.mul(2));
     await wEth.transfer(controller.address, amount);
@@ -161,7 +165,7 @@ describe('ReservePoolController', async () => {
       expandTo18Decimals(15),
       initialTradeFee,
       true,
-      spotOracle.address,
+      spotOracle.address
     );
     console.log('here1');
     // try initialize again
@@ -363,7 +367,7 @@ describe('ReservePoolController', async () => {
       token0 == wEth.address
         ? reserves.reserve0.div(reserves.reserve1)
         : reserves.reserve1.div(reserves.reserve0);
-    console.log("b/u:", priceBPool, priceUni);
+    console.log('b/u:', priceBPool, priceUni);
     expect(priceBPool).to.eq(priceUni);
 
     const remainingBal = await vBtc.balanceOf(controller.address);

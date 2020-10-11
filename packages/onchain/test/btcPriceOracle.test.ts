@@ -19,7 +19,7 @@ const {expect} = chai;
 
 const wEthAmount = expandTo18Decimals(400);
 
-const tBtc0Amount = BigNumber.from('900000000');  // 9 BTC
+const tBtc0Amount = BigNumber.from('900000000'); // 9 BTC
 const tBtc1Amount = BigNumber.from('1100000000'); // 11 BTC
 const DEC_FAC = BigNumber.from('10000000000'); // 10 ^ 10
 

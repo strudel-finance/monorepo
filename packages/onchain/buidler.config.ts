@@ -7,7 +7,7 @@ usePlugin('buidler-typechain');
 usePlugin('buidler-gas-reporter');
 usePlugin('@openzeppelin/buidler-upgrades');
 usePlugin('buidler-deploy');
-usePlugin("@nomiclabs/buidler-etherscan");
+usePlugin('@nomiclabs/buidler-etherscan');
 
 const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
 const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY || '';
@@ -74,7 +74,7 @@ const config = {
   etherscan: {
     // Your API key for Etherscan
     // Obtain one at https://etherscan.io/
-    apiKey: "blablabla"
+    apiKey: 'blablabla',
   },
   gasReporter: {
     enabled: COINMARKETCAP_API_KEY ? true : false,

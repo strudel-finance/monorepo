@@ -258,7 +258,15 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   {
     uint256 swapFee = bPool.getSwapFee();
     bool isPublicSwap = bPool.isPublicSwap();
-    return (address(uniRouter), oracle, maxVbtcWeight, blockTimestampLast, swapFee, isPublicSwap, spotOracle);
+    return (
+      address(uniRouter),
+      oracle,
+      maxVbtcWeight,
+      blockTimestampLast,
+      swapFee,
+      isPublicSwap,
+      spotOracle
+    );
   }
 
   function deployPool(uint256 initialSwapFee) external {
@@ -453,12 +461,20 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     uint256 bVbtcWeight,
     uint256 uWethBalance,
     uint256 uVbtcBalance
-    // ) internal pure returns (bool) {
-  ) internal returns (bool) {
+  )
+    internal
+    returns (
+      // ) internal pure returns (bool) {
+      bool
+    )
+  {
     uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
     uint256 bPrice = bWethWeight.mul(BONE).mul(bWethBalance).div(bVbtcWeight.mul(bVbtcBalance));
     //emit Data(uPrice.div(POOL_PRICE_DIV), bPrice.div(POOL_PRICE_DIV));
-    require(uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV), "price imbalance between pools");
+    require(
+      uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV),
+      "price imbalance between pools"
+    );
   }
 
   /**
@@ -484,15 +500,15 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     uint256 reserveVbtc;
     {
       // read SPOT price of vBTC
-      (reserveWeth, reserveVbtc) = getReserves(
-        uniRouter.factory(),
-        address(wEth),
-        address(vBtc)
-      );
+      (reserveWeth, reserveVbtc) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
 
       // check pool ratio close to spot price
       // prevent frontrunning
-      require(reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) == IBtcPriceOracle(spotOracle).consult(BONE).div(POOL_PRICE_DIV), "spot price not close to pair ratio");
+      require(
+        reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) ==
+          IBtcPriceOracle(spotOracle).consult(BONE).div(POOL_PRICE_DIV),
+        "spot price not close to pair ratio"
+      );
 
       // how much ETH (including UNI fee) is needed to lift SPOT to FEED?
       (isEthToVbtc, tradeAmount) = computeProfitMaximizingTrade(
@@ -510,7 +526,14 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       uint256 tokenBalanceIn = bPool.getBalance(address(vBtc));
       uint256 tokenBalanceOut = bPool.getBalance(address(wEth));
       uint256 tokenWeightOut = bPool.getDenormalizedWeight(address(wEth));
-      _checkPriceCloseEnough(tokenBalanceOut, tokenWeightOut, tokenBalanceIn, vBtcWeight, reserveWeth, reserveVbtc);
+      _checkPriceCloseEnough(
+        tokenBalanceOut,
+        tokenWeightOut,
+        tokenBalanceIn,
+        vBtcWeight,
+        reserveWeth,
+        reserveVbtc
+      );
       if (isEthToVbtc) {
         // calculate amount vBTC to get the needed ETH from reserve pool
         {
@@ -586,17 +609,11 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      (uint256 a, uint256 b) = getReserves(
-        uniRouter.factory(),
-        address(wEth),
-        address(vBtc)
-      );
+      (uint256 a, uint256 b) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
       uint256 vBtcBalance = bPool.getBalance(address(vBtc));
       uint256 wEthBalance = bPool.getBalance(address(wEth));
       // check that new weight does not exceed max weight
-      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(b).div(vBtcBalance).div(
-        a
-      );
+      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(b).div(vBtcBalance).div(a);
       // if trade moves away from equal balance, slow it down
       if (newVbtcWeight > ((uint256(data) << 8) >> 8) && newVbtcWeight > DEFAULT_WEIGHT) {
         require(now.sub(blockTimestampLast) > 24 hours, "hold the unicorns");
