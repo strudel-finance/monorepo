@@ -36,7 +36,7 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
   using SafeMath for uint256;
 
   uint256 internal constant DEFAULT_WEIGHT = 5 * 10**18;
-  uint256 internal constant POOL_PRICE_DIV = 10**18; // allowed divergence of pool prices (cut out 17 of 18 decimals)
+  uint256 internal constant POOL_PRICE_DIV = 10**17; // allowed divergence of pool prices (cut out 17 of 18 decimals)
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
   bytes32
     internal constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
@@ -605,8 +605,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      // a = uni wEth reserve
-      // b = uni vBtc Reserve
       (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
         uniRouter.factory(),
         address(wEth),

@@ -187,15 +187,12 @@ describe('ReservePoolController', async () => {
       // maxVbtcWeight
       // blockTimestampLast
       const paramsBefore = await controller.getParams();
-      console.log(paramsBefore);
       // Upgrade it to v1.1
-      console.log('Upgrading to v1.1...');
       const ReservePoolController = await ethers.getContractFactory('ReservePoolController');
       controller = (await upgrades.upgradeProxy(
         controller.address,
         ReservePoolController
       )) as ReservePoolController;
-      console.log(`Contract upgraded at ${controller.address}`);
 
       // address(uniRouter),
       // oracle,
@@ -205,7 +202,6 @@ describe('ReservePoolController', async () => {
       // isPublicSwap,
       // spotOracle
       const params = await controller.getParams();
-      //console.log(params);
 
       // address _uniRouter,
       // address _oracle,
@@ -230,7 +226,7 @@ describe('ReservePoolController', async () => {
 
     it('should resync when SPOT under FEED', async () => {
       // check prices before trades
-      const token0 = await spotPair.token0();
+      let token0 = await spotPair.token0();
       let reserves = await spotPair.getReserves();
       let wEthBal = await bPool.getBalance(wEth.address);
       let vBtcBal = await bPool.getBalance(vBtc.address);
@@ -245,6 +241,8 @@ describe('ReservePoolController', async () => {
 
       // do some swaps on feed pair, to increase price
       const devAddr = await signers[0].getAddress();
+      token0 = await feedPair.token0();
+      reserves = await feedPair.getReserves();
       const wEthIn = expandTo18Decimals(4);
       await wEth.transfer(feedPair.address, wEthIn);
       if (token0 == wEth.address) {
@@ -276,6 +274,7 @@ describe('ReservePoolController', async () => {
 
       // check price after trade
       reserves = await spotPair.getReserves();
+      token0 = await spotPair.token0();
       wEthBal = await bPool.getBalance(wEth.address);
       vBtcBal = await bPool.getBalance(vBtc.address);
       wEthWeight = await bPool.getNormalizedWeight(wEth.address);
@@ -293,7 +292,7 @@ describe('ReservePoolController', async () => {
 
     it('should resync when SPOT over FEED', async () => {
       // check prices before trades
-      const token0 = await spotPair.token0();
+      let token0 = await spotPair.token0();
       let reserves = await spotPair.getReserves();
       let wEthBal = await bPool.getBalance(wEth.address);
       let vBtcBal = await bPool.getBalance(vBtc.address);
@@ -308,6 +307,8 @@ describe('ReservePoolController', async () => {
 
       // do some swaps, get feed price under spot
       const devAddr = await signers[0].getAddress();
+      token0 = await feedPair.token0();
+      reserves = await feedPair.getReserves();
       const tBtcIn = BigNumber.from('10000000');
       await tBtc.transfer(feedPair.address, tBtcIn);
       if (token0 == wEth.address) {
@@ -339,6 +340,7 @@ describe('ReservePoolController', async () => {
 
       // check price after trade
       reserves = await spotPair.getReserves();
+      token0 = await spotPair.token0();
       wEthBal = await bPool.getBalance(wEth.address);
       vBtcBal = await bPool.getBalance(vBtc.address);
       wEthWeight = await bPool.getNormalizedWeight(wEth.address);
@@ -355,10 +357,12 @@ describe('ReservePoolController', async () => {
 
     it('should resync when SPOT much under FEED', async () => {
       const devAddr = await signers[0].getAddress();
-      const token0 = await spotPair.token0();
+      let token0 = await spotPair.token0();
       let reserves = await spotPair.getReserves();
       // do some swaps, to get feed price much under feed
       const tBtcIn = BigNumber.from('30000000'); // 0.3 BTC in
+      token0 = await feedPair.token0();
+      reserves = await feedPair.getReserves();
       await tBtc.transfer(feedPair.address, tBtcIn);
       if (token0 == wEth.address) {
         let wEthOut = reserves.reserve0.sub(
@@ -392,6 +396,7 @@ describe('ReservePoolController', async () => {
 
       // check price after trade
       reserves = await spotPair.getReserves();
+      token0 = await spotPair.token0();
       const wEthBal = await bPool.getBalance(wEth.address);
       const vBtcBal = await bPool.getBalance(vBtc.address);
       const dwEthWeight = await bPool.getDenormalizedWeight(wEth.address);
@@ -411,8 +416,8 @@ describe('ReservePoolController', async () => {
 
     it('should fail resync when MAX_WEIGHT exceeded', async () => {
       const devAddr = await signers[0].getAddress();
-      const token0 = await spotPair.token0();
-      let reserves = await spotPair.getReserves();
+      const token0 = await feedPair.token0();
+      let reserves = await feedPair.getReserves();
       const tBtcIn = BigNumber.from('200000000'); // 0.3 BTC in
       await tBtc.transfer(feedPair.address, tBtcIn);
       if (token0 == wEth.address) {

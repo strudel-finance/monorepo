@@ -118,7 +118,6 @@ describe('BtcPriceOracle', () => {
       let vBtcOut = reserves.reserve1.sub(
         reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(wEthIn))
       );
-      console.log('out 2', vBtcOut);
       vBtcOut = vBtcOut.sub(vBtcOut.mul(997).div(1000));
       await pair0.swap(0, vBtcOut, devAddr, '0x');
     } else {
@@ -126,7 +125,6 @@ describe('BtcPriceOracle', () => {
         reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(wEthIn))
       );
       vBtcOut = vBtcOut.sub(vBtcOut.mul(997).div(1000));
-      console.log('out 1', vBtcOut);
       await pair0.swap(vBtcOut, 0, devAddr, '0x');
     }
 
