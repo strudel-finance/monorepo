@@ -99,7 +99,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
       const isAncestor = await relayContract.methods
         .isAncestor(blockHashLittle, GCD, 2500)
         .call()
-      return offset >= BTC_ACCEPTANCE && isAncestor
+      return offset >= 5 && isAncestor
     } catch (e) {
       return false
     }
