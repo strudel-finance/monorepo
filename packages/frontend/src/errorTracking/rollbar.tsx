@@ -6,11 +6,11 @@ const RollbarErrorTracking = (() => {
     captureUnhandledRejections: true,
   })
   const logErroInfo = (info: any) => {
-    RollbarObj.info(info)
+    //RollbarObj.info(info)
   }
   const logErrorInRollbar = (error: any) => {
-    RollbarObj.error(error)
+    //RollbarObj.error(error)
   }
-  return {logErroInfo, logErrorInRollbar}
+  return { logErroInfo, logErrorInRollbar }
 })()
 export default RollbarErrorTracking

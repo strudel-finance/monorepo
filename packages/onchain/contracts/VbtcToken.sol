@@ -1,22 +1,21 @@
-// SPDX-License-Identifier: MPL
+// SPDX-License-Identifier: MPL-2.0
 
 pragma solidity 0.6.6;
 
-import {ERC20Capped} from "@openzeppelin/contracts/token/ERC20/ERC20Capped.sol";
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20Capped.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@uniswap/lib/contracts/libraries/Babylonian.sol";
-import {FlashERC20} from "./FlashERC20.sol";
-import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
-import {ITokenRecipient} from "./ITokenRecipient.sol";
 import {TypedMemView} from "./summa-tx/TypedMemView.sol";
 import {ViewBTC} from "./summa-tx/ViewBTC.sol";
 import {ViewSPV} from "./summa-tx/ViewSPV.sol";
-import {IRelay} from "./IRelay.sol";
+import "./erc20/ITokenRecipient.sol";
+import "./summa-tx/IRelay.sol";
+import "./StrudelToken.sol";
+import "./FlashERC20.sol";
 
 /// @title  VBTC Token.
 /// @notice This is the VBTC ERC20 contract.
-contract VBTCToken is FlashERC20, ERC20Capped {
+contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   using SafeMath for uint256;
   using TypedMemView for bytes;
   using TypedMemView for bytes29;
@@ -33,34 +32,59 @@ contract VBTCToken is FlashERC20, ERC20Capped {
   uint8 constant ADDR_LEN = 20;
   uint256 constant BTC_CAP_SQRT = 4582575700000; // sqrt(BTC_CAP)
   bytes3 constant PROTOCOL_ID = 0x07ffff; // a mersenne prime
+  bytes32 public DOMAIN_SEPARATOR;
 
-  uint256 public numConfs;
+  // immutable
+  StrudelToken private strudel;
+  // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+  bytes32
+    public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+
+  // gov params
   IRelay public relay;
-  ERC20Mintable public strudel;
+  uint256 public numConfs;
   uint256 public relayReward;
 
+  // working memory
   // marking all sucessfully processed outputs
   mapping(bytes32 => bool) public knownOutpoints;
+  mapping(address => uint256) public nonces;
 
-  /// @dev Constructor, calls ERC20 constructor to set Token info
-  ///      ERC20(TokenName, TokenSymbol)
-  constructor(
+  function initialize(
     address _relay,
     address _strudel,
     uint256 _minConfs,
     uint256 _relayReward
-  ) public FlashERC20("vBTC", "VBTC") ERC20Capped(BTC_CAP) {
+  ) public initializer {
     relay = IRelay(_relay);
-    strudel = ERC20Mintable(_strudel);
+    strudel = StrudelToken(_strudel);
     numConfs = _minConfs;
     relayReward = _relayReward;
+    // chain constructors?
+    __Flash_init("Strudel BTC", "VBTC");
+    __ERC20Capped_init(BTC_CAP);
+    uint256 chainId;
+    assembly {
+      chainId := chainid()
+    }
+    DOMAIN_SEPARATOR = keccak256(
+      abi.encode(
+        keccak256(
+          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        ),
+        keccak256(bytes("Strudel BTC")),
+        keccak256(bytes("1")),
+        chainId,
+        address(this)
+      )
+    );
   }
 
   function _beforeTokenTransfer(
     address from,
     address to,
     uint256 amount
-  ) internal virtual override(ERC20, ERC20Capped) {
+  ) internal virtual override(ERC20CappedUpgradeSafe, ERC20UpgradeSafe) {
     super._beforeTokenTransfer(from, to, amount);
   }
 
@@ -87,7 +111,7 @@ contract VBTCToken is FlashERC20, ERC20Capped {
     // check the header is included in the chain
     bytes32 headerHash = _header.hash256();
     bytes32 GCD = relay.getLastReorgCommonAncestor();
-    require(relay.isAncestor(headerHash, GCD, 240), "GCD does not confirm header");
+    require(relay.isAncestor(headerHash, GCD, 2500), "GCD does not confirm header");
 
     // check offset to tip
     bytes32 bestKnownDigest = relay.getBestKnownDigest();
@@ -198,21 +222,23 @@ contract VBTCToken is FlashERC20, ERC20Capped {
     strudel.mint(owner(), rewardAmount.div(devFundDivRate));
   }
 
-  // function proofP2FSHAndMint(
-  //   bytes calldata _header,
-  //   bytes calldata _proof,
-  //   uint256 _index,
-  //   bytes32 _txid,
-  //   bytes32 _r,
-  //   bytes32 _s,
-  //   uint8 _v
-  // ) external returns (bool) {
-  //   return false;
-  // }
+  // TODO: implement
+  // bytes calldata _header,
+  // bytes calldata _proof,
+  // uint256 _index,
+  // bytes32 _txid,
+  function proofP2FSHAndMint(
+    bytes calldata _header,
+    bytes calldata _proof,
+    uint256 _index,
+    bytes32 _txid
+  ) external virtual returns (bool) {
+    require(false, "not implemented");
+  }
 
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
     require(relay.addHeaders(_anchor, _headers), "add header failed");
-    strudel.mint(msg.sender, relayReward);
+    strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
   }
 
   function addHeadersWithRetarget(
@@ -224,7 +250,7 @@ contract VBTCToken is FlashERC20, ERC20Capped {
       relay.addHeadersWithRetarget(_oldPeriodStartHeader, _oldPeriodEndHeader, _headers),
       "add header with retarget failed"
     );
-    strudel.mint(msg.sender, relayReward);
+    strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
   }
 
   function markNewHeaviest(
@@ -237,7 +263,7 @@ contract VBTCToken is FlashERC20, ERC20Capped {
       relay.markNewHeaviest(_ancestor, _currentBest, _newBest, _limit),
       "mark new heaviest failed"
     );
-    strudel.mint(msg.sender, relayReward.div(2));
+    strudel.mint(msg.sender, relayReward);
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.
@@ -276,8 +302,8 @@ contract VBTCToken is FlashERC20, ERC20Capped {
   function approveAndCall(
     ITokenRecipient _spender,
     uint256 _value,
-    bytes memory _extraData
-  ) public returns (bool) {
+    bytes calldata _extraData
+  ) external returns (bool) {
     // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
       _spender.receiveApproval(msg.sender, _value, address(this), _extraData);
@@ -286,13 +312,41 @@ contract VBTCToken is FlashERC20, ERC20Capped {
     return false;
   }
 
-  function setRelayReward(uint256 _newRelayReward) public onlyOwner {
+  function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external {
+    require(deadline >= block.timestamp, "vBTC: EXPIRED");
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+      )
+    );
+    address recoveredAddress = ecrecover(digest, v, r, s);
+    require(recoveredAddress != address(0) && recoveredAddress == owner, "VBTC: INVALID_SIGNATURE");
+    _approve(owner, spender, value);
+  }
+
+  function setRelayReward(uint256 _newRelayReward) external onlyOwner {
     require(_newRelayReward > 0, "!newRelayReward-0");
     relayReward = _newRelayReward;
   }
 
-  function setRelayAddress(address _newRelayAddr) public onlyOwner {
+  function setRelayAddress(address _newRelayAddr) external onlyOwner {
     require(_newRelayAddr != address(0), "!newRelayAddr-0");
     relay = IRelay(_newRelayAddr);
+  }
+
+  function setNumConfs(uint256 _numConfs) external onlyOwner {
+    require(_numConfs > 0, "!newNumConfs-0");
+    require(_numConfs < 100, "!newNumConfs-useless");
+    numConfs = _numConfs;
   }
 }

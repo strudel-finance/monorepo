@@ -1,21 +1,53 @@
-// SPDX-License-Identifier: MPL
+// SPDX-License-Identifier: MPL-2.0
 
 pragma solidity 0.6.6;
 
-import {FlashERC20} from "./FlashERC20.sol";
-import {ERC20Mintable} from "./ERC20Mintable/ERC20Mintable.sol";
-import {SafeMath} from "@openzeppelin/contracts/math/SafeMath.sol";
-import {ITokenRecipient} from "./ITokenRecipient.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "./erc20/MinterRole.sol";
+import "./erc20/ITokenRecipient.sol";
 
-/// @title  VBTC Token.
-/// @notice This is the VBTC ERC20 contract.
-contract StrudelToken is FlashERC20, ERC20Mintable {
+/// @title  Strudel Token.
+/// @notice This is the Strudel ERC20 contract.
+contract StrudelToken is ERC20UpgradeSafe, MinterRole {
   using SafeMath for uint256;
 
-  /// @dev Constructor, calls ERC20 constructor to set Token info
-  ///      ERC20(TokenName, TokenSymbol)
-  constructor() public FlashERC20("Strudel Finance", "STRDL") {
-    // solhint-disable-previous-line no-empty-blocks
+  bytes32 public DOMAIN_SEPARATOR;
+  // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
+  bytes32
+    public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+  mapping(address => uint256) public nonces;
+
+  constructor() public {
+    __ERC20_init("Strudel Finance", "$TRDL");
+    __Ownable_init();
+    uint256 chainId;
+    assembly {
+      chainId := chainid()
+    }
+    DOMAIN_SEPARATOR = keccak256(
+      abi.encode(
+        keccak256(
+          "EIP712Domain(string name,string version,uint256 chainId,address verifyingContract)"
+        ),
+        keccak256(bytes("Strudel Finance")),
+        keccak256(bytes("1")),
+        chainId,
+        address(this)
+      )
+    );
+  }
+
+  /**
+   * @dev See {ERC20-_mint}.
+   *
+   * Requirements:
+   *
+   * - the caller must have the {MinterRole}.
+   */
+  function mint(address account, uint256 amount) external onlyMinter returns (bool) {
+    _mint(account, amount);
+    return true;
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.
@@ -62,5 +94,30 @@ contract StrudelToken is FlashERC20, ERC20Mintable {
       return true;
     }
     return false;
+  }
+
+  function permit(
+    address owner,
+    address spender,
+    uint256 value,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s
+  ) external {
+    require(deadline >= block.timestamp, "Strudel: EXPIRED");
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+      )
+    );
+    address recoveredAddress = ecrecover(digest, v, r, s);
+    require(
+      recoveredAddress != address(0) && recoveredAddress == owner,
+      "Strudel: INVALID_SIGNATURE"
+    );
+    _approve(owner, spender, value);
   }
 }
