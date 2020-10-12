@@ -166,7 +166,7 @@ describe('ReservePoolController', async () => {
       oracle.address,
       expandTo18Decimals(15),
       initialTradeFee,
-      true//,
+      true //,
       //spotOracle.address
     );
 
@@ -180,10 +180,8 @@ describe('ReservePoolController', async () => {
 
   it('should test all governance functions');
 
-
   describe('pool upgrade', async () => {
     it('should not destroy storage', async () => {
-
       // uniRouter
       // oracle
       // maxVbtcWeight
@@ -193,9 +191,11 @@ describe('ReservePoolController', async () => {
       // Upgrade it to v1.1
       console.log('Upgrading to v1.1...');
       const ReservePoolController = await ethers.getContractFactory('ReservePoolController');
-      controller = (await upgrades.upgradeProxy(controller.address, ReservePoolController)) as ReservePoolController;
+      controller = (await upgrades.upgradeProxy(
+        controller.address,
+        ReservePoolController
+      )) as ReservePoolController;
       console.log(`Contract upgraded at ${controller.address}`);
-
 
       // address(uniRouter),
       // oracle,
@@ -213,14 +213,20 @@ describe('ReservePoolController', async () => {
       // uint256 _swapFee,
       // bool _isPublicSwap,
       // address _spotOracle
-      await controller.setParams(params[0], params[1], params[2], params[4], params[5], spotOracle.address);
+      await controller.setParams(
+        params[0],
+        params[1],
+        params[2],
+        params[4],
+        params[5],
+        spotOracle.address
+      );
 
       expect(paramsBefore[0]).to.eq(params[0]);
       expect(paramsBefore[1]).to.eq(params[1]);
       expect(paramsBefore[2]).to.eq(params[2]);
       expect(paramsBefore[3]).to.eq(params[3]);
     });
-
 
     it('should resync when SPOT under FEED', async () => {
       // check prices before trades
@@ -432,7 +438,6 @@ describe('ReservePoolController', async () => {
       await expect(controller.resyncWeights()).to.be.revertedWith('max weight error');
     });
   });
-
 
   describe('standard pool interaction', async () => {
     it('should join pool', async () => {
