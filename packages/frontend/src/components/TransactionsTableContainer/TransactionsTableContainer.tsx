@@ -93,8 +93,13 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
         .findHeight(bestKnownDigest)
         .call()
       const offset = Number(heightDigest) - Number(heightTx)
-
-      return offset >= BTC_ACCEPTANCE
+      const GCD = await relayContract.methods
+        .getLastReorgCommonAncestor()
+        .call()
+      const isAncestor = await relayContract.methods
+        .isAncestor(blockHashLittle, GCD, 2500)
+        .call()
+      return offset >= BTC_ACCEPTANCE && isAncestor
     } catch (e) {
       return false
     }
