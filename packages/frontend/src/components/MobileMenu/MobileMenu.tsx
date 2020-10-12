@@ -36,6 +36,12 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             </StyledLink>
           )}
           <StyledAbsoluteLink
+            href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
+            target="_blank"
+          >
+            Help
+          </StyledAbsoluteLink>
+          <StyledAbsoluteLink
             href="https://medium.com/@strudelfinance/strudel-manifesto-580759f9634b"
             target="_blank"
           >
