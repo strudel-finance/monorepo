@@ -467,12 +467,9 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     )
   {
     uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
-    uint256 bPrice = bWethWeight.mul(BONE).mul(bWethBalance).div(bVbtcWeight.mul(bVbtcBalance));
+    uint256 bPrice = bVbtcWeight.mul(BONE).mul(bWethBalance).div(bWethWeight.mul(bVbtcBalance));
     //emit Data(uPrice.div(POOL_PRICE_DIV), bPrice.div(POOL_PRICE_DIV));
-    require(
-      uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV),
-      "price imbalance between pools"
-    );
+    require(uPrice.div(BONE) == bPrice.div(BONE), "price imbalance between pools");
   }
 
   /**
@@ -582,9 +579,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       ); // maxPrice
     }
 
-    // approve should have been done in constructor
-    // TransferHelper.safeApprove(tokenIn, address(router), tradeAmount);
-
     // 5. sell ETH in spot pool
     uint256[] memory amounts = IUniswapV2Router01(uniRouter).swapExactTokensForTokens(
       tradeAmount,
@@ -629,16 +623,17 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
         emit Trade(isEthToVbtc, amount, -int256(b.sub(a)));
       }
 
-      // check that new weight does not exceed max weight
-      uint256 newVbtcWeight = wEthBalance.mul(DEFAULT_WEIGHT).mul(reserveVbtc).div(vBtcBalance).div(
-        reserveWeth
+      // get new weight
+      uint256 newVbtcWeight = reserveWeth.mul(vBtcBalance).mul(DEFAULT_WEIGHT).div(wEthBalance).div(
+        reserveVbtc
       );
-      //uint256 newVbtcWeight = a.mul(vBtcBalance).div(b).div(bdiv(wEthBalance, DEFAULT_WEIGHT));
+
       // if trade moves away from equal balance, slow it down
       if (newVbtcWeight > ((uint256(data) << 8) >> 8) && newVbtcWeight > DEFAULT_WEIGHT) {
         require(now.sub(blockTimestampLast) > 24 hours, "hold the unicorns");
       }
       blockTimestampLast = uint32(now);
+      // check that new weight does not exceed max weight
       require(newVbtcWeight < maxVbtcWeight, "max weight error");
 
       // adjust weights so there is no arbitrage

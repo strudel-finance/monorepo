@@ -224,6 +224,75 @@ describe('ReservePoolController', async () => {
       expect(paramsBefore[3]).to.eq(params[3]);
     });
 
+    // take vBtc, sell into feed
+    // so vBtc price in feed is under vBtc price in spot
+    it('should resync when SPOT over FEED', async () => {
+      // check prices before trades
+      let token0 = await spotPair.token0();
+      let reserves = await spotPair.getReserves();
+      let wEthBal = await bPool.getBalance(wEth.address);
+      let vBtcBal = await bPool.getBalance(vBtc.address);
+      let wEthWeight = await bPool.getNormalizedWeight(wEth.address);
+      let vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
+      let priceBPool = wEthBal.mul(vBtcWeight).div(vBtcBal.mul(wEthWeight));
+      let priceUni =
+        token0 == wEth.address
+          ? reserves.reserve0.div(reserves.reserve1)
+          : reserves.reserve1.div(reserves.reserve0);
+      expect(priceBPool).to.eq(priceUni);
+      console.log();
+
+      // do some swaps, get feed price under spot
+      const devAddr = await signers[0].getAddress();
+      token0 = await feedPair.token0();
+      reserves = await feedPair.getReserves();
+      const tBtcIn = BigNumber.from('10000000');
+      await tBtc.transfer(feedPair.address, tBtcIn);
+      if (token0 == wEth.address) {
+        let wEthOut = reserves.reserve0.sub(
+          reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(tBtcIn))
+        );
+        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
+        await feedPair.swap(wEthOut, 0, devAddr, '0x');
+      } else {
+        let wEthOut = reserves.reserve1.sub(
+          reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(tBtcIn))
+        );
+        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
+        await feedPair.swap(0, wEthOut, devAddr, '0x');
+      }
+
+      // update the oracle
+      await ethers.provider.send('evm_increaseTime', [60 * 21]);
+      await ethers.provider.send('evm_mine', []);
+      await oracle.update();
+      await spotOracle.update();
+      await ethers.provider.send('evm_increaseTime', [60 * 1]);
+      await ethers.provider.send('evm_mine', []);
+      await spotOracle.update();
+
+      // resync pools
+      const tx = await controller.resyncWeights();
+      const events = (await tx.wait(1)).events!;
+
+      // check price after trade
+      reserves = await spotPair.getReserves();
+      token0 = await spotPair.token0();
+      wEthBal = await bPool.getBalance(wEth.address);
+      vBtcBal = await bPool.getBalance(vBtc.address);
+      wEthWeight = await bPool.getNormalizedWeight(wEth.address);
+      vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
+      priceBPool = wEthBal.mul(vBtcWeight).div(vBtcBal.mul(wEthWeight));
+      priceUni =
+        token0 == wEth.address
+          ? reserves.reserve0.div(reserves.reserve1)
+          : reserves.reserve1.div(reserves.reserve0);
+      expect(priceBPool).to.eq(priceUni);
+      const feedPrice = await oracle.consult(expandTo18Decimals(1));
+      expect(feedPrice.div(one)).to.eq(priceUni);
+    });
+
+    // take eth, buy vBtc in feed, so feed is over spot
     it('should resync when SPOT under FEED', async () => {
       // check prices before trades
       let token0 = await spotPair.token0();
@@ -232,7 +301,7 @@ describe('ReservePoolController', async () => {
       let vBtcBal = await bPool.getBalance(vBtc.address);
       let wEthWeight = await bPool.getNormalizedWeight(wEth.address);
       let vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
-      let priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
+      let priceBPool = wEthBal.mul(vBtcWeight).div(vBtcBal.mul(wEthWeight));
       let priceUni =
         token0 == wEth.address
           ? reserves.reserve0.div(reserves.reserve1)
@@ -279,7 +348,7 @@ describe('ReservePoolController', async () => {
       vBtcBal = await bPool.getBalance(vBtc.address);
       wEthWeight = await bPool.getNormalizedWeight(wEth.address);
       vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
-      priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
+      priceBPool = wEthBal.mul(vBtcWeight).div(vBtcBal.mul(wEthWeight));
       priceUni =
         token0 == wEth.address
           ? reserves.reserve0.div(reserves.reserve1)
@@ -290,92 +359,27 @@ describe('ReservePoolController', async () => {
       expect(feedPrice.div(one)).to.eq(priceUni);
     });
 
-    it('should resync when SPOT over FEED', async () => {
-      // check prices before trades
-      let token0 = await spotPair.token0();
-      let reserves = await spotPair.getReserves();
-      let wEthBal = await bPool.getBalance(wEth.address);
-      let vBtcBal = await bPool.getBalance(vBtc.address);
-      let wEthWeight = await bPool.getNormalizedWeight(wEth.address);
-      let vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
-      let priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
-      let priceUni =
-        token0 == wEth.address
-          ? reserves.reserve0.div(reserves.reserve1)
-          : reserves.reserve1.div(reserves.reserve0);
-      expect(priceBPool).to.eq(priceUni);
-
-      // do some swaps, get feed price under spot
-      const devAddr = await signers[0].getAddress();
-      token0 = await feedPair.token0();
-      reserves = await feedPair.getReserves();
-      const tBtcIn = BigNumber.from('10000000');
-      await tBtc.transfer(feedPair.address, tBtcIn);
-      if (token0 == wEth.address) {
-        let wEthOut = reserves.reserve0.sub(
-          reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(tBtcIn))
-        );
-        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
-        await feedPair.swap(wEthOut, 0, devAddr, '0x');
-      } else {
-        let wEthOut = reserves.reserve1.sub(
-          reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(tBtcIn))
-        );
-        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
-        await feedPair.swap(0, wEthOut, devAddr, '0x');
-      }
-
-      // update the oracle
-      await ethers.provider.send('evm_increaseTime', [60 * 21]);
-      await ethers.provider.send('evm_mine', []);
-      await oracle.update();
-      await spotOracle.update();
-      await ethers.provider.send('evm_increaseTime', [60 * 1]);
-      await ethers.provider.send('evm_mine', []);
-      await spotOracle.update();
-
-      // resync pools
-      const tx = await controller.resyncWeights();
-      const events = (await tx.wait(1)).events!;
-
-      // check price after trade
-      reserves = await spotPair.getReserves();
-      token0 = await spotPair.token0();
-      wEthBal = await bPool.getBalance(wEth.address);
-      vBtcBal = await bPool.getBalance(vBtc.address);
-      wEthWeight = await bPool.getNormalizedWeight(wEth.address);
-      vBtcWeight = await bPool.getNormalizedWeight(vBtc.address);
-      priceBPool = wEthWeight.mul(wEthBal).div(vBtcWeight.mul(vBtcBal));
-      priceUni =
-        token0 == wEth.address
-          ? reserves.reserve0.div(reserves.reserve1)
-          : reserves.reserve1.div(reserves.reserve0);
-      expect(priceBPool).to.eq(priceUni);
-      const feedPrice = await oracle.consult(expandTo18Decimals(1));
-      expect(feedPrice.div(one)).to.eq(priceUni);
-    });
-
-    it('should resync when SPOT much under FEED', async () => {
+    it('should resync when SPOT much over FEED', async () => {
       const devAddr = await signers[0].getAddress();
       let token0 = await spotPair.token0();
       let reserves = await spotPair.getReserves();
       // do some swaps, to get feed price much under feed
-      const tBtcIn = BigNumber.from('30000000'); // 0.3 BTC in
       token0 = await feedPair.token0();
       reserves = await feedPair.getReserves();
-      await tBtc.transfer(feedPair.address, tBtcIn);
+      const wEthIn = expandTo18Decimals(20);
+      await wEth.transfer(feedPair.address, wEthIn);
       if (token0 == wEth.address) {
-        let wEthOut = reserves.reserve0.sub(
-          reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(tBtcIn))
+        let tBtcOut = reserves.reserve1.sub(
+          reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(wEthIn))
         );
-        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
-        await feedPair.swap(wEthOut, 0, devAddr, '0x');
+        tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
+        await feedPair.swap(0, tBtcOut, devAddr, '0x');
       } else {
-        let wEthOut = reserves.reserve1.sub(
-          reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(tBtcIn))
+        let tBtcOut = reserves.reserve0.sub(
+          reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(wEthIn))
         );
-        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
-        await feedPair.swap(0, wEthOut, devAddr, '0x');
+        tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
+        await feedPair.swap(tBtcOut, 0, devAddr, '0x');
       }
 
       await ethers.provider.send('evm_increaseTime', [60 * 21]);
@@ -401,7 +405,7 @@ describe('ReservePoolController', async () => {
       const vBtcBal = await bPool.getBalance(vBtc.address);
       const dwEthWeight = await bPool.getDenormalizedWeight(wEth.address);
       const dvBtcWeight = await bPool.getDenormalizedWeight(vBtc.address);
-      const priceBPool = dwEthWeight.mul(wEthBal).div(dvBtcWeight.mul(vBtcBal));
+      const priceBPool = wEthBal.mul(dvBtcWeight).div(vBtcBal.mul(dwEthWeight));
       const priceUni =
         token0 == wEth.address
           ? reserves.reserve0.div(reserves.reserve1)
@@ -418,20 +422,20 @@ describe('ReservePoolController', async () => {
       const devAddr = await signers[0].getAddress();
       const token0 = await feedPair.token0();
       let reserves = await feedPair.getReserves();
-      const tBtcIn = BigNumber.from('200000000'); // 0.3 BTC in
-      await tBtc.transfer(feedPair.address, tBtcIn);
+      const wEthIn = expandTo18Decimals(40);
+      await wEth.transfer(feedPair.address, wEthIn);
       if (token0 == wEth.address) {
-        let wEthOut = reserves.reserve0.sub(
-          reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(tBtcIn))
+        let tBtcOut = reserves.reserve1.sub(
+          reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(wEthIn))
         );
-        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
-        await feedPair.swap(wEthOut, 0, devAddr, '0x');
+        tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
+        await feedPair.swap(0, tBtcOut, devAddr, '0x');
       } else {
-        let wEthOut = reserves.reserve1.sub(
-          reserves.reserve1.mul(reserves.reserve0).div(reserves.reserve0.add(tBtcIn))
+        let tBtcOut = reserves.reserve0.sub(
+          reserves.reserve0.mul(reserves.reserve1).div(reserves.reserve1.add(wEthIn))
         );
-        wEthOut = wEthOut.sub(wEthOut.mul(997).div(1000));
-        await feedPair.swap(0, wEthOut, devAddr, '0x');
+        tBtcOut = tBtcOut.sub(tBtcOut.mul(997).div(1000));
+        await feedPair.swap(tBtcOut, 0, devAddr, '0x');
       }
 
       // update the oracle
