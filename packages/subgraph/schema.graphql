@@ -1,0 +1,7 @@
+type Crossings @entity {
+  id: ID!
+  ethTxHash: String
+  ethAddress: String # address
+  btcTxHash: String # address
+  amount: BigInt
+}

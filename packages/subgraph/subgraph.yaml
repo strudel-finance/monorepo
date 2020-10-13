@@ -1,0 +1,31 @@
+specVersion: 0.0.2
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: Contract
+    network: mainnet
+    source:
+      address: "0xe1406825186d63980fd6e2ec61888f7b91c4bae4"
+      abi: Contract
+      startBlock: 11019035
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.4
+      language: wasm/assemblyscript
+      entities:
+        - Approval
+        - Crossing
+        - FlashMint
+        - OwnershipTransferred
+        - Transfer
+      abis:
+        - name: Contract
+          file: ./abis/Contract.json
+      callHandlers:
+        - function: proofOpReturnAndMint(bytes, bytes, bytes4, bytes4, uint256, uint32, bytes, bytes)
+          handler: handleCrossing
+      eventHandlers:
+        - event: Transfer(indexed address,indexed address,uint256)
+          handler: handleTransfer
+      file: ./src/mapping.ts
