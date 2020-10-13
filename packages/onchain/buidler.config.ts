@@ -7,6 +7,7 @@ usePlugin('buidler-typechain');
 usePlugin('buidler-gas-reporter');
 usePlugin('@openzeppelin/buidler-upgrades');
 usePlugin('buidler-deploy');
+usePlugin('@nomiclabs/buidler-etherscan');
 
 const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
 const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY || '';
@@ -66,6 +67,14 @@ const config = {
       url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
       accounts: [GOERLI_PRIVATE_KEY],
     },
+    mainnet: {
+      url: `https://mainnet.infura.io/v3/blabla`,
+    },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: 'blablabla',
   },
   gasReporter: {
     enabled: COINMARKETCAP_API_KEY ? true : false,
