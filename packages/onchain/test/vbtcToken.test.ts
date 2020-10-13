@@ -1,27 +1,27 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
-import {Signer, Contract} from 'ethers';
-import {getAdminAddress} from '@openzeppelin/upgrades-core';
+import { ethers, upgrades } from '@nomiclabs/buidler';
+import { Signer, Contract } from 'ethers';
+import { getAdminAddress } from '@openzeppelin/upgrades-core';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
+import { solidity } from 'ethereum-waffle';
 import vector from './testVector.json';
 import REGULAR_CHAIN from './headers.json';
-import {expandTo18Decimals, concatenateHexStrings} from './shared/utilities';
+import { expandTo18Decimals, concatenateHexStrings } from './shared/utilities';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxyArtifact from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
-import {VbtcToken} from '../typechain/VbtcToken';
-import {StrudelToken} from '../typechain/StrudelToken';
-import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
-import {MockRelay} from '../typechain/MockRelay';
-import {MockRelayFactory} from '../typechain/MockRelayFactory';
-import {MockBorrower} from '../typechain/MockBorrower';
-import {MockBorrowerFactory} from '../typechain/MockBorrowerFactory';
-import {MockVbtcUpgraded} from '../typechain/MockVbtcUpgraded';
-import {MockVbtcUpgradedFactory} from '../typechain/MockVbtcUpgradedFactory';
-import {Timelock} from '../typechain/Timelock';
-import {TimelockFactory} from '../typechain/TimelockFactory';
+import { VbtcToken } from '../typechain/VbtcToken';
+import { StrudelToken } from '../typechain/StrudelToken';
+import { StrudelTokenFactory } from '../typechain/StrudelTokenFactory';
+import { MockRelay } from '../typechain/MockRelay';
+import { MockRelayFactory } from '../typechain/MockRelayFactory';
+import { MockBorrower } from '../typechain/MockBorrower';
+import { MockBorrowerFactory } from '../typechain/MockBorrowerFactory';
+import { MockVbtcUpgraded } from '../typechain/MockVbtcUpgraded';
+import { MockVbtcUpgradedFactory } from '../typechain/MockVbtcUpgradedFactory';
+import { Timelock } from '../typechain/Timelock';
+import { TimelockFactory } from '../typechain/TimelockFactory';
 
 chai.use(solidity);
-const {expect} = chai;
+const { expect } = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -93,7 +93,7 @@ describe('VBTC', async () => {
           test.VIN,
           test.VOUT
         )
-      ).to.be.revertedWith('height not found in relay');
+      ).to.be.revertedWith('Not included!');
 
       await relay.addHeader(test.BLOCK_HASH, 200);
       await expect(
@@ -184,7 +184,7 @@ describe('VBTC', async () => {
     const bobAddr = await bob.getAddress();
 
     // prepare data
-    const {chain, genesis} = REGULAR_CHAIN;
+    const { chain, genesis } = REGULAR_CHAIN;
     const headerHex = chain.map((header) => header.hex);
     let headers = concatenateHexStrings(headerHex.slice(0, 3));
 

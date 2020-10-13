@@ -238,7 +238,11 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
 
   function _checkNew(bytes29 _headers) internal returns (bool) {
     bytes29 _target = _headers.indexHeaderArray(0);
-    require(relay.findHeight(_target.hash256()) == 0, "already included");
+    try relay.findHeight(_target.hash256()) {
+      revert("already included");
+    } catch Error(string memory) {
+      return true;
+    }
   }
 
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
@@ -270,7 +274,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
       relay.markNewHeaviest(_ancestor, _currentBest, _newBest, _limit),
       "mark new heaviest failed"
     );
-    strudel.mint(msg.sender, relayReward);
+    strudel.mint(msg.sender, relayReward / 2);
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.
