@@ -166,8 +166,7 @@ describe('ReservePoolController', async () => {
       oracle.address,
       expandTo18Decimals(15),
       initialTradeFee,
-      true,
-      spotOracle.address
+      true
     );
 
     // try initialize again

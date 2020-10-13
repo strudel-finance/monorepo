@@ -496,7 +496,6 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
       require(
         reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) ==
           IBtcPriceOracle(spotOracle).consult(BONE).div(POOL_PRICE_DIV),
-
         // use this for upgrade to get around governance delay
         //reserveWeth.mul(BONE).div(reserveVbtc).div(POOL_PRICE_DIV) ==
         //  IBtcPriceOracle(0x91AE9424B706616A531831Fb4A8988726B398837).consult(BONE).div(POOL_PRICE_DIV),

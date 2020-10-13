@@ -216,7 +216,7 @@ describe('VBTC', async () => {
 
     // don't allow to relay twice
     await expect(vBtc.connect(bob).addHeaders(chain[2].hex, headers)).to.be.revertedWith(
-      "already included"
+      'already included'
     );
   });
 
