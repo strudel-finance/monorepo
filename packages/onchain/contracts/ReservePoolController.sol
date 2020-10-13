@@ -461,11 +461,8 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     uint256 uVbtcBalance
   ) internal pure returns (bool) {
     uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
-    uint256 bPrice = bWethWeight.mul(BONE).mul(bWethBalance).div(bVbtcWeight.mul(bVbtcBalance));
-    require(
-      uPrice.div(POOL_PRICE_DIV) == bPrice.div(POOL_PRICE_DIV),
-      "price imbalance between pools"
-    );
+    uint256 bPrice = bVbtcWeight.mul(BONE).mul(bWethBalance).div(bWethWeight.mul(bVbtcBalance));
+    require(uPrice.div(BONE) == bPrice.div(BONE), "price imbalance between pools");
   }
 
   /**
@@ -599,9 +596,11 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     // adjusts weight in reserve pool
     {
       // read uni weights
-      // a = uni wEth reserve
-      // b = uni vBtc Reserve
-      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(uniRouter.factory(), address(wEth), address(vBtc));
+      (uint256 reserveWeth, uint256 reserveVbtc) = getReserves(
+        uniRouter.factory(),
+        address(wEth),
+        address(vBtc)
+      );
       uint256 vBtcBalance = bPool.getBalance(address(vBtc));
       uint256 wEthBalance = bPool.getBalance(address(wEth));
 
