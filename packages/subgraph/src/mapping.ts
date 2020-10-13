@@ -1,4 +1,4 @@
-import { BigInt, Address, log, Call } from "@graphprotocol/graph-ts"
+import { BigInt, Address, log } from "@graphprotocol/graph-ts"
 
 import {
   Contract,
@@ -13,16 +13,17 @@ import { Crossings } from "../generated/schema"
 export function handleApproval(event: Approval): void {
 }
 
-export function handleCrossing(call: Call): void {
+export function handleCrossing(event: Crossing): void {
 
-    let id = call.transaction.hash.toHexString()
+    let id = event.transaction.hash.toHexString()
 
     let crossing = new Crossings(id)
 
     crossing.ethTxHash = id
-    crossing.btcTxHash = call.inputValues[0].toHexString()
+    crossing.btcTxHash = event.btcTxHash().toHexString()
+    crossing.receiver = event.receiver().toHexString()
     // BigInt and BigDecimal math are supported
-    crossing.amount =  event.params.amount
+    crossing.amount =  event.amount()
 
     log.info("Crossing called", [id])
     // Entities can be written to the store with `.save()`

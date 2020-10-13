@@ -14,18 +14,11 @@ dataSources:
       apiVersion: 0.0.4
       language: wasm/assemblyscript
       entities:
-        - Approval
         - Crossing
-        - FlashMint
-        - OwnershipTransferred
-        - Transfer
       abis:
         - name: Contract
           file: ./abis/Contract.json
-      callHandlers:
-        - function: proofOpReturnAndMint(bytes, bytes, bytes4, bytes4, uint256, uint32, bytes, bytes)
-          handler: handleCrossing
       eventHandlers:
-        - event: Transfer(indexed address,indexed address,uint256)
-          handler: handleTransfer
+        - event: Crossing(indexed bytes, indexed address, uint256, uint32)
+          handler: handleCrossing
       file: ./src/mapping.ts
