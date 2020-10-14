@@ -8,18 +8,24 @@ import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
-import { Transaction, LoadingStatus } from '../../types/types'
+import {
+  Transaction,
+  LoadingStatus,
+  SoChainConfirmedGetTx,
+  Confirmation,
+} from '../../types/types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
-import React, {useState, useRef, useEffect} from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { apiServer } from '../../constants/backendAddresses'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
 import showError, { handleErrors } from '../../utils/showError'
 import useInterval from '../../hooks/useInterval'
 import sb from 'satoshi-bitcoin'
-
-
-
+import { changeEndian } from '../../utils/changeEndian'
+import { Contract } from 'web3-eth-contract'
+import { getRelayContract } from '../../vbtc/utils'
+import useVBTC from '../../hooks/useVBTC'
 
 export interface TransactionTableProps {
   account: any
@@ -55,20 +61,50 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   lastRequest,
   handleSetLastRequest,
   checkAndRemoveLastRequest,
-  wallet
+  wallet,
 }) => {
   const POLL_DURATION_TXS = 1500
   const BTC_ACCEPTANCE = 6
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
   const [confirmations, setConfirmations] = useState({})
-  
+  const vbtc = useVBTC()
+
   const handleLoading = (ls: LoadingStatus) => {
     let tempLoading = isLoading
     tempLoading[ls.tx] = ls.status
     setLoading(tempLoading)
   }
-  
+
+  const getInclusion = async (
+    blockHash: string,
+    vbtc: any,
+  ): Promise<boolean> => {
+    const relayContract = getRelayContract(vbtc)
+    let blockHashLittle = '0x' + changeEndian(blockHash)
+    try {
+      const bestKnownDigest = await relayContract.methods
+        .getBestKnownDigest()
+        .call()
+      const heightTx = await relayContract.methods
+        .findHeight(blockHashLittle)
+        .call()
+      const heightDigest = await relayContract.methods
+        .findHeight(bestKnownDigest)
+        .call()
+      const offset = Number(heightDigest) - Number(heightTx)
+      const GCD = await relayContract.methods
+        .getLastReorgCommonAncestor()
+        .call()
+      const isAncestor = await relayContract.methods
+        .isAncestor(blockHashLittle, GCD, 2500)
+        .call()
+      return offset >= 5 && isAncestor
+    } catch (e) {
+      return false
+    }
+  }
+
   const isAccountRequest = (
     res: AccountRequest | void,
   ): res is AccountRequest => {
@@ -77,7 +113,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
     }
     return false
   }
-  
+
   useEffect(() => {
     const abortController = new AbortController()
     if (account == null || previousAccount !== account) {
@@ -97,10 +133,10 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
       abortController.abort()
     }
   }, [account])
-  
+
   const passedAccount = useRef()
   passedAccount.current = account
-  
+
   const handleTransactionUpdate = async (abortController?: any) => {
     let abortProps = abortController
       ? {
@@ -169,7 +205,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
       }
     }
   }
-  
+
   useInterval(async () => {
     if (account != null) {
       await handleTransactionUpdate()
@@ -183,12 +219,40 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
         )
 
         let highConfirmations = {}
-        Object.keys(confirmations).forEach((key) => {
-          if (confirmations[key] >= BTC_ACCEPTANCE) {
+        await Object.keys(confirmations).forEach(async (key) => {
+          if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
             highConfirmations[key] = confirmations[key]
+            if (!highConfirmations[key].blockHash) {
+              let res = await fetch(
+                `https://sochain.com/api/v2/get_tx/BTC/${key}`,
+              )
+                .then(handleErrors)
+                .then((response) => response.json())
+                .then((res: SoChainConfirmedGetTx) => res)
+                .catch((e) => {
+                  RollbarErrorTracking.logErrorInRollbar(
+                    'SoChain fetch tx error' + e.message,
+                  )
+                  showError('SoChain API Error: ' + e.message)
+                  return undefined
+                })
+              if (res !== undefined) {
+                highConfirmations[key].blockHash = res.data.blockhash
+                highConfirmations[key].tx_hex = res.data.tx_hex
+              }
+            }
+            if (
+              highConfirmations[key].blockHash &&
+              !highConfirmations[key].isRelayed
+            ) {
+              highConfirmations[key].isRelayed = await getInclusion(
+                highConfirmations[key].blockHash,
+                vbtc,
+              )
+            }
           }
         })
-        let newConfirmations = {}
+        let newConfirmations: Record<string, Confirmation> = {}
         for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
           let res = await fetch(
             `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
@@ -204,11 +268,15 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
               return undefined
             })
 
-          if (res === undefined) {
+          if (res === undefined || res.data.confirmations === undefined) {
             continue
           }
-          newConfirmations[transactionsWithLowConfirmations[i].btcTxHash] =
-            res.data.confirmations
+          let confirmation: Confirmation = {
+            confirmations: res.data.confirmations,
+          }
+          newConfirmations[
+            transactionsWithLowConfirmations[i].btcTxHash
+          ] = confirmation
         }
         const confirmationsRecombined = {
           ...highConfirmations,
@@ -220,7 +288,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
       }
     }
   }, POLL_DURATION_TXS)
-  
+
   const classes = useStyles()
   return (
     <div className={classes.container}>
@@ -273,7 +341,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                     <Typography variant="caption">
                       <ConversionStatus
                         tx={tx}
-                        confirmation={confirmations[tx.btcTxHash]}
+                        confirmations={confirmations[tx.btcTxHash]}
                       />
                     </Typography>
                   </TableCell>

@@ -5,10 +5,10 @@ import React from 'react'
 
 import { ExternalLink } from './ExternalLink'
 import {
-  SoChainConfirmedGetTx,
   Proof,
   Transaction,
   LoadingStatus,
+  Confirmation,
 } from '../../../types/types'
 import useModal from '../../../hooks/useModal'
 import { apiServer } from '../../../constants/backendAddresses'
@@ -118,6 +118,8 @@ const callProofOpReturnAndMint = async (
   account: any,
   vbtcContract: any,
   vbtc: any,
+  blockHash: string,
+  tx_hex: string,
 ) => {
   let loadingStatus = { tx: tx.btcTxHash, status: true }
   handleLoading(loadingStatus)
@@ -125,24 +127,8 @@ const callProofOpReturnAndMint = async (
   let proof
 
   if (!tx.hasOwnProperty('proof')) {
-    let res = await fetch(
-      `https://sochain.com/api/v2/get_tx/BTC/${tx.btcTxHash}`,
-    )
-      .then(handleErrors)
-      .then((response) => response.json())
-      .then((res: SoChainConfirmedGetTx) => res)
-      .catch((e) => {
-        RollbarErrorTracking.logErrorInRollbar(
-          'SoChain fetch tx error' + e.message,
-        )
-        showError('SoChain API Error: ' + e.message)
-        return undefined
-      })
-    if (res === undefined) {
-      handleLoading(loadingStatus)
-      return
-    }
-    proof = await getProof(res.data.tx_hex, tx.btcTxHash, res.data.blockhash)
+    //TODO: add confirmations
+    proof = await getProof(tx_hex, tx.btcTxHash, blockHash)
       .then(handleErrors)
       .then((response1) => response1.json())
       .then((result: string) => JSON.parse(result))
@@ -195,7 +181,7 @@ const callProofOpReturnAndMint = async (
 
 interface Props {
   tx: Transaction
-  confirmation?: number
+  confirmation?: Confirmation
   handleLoading?: (ls: LoadingStatus) => void
   isLoading?: any
 }
@@ -211,7 +197,10 @@ const ConversionActions: React.FC<Props> = ({
   const vbtcContract = getVbtcContract(vbtc)
 
   const targetBtcConfs = 6
-  const isConfirmed = confirmation >= targetBtcConfs
+  let isConfirmed = false
+  if (confirmation && confirmation.hasOwnProperty('confirmations')) {
+    isConfirmed = confirmation.confirmations >= targetBtcConfs
+  }
   const classes = useStyles()
   const [showModal] = useModal(
     <BurnModal value={tx.value} address={tx.ethAddress} continueV={true} />,
@@ -243,30 +232,34 @@ const ConversionActions: React.FC<Props> = ({
             View ETH TX
           </ExternalLink>
         )}
-        {(tx.confirmed || isConfirmed) && !tx.ethTxHash && (
-          <React.Fragment>
-            {!isLoading[tx.btcTxHash] ? (
-              <Button
-                size="xs"
-                onClick={() => {
-                  callProofOpReturnAndMint(
-                    tx,
-                    handleLoading,
-                    account,
-                    vbtcContract,
-                    vbtc,
-                  )
-                }}
-              >
-                Claim vBTC & $TRDL
-              </Button>
-            ) : (
-              <a className={classes.viewLink} href="">
-                Loading
-              </a>
-            )}
-          </React.Fragment>
-        )}
+        {(tx.confirmed || isConfirmed) &&
+          !tx.ethTxHash &&
+          confirmation.isRelayed && (
+            <React.Fragment>
+              {!isLoading[tx.btcTxHash] ? (
+                <Button
+                  size="xs"
+                  onClick={() => {
+                    callProofOpReturnAndMint(
+                      tx,
+                      handleLoading,
+                      account,
+                      vbtcContract,
+                      vbtc,
+                      confirmation.blockHash,
+                      confirmation.tx_hex,
+                    )
+                  }}
+                >
+                  Claim vBTC & $TRDL
+                </Button>
+              ) : (
+                <a className={classes.viewLink} href="">
+                  Loading
+                </a>
+              )}
+            </React.Fragment>
+          )}
       </div>
     </React.Fragment>
   )

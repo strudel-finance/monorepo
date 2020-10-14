@@ -1,14 +1,14 @@
 // This program is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
+// it under the terms of the GNU General internal License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
+// GNU General internal License for more details.
 
-// You should have received a copy of the GNU General Public License
+// You should have received a copy of the GNU General internal License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 pragma solidity 0.6.6;
@@ -16,57 +16,6 @@ pragma solidity 0.6.6;
 import "./BNum.sol";
 
 contract BMath is BNum {
-  /**********************************************************************************************
-    // calcSpotPrice                                                                             //
-    // sP = spotPrice                                                                            //
-    // bI = tokenBalanceIn                ( bI / wI )         1                                  //
-    // bO = tokenBalanceOut         sP =  -----------  *  ----------                             //
-    // wI = tokenWeightIn                 ( bO / wO )     ( 1 - sF )                             //
-    // wO = tokenWeightOut                                                                       //
-    // sF = swapFee                                                                              //
-    **********************************************************************************************/
-  function calcSpotPrice(
-    uint256 tokenBalanceIn,
-    uint256 tokenWeightIn,
-    uint256 tokenBalanceOut,
-    uint256 tokenWeightOut,
-    uint256 swapFee
-  ) public pure returns (uint256 spotPrice) {
-    uint256 numer = bdiv(tokenBalanceIn, tokenWeightIn);
-    uint256 denom = bdiv(tokenBalanceOut, tokenWeightOut);
-    uint256 ratio = bdiv(numer, denom);
-    uint256 scale = bdiv(BONE, bsub(BONE, swapFee));
-    return (spotPrice = bmul(ratio, scale));
-  }
-
-  /**********************************************************************************************
-    // calcOutGivenIn                                                                            //
-    // aO = tokenAmountOut                                                                       //
-    // bO = tokenBalanceOut                                                                      //
-    // bI = tokenBalanceIn              /      /            bI             \    (wI / wO) \      //
-    // aI = tokenAmountIn    aO = bO * |  1 - | --------------------------  | ^            |     //
-    // wI = tokenWeightIn               \      \ ( bI + ( aI * ( 1 - sF )) /              /      //
-    // wO = tokenWeightOut                                                                       //
-    // sF = swapFee                                                                              //
-    **********************************************************************************************/
-  function calcOutGivenIn(
-    uint256 tokenBalanceIn,
-    uint256 tokenWeightIn,
-    uint256 tokenBalanceOut,
-    uint256 tokenWeightOut,
-    uint256 tokenAmountIn,
-    uint256 swapFee
-  ) public pure returns (uint256 tokenAmountOut) {
-    uint256 weightRatio = bdiv(tokenWeightIn, tokenWeightOut);
-    uint256 adjustedIn = bsub(BONE, swapFee);
-    adjustedIn = bmul(tokenAmountIn, adjustedIn);
-    uint256 y = bdiv(tokenBalanceIn, badd(tokenBalanceIn, adjustedIn));
-    uint256 foo = bpow(y, weightRatio);
-    uint256 bar = bsub(BONE, foo);
-    tokenAmountOut = bmul(tokenBalanceOut, bar);
-    return tokenAmountOut;
-  }
-
   /**********************************************************************************************
     // calcInGivenOut                                                                            //
     // aI = tokenAmountIn                                                                        //
@@ -84,7 +33,7 @@ contract BMath is BNum {
     uint256 tokenWeightOut,
     uint256 tokenAmountOut,
     uint256 swapFee
-  ) public pure returns (uint256 tokenAmountIn) {
+  ) internal pure returns (uint256 tokenAmountIn) {
     uint256 weightRatio = bdiv(tokenWeightOut, tokenWeightIn);
     uint256 diff = bsub(tokenBalanceOut, tokenAmountOut);
     uint256 y = bdiv(tokenBalanceOut, diff);
@@ -112,7 +61,7 @@ contract BMath is BNum {
     uint256 totalWeight,
     uint256 tokenAmountIn,
     uint256 swapFee
-  ) public pure returns (uint256 poolAmountOut) {
+  ) internal pure returns (uint256 poolAmountOut) {
     // Charge the trading fee for the proportion of tokenAi
     ///  which is implicitly traded to the other pool tokens.
     // That proportion is (1- weightTokenIn)
@@ -148,7 +97,7 @@ contract BMath is BNum {
     uint256 totalWeight,
     uint256 poolAmountOut,
     uint256 swapFee
-  ) public pure returns (uint256 tokenAmountIn) {
+  ) internal pure returns (uint256 tokenAmountIn) {
     uint256 normalizedWeight = bdiv(tokenWeightIn, totalWeight);
     uint256 newPoolSupply = badd(poolSupply, poolAmountOut);
     uint256 poolRatio = bdiv(newPoolSupply, poolSupply);
@@ -184,7 +133,7 @@ contract BMath is BNum {
     uint256 totalWeight,
     uint256 poolAmountIn,
     uint256 swapFee
-  ) public pure returns (uint256 tokenAmountOut) {
+  ) internal pure returns (uint256 tokenAmountOut) {
     uint256 normalizedWeight = bdiv(tokenWeightOut, totalWeight);
     // charge exit fee on the pool token side
     // pAiAfterExitFee = pAi*(1-exitFee)
@@ -223,7 +172,7 @@ contract BMath is BNum {
     uint256 totalWeight,
     uint256 tokenAmountOut,
     uint256 swapFee
-  ) public pure returns (uint256 poolAmountIn) {
+  ) internal pure returns (uint256 poolAmountIn) {
     // charge swap fee on the output token side
     uint256 normalizedWeight = bdiv(tokenWeightOut, totalWeight);
     //uint tAoBeforeSwapFee = tAo / (1 - (1-weightTo) * swapFee) ;

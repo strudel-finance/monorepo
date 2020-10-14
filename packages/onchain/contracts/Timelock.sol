@@ -12,7 +12,7 @@
 pragma solidity 0.6.6;
 
 // XXX: import "./SafeMath.sol";
-import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 
 contract Timelock {
   using SafeMath for uint256;
@@ -46,7 +46,7 @@ contract Timelock {
   );
 
   uint256 public constant GRACE_PERIOD = 14 days;
-  uint256 public constant MINIMUM_DELAY = 2 days;
+  uint256 public constant MINIMUM_DELAY = 1 days;
   uint256 public constant MAXIMUM_DELAY = 30 days;
 
   address public admin;

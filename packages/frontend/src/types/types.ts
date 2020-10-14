@@ -18,7 +18,12 @@ export interface Proof {
   vin: string
   vout: string
 }
-
+export interface Confirmation {
+  isRelayed?: boolean
+  blockHash?: string
+  confirmations?: number
+  tx_hex?: string
+}
 export interface Transaction {
   txCreatedAt: Date
   value: string //in BTC not satoshi
