@@ -238,7 +238,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
 
   function _checkNew(bytes29 _headers) internal view returns (bool) {
     bytes29 _target = _headers.indexHeaderArray(0);
-    try relay.findHeight(_target.hash256()) {
+    try relay.findHeight(_target.hash256())  {
       revert("already included");
     } catch Error(string memory) {
       return true;
@@ -277,6 +277,7 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
       "mark new heaviest failed"
     );
     strudel.mint(msg.sender, relayReward / 2);
+    return true;
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.
