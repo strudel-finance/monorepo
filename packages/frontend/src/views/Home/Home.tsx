@@ -140,7 +140,7 @@ const Home: React.FC = () => {
             title="Enter the Strudel"
             subtitle="Turn your BTC in vBTC and  earn intergalactical $TRDL rewards."
           />
-          {wallet.status === 'connected' ? (
+          {account && wallet.status === 'connected' ? (
             <Container fixed maxWidth="lg">
               <Grid container spacing={2}>
                 <Grid item xs={12} sm={12} md={4}>
