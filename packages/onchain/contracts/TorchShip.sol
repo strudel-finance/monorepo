@@ -108,6 +108,23 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     }
   }
 
+  // Safe strudel transfer function, just in case if rounding error causes pool to not have enough STRDLs.
+  function transferForeignRewards(
+    uint256 _pid,
+    address _to,
+    uint256 _amount
+  ) internal {
+    ForeignRewardSet memory set = foreignRewards[_pid];
+    if (set.tokenAddress != address(0)) {
+      uint256 extra = _amount.mul(1e4).div(set.strudelRatio);
+      try IERC20(set.tokenAddress).transfer(_to, extra)  {
+        // do nothing;
+      } catch Error(string memory) {
+        // out of foreign rewards, do nothing;
+      }
+    }
+  }
+
   function poolLength() external view returns (uint256) {
     return poolInfo.length;
   }
@@ -182,15 +199,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     if (user.amount > 0) {
       uint256 pending = user.amount.mul(pool.accStrudelPerShare).div(1e12).sub(user.rewardDebt);
       safeStrudelTransfer(msg.sender, pending);
-      ForeignRewardSet memory set = foreignRewards[_pid];
-      if (set.tokenAddress != address(0)) {
-        uint256 extra = pending.mul(1e4).div(set.strudelRatio);
-        try IERC20(set.tokenAddress).transfer(msg.sender, extra)  {
-          // do nothing;
-        } catch Error(string memory) {
-          // out of foreign rewards, do nothing;
-        }
-      }
+      transferForeignRewards(_pid, msg.sender, pending);
     }
     pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
     user.amount = user.amount.add(_amount);
@@ -206,15 +215,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     updatePool(_pid);
     uint256 pending = user.amount.mul(pool.accStrudelPerShare).div(1e12).sub(user.rewardDebt);
     safeStrudelTransfer(msg.sender, pending);
-    ForeignRewardSet memory set = foreignRewards[_pid];
-    if (set.tokenAddress != address(0)) {
-      uint256 extra = pending.mul(1e4).div(set.strudelRatio);
-      try IERC20(set.tokenAddress).transfer(msg.sender, extra)  {
-        // do nothing;
-      } catch Error(string memory) {
-        // out of foreign rewards, do nothing;
-      }
-    }
+    transferForeignRewards(_pid, msg.sender, pending);
     user.amount = user.amount.sub(_amount);
     user.rewardDebt = user.amount.mul(pool.accStrudelPerShare).div(1e12);
     pool.lpToken.safeTransfer(address(msg.sender), _amount);
