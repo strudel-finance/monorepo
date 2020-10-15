@@ -292,15 +292,15 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     address _tokenAddress,
     uint32 _rewardRate
   ) public onlyOwner {
-    require(_tokenAddress > address(0), "!rewardTokenAddress-0");
+    require(_pid < poolInfo.length, "unknown pool");
+    require(_tokenAddress != address(0), "!rewardTokenAddress-0");
     IERC20 foreignToken = IERC20(_tokenAddress);
     require(foreignToken.totalSupply() > 0, "not ERC20");
-    require(_pid < poolInfo.length, "unknown pool");
     ForeignRewardSet memory set = foreignRewards[_pid];
-    // either no token, or rate was at 0
+    // either non-existing, or 0 ratio, or same
     require(
-      set.tokenAddress == address(0) || (set.strudelRatio == 0 && _rewardRate > 0),
-      "existing set"
+      set.tokenAddress == address(0) || set.strudelRatio == 0 || set.tokenAddress == _tokenAddress,
+      "override of existing set"
     );
     if (_rewardRate == 0) {
       // we are setting an existing pair to 0, then withdraw supply
