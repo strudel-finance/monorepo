@@ -179,9 +179,9 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
       address foreignRewardToken = foreignRewards[_pid];
       if (foreignRewardToken != address(0)) {
         uint256 extra = pending.mul(1e18).div(foreignRewardRate[foreignRewardToken]);
-        try IERC20(foreignRewardToken).transfer(msg.sender, extra) {
+        try IERC20(foreignRewardToken).transfer(msg.sender, extra)  {
           // do nothing;
-        }catch Error(string memory) {
+        } catch Error(string memory) {
           // out of foreign rewards, do nothing;
         }
       }
@@ -203,9 +203,9 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     address foreignRewardToken = foreignRewards[_pid];
     if (foreignRewardToken != address(0)) {
       uint256 extra = pending.mul(1e18).div(foreignRewardRate[foreignRewardToken]);
-      try IERC20(foreignRewardToken).transfer(msg.sender, extra){
+      try IERC20(foreignRewardToken).transfer(msg.sender, extra)  {
         // do nothing;
-      }catch Error(string memory) {
+      } catch Error(string memory) {
         // out of foreign rewards, do nothing;
       }
     }
@@ -281,11 +281,18 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     bonusMultiplier = _bonusMultiplier;
   }
 
-  function setForeignRewardSet(uint256 _pid, address _tokenAddress, uint256 _rewardRate) public onlyOwner {
+  function setForeignRewardSet(
+    uint256 _pid,
+    address _tokenAddress,
+    uint256 _rewardRate
+  ) public onlyOwner {
     require(_tokenAddress > address(0), "!rewardTokenAddress-0");
     require(IERC20(_tokenAddress).totalSupply() > 0, "not ERC20");
     require(_pid < poolInfo.length, "unknown pool");
-    require(foreignRewards[_pid] == address(0) || foreignRewardRate[_tokenAddress] == 0, "existing set");
+    require(
+      foreignRewards[_pid] == address(0) || foreignRewardRate[_tokenAddress] == 0,
+      "existing set"
+    );
     foreignRewards[_pid] = _tokenAddress;
     foreignRewardRate[_tokenAddress] = _rewardRate;
   }
