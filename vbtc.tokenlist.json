@@ -1,0 +1,65 @@
+{
+  "name": "Strudel Protocol",
+  "logoURI": "https://raw.githubusercontent.com/strudel-finance/monorepo/master/packages/frontend/src/assets/img/Strudel.png",
+  "keywords": [
+    "strudel",
+    "finance",
+    "vBTC"
+  ],
+  "timestamp": "2020-09-01T00:00:00+00:00",
+  "tokens": [
+    {
+      "address": "0xe1406825186d63980fd6e2ec61888f7b91c4bae4",
+      "chainId": 1,
+      "name": "vBTC",
+      "symbol": "vBTC",
+      "decimals": 18,
+      "logoURI": "https://raw.githubusercontent.com/strudel-finance/monorepo/master/packages/frontend/src/assets/img/vbtc.png"
+    },
+    {
+      "address": "0x297d33e17e61c2ddd812389c2105193f8348188a",
+      "chainId": 1,
+      "name": "Strudel",
+      "symbol": "STRDL",
+      "decimals": 18,
+      "logoURI": "https://raw.githubusercontent.com/strudel-finance/monorepo/master/packages/frontend/src/assets/img/Strudel.png"
+    },
+    {
+      "address": "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2",
+      "chainId": 1,
+      "name": "WrappedEther",
+      "symbol": "WETH",
+      "decimals": 18,
+      "logoURI": "https://1inch.exchange/assets/tokens/0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2.png"
+    },
+    {
+      "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
+      "chainId": 1,
+      "name": "WrappedBitcoin",
+      "symbol": "WBTC",
+      "decimals": 8,
+      "logoURI": "https://1inch.exchange/assets/tokens/0x2260fac5e5542a773aa44fbcfedf7c193bc2c599.png"
+    },
+    {
+      "address": "0xeb4c2781e4eba804ce9a9803c67d0893436bb27d",
+      "chainId": 1,
+      "name": "renBTC",
+      "symbol": "renBTC",
+      "decimals": 8,
+      "logoURI": "https://1inch.exchange/assets/tokens/0xeb4c2781e4eba804ce9a9803c67d0893436bb27d.png"
+    },
+    {
+      "address": "0x8dAEBADE922dF735c38C80C7eBD708Af50815fAa",
+      "chainId": 1,
+      "name": "tBTC",
+      "symbol": "tBTC",
+      "decimals": 18,
+      "logoURI": "https://1inch.exchange/assets/tokens/0x8daebade922df735c38c80c7ebd708af50815faa.png"
+    }
+  ],
+  "version": {
+    "major": 1,
+    "minor": 0,
+    "patch": 1
+  }
+}
