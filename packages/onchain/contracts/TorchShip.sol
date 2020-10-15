@@ -53,7 +53,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   struct ForeignRewardSet {
     address tokenAddress; // token address of other ERC20, supply needs to be deposited
     // for each $TRDL, how much foreign tokens are paid out?
-    uint32 strudelRatio; // the ratio is the quotient in a multiplier with a divisor of 10^4
+    uint32 strudelRatio; // number used as quotient, the divisor is 10^4
   }
 
   // immutable
@@ -108,7 +108,6 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     }
   }
 
-  // Safe strudel transfer function, just in case if rounding error causes pool to not have enough STRDLs.
   function transferForeignRewards(
     uint256 _pid,
     address _to,
@@ -294,10 +293,19 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint32 _rewardRate
   ) public onlyOwner {
     require(_tokenAddress > address(0), "!rewardTokenAddress-0");
-    require(IERC20(_tokenAddress).totalSupply() > 0, "not ERC20");
+    IERC20 foreignToken = IERC20(_tokenAddress);
+    require(foreignToken.totalSupply() > 0, "not ERC20");
     require(_pid < poolInfo.length, "unknown pool");
     ForeignRewardSet memory set = foreignRewards[_pid];
-    require(set.tokenAddress == address(0) || set.strudelRatio == 0, "existing set");
+    // either no token, or rate was at 0
+    require(
+      set.tokenAddress == address(0) || (set.strudelRatio == 0 && _rewardRate > 0),
+      "existing set"
+    );
+    if (_rewardRate == 0) {
+      // we are setting an existing pair to 0, then withdraw supply
+      foreignToken.transfer(owner(), foreignToken.balanceOf(address(this)));
+    }
     foreignRewards[_pid] = ForeignRewardSet(_tokenAddress, _rewardRate);
   }
 }
