@@ -11,7 +11,6 @@ import ModalActions from '../ModalActions'
 import ModalContent from '../ModalContent'
 import ModalTitle from '../ModalTitle'
 import Spacer from '../Spacer'
-
 import WalletCard from './components/WalletCard'
 
 const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
