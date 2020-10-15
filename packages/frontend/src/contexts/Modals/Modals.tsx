@@ -57,7 +57,7 @@ const Modals: React.FC = ({ children }) => {
 
 const StyledModalWrapper = styled.div`
   padding: 10px;
-  z-index: 10000;
+  z-index: 999;
   align-items: center;
   display: flex;
   flex-direction: column;
