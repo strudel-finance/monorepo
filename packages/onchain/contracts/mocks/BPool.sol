@@ -13,12 +13,12 @@
 
 pragma solidity 0.6.6;
 
-import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
-import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "../balancer/BMath.sol";
 import "../balancer/IBPool.sol";
 
-contract BPool is ERC20, BMath, IBPool {
+contract BPool is ERC20UpgradeSafe, BMath, IBPool {
   struct Record {
     bool bound; // is token bound to pool
     uint256 index; // private
@@ -72,12 +72,64 @@ contract BPool is ERC20, BMath, IBPool {
   mapping(address => Record) private _records;
   uint256 private _totalWeight;
 
-  constructor(address controller) public ERC20("poolName", "POS") {
+  constructor(address controller) public {
     _controller = controller;
     _factory = msg.sender;
     _swapFee = MIN_FEE;
     _publicSwap = false;
     _finalized = false;
+    __ERC20_init("poolName", "POS");
+  }
+
+  /**********************************************************************************************
+    // calcSpotPrice                                                                             //
+    // sP = spotPrice                                                                            //
+    // bI = tokenBalanceIn                ( bI / wI )         1                                  //
+    // bO = tokenBalanceOut         sP =  -----------  *  ----------                             //
+    // wI = tokenWeightIn                 ( bO / wO )     ( 1 - sF )                             //
+    // wO = tokenWeightOut                                                                       //
+    // sF = swapFee                                                                              //
+    **********************************************************************************************/
+  function calcSpotPrice(
+    uint256 tokenBalanceIn,
+    uint256 tokenWeightIn,
+    uint256 tokenBalanceOut,
+    uint256 tokenWeightOut,
+    uint256 swapFee
+  ) internal pure returns (uint256 spotPrice) {
+    uint256 numer = bdiv(tokenBalanceIn, tokenWeightIn);
+    uint256 denom = bdiv(tokenBalanceOut, tokenWeightOut);
+    uint256 ratio = bdiv(numer, denom);
+    uint256 scale = bdiv(BONE, bsub(BONE, swapFee));
+    return (spotPrice = bmul(ratio, scale));
+  }
+
+  /**********************************************************************************************
+    // calcOutGivenIn                                                                            //
+    // aO = tokenAmountOut                                                                       //
+    // bO = tokenBalanceOut                                                                      //
+    // bI = tokenBalanceIn              /      /            bI             \    (wI / wO) \      //
+    // aI = tokenAmountIn    aO = bO * |  1 - | --------------------------  | ^            |     //
+    // wI = tokenWeightIn               \      \ ( bI + ( aI * ( 1 - sF )) /              /      //
+    // wO = tokenWeightOut                                                                       //
+    // sF = swapFee                                                                              //
+    **********************************************************************************************/
+  function calcOutGivenIn(
+    uint256 tokenBalanceIn,
+    uint256 tokenWeightIn,
+    uint256 tokenBalanceOut,
+    uint256 tokenWeightOut,
+    uint256 tokenAmountIn,
+    uint256 swapFee
+  ) internal pure returns (uint256 tokenAmountOut) {
+    uint256 weightRatio = bdiv(tokenWeightIn, tokenWeightOut);
+    uint256 adjustedIn = bsub(BONE, swapFee);
+    adjustedIn = bmul(tokenAmountIn, adjustedIn);
+    uint256 y = bdiv(tokenBalanceIn, badd(tokenBalanceIn, adjustedIn));
+    uint256 foo = bpow(y, weightRatio);
+    uint256 bar = bsub(BONE, foo);
+    tokenAmountOut = bmul(tokenBalanceOut, bar);
+    return tokenAmountOut;
   }
 
   function isPublicSwap() external override view returns (bool) {

@@ -104,7 +104,7 @@ const Farms: React.FC = () => {
                       vBTC to BTC.
                     </StyledP>
                     <StyledP>
-                      $TRDL is the crypto-econmical incentive to stake and earn
+                      $TRDL is the crypto-economical incentive to stake and earn
                       rewards by being short on <br /> BTC dominance and long on
                       Ethereum.  
                     </StyledP>

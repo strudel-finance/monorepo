@@ -3,7 +3,7 @@ pragma solidity 0.6.6;
 import {TypedMemView} from "../summa-tx/TypedMemView.sol";
 import {ViewBTC} from "../summa-tx/ViewBTC.sol";
 import {ViewSPV} from "../summa-tx/ViewSPV.sol";
-import {IRelay} from "../IRelay.sol";
+import {IRelay} from "../summa-tx/IRelay.sol";
 
 /** @title MockRelay */
 /** half-hearted implementation for testing */
@@ -90,6 +90,7 @@ contract MockRelay is IRelay {
     override
     returns (bool)
   {
+    require(_headers.length % 80 == 0, "Header array length must be divisible by 80");
     bytes29 _headersView = _headers.ref(0).tryAsHeaderArray();
     bytes29 _anchorView = _anchor.ref(0).tryAsHeader();
 
@@ -110,7 +111,6 @@ contract MockRelay is IRelay {
 
     uint256 _anchorHeight = heights[_previousDigest]; /* NB: errors if unknown */
     require(_anchorHeight > 0, "anchor height can not be 0");
-    require(_headers.length % 80 == 0, "Header array length must be divisible by 80");
 
     /*
     NB:
