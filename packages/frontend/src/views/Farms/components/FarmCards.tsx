@@ -55,31 +55,41 @@ const FarmCards: React.FC = () => {
         ...farm,
         ...stakedValue[i],
         apy: stakedValue[i]
-          ? strudelPrice
-              .times(STRUDEL_PER_BLOCK)
-              .times(BLOCKS_PER_YEAR)
-              .times(stakedValue[i].poolWeight)
-              .div(stakedValue[i].totalWethValue)
+          ? (() => {
+              if (i <= 1)
+                return strudelPrice
+                  .times(STRUDEL_PER_BLOCK)
+                  .times(BLOCKS_PER_YEAR)
+                  .times(stakedValue[i].poolWeight)
+                  .div(stakedValue[i].totalWethValue)
+
+              return strudelPrice
+                .times(STRUDEL_PER_BLOCK)
+                .times(BLOCKS_PER_YEAR)
+                .div(stakedValue[i].totalWethValue)
+            })()
           : null,
         percentage: stakedValue[i]
-          ? Number(Number(stakedValue[i].poolWeight) * Number(100))
-              .toFixed(2)
-              .toString()
+          ? (() => {
+              if (i <= 1)
+                return Number(Number(stakedValue[i].poolWeight) * Number(100))
+                  .toFixed(2)
+                  .toString()
+
+              return '0'
+            })()
           : null,
       }
       const newFarmRows = [...farmRows]
-      if (
-        newFarmRows[newFarmRows.length - 1].length === 3 ||
-        (newFarmRows.length - 1 == 0 &&
-          newFarmRows[newFarmRows.length - 1].length === 2)
-      ) {
-        newFarmRows.push([farmWithStakedValue])
+
+      if (i <= 1) {
+        newFarmRows[0].push(farmWithStakedValue)
       } else {
-        newFarmRows[newFarmRows.length - 1].push(farmWithStakedValue)
+        newFarmRows[1].push(farmWithStakedValue)
       }
       return newFarmRows
     },
-    [[]],
+    [[], []],
   )
 
   return (
@@ -89,8 +99,8 @@ const FarmCards: React.FC = () => {
           <StyledRow key={i}>
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
-                <FarmCard farm={farm} index={i + j} />
-                {(j === 0 || j === 1) && <StyledSpacer />}
+                <FarmCard farm={farm} index={i + j} rowIndex={i} />
+                {(j === 0 || (i === 1 && j !== 3)) && <StyledSpacer />}
               </React.Fragment>
             ))}
           </StyledRow>
@@ -107,9 +117,10 @@ const FarmCards: React.FC = () => {
 interface FarmCardProps {
   farm: FarmWithStakedValue
   index: number
+  rowIndex: number
 }
 
-const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
+const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
@@ -172,7 +183,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
   const poolActive = true // startTime * 1000 - Date.now() <= 0
 
   return (
-    <StyledCardWrapper>
+    <StyledCardWrapper style={{ opacity: rowIndex === 1 && '0.5' }}>
       {farm.isBalancer && <StyledCardAccent />}
       <Card style={{ backgroundImage: `url(${getBackground()})` }}>
         <CardContent>
@@ -282,7 +293,7 @@ const StyledCardAccent = styled.div`
 `
 
 const StyledCards = styled.div`
-  width: 900px;
+  width: 1210px;
   @media (max-width: 768px) {
     width: 100%;
   }
