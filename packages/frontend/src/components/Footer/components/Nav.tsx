@@ -4,12 +4,9 @@ import styled from 'styled-components'
 const Nav: React.FC = () => {
   return (
     <StyledNav>
-      {false && (
-        <>
-          <StyledLink target="_blank" href=""></StyledLink>
-          <StyledLink target="_blank" href=""></StyledLink>
-        </>
-      )}
+      <StyledLink target="_blank" href="https://t.me/STRUDEL_OFFICIAL">
+        Telegram
+      </StyledLink>
       <StyledLink target="_blank" href="https://discord.gg/CcEE5mC">
         Discord
       </StyledLink>
