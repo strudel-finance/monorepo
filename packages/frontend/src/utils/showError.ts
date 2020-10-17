@@ -1,7 +1,10 @@
-import {toast} from 'react-toastify'
+import { toast } from 'react-toastify'
 
 const showError = (message: string) => {
   toast.error(message, {
+    progressStyle: {
+      zIndex: 100,
+    },
     position: 'top-right',
     autoClose: 5000,
     hideProgressBar: false,
