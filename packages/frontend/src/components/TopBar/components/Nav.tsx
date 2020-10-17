@@ -11,11 +11,9 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/farms">
         Terra-Farms
       </StyledLink>
-      {false && (
-        <StyledLink exact activeClassName="active" to="/staking">
-          Gravity Bags
-        </StyledLink>
-      )}
+      <StyledLink exact activeClassName="active" to="/relay">
+        Relay
+      </StyledLink>
       <StyledAbsoluteLink
         href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
         target="_blank"
@@ -28,7 +26,6 @@ const Nav: React.FC = () => {
       >
         About
       </StyledAbsoluteLink>
-
     </StyledNav>
   )
 }

@@ -13,7 +13,7 @@ import useModal from './hooks/useModal'
 import theme from './theme'
 import Farms from './views/Farms'
 import Home from './views/Home'
-import Stake from './views/Stake'
+import Relay from './views/Relay'
 import { useTracking } from './hooks/useTracking'
 import { ToastContainer } from 'react-toastify'
 import { ErrorBoundary } from 'react-error-boundary'
@@ -58,11 +58,9 @@ const App: React.FC = () => {
         <Route path="/farms">
           <Farms />
         </Route>
-        {false && (
-          <Route path="/staking">
-            <Stake />
-          </Route>
-        )}
+        <Route path="/relay">
+          <Relay />
+        </Route>
       </Switch>
     </>
   )
