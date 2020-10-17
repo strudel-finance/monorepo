@@ -175,3 +175,10 @@ curl  --data '{"txData": "02000000017aa6eca8ed999fd0205a3a8af9d60e2b1893cb1245ab
 ```
 
 [this code](https://github.com/summa-tx/bitcoin-spv/tree/master/js) can be used to verify proofs client side.
+
+
+## deploy
+
+```
+BCD_USERNAME=xxx BCD_PASSWORD=yyy PROVIDER_URL=https://mainnet.infura.io/v3/zzz yarn deploy
+```

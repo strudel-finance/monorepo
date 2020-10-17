@@ -55,34 +55,22 @@ const FarmCards: React.FC = () => {
         ...farm,
         ...stakedValue[i],
         apy: stakedValue[i]
-          ? (() => {
-              if (i <= 1)
-                return strudelPrice
-                  .times(STRUDEL_PER_BLOCK)
-                  .times(BLOCKS_PER_YEAR)
-                  .times(stakedValue[i].poolWeight)
-                  .div(stakedValue[i].totalWethValue)
+          ? strudelPrice
+              .times(STRUDEL_PER_BLOCK)
+              .times(BLOCKS_PER_YEAR)
+              .times(stakedValue[i].poolWeight)
 
-              return strudelPrice
-                .times(STRUDEL_PER_BLOCK)
-                .times(BLOCKS_PER_YEAR)
-                .div(stakedValue[i].totalWethValue)
-            })()
+              .div(stakedValue[i].totalWethValue)
           : null,
         percentage: stakedValue[i]
-          ? (() => {
-              if (i <= 1)
-                return Number(Number(stakedValue[i].poolWeight) * Number(100))
-                  .toFixed(2)
-                  .toString()
-
-              return '0'
-            })()
+          ? Number(Number(stakedValue[i].poolWeight) * Number(100))
+              .toFixed(2)
+              .toString()
           : null,
       }
       const newFarmRows = [...farmRows]
 
-      if (i <= 1) {
+      if (i <= 2) {
         newFarmRows[0].push(farmWithStakedValue)
       } else {
         newFarmRows[1].push(farmWithStakedValue)
@@ -100,7 +88,6 @@ const FarmCards: React.FC = () => {
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
                 <FarmCard farm={farm} index={i + j} rowIndex={i} />
-                {(j === 0 || (i === 1 && j !== 3)) && <StyledSpacer />}
               </React.Fragment>
             ))}
           </StyledRow>
@@ -174,6 +161,8 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
       case '1':
         return <StrudelMoving />
       case '2':
+        return <VBTCSpin />
+      case '3':
         return <VBTCSpin />
       default:
         return icon
@@ -293,8 +282,8 @@ const StyledCardAccent = styled.div`
 `
 
 const StyledCards = styled.div`
-  width: 1210px;
-  @media (max-width: 768px) {
+  width: 1240px;
+  @media (max-width: 1240px) {
     width: 100%;
   }
 `
@@ -320,7 +309,7 @@ const StyledRow = styled.div`
 `
 
 const StyledCardWrapper = styled.div`
-  display: flex;
+  margin: 12px;
   width: calc((900px - ${(props) => props.theme.spacing[4]}px * 2) / 3);
   position: relative;
 `

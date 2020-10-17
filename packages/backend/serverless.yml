@@ -6,7 +6,7 @@ custom:
   table: strudel-${opt:stage}
   region: eu-west-1
   bcdRpc: 'bcd.strudel.finance'
-  bcdPost: 8332
+  bcdPort: 8332
 
 
 package:
@@ -77,7 +77,7 @@ functions:
     environment:
       PROVIDER_URL: ${env:PROVIDER_URL}
       BCD_RPC: ${env:BCD_RPC, self:custom.bcdRpc}
-      BCD_PORT: ${env:BCD_PORT, self:custom.bcdPost}
+      BCD_PORT: ${env:BCD_PORT, self:custom.bcdPort}
       BCD_USERNAME: ${env:BCD_USERNAME}
       BCD_PASSWORD: ${env:BCD_PASSWORD}
       TABLE_NAME:
