@@ -56,7 +56,7 @@ const FarmCards: React.FC = () => {
         ...stakedValue[i],
         apy: stakedValue[i]
           ? (() => {
-              if (i <= 1)
+              if (i <= 2)
                 return strudelPrice
                   .times(STRUDEL_PER_BLOCK)
                   .times(BLOCKS_PER_YEAR)
@@ -71,7 +71,7 @@ const FarmCards: React.FC = () => {
           : null,
         percentage: stakedValue[i]
           ? (() => {
-              if (i <= 1)
+              if (i <= 2)
                 return Number(Number(stakedValue[i].poolWeight) * Number(100))
                   .toFixed(2)
                   .toString()
