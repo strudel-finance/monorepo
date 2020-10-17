@@ -99,7 +99,7 @@ const FarmCards: React.FC = () => {
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
                 <FarmCard farm={farm} index={i + j} rowIndex={i} />
-                {(j === 0 || (i === 1 && j !== 3)) && <StyledSpacer />}
+                {(j <= 1 || (i === 1 && j !== 3)) && <StyledSpacer />}
               </React.Fragment>
             ))}
           </StyledRow>
