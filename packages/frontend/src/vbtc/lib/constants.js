@@ -39,6 +39,14 @@ export const addressMap = {
 }
 
 export const contractAddresses = {
+  tbtc: {
+    1: '0x8daebade922df735c38c80c7ebd708af50815faa',
+    5: '',
+  },
+  tbtcPool: {
+    1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
+    5: '',
+  },
   vbtc: {
     1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
     5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
@@ -57,8 +65,8 @@ export const contractAddresses = {
   },
   relay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
-    5: ''
-  }
+    5: '',
+  },
 }
 
 /*
@@ -115,9 +123,26 @@ export const supportedPools = [
       5: '0x611f48792751271328f5192d83343f0bfad8b78f',
     },
     name: 'Spin Strudel',
-    symbol: 'STRDL-ETH UNI-V2 LP',
+    symbol: '$TRDL-ETH UNI-V2 LP',
     tokenSymbol: 'STRDL',
     icon: '1',
+  },
+  {
+    pid: 6,
+    isBalancer: false,
+    url: 'https://sushiswap.fi/pair/0xbcedc25cbb0ea44e03e41dc2d00d54fe6d4646db',
+    lpAddresses: {
+      1: '0xbcedc25cbb0ea44e03e41dc2d00d54fe6d4646db',
+      5: '',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+      5: '',
+    },
+    name: 'vBTC/tBTC',
+    symbol: 'vBTC tBTC Sushi LP',
+    tokenSymbol: 'vBTC',
+    icon: '3',
   },
   {
     pid: 2,
