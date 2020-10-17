@@ -71,7 +71,7 @@ const FarmCards: React.FC = () => {
       if (
         newFarmRows[newFarmRows.length - 1].length === 3 ||
         (newFarmRows.length - 1 == 0 &&
-          newFarmRows[newFarmRows.length - 1].length === 2)
+          newFarmRows[newFarmRows.length - 1].length === 3)
       ) {
         newFarmRows.push([farmWithStakedValue])
       } else {
@@ -163,6 +163,8 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
       case '1':
         return <StrudelMoving />
       case '2':
+        return <VBTCSpin />
+      case '3':
         return <VBTCSpin />
       default:
         return icon

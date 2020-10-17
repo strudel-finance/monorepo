@@ -24,6 +24,7 @@ import VBtcEth from '../../../assets/img/vBTC-ETH.png'
 import StrudelEth from '../../../assets/img/STRDL-ETH.png'
 import renBTC from '../../../assets/img/renBTC-ETH.png'
 import wBTC from '../../../assets/img/wBTC-ETH.png'
+import vBTCtBTC from '../../../assets/img/vBTC-tBTC.png'
 
 interface StakeProps {
   lpContract: Contract
@@ -79,6 +80,8 @@ const Stake: React.FC<StakeProps> = ({ lpContract, pid, tokenName, icon }) => {
         return <LPImage src={StrudelEth} />
       case '2':
         return <LPImage src={VBtcEth} />
+      case '3':
+        return <LPImage style={{ height: '50px' }} src={vBTCtBTC} />
       case '🐋':
         return <LPImage src={wBTC} />
       case '🦏':

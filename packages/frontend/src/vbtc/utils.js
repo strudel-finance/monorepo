@@ -1,7 +1,9 @@
 import BigNumber from 'bignumber.js'
 import { ethers } from 'ethers'
 import { getWeight } from '../utils/bpool'
-
+import UNIV2PairAbi from './lib/abi/uni_v2_lp.json'
+import ERC20Abi from './lib/abi/erc20.json'
+import { contractAddresses } from './lib/constants.js'
 BigNumber.config({
   EXPONENTIAL_AT: 1000,
   DECIMAL_PLACES: 80,
@@ -95,6 +97,35 @@ export const getEarned = async (masterChefContract, pid, account) => {
   return masterChefContract.methods.pendingStrudel(pid, account).call()
 }
 
+const getValueOfTbtcWeth = async (
+  vbtc,
+  wethContract,
+  lpContract,
+  portionLp,
+) => {
+  // Get total weth value for the lpContract = w1
+  let tbtcPool = new vbtc.web3.eth.Contract(
+    UNIV2PairAbi,
+    contractAddresses.tbtcPool['1'],
+  )
+  let tbtc = new vbtc.web3.eth.Contract(ERC20Abi, contractAddresses.tbtc['1'])
+  const tbtcContractWeth = await wethContract.methods
+    .balanceOf(tbtcPool.options.address)
+    .call()
+  const tbtcContractTbtc = await tbtc.methods
+    .balanceOf(tbtcPool.options.address)
+    .call()
+  const lpContractTBTC = await tbtc.methods
+    .balanceOf(lpContract.options.address)
+    .call()
+  let tbtcPrice = new BigNumber(tbtcContractWeth).div(
+    new BigNumber(tbtcContractTbtc),
+  )
+  let lpContractWeth = new BigNumber(lpContractTBTC).times(tbtcPrice)
+  let totalLpWethValue = portionLp.times(lpContractWeth).times(new BigNumber(2))
+  return [totalLpWethValue, lpContractWeth]
+}
+
 export const getTotalLPWethValue = async (
   isBalancer,
   masterChefContract,
@@ -104,6 +135,7 @@ export const getTotalLPWethValue = async (
   pid,
   vbtcContract,
   balancerPoolContract,
+  vbtc,
 ) => {
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
@@ -121,28 +153,39 @@ export const getTotalLPWethValue = async (
   if (isBalancer) {
     lpContract = balancerPoolContract
   }
-
-  // Get total weth value for the lpContract = w1
-  const lpContractWeth = await wethContract.methods
-    .balanceOf(lpContract.options.address)
-    .call()
-
+  let totalLpWethValue
+  let lpContractWeth
   // Return p1 * w1 * 2
   const portionLp = new BigNumber(balance).div(new BigNumber(totalSupply))
-  const lpWethWorth = new BigNumber(lpContractWeth)
-  let totalLpWethValue
-
-  //include weight into account if it is the Balancer Pool
-  if (isBalancer) {
-    totalLpWethValue = portionLp
-      .times(lpWethWorth)
-      .times(
-        new BigNumber(1).plus(
-          new BigNumber(await getWeight(lpContract, vbtcContract)),
-        ),
-      )
+  let lpWethWorth
+  if (pid === 6) {
+    ;[totalLpWethValue, lpContractWeth] = await getValueOfTbtcWeth(
+      vbtc,
+      wethContract,
+      lpContract,
+      portionLp,
+    )
   } else {
-    totalLpWethValue = portionLp.times(lpWethWorth).times(new BigNumber(2))
+    // Get total weth value for the lpContract = w1
+    lpContractWeth = await wethContract.methods
+      .balanceOf(lpContract.options.address)
+      .call()
+
+    lpWethWorth = new BigNumber(lpContractWeth)
+
+    //include weight into account if it is the Balancer Pool
+    if (isBalancer) {
+      totalLpWethValue = portionLp
+        .times(lpWethWorth)
+        .times(
+          new BigNumber(1).plus(
+            new BigNumber(await getWeight(lpContract, vbtcContract)),
+          ),
+        )
+      //check for tBTC/vBTC contracts
+    } else {
+      totalLpWethValue = portionLp.times(lpWethWorth).times(new BigNumber(2))
+    }
   }
   // Calculate
   const tokenAmount = new BigNumber(tokenAmountWholeLP)
