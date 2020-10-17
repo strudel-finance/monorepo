@@ -81,7 +81,7 @@ const FarmCards: React.FC = () => {
           : null,
       }
       const newFarmRows = [...farmRows]
-      if (i <= 1) {
+      if (i <= 2) {
         newFarmRows[0].push(farmWithStakedValue)
       } else {
         newFarmRows[1].push(farmWithStakedValue)
