@@ -58,6 +58,7 @@ const useAllStakedValue = () => {
             pid,
             vbtcContract,
             balancerPoolContract,
+            vbtc,
           ),
       ),
     )
