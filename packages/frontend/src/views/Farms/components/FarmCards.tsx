@@ -90,7 +90,7 @@ const FarmCards: React.FC = () => {
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
                 <FarmCard farm={farm} index={i + j} rowIndex={i} />
-                {(j <= 1 || (i === 1 && j !== 3)) && <StyledSpacer />}
+                {/* {(j <= 1 || (i === 1 && j !== 3)) && <StyledSpacer />} */}
               </React.Fragment>
             ))}
           </StyledRow>
@@ -285,8 +285,8 @@ const StyledCardAccent = styled.div`
 `
 
 const StyledCards = styled.div`
-  width: 1210px;
-  @media (max-width: 768px) {
+  width: 1240px;
+  @media (max-width: 1240px) {
     width: 100%;
   }
 `
@@ -312,7 +312,7 @@ const StyledRow = styled.div`
 `
 
 const StyledCardWrapper = styled.div`
-  display: flex;
+  margin: 12px;
   width: calc((900px - ${(props) => props.theme.spacing[4]}px * 2) / 3);
   position: relative;
 `
