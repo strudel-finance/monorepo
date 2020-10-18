@@ -59,7 +59,6 @@ const FarmCards: React.FC = () => {
               .times(STRUDEL_PER_BLOCK)
               .times(BLOCKS_PER_YEAR)
               .times(stakedValue[i].poolWeight)
-
               .div(stakedValue[i].totalWethValue)
           : null,
         percentage: stakedValue[i]
