@@ -459,16 +459,9 @@ contract ReservePoolController is ERC20UpgradeSafe, BMath, IBorrower, OwnableUpg
     uint256 bVbtcWeight,
     uint256 uWethBalance,
     uint256 uVbtcBalance
-  )
-    internal
-    returns (
-      // ) internal pure returns (bool) {
-      bool
-    )
-  {
+  ) internal pure returns (bool) {
     uint256 uPrice = uWethBalance.mul(BONE).div(uVbtcBalance);
     uint256 bPrice = bVbtcWeight.mul(BONE).mul(bWethBalance).div(bWethWeight.mul(bVbtcBalance));
-    //emit Data(uPrice.div(POOL_PRICE_DIV), bPrice.div(POOL_PRICE_DIV));
     require(uPrice.div(BONE) == bPrice.div(BONE), "price imbalance between pools");
   }
 

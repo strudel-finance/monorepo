@@ -93,7 +93,7 @@ describe('VBTC', async () => {
           test.VIN,
           test.VOUT
         )
-      ).to.be.revertedWith('height not found in relay');
+      ).to.be.revertedWith('Not included!');
 
       await relay.addHeader(test.BLOCK_HASH, 200);
       await expect(
@@ -213,6 +213,11 @@ describe('VBTC', async () => {
     await vBtc.connect(bob).addHeaders(chain[2].hex, headers);
     const bobBal2 = await strudel.balanceOf(bobAddr);
     expect(bobBal2).to.eq(bobBal1.add(expandTo18Decimals(30).mul(3)));
+
+    // don't allow to relay twice
+    await expect(vBtc.connect(bob).addHeaders(chain[2].hex, headers)).to.be.revertedWith(
+      'already included'
+    );
   });
 
   describe('upgradeabliity', async () => {

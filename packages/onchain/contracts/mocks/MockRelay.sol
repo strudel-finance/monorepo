@@ -71,7 +71,11 @@ contract MockRelay is IRelay {
   /// @param _digest  The header digest to search for
   /// @return         The height of the header, or error if unknown
   function findHeight(bytes32 _digest) external override view returns (uint256) {
-    return heights[_digest];
+    uint256 height = heights[_digest];
+    if (height == 0) {
+      revert("Not included!");
+    }
+    return height;
   }
 
   /// @notice             Checks if a digest is an ancestor of the current one

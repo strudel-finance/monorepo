@@ -236,9 +236,20 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     require(false, "not implemented");
   }
 
+  function _checkNew(bytes29 _headers) internal view returns (bool) {
+    bytes29 _target = _headers.indexHeaderArray(0);
+    try relay.findHeight(_target.hash256())  {
+      revert("already included");
+    } catch Error(string memory) {
+      return true;
+    }
+  }
+
   function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
+    _checkNew(_headers.ref(0).tryAsHeaderArray());
     require(relay.addHeaders(_anchor, _headers), "add header failed");
     strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
+    return true;
   }
 
   function addHeadersWithRetarget(
@@ -246,11 +257,13 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     bytes calldata _oldPeriodEndHeader,
     bytes calldata _headers
   ) external returns (bool) {
+    _checkNew(_headers.ref(0).tryAsHeaderArray());
     require(
       relay.addHeadersWithRetarget(_oldPeriodStartHeader, _oldPeriodEndHeader, _headers),
       "add header with retarget failed"
     );
     strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
+    return true;
   }
 
   function markNewHeaviest(
@@ -263,7 +276,8 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
       relay.markNewHeaviest(_ancestor, _currentBest, _newBest, _limit),
       "mark new heaviest failed"
     );
-    strudel.mint(msg.sender, relayReward);
+    strudel.mint(msg.sender, relayReward / 2);
+    return true;
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.
