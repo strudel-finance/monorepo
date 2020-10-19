@@ -47,6 +47,7 @@ const PERMIT_TYPEHASH = keccak256(
 );
 
 function getDomainSeparator(name: string, tokenAddress: string) {
+  console.log('chainId', ethers.provider.network.chainId);
   return keccak256(
     defaultAbiCoder.encode(
       ['bytes32', 'bytes32', 'bytes32', 'uint256', 'address'],

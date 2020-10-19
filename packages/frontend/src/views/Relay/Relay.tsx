@@ -13,6 +13,8 @@ import useModal from '../../hooks/useModal'
 
 import useVBTC from '../../hooks/useVBTC'
 
+import BidButton from './components/BidButton'
+
 const Relay: React.FC = () => {
   const { account } = useWallet()
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
@@ -24,7 +26,9 @@ const Relay: React.FC = () => {
     <Page>
       {!!account ? (
         <>
-          <div>TBD</div>
+          <div>
+            <BidButton startBlock={144} />
+          </div>
         </>
       ) : (
         <div
