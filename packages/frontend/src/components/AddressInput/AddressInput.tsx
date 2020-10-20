@@ -2,13 +2,13 @@ import React from 'react'
 import styled from 'styled-components'
 
 import Button from '../Button'
-import Input, {InputProps} from '../Input'
+import Input, { InputProps } from '../Input'
 
 interface AddressInputProps extends InputProps {
   address: string
 }
 
-const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
+const AddressInput: React.FC<AddressInputProps> = ({ value, onChange }) => {
   const disabled = 'disabled'
   return (
     <StyledTokenInput>
@@ -21,6 +21,7 @@ const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
         placeholder="0"
         value={value}
         disabled={true}
+        type="number"
       />
     </StyledTokenInput>
   )

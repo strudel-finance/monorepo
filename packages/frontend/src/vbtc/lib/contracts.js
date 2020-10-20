@@ -6,7 +6,8 @@ import VBTCAbi from './abi/vbtc.json'
 import UNIV2PairAbi from './abi/uni_v2_lp.json'
 import WETHAbi from './abi/weth.json'
 import BalancerPool from './abi/BPool.json'
-import RelayAbi from './abi/Relay.json'
+import AuctionRelayAbi from './abi/AuctionRelay.json'
+
 import {
   contractAddresses,
   SUBTRACT_GAS_LIMIT,
@@ -28,7 +29,7 @@ export class Contracts {
     this.vbtc = new this.web3.eth.Contract(VBTCAbi)
     this.masterChef = new this.web3.eth.Contract(MasterChefAbi)
     this.weth = new this.web3.eth.Contract(WETHAbi)
-    this.relay = new this.web3.eth.Contract(RelayAbi)
+    this.relay = new this.web3.eth.Contract(AuctionRelayAbi)
 
     this.pools = supportedPools.map((pool) =>
       Object.assign(pool, {
@@ -60,7 +61,7 @@ export class Contracts {
     setProvider(this.strudel, contractAddresses.strudel[networkId])
     setProvider(this.masterChef, contractAddresses.masterChef[networkId])
     setProvider(this.weth, contractAddresses.weth[networkId])
-    setProvider(this.relay, contractAddresses.relay[networkId])
+    setProvider(this.relay, contractAddresses.auctionrelay[networkId])
 
     this.pools.forEach(
       ({

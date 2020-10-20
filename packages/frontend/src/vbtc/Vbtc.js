@@ -1,10 +1,10 @@
 import Web3 from 'web3'
 import BigNumber from 'bignumber.js'
-import {Contracts} from './lib/contracts.js'
-import {Account} from './lib/accounts.js'
-import {EVM} from './lib/evm.js'
+import { Contracts } from './lib/contracts.js'
+import { Account } from './lib/accounts.js'
+import { EVM } from './lib/evm.js'
 
-import {contractAddresses} from './lib/constants'
+import { contractAddresses } from './lib/constants'
 
 export class Vbtc {
   constructor(provider, networkId, testing, options) {
@@ -40,6 +40,7 @@ export class Vbtc {
     this.masterChefAddress = contractAddresses.masterChef[networkId]
     this.wethAddress = contractAddresses.weth[networkId]
     this.strudelAddress = contractAddresses.strudel[networkId]
+    this.relayAddress = contractAddresses.auctionrelay[networkId]
   }
 
   async resetEVM() {

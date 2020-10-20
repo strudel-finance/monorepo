@@ -1,21 +1,53 @@
 [
   {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_relay",
+        "type": "address"
+      },
+      {
+        "internalType": "address",
+        "name": "_rewardToken",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_rewardAmount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "address",
+        "name": "_auctionToken",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
     "anonymous": false,
     "inputs": [
       {
         "indexed": true,
-        "internalType": "bytes32",
-        "name": "_first",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "slotStartBlock",
+        "type": "uint256"
       },
       {
         "indexed": true,
-        "internalType": "bytes32",
-        "name": "_last",
-        "type": "bytes32"
+        "internalType": "address",
+        "name": "relayer",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
       }
     ],
-    "name": "Extension",
+    "name": "Bid",
     "type": "event"
   },
   {
@@ -23,24 +55,24 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "bytes32",
-        "name": "_from",
-        "type": "bytes32"
+        "internalType": "uint256",
+        "name": "startBlock",
+        "type": "uint256"
       },
       {
         "indexed": true,
-        "internalType": "bytes32",
-        "name": "_to",
-        "type": "bytes32"
+        "internalType": "address",
+        "name": "slotWinner",
+        "type": "address"
       },
       {
-        "indexed": true,
-        "internalType": "bytes32",
-        "name": "_gcd",
-        "type": "bytes32"
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "betAmount",
+        "type": "uint256"
       }
     ],
-    "name": "NewTip",
+    "name": "NewRound",
     "type": "event"
   },
   {
@@ -94,6 +126,99 @@
       }
     ],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "slotStartBlock",
+        "type": "uint256"
+      }
+    ],
+    "name": "bestBid",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "slotStartBlock",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "bid",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "slotStartBlock",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "deadline",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint8",
+        "name": "v",
+        "type": "uint8"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "r",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "s",
+        "type": "bytes32"
+      }
+    ],
+    "name": "bidWithPermit",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "currentRound",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "slotWinner",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "startBlock",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -201,6 +326,26 @@
         "type": "bool"
       }
     ],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "updateRound",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "slotStartBlock",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdrawBid",
+    "outputs": [],
     "stateMutability": "nonpayable",
     "type": "function"
   }

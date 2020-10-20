@@ -54,6 +54,7 @@ export const contractAddresses = {
   strudel: {
     1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
     5: '0x611f48792751271328f5192d83343f0bfad8b78f',
+    42: '0xc1b613b811d5916F73c2094BEf62Ed943fE9b8CC',
   },
   masterChef: {
     1: '0x517b091FdB87A42c879BbB849444E76A324D53c8',
@@ -63,9 +64,9 @@ export const contractAddresses = {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     5: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
   },
-  relay: {
+  auctionrelay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
-    5: '',
+    42: '0x3C65D437d7B50a976afc0E4BF371f1DA3A636614',
   },
 }
 

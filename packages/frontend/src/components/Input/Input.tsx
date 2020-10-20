@@ -8,6 +8,7 @@ export interface InputProps {
   startAdornment?: React.ReactNode
   value: string
   disabled?: boolean
+  type?: string
 }
 
 const Input: React.FC<InputProps> = ({
@@ -17,6 +18,7 @@ const Input: React.FC<InputProps> = ({
   startAdornment,
   value,
   disabled,
+  type = 'text',
 }) => {
   return (
     <StyledInputWrapper>
@@ -26,6 +28,7 @@ const Input: React.FC<InputProps> = ({
         value={value}
         onChange={onChange}
         disabled={disabled}
+        type={type}
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>

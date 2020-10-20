@@ -80,6 +80,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
     blockHash: string,
     vbtc: any,
   ): Promise<boolean> => {
+    //TODO disable RelayContract and use Proxies of RelayAuction
     const relayContract = getRelayContract(vbtc)
     let blockHashLittle = '0x' + changeEndian(blockHash)
     try {
