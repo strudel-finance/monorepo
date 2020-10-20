@@ -180,46 +180,6 @@ describe('VBTC', async () => {
     });
   });
 
-  it('relay rewards', async () => {
-    const bobAddr = await bob.getAddress();
-
-    // prepare data
-    const {chain, genesis} = REGULAR_CHAIN;
-    const headerHex = chain.map((header) => header.hex);
-    let headers = concatenateHexStrings(headerHex.slice(0, 3));
-
-    const bobBal0 = await strudel.balanceOf(bobAddr);
-    const reward0 = await vBtc.relayReward();
-    await relay.addHeader(REGULAR_CHAIN.genesis.digest_le, 100);
-    await vBtc.connect(bob).addHeaders(genesis.hex, headers);
-    const bobBal1 = await strudel.balanceOf(bobAddr);
-    expect(bobBal1).to.eq(bobBal0.add(reward0.mul(3)));
-
-    // try calling from non-owner account
-    expect(vBtc.connect(bob).setRelayReward(reward0.mul(2))).to.be.revertedWith(
-      'caller is not the owner'
-    );
-
-    // use the ownerLock to update rawards
-    const msgData = `0x9507ba4c000000000000000000000000000000000000000000000001a055690d9db80000`; // 30 $TRDL
-    const timestamp = (await ethers.provider.getBlock('latest')).timestamp;
-    await ownerLock.queueTransaction(vBtc.address, 0, '', msgData, timestamp + 60 * 60 * 24 + 5);
-    await ethers.provider.send('evm_increaseTime', [60 * 60 * 25]);
-    await ethers.provider.send('evm_mine', []);
-    await ownerLock.executeTransaction(vBtc.address, 0, '', msgData, timestamp + 60 * 60 * 24 + 5);
-
-    //relay some more headers and check
-    headers = concatenateHexStrings(headerHex.slice(3, 6));
-    await vBtc.connect(bob).addHeaders(chain[2].hex, headers);
-    const bobBal2 = await strudel.balanceOf(bobAddr);
-    expect(bobBal2).to.eq(bobBal1.add(expandTo18Decimals(30).mul(3)));
-
-    // don't allow to relay twice
-    await expect(vBtc.connect(bob).addHeaders(chain[2].hex, headers)).to.be.revertedWith(
-      'already included'
-    );
-  });
-
   describe('upgradeabliity', async () => {
     it('should allow upgrade', async () => {
       // before
