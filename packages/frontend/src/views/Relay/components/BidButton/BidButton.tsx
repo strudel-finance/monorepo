@@ -12,7 +12,7 @@ import { useWallet } from 'use-wallet'
 import { splitSignature } from 'ethers/lib/utils'
 import RollbarErrorTracking from '../../../../errorTracking/rollbar'
 import showError from '../../../../utils/showError'
-import TextField from '@material-ui/core/TextField'
+import MuiTextField from '@material-ui/core/TextField'
 import Button from '../../../../components/Button'
 import MuiGrid from '@material-ui/core/Grid'
 import { withStyles } from '@material-ui/core'
@@ -25,6 +25,11 @@ const Grid = withStyles({
 interface BidButtonProps {
   startBlock: number
 }
+const TextField = withStyles({
+  root: {
+    width: '100%',
+  },
+})(MuiTextField)
 
 const MAX = BigNumber.from(
   '0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff',
@@ -112,7 +117,8 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={6}>
+      <Grid item md={3} xs={1}></Grid>
+      <Grid item md={3} xs={5}>
         <TextField
           id="outlined-name"
           label="Amount"
@@ -122,11 +128,12 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
           variant="outlined"
         />
       </Grid>
-      <Grid item xs={6}>
+      <Grid item md={3} xs={5}>
         <Button disabled={loading} onClick={submitBid}>
           Bid
         </Button>
       </Grid>
+      <Grid item md={3} xs={1}></Grid>
     </Grid>
   )
 }

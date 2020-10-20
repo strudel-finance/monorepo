@@ -27,10 +27,8 @@ const Relay: React.FC = () => {
     <Page>
       {!!account ? (
         <>
-          <div>
-            <BidButton startBlock={653472} />
-            <WithdrawButton />
-          </div>
+          <BidButton startBlock={653472} />
+          <WithdrawButton />
         </>
       ) : (
         <div
