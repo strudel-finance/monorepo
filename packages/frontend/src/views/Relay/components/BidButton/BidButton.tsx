@@ -8,6 +8,7 @@ import {
 import useVBTC from '../../../../hooks/useVBTC'
 import { getApprovalData } from './utilities'
 import { BigNumber } from 'ethers'
+import BN from 'bignumber.js'
 import { useWallet } from 'use-wallet'
 import { splitSignature } from 'ethers/lib/utils'
 import RollbarErrorTracking from '../../../../errorTracking/rollbar'
@@ -15,6 +16,7 @@ import showError from '../../../../utils/showError'
 import MuiTextField from '@material-ui/core/TextField'
 import Button from '../../../../components/Button'
 import MuiGrid from '@material-ui/core/Grid'
+import InputAdornment from '@material-ui/core/InputAdornment'
 import { withStyles } from '@material-ui/core'
 
 const Grid = withStyles({
@@ -43,7 +45,8 @@ interface Signature {
 const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
   const { account, chainId } = useWallet()
   const [loading, setLoading] = useState(false)
-  const [amount, setAmount] = useState(0)
+  const [amount, setAmount] = useState(new BN(0))
+  const [displayAmount, setDisplayAmount] = useState(0)
   const vbtc: any = useVBTC()
   const relayContract = getRelayContract(vbtc)
   const strudelContract = getStrudelContract(vbtc)
@@ -63,17 +66,26 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
   }
   const executeBidwithPermit = async (sig: Signature, deadline: number) => {
     await relayContract.methods
-      .bidWithPermit(startBlock, amount, deadline, sig.v, sig.r, sig.s)
+      .bidWithPermit(
+        startBlock,
+        amount.toString(),
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s,
+      )
       .send({ from: account })
       .catch(errorHandling)
     setLoading(false)
   }
   const handleChange = (event: any) => {
-    setAmount(event.target.value)
+    setAmount(new BN(event.target.value).times(1e18))
+    setDisplayAmount(event.target.value)
   }
+
   const executeBid = async () => {
     await relayContract.methods
-      .bid(startBlock, amount)
+      .bid(startBlock, amount.toString())
       .send({ from: account })
       .catch(errorHandling)
     setLoading(false)
@@ -81,10 +93,17 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
 
   const submitBid = async () => {
     setLoading(true)
+    console.log(amount.toString())
     const allowance = await strudelContract.methods
       .allowance(account, relayAddress)
       .call()
-    if (amount < allowance) {
+    const balance = await strudelContract.methods.balanceOf(account).call()
+    if (balance < amount) {
+      showError('You do not own enough Strudel.')
+      setLoading(false)
+      return
+    }
+    if (amount > allowance) {
       const nonce = await strudelContract.methods.nonces(account).call()
       let dt = new Date()
       dt.setHours(dt.getHours() + 1)
@@ -123,7 +142,10 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
           id="outlined-name"
           label="Amount"
           type="number"
-          value={amount}
+          InputProps={{
+            endAdornment: <InputAdornment position="end">$TRDL</InputAdornment>,
+          }}
+          value={displayAmount}
           onChange={handleChange}
           variant="outlined"
         />
