@@ -70,12 +70,12 @@ describe('TorchShip', async () => {
     // check params
     const devFundDivRate = await torchShip.connect(alice).devFundDivRate();
     expect(devFundDivRate).to.eq(17);
-    const bonusEndBlock = await torchShip.bonusEndBlock();
-    expect(bonusEndBlock).to.eq(1000);
+    const lastBlockHeight = await torchShip.lastBlockHeight();
+    expect(lastBlockHeight).to.eq(1000);
     const strudelPerBlock = await torchShip.strudelPerBlock();
     expect(strudelPerBlock).to.eq(expandTo18Decimals(1000));
-    const bonusMultiplier = await torchShip.bonusMultiplier();
-    expect(bonusMultiplier).to.eq(4);
+    const windowSize = await torchShip.windowSize();
+    expect(windowSize).to.eq(4);
     expect(await instance.isMinter(torchShip.address)).to.be.true;
   });
 
