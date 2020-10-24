@@ -55,23 +55,20 @@ const FarmCards: React.FC = () => {
         ...farm,
         ...stakedValue[i],
         apy: stakedValue[i]
-          ? (() => {
-              return strudelPrice
-                .times(STRUDEL_PER_BLOCK)
-                .times(BLOCKS_PER_YEAR)
-                .times(stakedValue[i].poolWeight)
-                .div(stakedValue[i].totalWethValue)
-            })()
+          ? strudelPrice
+              .times(STRUDEL_PER_BLOCK)
+              .times(BLOCKS_PER_YEAR)
+              .times(stakedValue[i].poolWeight)
+              .div(stakedValue[i].totalWethValue)
           : null,
         percentage: stakedValue[i]
-          ? (() => {
-              return Number(Number(stakedValue[i].poolWeight) * Number(100))
-                .toFixed(2)
-                .toString()
-            })()
+          ? Number(Number(stakedValue[i].poolWeight) * Number(100))
+              .toFixed(2)
+              .toString()
           : null,
       }
       const newFarmRows = [...farmRows]
+
       if (i <= 2) {
         newFarmRows[0].push(farmWithStakedValue)
       } else {
@@ -90,7 +87,6 @@ const FarmCards: React.FC = () => {
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
                 <FarmCard farm={farm} index={i + j} rowIndex={i} />
-                {(j <= 1 || (i === 1 && j !== 3)) && <StyledSpacer />}
               </React.Fragment>
             ))}
           </StyledRow>
@@ -285,8 +281,8 @@ const StyledCardAccent = styled.div`
 `
 
 const StyledCards = styled.div`
-  width: 1210px;
-  @media (max-width: 768px) {
+  width: 1240px;
+  @media (max-width: 1240px) {
     width: 100%;
   }
 `
@@ -312,7 +308,7 @@ const StyledRow = styled.div`
 `
 
 const StyledCardWrapper = styled.div`
-  display: flex;
+  margin: 12px;
   width: calc((900px - ${(props) => props.theme.spacing[4]}px * 2) / 3);
   position: relative;
 `
