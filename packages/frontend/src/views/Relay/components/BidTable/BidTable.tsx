@@ -1,14 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import styled from 'styled-components'
-
-import { useParams } from 'react-router-dom'
-import { useWallet } from 'use-wallet'
-import { provider } from 'web3-core'
+import React from 'react'
 import {
-  FormControlLabel,
   makeStyles,
   Paper,
-  Switch,
   Table,
   TableBody,
   TableCell,
@@ -20,8 +13,7 @@ import {
 } from '@material-ui/core'
 import { gql, useQuery } from '@apollo/client'
 import BN from 'bignumber.js'
-import * as luxon from 'luxon'
-import './BidTable.css'
+import { DateTime } from 'luxon'
 
 interface RelayTableHeadProps {
   classes: Object
@@ -102,14 +94,14 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
   const START_BLOCK = gql`
-    query StartBlockQuery {
-      bidItems(where: {slotStartBlock: ${startBlock}}, orderBy: amount, orderDirection: desc) {
-        slotStartBlock
-        relayer
-        amount
-        time
-      }
+  query StartBlockQuery {
+    bidItems(where: {slotStartBlock: ${startBlock}}, orderBy: amount, orderDirection: desc) {
+      slotStartBlock
+      relayer
+      amount
+      time
     }
+  }
   `
 
   const { data }: { data: { bidItems: BidItem[] } } = useQuery(START_BLOCK)
@@ -122,17 +114,9 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
-  const BidTableContainer = styled.div`
-    width: 80% !important;
-    @media (min-width: 500px) and (orientation: landscape) {
-      padding: 0px 24px;
-    }
-    max-width: 1200px;
-    box-sizing: border-box;
-  `
 
   return (
-    <BidTableContainer className={classes.root}>
+    <>
       <Paper className={classes.paper}>
         <TableContainer>
           <Table
@@ -148,7 +132,7 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
             <TableBody>
               {data &&
                 data.bidItems.map((bidItem: BidItem, index: number) => {
-                  const localTIme = luxon.DateTime.fromMillis(+bidItem.time)
+                  const localTIme = DateTime.fromMillis(+bidItem.time)
                     .toLocal()
                     .toFormat('ff')
 
@@ -160,7 +144,9 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
                       role="checkbox"
                       tabIndex={-1}
                       key={amount}
-                      className={index === 0 ? 'leader' : ''}
+                      style={{
+                        backgroundColor: index === 0 ? '#aff3d0;' : 'white',
+                      }}
                     >
                       <TableCell component="th" id={labelId} scope="row">
                         {Number(amount).toFixed(2)}
@@ -183,7 +169,7 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-    </BidTableContainer>
+    </>
   )
 }
 

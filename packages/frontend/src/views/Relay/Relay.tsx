@@ -52,7 +52,6 @@ const Relay: React.FC = () => {
       .then(handleErrors)
       .then((response) => response.json())
       .then(({ data }) => {
-        // data.blocks = current block
         setCurrentBlock(data.blocks)
         getNextStart(data.blocks)
       })
@@ -68,14 +67,25 @@ const Relay: React.FC = () => {
   useEffect(blockHeight, [])
   useInterval(blockHeight, 5000)
 
+  const BidContainer = styled.div`
+    width: 80% !important;
+    @media (min-width: 500px) and (orientation: landscape) {
+      padding: 0px 24px;
+    }
+    max-width: 1200px;
+    box-sizing: border-box;
+  `
+
   return (
     <Page>
       {!!account ? (
         <ApolloProvider client={client}>
-          <BidProgressBar currentBlock={currentBlock} />
-          <BidTable startBlock={startBlock} />
-          <BidButton startBlock={startBlock} />
-          <WithdrawButton />
+          <BidContainer>
+            <BidProgressBar currentBlock={currentBlock} />
+            <BidTable startBlock={startBlock} />
+            <BidButton startBlock={startBlock} />
+            <WithdrawButton />
+          </BidContainer>
         </ApolloProvider>
       ) : (
         <div

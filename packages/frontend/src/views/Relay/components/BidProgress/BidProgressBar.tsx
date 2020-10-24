@@ -3,7 +3,6 @@ import styled from 'styled-components'
 import useInterval from '../../../../hooks/useInterval'
 import useVBTC from '../../../../hooks/useVBTC'
 import { getRelayContract } from '../../../../vbtc/utils'
-import './BidProgressBar.css'
 
 interface IBidProgress {
   currentBlock: number
@@ -34,45 +33,40 @@ const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
   const progressBarWidth = 100 - blockDiff * 14.2
 
   const ProgressDiv = styled.div`
-    background-color: ${blockDiff > 1
-      ? blockDiff > 5
-        ? '#D36357'
-        : '#FFAC33'
-      : '#AFF3D0'};
-    width: ${progressBarWidth}%;
+    background-color: #aff3d0;
     height: 56px;
     border: 1px solid #b5b5b5;
     margin-top: 20px;
     box-sizing: border-box;
-    max-width: 1154px;
+    min-width: 50px;
   `
 
   const ContainerDiv = styled.div`
-    width: 80%;
-    @media (min-width: 500px) and (orientation: landscape) {
-      padding: 0px 24px;
-    }
-    max-width: 1200px;
-    box-sizing: border-box;
     margin: 50px 0;
+  `
+  const BlockNum = styled.p`
+    text-align: right;
+    padding-right: 13px;
+    font-size: 0.875rem;
+    top: 50%;
+    margin-top: 16px;
   `
 
   return (
-    <>
-      <ContainerDiv>
-        <div className="loader">
-          <div
-            className="loader-fill"
-            style={{ width: 10, backgroundColor: '#AFF3D0' }}
-          >
-            <p>{currentBlock}</p>
-          </div>
-        </div>
-        <ProgressDiv>
-          <p>{heightDigest}</p>
-        </ProgressDiv>
-      </ContainerDiv>
-    </>
+    <ContainerDiv>
+      <ProgressDiv>
+        <BlockNum>{currentBlock}</BlockNum>
+      </ProgressDiv>
+      <ProgressDiv
+        style={{
+          backgroundColor:
+            blockDiff > 1 ? (blockDiff > 5 ? '#D36357' : '#FFAC33') : '#AFF3D0',
+          width: `${progressBarWidth}%`,
+        }}
+      >
+        <BlockNum>{heightDigest}</BlockNum>
+      </ProgressDiv>
+    </ContainerDiv>
   )
 }
 
