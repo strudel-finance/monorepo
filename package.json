@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/material-ui": "^0.21.8"
+  }
+}
