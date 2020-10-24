@@ -145,7 +145,7 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
                       tabIndex={-1}
                       key={amount}
                       style={{
-                        backgroundColor: index === 0 ? '#aff3d0;' : 'white',
+                        backgroundColor: index === 0 ? '#aff3d0' : 'white',
                       }}
                     >
                       <TableCell component="th" id={labelId} scope="row">

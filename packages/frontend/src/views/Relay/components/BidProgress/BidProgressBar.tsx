@@ -3,13 +3,14 @@ import styled from 'styled-components'
 import useInterval from '../../../../hooks/useInterval'
 import useVBTC from '../../../../hooks/useVBTC'
 import { getRelayContract } from '../../../../vbtc/utils'
+import Skeleton from 'react-loading-skeleton'
 
 interface IBidProgress {
   currentBlock: number
 }
 
 const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
-  const [heightDigest, setHeightDigest] = useState(currentBlock)
+  const [heightDigest, setHeightDigest] = useState(0)
   const vbtc = useVBTC()
 
   const relayContract = getRelayContract(vbtc)
@@ -57,15 +58,23 @@ const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
       <ProgressDiv>
         <BlockNum>{currentBlock}</BlockNum>
       </ProgressDiv>
-      <ProgressDiv
-        style={{
-          backgroundColor:
-            blockDiff > 1 ? (blockDiff > 5 ? '#D36357' : '#FFAC33') : '#AFF3D0',
-          width: `${progressBarWidth}%`,
-        }}
-      >
-        <BlockNum>{heightDigest}</BlockNum>
-      </ProgressDiv>
+      {heightDigest ? (
+        <ProgressDiv
+          style={{
+            backgroundColor:
+              blockDiff > 1
+                ? blockDiff > 5
+                  ? '#D36357'
+                  : '#FFAC33'
+                : '#AFF3D0',
+            width: `${progressBarWidth}%`,
+          }}
+        >
+          <BlockNum>{heightDigest}</BlockNum>
+        </ProgressDiv>
+      ) : (
+        <Skeleton height={56} style={{ marginTop: '20px' }} />
+      )}
     </ContainerDiv>
   )
 }
