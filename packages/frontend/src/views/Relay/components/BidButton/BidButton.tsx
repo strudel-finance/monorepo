@@ -93,17 +93,18 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
 
   const submitBid = async () => {
     setLoading(true)
-    console.log(amount.toString())
-    const allowance = await strudelContract.methods
-      .allowance(account, relayAddress)
-      .call()
-    const balance = await strudelContract.methods.balanceOf(account).call()
-    if (balance < amount) {
+    const allowance = new BN(
+      await strudelContract.methods.allowance(account, relayAddress).call(),
+    )
+    const balance = new BN(
+      await strudelContract.methods.balanceOf(account).call(),
+    )
+    if (balance.isLessThan(amount)) {
       showError('You do not own enough Strudel.')
       setLoading(false)
       return
     }
-    if (amount > allowance) {
+    if (amount.isGreaterThan(allowance)) {
       const nonce = await strudelContract.methods.nonces(account).call()
       let dt = new Date()
       dt.setHours(dt.getHours() + 1)
@@ -151,7 +152,7 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
         />
       </Grid>
       <Grid item md={3} xs={5}>
-        <Button disabled={loading} onClick={submitBid}>
+        <Button disabled={loading || displayAmount <= 0} onClick={submitBid}>
           Bid
         </Button>
       </Grid>
