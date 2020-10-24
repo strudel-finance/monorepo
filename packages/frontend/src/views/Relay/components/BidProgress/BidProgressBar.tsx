@@ -49,7 +49,9 @@ const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
 
   const ContainerDiv = styled.div`
     width: 80%;
-    padding: 0px 24px;
+    @media (min-width: 500px) and (orientation: landscape) {
+      padding: 0px 24px;
+    }
     max-width: 1200px;
     box-sizing: border-box;
     margin: 50px 0;
