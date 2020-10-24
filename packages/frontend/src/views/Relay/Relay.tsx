@@ -31,9 +31,6 @@ const Relay: React.FC = () => {
   const { account } = useWallet()
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
 
-  const vbtc = useVBTC()
-  const { ethereum } = useWallet()
-
   const client = new ApolloClient({
     uri:
       'https://api.thegraph.com/subgraphs/name/strudel-finance/auction-relay',
