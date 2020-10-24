@@ -47,7 +47,6 @@ const Relay: React.FC = () => {
   const getNextStart = (startBlock: number) => {
     const nextStartBlock =
       startBlock + (SLOT_LENGTH - (startBlock % SLOT_LENGTH))
-    console.log(nextStartBlock)
     setStartBlock(nextStartBlock)
   }
 

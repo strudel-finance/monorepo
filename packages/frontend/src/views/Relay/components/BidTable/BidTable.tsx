@@ -65,7 +65,7 @@ const RelayTableHead: React.FC<RelayTableHeadProps> = (props) => {
       label: 'Bid',
     },
     { id: 'Address', numeric: true, disablePadding: false, label: 'Address' },
-    { id: 'Time', numeric: true, disablePadding: false, label: 'Time (Local)' },
+    { id: 'Time', numeric: true, disablePadding: false, label: 'Time' },
   ]
 
   return (
@@ -97,7 +97,6 @@ interface BidItem {
 }
 
 const BidTable: React.FC<TableData> = ({ startBlock }) => {
-  console.log(startBlock)
   const classes = useStyles()
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
@@ -123,17 +122,17 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
     setRowsPerPage(parseInt(event.target.value, 10))
     setPage(0)
   }
+  const BidTableContainer = styled.div`
+    width: 80% !important;
+    @media (min-width: 500px) and (orientation: landscape) {
+      padding: 0px 24px;
+    }
+    max-width: 1200px;
+    box-sizing: border-box;
+  `
 
   return (
-    <div
-      className={classes.root}
-      style={{
-        width: '80%',
-        padding: `0 24px`,
-        maxWidth: '1200px',
-        boxSizing: 'border-box',
-      }}
-    >
+    <BidTableContainer className={classes.root}>
       <Paper className={classes.paper}>
         <TableContainer>
           <Table
@@ -184,7 +183,7 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
           onChangeRowsPerPage={handleChangeRowsPerPage}
         />
       </Paper>
-    </div>
+    </BidTableContainer>
   )
 }
 
