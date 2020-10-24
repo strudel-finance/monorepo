@@ -16,7 +16,7 @@ import useVBTC from '../../hooks/useVBTC'
 import BidButton from './components/BidButton'
 import WithdrawButton from './components/WithdrawButton'
 import BidTable from './components/BidTable/BidTable'
-import BidProgresBar from './components/BidProgress/BidProgressBar'
+import BidProgressBar from './components/BidProgress/BidProgressBar'
 import showError, { handleErrors } from '../../utils/showError'
 import RollbarErrorTracking from '../../errorTracking/rollbar'
 import useInterval from '../../hooks/useInterval'
@@ -47,7 +47,7 @@ const Relay: React.FC = () => {
   const getNextStart = (startBlock: number) => {
     const nextStartBlock =
       startBlock + (SLOT_LENGTH - (startBlock % SLOT_LENGTH))
-
+    console.log(nextStartBlock)
     setStartBlock(nextStartBlock)
   }
 
@@ -76,7 +76,7 @@ const Relay: React.FC = () => {
     <Page>
       {!!account ? (
         <ApolloProvider client={client}>
-          <BidProgresBar currentBlock={currentBlock} />
+          <BidProgressBar currentBlock={currentBlock} />
           <BidTable startBlock={startBlock} />
           <BidButton startBlock={startBlock} />
           <WithdrawButton />

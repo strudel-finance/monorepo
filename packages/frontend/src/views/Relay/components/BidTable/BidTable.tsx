@@ -97,13 +97,14 @@ interface BidItem {
 }
 
 const BidTable: React.FC<TableData> = ({ startBlock }) => {
+  console.log(startBlock)
   const classes = useStyles()
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
 
   const START_BLOCK = gql`
     query StartBlockQuery {
-      bidItems(slotStartBlock: ${startBlock}, orderBy: amount, orderDirection: desc) {
+      bidItems(where: {slotStartBlock: ${startBlock}}, orderBy: amount, orderDirection: desc) {
         slotStartBlock
         relayer
         amount
