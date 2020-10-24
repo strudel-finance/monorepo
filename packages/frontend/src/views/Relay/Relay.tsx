@@ -40,14 +40,25 @@ const Relay: React.FC = () => {
     cache: new InMemoryCache(),
   })
 
+  const [currentBlock, setCurrentBlock] = useState(0)
   const [startBlock, setStartBlock] = useState(0)
+
+  const SLOT_LENGTH = 144
+  const getNextStart = (startBlock: number) => {
+    const nextStartBlock =
+      startBlock + (SLOT_LENGTH - (startBlock % SLOT_LENGTH))
+
+    setStartBlock(nextStartBlock)
+  }
 
   const blockHeight = () => {
     fetch('https://sochain.com/api/v2/get_info/BTC')
       .then(handleErrors)
       .then((response) => response.json())
       .then(({ data }) => {
-        setStartBlock(data.blocks)
+        // data.blocks = current block
+        setCurrentBlock(data.blocks)
+        getNextStart(data.blocks)
       })
       .catch((e) => {
         showError('SoChain API error: ' + e.message)
@@ -61,13 +72,11 @@ const Relay: React.FC = () => {
   useEffect(blockHeight, [])
   useInterval(blockHeight, 5000)
 
-  console.log('startBlock', startBlock)
-
   return (
     <Page>
       {!!account ? (
         <ApolloProvider client={client}>
-          <BidProgresBar startBlock={startBlock} />
+          <BidProgresBar currentBlock={currentBlock} />
           <BidTable startBlock={startBlock} />
           <BidButton startBlock={startBlock} />
           <WithdrawButton />

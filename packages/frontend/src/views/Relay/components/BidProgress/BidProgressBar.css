@@ -1,5 +1,5 @@
 .loader {
-  width: 80%;
+  /* width: 80%; */
   height: 56px;
   margin: 40px auto;
   /* border-radius: 12px; */
@@ -11,6 +11,7 @@
   /* padding: 0px 24px; */
   max-width: 1154px;
 }
+
 .loader-fill {
   flex: 1;
   /* border-radius: 12px 0 0 12px; */

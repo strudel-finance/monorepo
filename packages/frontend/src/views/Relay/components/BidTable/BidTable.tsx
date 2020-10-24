@@ -25,10 +25,6 @@ import './BidTable.css'
 
 interface RelayTableHeadProps {
   classes: Object
-  numSelected: number
-  onRequestSort: (event: any, property: any) => void
-  order: 'asc' | 'desc' | string
-  orderBy: string
   rowCount: number
 }
 
@@ -102,28 +98,8 @@ interface BidItem {
 
 const BidTable: React.FC<TableData> = ({ startBlock }) => {
   const classes = useStyles()
-  const [order, setOrder] = React.useState('asc')
-  const [orderBy, setOrderBy] = React.useState('calories')
-  const [selected, setSelected] = React.useState([])
   const [page, setPage] = React.useState(0)
-  const [dense, setDense] = React.useState(false)
   const [rowsPerPage, setRowsPerPage] = React.useState(5)
-
-  const [TableData, setTableData] = useState()
-
-  const LATEST_ROUND = gql`
-    query getLatesRound(
-      $first: Number!
-      $startBlock: Number!
-      $orderDirection: Number!
-    ) {
-      rounds(first: 1, orderBy: startBlock, orderDirection: desc) {
-        startBlock
-        slotWinner
-        betAmount
-      }
-    }
-  `
 
   const START_BLOCK = gql`
     query StartBlockQuery {
@@ -137,14 +113,6 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
   `
 
   const { data }: { data: { bidItems: BidItem[] } } = useQuery(START_BLOCK)
-
-  console.log(data, 'data')
-
-  const handleRequestSort = (event: any, property: any) => {
-    const isAsc = orderBy === property && order === 'asc'
-    setOrder(isAsc ? 'desc' : 'asc')
-    setOrderBy(property)
-  }
 
   const handleChangePage = (event: any, newPage: any) => {
     setPage(newPage)
@@ -175,23 +143,11 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
           >
             <RelayTableHead
               classes={classes}
-              numSelected={selected.length}
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
               rowCount={data && data.bidItems.length}
             />
             <TableBody>
               {data &&
                 data.bidItems.map((bidItem: BidItem, index: number) => {
-                  console.log(
-                    new Date(+bidItem.time).toISOString(),
-                    luxon.DateTime.fromMillis(+bidItem.time)
-                      .toLocal()
-                      .toFormat('ff'),
-                    'rrrrr',
-                  )
-
                   const localTIme = luxon.DateTime.fromMillis(+bidItem.time)
                     .toLocal()
                     .toFormat('ff')
@@ -204,7 +160,7 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
                       role="checkbox"
                       tabIndex={-1}
                       key={amount}
-                      className={index === 0 && 'leader'}
+                      className={index === 0 ? 'leader' : ''}
                     >
                       <TableCell component="th" id={labelId} scope="row">
                         {Number(amount).toFixed(2)}
