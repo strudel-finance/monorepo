@@ -117,17 +117,19 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
   }
 
   const TitleHeading = styled.p`
-  font-size: 17px
-  margin: 16px 0;
-  font-weight:bold
-`
+    font-size: 17px;
+    margin: 20px 0;
+    font-weight: bold;
+  `
 
   return (
     <>
+      <TitleHeading>
+        Next Slot Start Block{' '}
+        <span style={{ color: '#8954dfc7' }}>{startBlock}</span> Starting in
+        (Countdown block):
+      </TitleHeading>
       <Paper className={classes.paper}>
-        <TitleHeading>
-          Next Slot Start Block: {startBlock} Starting in (Countdown block):
-        </TitleHeading>
         <TableContainer>
           <Table
             className={classes.table}

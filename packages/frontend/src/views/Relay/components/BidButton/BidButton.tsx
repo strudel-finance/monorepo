@@ -43,6 +43,7 @@ interface Signature {
 }
 
 const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
+  startBlock = 654048
   const { account, chainId } = useWallet()
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState(new BN(0))
@@ -51,6 +52,11 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
   const relayContract = getRelayContract(vbtc)
   const strudelContract = getStrudelContract(vbtc)
   const relayAddress = getRelayAddress(vbtc)
+
+  useEffect(() => {
+    setLoading(false)
+  }, [account])
+
   const errorHandling = (error: any) => {
     setLoading(false)
     // for all errors other than 4001 (EIP-1193 user rejected request), fall back to manual approve
@@ -94,10 +100,16 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
   const submitBid = async () => {
     setLoading(true)
     const allowance = new BN(
-      await strudelContract.methods.allowance(account, relayAddress).call(),
+      await strudelContract.methods
+        .allowance(account, relayAddress)
+        .call()
+        .catch(errorHandling),
     )
     const balance = new BN(
-      await strudelContract.methods.balanceOf(account).call(),
+      await strudelContract.methods
+        .balanceOf(account)
+        .call()
+        .catch(errorHandling),
     )
     if (balance.isLessThan(amount)) {
       showError('You do not own enough Strudel.')
@@ -105,7 +117,10 @@ const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
       return
     }
     if (amount.isGreaterThan(allowance)) {
-      const nonce = await strudelContract.methods.nonces(account).call()
+      const nonce = await strudelContract.methods
+        .nonces(account)
+        .call()
+        .catch(errorHandling)
       let dt = new Date()
       dt.setHours(dt.getHours() + 1)
       const deadline = BigNumber.from(Math.floor(dt.getTime() / 1000))

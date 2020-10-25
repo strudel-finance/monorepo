@@ -40,10 +40,11 @@ const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
     margin-top: 20px;
     box-sizing: border-box;
     min-width: 50px;
+    box-shadow: 6px 6px 12px #979b96;
   `
 
   const ContainerDiv = styled.div`
-    margin: 50px 0;
+    margin: 30px 0 20px 0;
   `
   const BlockNum = styled.p`
     text-align: right;
@@ -54,9 +55,9 @@ const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
   `
 
   const TitleHeading = styled.p`
-    font-size: 17px
-    margin: 16px 0;
-    font-weight:bold
+    font-size: 17px;
+    margin: 20px 0;
+    font-weight: bold;
   `
 
   return (
