@@ -14,6 +14,7 @@ import {
 import { gql, useQuery } from '@apollo/client'
 import BN from 'bignumber.js'
 import { DateTime } from 'luxon'
+import styled from 'styled-components'
 
 interface RelayTableHeadProps {
   classes: Object
@@ -115,9 +116,18 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
     setPage(0)
   }
 
+  const TitleHeading = styled.p`
+  font-size: 17px
+  margin: 16px 0;
+  font-weight:bold
+`
+
   return (
     <>
       <Paper className={classes.paper}>
+        <TitleHeading>
+          Next Slot Start Block: {startBlock} Starting in (Countdown block):
+        </TitleHeading>
         <TableContainer>
           <Table
             className={classes.table}

@@ -53,11 +53,19 @@ const BidProgressBar: React.FC<IBidProgress> = ({ currentBlock }) => {
     margin-top: 16px;
   `
 
+  const TitleHeading = styled.p`
+    font-size: 17px
+    margin: 16px 0;
+    font-weight:bold
+  `
+
   return (
     <ContainerDiv>
+      <TitleHeading>Bitcoin Block Height:</TitleHeading>
       <ProgressDiv>
         <BlockNum>{currentBlock}</BlockNum>
       </ProgressDiv>
+      <TitleHeading>Current Relay Block Height:</TitleHeading>
       {heightDigest ? (
         <ProgressDiv
           style={{
