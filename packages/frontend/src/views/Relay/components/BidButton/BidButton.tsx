@@ -43,7 +43,6 @@ interface Signature {
 }
 
 const BidButton: React.FC<BidButtonProps> = ({ startBlock }) => {
-  startBlock = 654048
   const { account, chainId } = useWallet()
   const [loading, setLoading] = useState(false)
   const [amount, setAmount] = useState(new BN(0))
