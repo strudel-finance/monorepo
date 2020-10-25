@@ -126,8 +126,7 @@ const BidTable: React.FC<TableData> = ({ startBlock }) => {
     <>
       <TitleHeading>
         Next Slot Start Block{' '}
-        <span style={{ color: '#8954dfc7' }}>{startBlock}</span> Starting in
-        (Countdown block):
+        <span style={{ color: '#8954dfc7' }}>{startBlock}</span>
       </TitleHeading>
       <Paper className={classes.paper}>
         <TableContainer>
