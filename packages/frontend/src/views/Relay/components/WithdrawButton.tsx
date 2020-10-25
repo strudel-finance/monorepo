@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { getRelayContract, getStrudelContract } from '../../../vbtc/utils'
 import useVBTC from '../../../hooks/useVBTC'
@@ -25,11 +25,15 @@ const TextField = withStyles({
 
 const WithdrawButton: React.FC = () => {
   const { account, chainId } = useWallet()
+
   const [startBlock, setStartBlock] = useState(0)
   const [loading, setLoading] = useState(false)
   const vbtc: any = useVBTC()
   const relayContract = getRelayContract(vbtc)
   const strudelContract = getStrudelContract(vbtc)
+  useEffect(() => {
+    setLoading(false)
+  }, [account])
   const handleChange = (event: any) => {
     setStartBlock(event.target.value)
   }
