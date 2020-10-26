@@ -8,6 +8,8 @@ import {StrudelToken} from '../typechain/StrudelToken';
 import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxy from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
+import {V1TorchShip} from '../typechain/V1TorchShip';
+import {V1TorchShipFactory} from '../typechain/V1TorchShipFactory';
 import {TorchShip} from '../typechain/TorchShip';
 import {TorchShipFactory} from '../typechain/TorchShipFactory';
 import {MockErc20} from '../typechain/MockErc20';
@@ -32,7 +34,7 @@ async function deployShip(
   let [alice] = await ethers.getSigners();
 
   // deploy the thing
-  const TorchShip = (await ethers.getContractFactory('TorchShip')).connect(dev);
+  const TorchShip = (await ethers.getContractFactory('V1TorchShip')).connect(dev);
   const torchShip = await upgrades.deployProxy(
     TorchShip,
     [
@@ -70,12 +72,8 @@ describe('TorchShip', async () => {
     // check params
     const devFundDivRate = await torchShip.connect(alice).devFundDivRate();
     expect(devFundDivRate).to.eq(17);
-    const lastBlockHeight = await torchShip.lastBlockHeight();
-    expect(lastBlockHeight).to.eq(1000);
     const strudelPerBlock = await torchShip.strudelPerBlock();
     expect(strudelPerBlock).to.eq(expandTo18Decimals(1000));
-    const windowSize = await torchShip.windowSize();
-    expect(windowSize).to.eq(4);
     expect(await instance.isMinter(torchShip.address)).to.be.true;
   });
 
@@ -199,10 +197,10 @@ describe('TorchShip', async () => {
       expect((await lp.balanceOf(bobAddr)).valueOf()).to.eq(1000);
     });
 
-    it('should distribute $TRDL properly for each staker', async () => {
+    it('should distribute $TRDL properly for each staker with upgrade in between', async () => {
       // 100 per block farming rate starting at block 300 with bonus until block 1000
       const devAddr = await dev.getAddress();
-      const torchShip = await deployShip(dev, instance, 100, 300, 1000, 10);
+      let torchShip = await deployShip(dev, instance, 100, 300, 1000, 10);
       await torchShip.connect(dev).setDevFundDivRate(50);
       await torchShip.connect(dev).add('100', lp.address, true);
       await lp.connect(alice).approve(torchShip.address, '1000');
@@ -234,7 +232,7 @@ describe('TorchShip', async () => {
       );
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(200));
       // Bob withdraws 5 LPs at block 330. At this point:
-      //   Bob should have: 4*2/3*1000 + 2*2/6*1000 + 10*2/7*1000 = 6190
+      // Bob should have: 4*2/3*1000 + 2*2/6*1000 + 10*2/7*1000 = 6190
       await advanceBlock(329);
       await torchShip.connect(bob).withdraw(0, '5');
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(20400));
@@ -245,23 +243,68 @@ describe('TorchShip', async () => {
         '8142857142857142857144'
       );
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(400));
+
+      // do a contract upgrade
+      const TorchShip = (await ethers.getContractFactory('TorchShip')).connect(dev);
+      torchShip = (await upgrades.upgradeProxy(
+        torchShip.address,
+        TorchShip,
+        {unsafeAllowCustomTypes: true}
+      )) as TorchShip;
+
+      // check variables
+      let lastBlockHeight = await torchShip.lastBlockHeight();
+      expect(lastBlockHeight).to.eq(1000);
+      let windowSize = await torchShip.windowSize();
+      expect(windowSize).to.eq(10);
+
+      // activate variance
+      const refToken = await new MockErc20Factory(minter).deploy('VBTC', 'VBTC', 18, '10000000000');
+      await torchShip.initVariance(refToken.address, 63, 7);
+      let multiplier = await torchShip.getMultiplier(0,1);
+      console.log(multiplier.toString());
+
+      // check variables again
+      lastBlockHeight = await torchShip.lastBlockHeight();
+      expect(lastBlockHeight).to.eq(325); // 332 - 7
+      windowSize = await torchShip.windowSize();
+      expect(windowSize).to.eq(63);
+   
+
+
       // Alice withdraws 20 LPs at block 340.
       // Bob withdraws 15 LPs at block 350.
       // Carol withdraws 30 LPs at block 360.
       await advanceBlock(339);
+      let ui = await torchShip.userInfo(0, aliceAddr);
+      console.log(ui);
+      let sps = await torchShip.poolInfo(0);
+      console.log(sps);
       await torchShip.connect(alice).withdraw(0, '20');
+      ui = await torchShip.userInfo(0, aliceAddr);
+      console.log(ui);
+      sps = await torchShip.poolInfo(0);
+      console.log(sps);
       await advanceBlock(349);
       await torchShip.connect(bob).withdraw(0, '15');
       await advanceBlock(359);
+      const exp = await torchShip.pendingStrudel(0, carolAddr);
+      console.log('expected: ', exp);
       await torchShip.connect(carol).withdraw(0, '30');
-      expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(51000));
-      expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(1000));
-      // Alice should have: 5666 + 10*2/7*1000 + 10*2/6.5*1000 = 11600
-      expect((await instance.balanceOf(aliceAddr)).valueOf()).to.eq('11600732600732600732600');
-      // Bob should have: 6190 + 10*1.5/6.5 * 1000 + 10*1.5/4.5*1000 = 11831
-      expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('11831501831501831501831');
+
+      multiplier = await torchShip.getMultiplier(0,1);
+      console.log(multiplier.toString());
+      expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(24786));
+      expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(486));
+      // Alice should have: 5666 + 10*2/7*1000 + 4*2/6.5*1000 + 6*2/6.5*100 = 9938.52747253
+      expect((await instance.balanceOf(aliceAddr)).valueOf()).to.eq('9785347985347985347985');
+      // Bob should have: 6190 + 4*1.5/6.5 * 1000 + 6*1.5/6.5 * 100 + 10*1.5/4.5*100 = 7584.87179487
+      expect((await instance.balanceOf(bobAddr)).valueOf()).to.eq('7169963369963369963370');
       // Carol should have: 2*3/6*1000 + 10*3/7*1000 + 10*3/6.5*1000 + 10*3/4.5*1000 + 10*1000 = 26568
+      // Carol should have: 2*3/6*1000 + 10*3/7*1000 + 4*3/6.5*1000 + 6*3/6.5*100 + 10*3/4.5*100 + 10*100 = 9075.45787546
       expect((await instance.balanceOf(carolAddr)).valueOf()).to.eq('26567765567765567765568');
+      const rs = await instance.balanceOf(torchShip.address);
+      console.log(rs);
       // All of them should have 1000 LPs back.
       expect((await lp.balanceOf(aliceAddr)).valueOf()).to.eq(1000);
       expect((await lp.balanceOf(bobAddr)).valueOf()).to.eq(1000);
