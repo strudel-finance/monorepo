@@ -1,0 +1,18 @@
+{
+  "name": "relay-script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bswap": "^1.3.2",
+    "endian-toggle": "^0.0.0",
+    "ethers": "^5.0.0-beta.189",
+    "node-fetch": "^2.6.1",
+    "request": "^2.88.2"
+  }
+}
