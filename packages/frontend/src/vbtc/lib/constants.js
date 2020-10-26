@@ -66,7 +66,7 @@ export const contractAddresses = {
   },
   auctionrelay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
-    5: '0x43a7c1a5E15f79C7c41ea4468eeD62De0B38E5F4',
+    5: '0xaF963309EE1F8A7365401691d3E2F3B95b4d2975',
     42: '0x7cA6dD00246AE9cE164490F9bcB2553f5f29741D',
   },
 }

@@ -24,7 +24,8 @@ const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title }) => {
     }
 
     if (chainId.length) {
-      showError('You are on an incorrect network. Please change to mainnet!')
+      //TODO: reactivate
+      //showError('You are on an incorrect network. Please change to mainnet!')
       setChainId('')
     }
   }, [chainId])

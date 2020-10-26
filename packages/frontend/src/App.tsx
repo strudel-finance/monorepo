@@ -52,12 +52,16 @@ const App: React.FC = () => {
       <TopBar onPresentMobileMenu={handlePresentMobileMenu} />
       <MobileMenu onDismiss={handleDismissMobileMenu} visible={mobileMenu} />
       <Switch>
-        <Route path="/" exact>
-          <Home />
-        </Route>
-        <Route path="/farms">
-          <Farms />
-        </Route>
+        {false && (
+          <>
+            <Route path="/" exact>
+              <Home />
+            </Route>
+            <Route path="/farms">
+              <Farms />
+            </Route>
+          </>
+        )}
         <Route path="/relay">
           <Relay />
         </Route>

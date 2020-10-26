@@ -5,12 +5,16 @@ import styled from 'styled-components'
 const Nav: React.FC = () => {
   return (
     <StyledNav>
-      <StyledLink exact activeClassName="active" to="/">
-        Home
-      </StyledLink>
-      <StyledLink exact activeClassName="active" to="/farms">
-        Terra-Farms
-      </StyledLink>
+      {false && (
+        <>
+          <StyledLink exact activeClassName="active" to="/">
+            Home
+          </StyledLink>
+          <StyledLink exact activeClassName="active" to="/farms">
+            Terra-Farms
+          </StyledLink>
+        </>
+      )}
       <StyledLink exact activeClassName="active" to="/relay">
         Relay
       </StyledLink>

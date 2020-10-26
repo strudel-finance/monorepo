@@ -14,27 +14,35 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
       <StyledMobileMenuWrapper>
         <StyledBackdrop onClick={onDismiss} />
         <StyledMobileMenu>
-          <StyledLink exact activeClassName="active" to="/" onClick={onDismiss}>
-            Home
-          </StyledLink>
+          {false && (
+            <>
+              <StyledLink
+                exact
+                activeClassName="active"
+                to="/"
+                onClick={onDismiss}
+              >
+                Home
+              </StyledLink>
+              <StyledLink
+                exact
+                activeClassName="active"
+                to="/farms"
+                onClick={onDismiss}
+              >
+                Terra-Farms
+              </StyledLink>
+            </>
+          )}
           <StyledLink
             exact
             activeClassName="active"
-            to="/farms"
+            to="/relay"
             onClick={onDismiss}
           >
-            Terra-Farms
+            Relay
           </StyledLink>
-          {false && (
-            <StyledLink
-              exact
-              activeClassName="active"
-              to="/staking"
-              onClick={onDismiss}
-            >
-              Staking
-            </StyledLink>
-          )}
+
           <StyledAbsoluteLink
             href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
             target="_blank"
