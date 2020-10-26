@@ -246,11 +246,9 @@ describe('TorchShip', async () => {
 
       // do a contract upgrade
       const TorchShip = (await ethers.getContractFactory('TorchShip')).connect(dev);
-      torchShip = (await upgrades.upgradeProxy(
-        torchShip.address,
-        TorchShip,
-        {unsafeAllowCustomTypes: true}
-      )) as TorchShip;
+      torchShip = (await upgrades.upgradeProxy(torchShip.address, TorchShip, {
+        unsafeAllowCustomTypes: true,
+      })) as TorchShip;
 
       // check variables
       let lastBlockHeight = await torchShip.lastBlockHeight();
@@ -261,7 +259,7 @@ describe('TorchShip', async () => {
       // activate variance
       const refToken = await new MockErc20Factory(minter).deploy('VBTC', 'VBTC', 18, '10000000000');
       await torchShip.initVariance(refToken.address, 63, 7);
-      let multiplier = await torchShip.getMultiplier(0,1);
+      let multiplier = await torchShip.getMultiplier(0, 1);
       console.log(multiplier.toString());
 
       // check variables again
@@ -269,8 +267,6 @@ describe('TorchShip', async () => {
       expect(lastBlockHeight).to.eq(325); // 332 - 7
       windowSize = await torchShip.windowSize();
       expect(windowSize).to.eq(63);
-   
-
 
       // Alice withdraws 20 LPs at block 340.
       // Bob withdraws 15 LPs at block 350.
@@ -292,7 +288,7 @@ describe('TorchShip', async () => {
       console.log('expected: ', exp);
       await torchShip.connect(carol).withdraw(0, '30');
 
-      multiplier = await torchShip.getMultiplier(0,1);
+      multiplier = await torchShip.getMultiplier(0, 1);
       console.log(multiplier.toString());
       expect((await instance.totalSupply()).valueOf()).to.eq(expandTo18Decimals(24786));
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(486));
