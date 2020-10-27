@@ -113,7 +113,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
 
   // update the totalSupply for the observation at the current timestamp. each observation is updated at most
   // once per epoch period.
-  function updateVariance() internal {
+  function updateVariance() public {
     if (referenceToken == address(0)) {
       return;
     }
@@ -142,11 +142,11 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     // fallback before not initialized
     if (referenceToken == address(0)) {
       if (_to <= lastBlockHeight) {
-        return _to.sub(_from).mul(windowSize).mul(10**18);
+        return _to.sub(_from).mul(windowSize).mul(1e18);
       } else if (_from >= lastBlockHeight) {
-        return _to.sub(_from).mul(10**18);
+        return _to.sub(_from).mul(1e18);
       } else {
-        return lastBlockHeight.sub(_from).mul(windowSize).add(_to.sub(lastBlockHeight)).mul(10**18);
+        return lastBlockHeight.sub(_from).mul(windowSize).add(_to.sub(lastBlockHeight)).mul(1e18);
       }
     }
 
@@ -158,7 +158,8 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 latestSupply = observations[latestPos];
 
     // get the variance, normalize over supply
-    return latestSupply.sub(average).mul(10**19).div(latestSupply).add(10**18);
+    uint256 variance = latestSupply.sub(average).mul(1e19).div(latestSupply).add(1e18);
+    return _to.sub(_from).mul(variance);
   }
 
   // View function to see pending STRDLs on frontend.
@@ -173,7 +174,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
         .mul(strudelPerBlock)
         .mul(pool.allocPoint)
         .div(totalAllocPoint)
-        .div(10**18);
+        .div(1e18);
       accStrudelPerShare = accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));
     }
     return user.amount.mul(accStrudelPerShare).div(1e12).sub(user.rewardDebt);
@@ -203,7 +204,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
       .mul(strudelPerBlock)
       .mul(pool.allocPoint)
       .div(totalAllocPoint)
-      .div(10**18);
+      .div(1e18);
     strudel.mint(owner(), strudelReward.div(devFundDivRate));
     strudel.mint(address(this), strudelReward);
     pool.accStrudelPerShare = pool.accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));

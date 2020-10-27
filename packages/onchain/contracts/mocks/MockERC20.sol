@@ -13,4 +13,8 @@ contract MockERC20 is ERC20UpgradeSafe {
     __ERC20_init(name, symbol);
     _setupDecimals(decimals);
   }
+
+  function mint(uint256 amount) public returns (bool) {
+    _mint(msg.sender, amount);
+  }
 }
