@@ -69,13 +69,7 @@ async function deployNewShip(
   const TorchShip = (await ethers.getContractFactory('TorchShip')).connect(dev);
   const torchShip = await upgrades.deployProxy(
     TorchShip,
-    [
-      strudel.address,
-      expandTo18Decimals(strudelPerBlock),
-      startBlock,
-      bonusEndBlock,
-      windowSize,
-    ],
+    [strudel.address, expandTo18Decimals(strudelPerBlock), startBlock, bonusEndBlock, windowSize],
     {unsafeAllowCustomTypes: true}
   );
   await torchShip.deployed();
