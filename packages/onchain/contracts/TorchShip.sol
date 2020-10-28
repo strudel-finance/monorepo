@@ -77,6 +77,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   // new since farming 2.0
   address private referenceToken;
   // the number of observations stored during the window
+  // immutable
   uint8 public granularity;
   // list of observations as ringbuffer
   uint256[] public observations;
@@ -125,7 +126,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
       observations.push(currentTotal);
     }
 
-    if (block.number.sub(lastBlockHeight) > windowSize.div(granularity)) {
+    if (block.number.sub(lastBlockHeight) >= windowSize.div(granularity)) {
       uint8 nextPos = (latestPos >= granularity - 1) ? 0 : latestPos + 1;
       observations[nextPos] = currentTotal;
       lastBlockHeight = block.number;

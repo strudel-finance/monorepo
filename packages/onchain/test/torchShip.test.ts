@@ -291,7 +291,7 @@ describe('TorchShip', async () => {
 
       // check variables again
       lastBlockHeight = await torchShip.lastBlockHeight();
-      expect(lastBlockHeight).to.eq(325); // 332 - 7
+      expect(lastBlockHeight).to.eq(334);
       windowSize = await torchShip.windowSize();
       expect(windowSize).to.eq(63);
 
@@ -387,7 +387,7 @@ describe('TorchShip', async () => {
 
       // check default position in ring buffer
       let latestPos = await torchShip.latestPos();
-      expect(latestPos).to.eq(0);
+      expect(latestPos).to.eq(1);
 
       // call first time
       let currentHeight = (await ethers.provider.getBlock('latest')).number;
@@ -400,7 +400,7 @@ describe('TorchShip', async () => {
       expect(factor).to.eq(expandTo18Decimals(1));
       // check ring buffer pointer moved
       latestPos = await torchShip.latestPos();
-      expect(latestPos).to.eq(1);
+      expect(latestPos).to.eq(2);
 
       // double observed supply
       await refToken.mint(expandTo18Decimals(1));
@@ -415,7 +415,7 @@ describe('TorchShip', async () => {
       expect(factor).to.eq('5285714285714285715');
       // check ring buffer pointer moved
       latestPos = await torchShip.latestPos();
-      expect(latestPos).to.eq(2);
+      expect(latestPos).to.eq(3);
 
       // go forward half of the window
       for (let i = 0; i < 3; i++) {
@@ -441,7 +441,7 @@ describe('TorchShip', async () => {
 
       // check that ring buffer implementation jumps back to front
       latestPos = await torchShip.latestPos();
-      expect(latestPos).to.eq(1);
+      expect(latestPos).to.eq(2);
     });
   });
 });
