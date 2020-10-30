@@ -47,7 +47,7 @@ const FarmCards: React.FC = () => {
       : new BigNumber(0)
   //console.log(strudelPrice.toString())
   const BLOCKS_PER_YEAR = new BigNumber(2336000)
-  const STRUDEL_PER_BLOCK = new BigNumber(4)
+  const STRUDEL_PER_BLOCK = new BigNumber(1)
 
   const rows = farms.reduce<FarmWithStakedValue[][]>(
     (farmRows, farm, i) => {
