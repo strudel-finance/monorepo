@@ -8,10 +8,6 @@ import ThumbsUp from '../../assets/img/thumbs_up_astronaut.png'
 
 import Button from '../../components/Button'
 import Page from '../../components/Page'
-import Countdown from 'react-countdown'
-import { startDate, endRewardsDate } from '../../constants/countdown'
-
-import { StyledCount, RenderProps } from '../../utils/countHelper'
 
 import PageHeader from '../../components/PageHeader'
 import WalletProviderModal from '../../components/WalletProviderModal'
@@ -50,28 +46,12 @@ const Container = withStyles({
 })(MuiContainer)
 
 const Farms: React.FC = () => {
-  const [isCountComplete, setCountComplete] = useState(false)
-
   const { path } = useRouteMatch()
   const { account } = useWallet()
-  const handleCountEnd = () => {
-    setCountComplete(true)
-  }
-  const renderer = ({ days, hours, minutes, seconds }: RenderProps) => {
-    // Render a countdown
-    return (
-      <>
-        {days}d:{hours}h:{minutes}min:{seconds}s
-      </>
-    )
-  }
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
-  const isPast = startDate < new Date()
   return (
     <Switch>
       <Page>
-        {isCountComplete || isPast ? (
-          <>
             {!!account ? (
               <>
                 <Route exact path={path}>
@@ -86,19 +66,6 @@ const Farms: React.FC = () => {
                     title="Terra-Farms to Explore"
                   />
                   <Container maxWidth="md">
-                    <Paper elevation={7}>
-                      <StyledP style={{ fontSize: '28px' }}>
-                        <StyledMulti>4x</StyledMulti> $TRDL bonus for{' '}
-                        <span>
-                          <Countdown
-                            date={endRewardsDate}
-                            renderer={renderer}
-                          />
-                        </span>{' '}
-                        <wbr />
-                        <img src={ThumbsUp} height="50px" />
-                      </StyledP>
-                    </Paper>
                     <StyledP>
                       The Terra-Farms strengthen the protocol and the peg of
                       vBTC to BTC.
@@ -134,16 +101,7 @@ const Farms: React.FC = () => {
                 />
               </div>
             )}
-          </>
-        ) : (
-          <StyledCount>
-            <Countdown
-              date={startDate}
-              renderer={renderer}
-              onComplete={handleCountEnd}
-            />
-          </StyledCount>
-        )}
+
       </Page>
     </Switch>
   )

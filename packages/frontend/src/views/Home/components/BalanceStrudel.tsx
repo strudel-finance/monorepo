@@ -123,7 +123,7 @@ const BalanceStrudel: React.FC = () => {
         </CardContent>
         <Footnote>
           New rewards per block
-          <FootnoteValue>4 $TRDL</FootnoteValue>
+          <FootnoteValue>1 $TRDL</FootnoteValue>
         </Footnote>
       </Card>
     </StyledWrapper>
