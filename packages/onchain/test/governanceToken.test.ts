@@ -40,6 +40,5 @@ describe('GovernanceToken', async () => {
       const bal = await gov.balanceOf(signerAddr);
       expect(bal).to.eq(expandTo18Decimals(26));
     });
-
   });
 });

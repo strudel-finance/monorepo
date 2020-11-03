@@ -44,14 +44,26 @@ contract GovernanceToken is ERC20UpgradeSafe {
     strudel = IERC20(strudelAddr);
   }
 
-  function _parse(uint256 lockData) internal pure returns (uint256 endBlock, uint256 locked, uint256 minted) {
+  function _parse(uint256 lockData)
+    internal
+    pure
+    returns (
+      uint256 endBlock,
+      uint256 locked,
+      uint256 minted
+    )
+  {
     endBlock = lockData >> 224;
     locked = uint256(uint112(lockData >> 112));
     minted = uint256(uint112(lockData));
   }
 
-  function _compact(uint256 endBlock, uint256 locked, uint256 minted) internal pure returns (uint256 lockData) {
-    lockData = lockData << 224 | uint112(lockData) <<  112 | uint112(lockData);
+  function _compact(
+    uint256 endBlock,
+    uint256 locked,
+    uint256 minted
+  ) internal pure returns (uint256 lockData) {
+    lockData = (lockData << 224) | (uint112(lockData) << 112) | uint112(lockData);
   }
 
   function lock(uint256 amount, uint256 blocks) external returns (bool) {
@@ -60,7 +72,9 @@ contract GovernanceToken is ERC20UpgradeSafe {
     require(amount >= 1e15, "small deposit");
     strudel.transferFrom(msg.sender, address(this), amount);
 
-    uint256 mintAmount = MAX_LOCK.mul(2).sub(blocks).mul(blocks).mul(amount).div(MAX_LOCK.mul(MAX_LOCK));
+    uint256 mintAmount = MAX_LOCK.mul(2).sub(blocks).mul(blocks).mul(amount).div(
+      MAX_LOCK.mul(MAX_LOCK)
+    );
 
     uint256 endBlock;
     uint256 locked;
@@ -73,13 +87,18 @@ contract GovernanceToken is ERC20UpgradeSafe {
       endBlock = block.number;
       locked = 0;
       minted = 0;
-      
     }
 
     uint256 remainingLock = endBlock - block.number;
-    uint256 averageDuration = remainingLock.mul(locked).add(amount.mul(blocks)).div(amount.add(locked));
+    uint256 averageDuration = remainingLock.mul(locked).add(amount.mul(blocks)).div(
+      amount.add(locked)
+    );
 
-    locks[msg.sender] = _compact(block.number + averageDuration, locked + amount, mintAmount + minted);
+    locks[msg.sender] = _compact(
+      block.number + averageDuration,
+      locked + amount,
+      mintAmount + minted
+    );
 
     _mint(msg.sender, mintAmount);
     return true;
@@ -96,8 +115,6 @@ contract GovernanceToken is ERC20UpgradeSafe {
     _burn(msg.sender, minted);
     strudel.transfer(msg.sender, locked);
   }
-
-
 
   /// @dev             Burns an amount of the token from the given account's balance.
   ///                  deducting from the sender's allowance for said account.
