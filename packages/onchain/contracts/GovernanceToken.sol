@@ -8,12 +8,11 @@ import "./erc20/ITokenRecipient.sol";
 import "./StrudelToken.sol";
 import "./IGovBridge.sol";
 
-/// @title  Strudel Token.
-/// @notice This is the Strudel ERC20 contract.
+/// @title  Strudel Governance Token.
+/// @notice This is an ERC20 contract that mints by locking another token.
 contract GovernanceToken is ERC20UpgradeSafe {
   using SafeMath for uint256;
 
-  uint256 constant MAX_LOCK = 45000 * 52;
   bytes32 public DOMAIN_SEPARATOR;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
   bytes32
@@ -229,7 +228,7 @@ contract GovernanceToken is ERC20UpgradeSafe {
     bytes32 r,
     bytes32 s
   ) external {
-    require(deadline >= block.timestamp, "Strudel: EXPIRED");
+    require(deadline >= block.timestamp, "Strudel Gov: EXPIRED");
     bytes32 digest = keccak256(
       abi.encodePacked(
         "\x19\x01",
@@ -240,7 +239,7 @@ contract GovernanceToken is ERC20UpgradeSafe {
     address recoveredAddress = ecrecover(digest, v, r, s);
     require(
       recoveredAddress != address(0) && recoveredAddress == owner,
-      "Strudel: INVALID_SIGNATURE"
+      "Strudel Gov: INVALID_SIGNATURE"
     );
     _approve(owner, spender, value);
   }
