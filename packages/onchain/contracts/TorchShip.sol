@@ -49,6 +49,13 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 accStrudelPerShare; // Accumulated STRDLs per share, times 1e12. See below.
   }
 
+  // Data for foreign rewards
+  struct ForeignRewardSet {
+    address tokenAddress; // token address of other ERC20, supply needs to be deposited
+    // for each $TRDL, how much foreign tokens are paid out?
+    uint32 strudelRatio; // number used as quotient, the divisor is 10^4
+  }
+
   // immutable
   StrudelToken private strudel;
 
@@ -71,6 +78,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   mapping(uint256 => mapping(address => UserInfo)) public userInfo;
   // Total allocation points. Must be the sum of all allocation points in all pools.
   uint256 public totalAllocPoint;
+  mapping(uint256 => ForeignRewardSet) private foreignRewards;
 
   function initialize(
     address _strudel,
@@ -100,8 +108,30 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     }
   }
 
+  function transferForeignRewards(
+    uint256 _pid,
+    address _to,
+    uint256 _amount
+  ) internal {
+    ForeignRewardSet memory set = foreignRewards[_pid];
+    if (set.tokenAddress != address(0)) {
+      uint256 extra = _amount.mul(1e4).div(set.strudelRatio);
+      try IERC20(set.tokenAddress).transfer(_to, extra)  {
+        // do nothing;
+      } catch Error(string memory) {
+        // out of foreign rewards, do nothing;
+      }
+    }
+  }
+
   function poolLength() external view returns (uint256) {
     return poolInfo.length;
+  }
+
+  function getForeignRewardSet(uint256 _pid) public view returns (address, uint256) {
+    require(_pid < poolInfo.length, "unknown pool");
+    ForeignRewardSet memory set = foreignRewards[_pid];
+    return (set.tokenAddress, set.strudelRatio);
   }
 
   // Return reward multiplier over the given _from to _to block.
@@ -168,6 +198,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     if (user.amount > 0) {
       uint256 pending = user.amount.mul(pool.accStrudelPerShare).div(1e12).sub(user.rewardDebt);
       safeStrudelTransfer(msg.sender, pending);
+      transferForeignRewards(_pid, msg.sender, pending);
     }
     pool.lpToken.safeTransferFrom(address(msg.sender), address(this), _amount);
     user.amount = user.amount.add(_amount);
@@ -183,6 +214,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     updatePool(_pid);
     uint256 pending = user.amount.mul(pool.accStrudelPerShare).div(1e12).sub(user.rewardDebt);
     safeStrudelTransfer(msg.sender, pending);
+    transferForeignRewards(_pid, msg.sender, pending);
     user.amount = user.amount.sub(_amount);
     user.rewardDebt = user.amount.mul(pool.accStrudelPerShare).div(1e12);
     pool.lpToken.safeTransfer(address(msg.sender), _amount);
@@ -253,5 +285,27 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   function setBonusMultiplier(uint256 _bonusMultiplier) public onlyOwner {
     require(_bonusMultiplier > 0, "!bonusMultiplier-0");
     bonusMultiplier = _bonusMultiplier;
+  }
+
+  function setForeignRewardSet(
+    uint256 _pid,
+    address _tokenAddress,
+    uint32 _rewardRate
+  ) public onlyOwner {
+    require(_pid < poolInfo.length, "unknown pool");
+    require(_tokenAddress != address(0), "!rewardTokenAddress-0");
+    IERC20 foreignToken = IERC20(_tokenAddress);
+    require(foreignToken.totalSupply() > 0, "not ERC20");
+    ForeignRewardSet memory set = foreignRewards[_pid];
+    // either non-existing, or 0 ratio, or same
+    require(
+      set.tokenAddress == address(0) || set.strudelRatio == 0 || set.tokenAddress == _tokenAddress,
+      "override of existing set"
+    );
+    if (_rewardRate == 0) {
+      // we are setting an existing pair to 0, then withdraw supply
+      foreignToken.transfer(owner(), foreignToken.balanceOf(address(this)));
+    }
+    foreignRewards[_pid] = ForeignRewardSet(_tokenAddress, _rewardRate);
   }
 }
