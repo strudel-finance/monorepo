@@ -2,17 +2,17 @@
 
 pragma solidity 0.6.6;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "./erc20/ITokenRecipient.sol";
+import "./StrudelToken.sol";
+import "./IGovBridge.sol";
 
 /// @title  Strudel Token.
 /// @notice This is the Strudel ERC20 contract.
 contract GovernanceToken is ERC20UpgradeSafe {
   using SafeMath for uint256;
 
-  uint256 constant BLOCKS_IN_WEEK = 45000;
   uint256 constant MAX_LOCK = 45000 * 52;
   bytes32 public DOMAIN_SEPARATOR;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
@@ -20,10 +20,16 @@ contract GovernanceToken is ERC20UpgradeSafe {
     public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
   mapping(address => uint256) public nonces;
 
-  IERC20 strudel;
-  mapping(address => uint256) public locks;
+  StrudelToken strudel;
+  IGovBridge public bridge;
+  mapping(address => uint256) private lockData;
+  uint256 intervalLength;
 
-  constructor(address strudelAddr) public {
+  constructor(
+    address _strudelAddr,
+    address _bridgeAddr,
+    uint256 _intervalLength
+  ) public {
     __ERC20_init("Strudel Governance Token", "g$TRDL");
     uint256 chainId;
     assembly {
@@ -40,8 +46,12 @@ contract GovernanceToken is ERC20UpgradeSafe {
         address(this)
       )
     );
-    require(strudelAddr != address(0), "zero strudel");
-    strudel = IERC20(strudelAddr);
+    require(_strudelAddr != address(0), "zero strudel");
+    strudel = StrudelToken(_strudelAddr);
+    require(_bridgeAddr != address(0), "zero bridge");
+    bridge = IGovBridge(_bridgeAddr);
+    require(_intervalLength > 0, "zero interval");
+    intervalLength = _intervalLength;
   }
 
   function _parse(uint256 lockData)
@@ -63,57 +73,105 @@ contract GovernanceToken is ERC20UpgradeSafe {
     uint256 locked,
     uint256 minted
   ) internal pure returns (uint256 lockData) {
-    lockData = (lockData << 224) | (uint112(lockData) << 112) | uint112(lockData);
+    lockData = (endBlock << 224) | (locked << 112) | minted;
   }
 
-  function lock(uint256 amount, uint256 blocks) external returns (bool) {
-    require(blocks >= BLOCKS_IN_WEEK, "lock too short");
-    require(blocks <= MAX_LOCK, "lock too long");
-    require(amount >= 1e15, "small deposit");
-    strudel.transferFrom(msg.sender, address(this), amount);
+  function getLock(address owner)
+    external
+    view
+    returns (
+      uint256 endBlock,
+      uint256 lockTotal,
+      uint256 mintTotal
+    )
+  {
+    (endBlock, lockTotal, mintTotal) = _parse(lockData[owner]);
+  }
 
-    uint256 mintAmount = MAX_LOCK.mul(2).sub(blocks).mul(blocks).mul(amount).div(
-      MAX_LOCK.mul(MAX_LOCK)
+  function _lock(
+    address owner,
+    address recipient,
+    uint256 amount,
+    uint256 lockDuration
+  ) internal {
+    require(owner != address(0), "recipient 0");
+    require(amount >= 1e15, "small deposit");
+    require(lockDuration >= intervalLength, "lock too short");
+    uint256 maxInterval = intervalLength * 52;
+    require(lockDuration <= maxInterval, "lock too long");
+    strudel.transferFrom(_msgSender(), address(this), amount);
+
+    uint256 mintAmount = maxInterval.mul(2).sub(lockDuration).mul(lockDuration).mul(amount).div(
+      maxInterval.mul(maxInterval)
     );
 
     uint256 endBlock;
-    uint256 locked;
-    uint256 minted;
-    (endBlock, locked, minted) = _parse(locks[msg.sender]);
+    uint256 lockTotal;
+    uint256 mintTotal;
+    (endBlock, lockTotal, mintTotal) = _parse(lockData[owner]);
 
     // return previous lock, if matured
-    if (locked > 0 && block.number >= endBlock) {
+    if (lockTotal > 0 && block.number >= endBlock) {
       unlock();
       endBlock = block.number;
-      locked = 0;
-      minted = 0;
+      lockTotal = 0;
+      mintTotal = 0;
     }
 
     uint256 remainingLock = endBlock - block.number;
-    uint256 averageDuration = remainingLock.mul(locked).add(amount.mul(blocks)).div(
-      amount.add(locked)
+    // TODO: arithmetic mean here is not apropriate. should follow mintAmount formula
+    uint256 averageDuration = remainingLock.mul(lockTotal).add(amount.mul(lockDuration)).div(
+      amount.add(lockTotal)
     );
 
-    locks[msg.sender] = _compact(
+    lockData[owner] = _compact(
       block.number + averageDuration,
-      locked + amount,
-      mintAmount + minted
+      lockTotal + amount,
+      mintAmount + mintTotal
     );
 
-    _mint(msg.sender, mintAmount);
+    _mint(recipient, mintAmount);
+  }
+
+  function lock(
+    address recipient,
+    uint256 amount,
+    uint256 blocks,
+    bool deposit
+  ) public returns (bool) {
+    if (deposit) {
+      _lock(recipient, address(this), amount, blocks);
+      _approve(address(this), address(bridge), amount);
+      bridge.deposit(address(this), amount, recipient);
+    } else {
+      _lock(recipient, recipient, amount, blocks);
+    }
     return true;
+  }
+
+  function lockWithPermit(
+    uint256 value,
+    uint256 blocks,
+    uint256 deadline,
+    uint8 v,
+    bytes32 r,
+    bytes32 s,
+    bool deposit
+  ) external returns (bool) {
+    strudel.permit(_msgSender(), address(this), value, deadline, v, r, s);
+    return lock(_msgSender(), value, blocks, deposit);
   }
 
   function unlock() public returns (bool) {
     uint256 endBlock;
     uint256 locked;
     uint256 minted;
-    (endBlock, locked, minted) = _parse(locks[msg.sender]);
+    (endBlock, locked, minted) = _parse(lockData[_msgSender()]);
     require(locked > 0, "nothing to unlock");
     require(endBlock <= block.number, "lock has not passed yet");
-    locks[msg.sender] = 0;
-    _burn(msg.sender, minted);
-    strudel.transfer(msg.sender, locked);
+    lockData[_msgSender()] = 0;
+    _burn(_msgSender(), minted);
+    strudel.transfer(_msgSender(), locked);
   }
 
   /// @dev             Burns an amount of the token from the given account's balance.
@@ -135,7 +193,7 @@ contract GovernanceToken is ERC20UpgradeSafe {
   /// total supply.
   /// @param _amount   The amount of tokens that will be burnt.
   function burn(uint256 _amount) external {
-    _burn(msg.sender, _amount);
+    _burn(_msgSender(), _amount);
   }
 
   /// @notice           Set allowance for other address and notify.
@@ -156,7 +214,7 @@ contract GovernanceToken is ERC20UpgradeSafe {
   ) public returns (bool) {
     // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
-      _spender.receiveApproval(msg.sender, _value, address(this), _extraData);
+      _spender.receiveApproval(_msgSender(), _value, address(this), _extraData);
       return true;
     }
     return false;
