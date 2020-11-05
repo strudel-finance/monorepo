@@ -4,13 +4,14 @@ pragma solidity 0.6.6;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "./erc20/ITokenRecipient.sol";
 import "./StrudelToken.sol";
 import "./IGovBridge.sol";
 
 /// @title  Strudel Governance Token.
 /// @notice This is an ERC20 contract that mints by locking another token.
-contract GovernanceToken is ERC20UpgradeSafe {
+contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
   using SafeMath for uint256;
 
   bytes32 public DOMAIN_SEPARATOR;
@@ -19,10 +20,10 @@ contract GovernanceToken is ERC20UpgradeSafe {
     public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
   mapping(address => uint256) public nonces;
 
-  StrudelToken strudel;
+  StrudelToken private strudel;
+  uint256 public intervalLength;
   IGovBridge public bridge;
   mapping(address => uint256) private lockData;
-  uint256 intervalLength;
 
   constructor(
     address _strudelAddr,
@@ -30,6 +31,7 @@ contract GovernanceToken is ERC20UpgradeSafe {
     uint256 _intervalLength
   ) public {
     __ERC20_init("Strudel Governance Token", "g$TRDL");
+    __Ownable_init();
     uint256 chainId;
     assembly {
       chainId := chainid()
@@ -173,28 +175,6 @@ contract GovernanceToken is ERC20UpgradeSafe {
     strudel.transfer(_msgSender(), locked);
   }
 
-  /// @dev             Burns an amount of the token from the given account's balance.
-  ///                  deducting from the sender's allowance for said account.
-  ///                  Uses the internal _burn function.
-  /// @param _account  The account whose tokens will be burnt.
-  /// @param _amount   The amount of tokens that will be burnt.
-  function burnFrom(address _account, uint256 _amount) external {
-    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
-      _amount,
-      "ERC20: burn amount exceeds allowance"
-    );
-
-    _approve(_account, _msgSender(), decreasedAllowance);
-    _burn(_account, _amount);
-  }
-
-  /// @dev Destroys `amount` tokens from `msg.sender`, reducing the
-  /// total supply.
-  /// @param _amount   The amount of tokens that will be burnt.
-  function burn(uint256 _amount) external {
-    _burn(_msgSender(), _amount);
-  }
-
   /// @notice           Set allowance for other address and notify.
   ///                   Allows `_spender` to spend no more than `_value`
   ///                   tokens on your behalf and then ping the contract about
@@ -209,8 +189,8 @@ contract GovernanceToken is ERC20UpgradeSafe {
   function approveAndCall(
     ITokenRecipient _spender,
     uint256 _value,
-    bytes memory _extraData
-  ) public returns (bool) {
+    bytes calldata _extraData
+  ) external returns (bool) {
     // not external to allow bytes memory parameters
     if (approve(address(_spender), _value)) {
       _spender.receiveApproval(_msgSender(), _value, address(this), _extraData);
@@ -242,5 +222,10 @@ contract GovernanceToken is ERC20UpgradeSafe {
       "Strudel Gov: INVALID_SIGNATURE"
     );
     _approve(owner, spender, value);
+  }
+
+  function updateBridge(address _bridgeAddr) external onlyOwner {
+    require(_bridgeAddr != address(0), "zero bridge");
+    bridge = IGovBridge(_bridgeAddr);
   }
 }

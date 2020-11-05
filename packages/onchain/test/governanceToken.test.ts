@@ -158,4 +158,25 @@ describe('GovernanceToken', async () => {
       expect(bal).to.eq(expandTo18Decimals(100000 - 26));
     });
   });
+
+  it('should allow owner and only owner to transfer ownership', async () => {
+    const alice = await signers[0].getAddress();
+    const bob = await signers[1].getAddress();
+
+    expect((await gov.owner()).valueOf()).to.eq(alice);
+    await expect(gov.connect(signers[1]).transferOwnership(bob)).to.be.revertedWith(
+      'caller is not the owner'
+    );
+    await gov.connect(signers[0]).transferOwnership(bob);
+    expect((await gov.owner()).valueOf()).to.eq(bob);
+    await gov.connect(signers[1]).functions.transferOwnership(alice);
+    expect((await gov.owner()).valueOf()).to.eq(alice);
+
+    // also check other admin functions
+    await expect(gov.connect(signers[1]).updateBridge(bob)).to.be.revertedWith(
+      'caller is not the owner'
+    );
+    await gov.connect(signers[0]).functions.updateBridge(alice);
+    expect((await gov.bridge()).valueOf()).to.eq(alice);
+  });
 });
