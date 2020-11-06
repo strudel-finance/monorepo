@@ -25,11 +25,11 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
   IGovBridge public bridge;
   mapping(address => uint256) private lockData;
 
-  constructor(
+  function initialize(
     address _strudelAddr,
     address _bridgeAddr,
     uint256 _intervalLength
-  ) public {
+  ) external initializer {
     __ERC20_init("Strudel Governance Token", "g$TRDL");
     __Ownable_init();
     uint256 chainId;

@@ -31,11 +31,17 @@ describe('GovernanceToken', async () => {
       expandTo18Decimals(100000)
     );
     bridge = await new MockGovBridgeFactory(signers[0]).deploy();
-    gov = await new GovernanceTokenFactory(signers[0]).deploy(
+
+    const GovernanceToken = (await ethers.getContractFactory('GovernanceToken')).connect(
+      signers[0]
+    );
+    const govToken = await upgrades.deployProxy(GovernanceToken, [
       strudel.address,
       bridge.address,
-      minInterval
-    );
+      minInterval,
+    ]);
+    await govToken.deployed();
+    gov = govToken as GovernanceToken;
   });
 
   describe('locking', async () => {
