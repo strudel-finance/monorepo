@@ -79,5 +79,6 @@ package-lock.json
 artifacts
 cache
 typechain
+.openzeppelin
 dist/
 deployments
