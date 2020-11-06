@@ -51,6 +51,7 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     strudel = StrudelToken(_strudelAddr);
     require(_bridgeAddr != address(0), "zero bridge");
     bridge = IGovBridge(_bridgeAddr);
+    _approve(address(this), _bridgeAddr, uint256(-1));
     require(_intervalLength > 0, "zero interval");
     intervalLength = _intervalLength;
   }
@@ -94,15 +95,16 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     address recipient,
     uint256 amount,
     uint256 lockDuration
-  ) internal {
-    require(owner != address(0), "recipient 0");
+  ) internal returns (uint256 mintAmount) {
+    require(owner != address(0), "owner 0");
+    require(recipient != address(0), "recipient 0");
     require(amount >= 1e15, "small deposit");
     require(lockDuration >= intervalLength, "lock too short");
     uint256 maxInterval = intervalLength * 52;
     require(lockDuration <= maxInterval, "lock too long");
     strudel.transferFrom(_msgSender(), address(this), amount);
 
-    uint256 mintAmount = maxInterval.mul(2).sub(lockDuration).mul(lockDuration).mul(amount).div(
+    mintAmount = maxInterval.mul(2).sub(lockDuration).mul(lockDuration).mul(amount).div(
       maxInterval.mul(maxInterval)
     );
 
@@ -141,9 +143,8 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     bool deposit
   ) public returns (bool) {
     if (deposit) {
-      _lock(recipient, address(this), amount, blocks);
-      _approve(address(this), address(bridge), amount);
-      bridge.deposit(address(this), amount, recipient);
+      uint256 mintAmount = _lock(recipient, address(this), amount, blocks);
+      bridge.deposit(address(this), mintAmount, recipient);
     } else {
       _lock(recipient, recipient, amount, blocks);
     }

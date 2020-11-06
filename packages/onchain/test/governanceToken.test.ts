@@ -92,7 +92,7 @@ describe('GovernanceToken', async () => {
       await strudel.approve(gov.address, expandTo18Decimals(100000));
       const tx = await gov.lock(alice, expandTo18Decimals(26), maxInterval, true);
       const events = (await tx.wait(1)).events!;
-      expect(`0x${events[6].topics[1].slice(26, 66)}`).to.eq(alice.toLowerCase());
+      expect(`0x${events[5].topics[1].slice(26, 66)}`).to.eq(alice.toLowerCase());
 
       let bal = await gov.balanceOf(bridge.address);
       expect(bal).to.eq(expandTo18Decimals(26));
