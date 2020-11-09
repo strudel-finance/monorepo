@@ -227,6 +227,7 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
 
   function updateBridge(address _bridgeAddr) external onlyOwner {
     require(_bridgeAddr != address(0), "zero bridge");
+    _approve(address(this), _bridgeAddr, uint256(-1));
     bridge = IGovBridge(_bridgeAddr);
   }
 }
