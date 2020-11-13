@@ -16,7 +16,7 @@ contract AuctionManager is OwnableUpgradeSafe {
   uint256 constant ACCURACY = 1e4;
   // when 95% at market price, start selling
   uint256 constant SELL_THRESHOLD = 9500;
-  // cap auctions at certain amount of $TRDL minted 
+  // cap auctions at certain amount of $TRDL minted
   uint256 constant DILUTION_BOUND = 70; // 0.7% of $TRDL total supply
   // stop selling when volume small
   uint256 constant DUST_THRESHOLD = 10; // 0.1% of $TRDL total supply
@@ -32,8 +32,6 @@ contract AuctionManager is OwnableUpgradeSafe {
   IPriceOracle private strudelPriceOracle;
   IDutchSwapFactory private auctionFactory;
   IDutchAuction public currentAuction;
-  
-
 
   constructor(
     address _strudelAddr,
@@ -65,7 +63,7 @@ contract AuctionManager is OwnableUpgradeSafe {
       require(currentAuction.auctionEnded(), "previous auction hasn't ended");
       currentAuction.finaliseAuction();
       uint256 studelReserves = strudel.balanceOf(address(this));
-      if(studelReserves > 0) {
+      if (studelReserves > 0) {
         strudel.burn(studelReserves);
       }
     }
@@ -85,7 +83,10 @@ contract AuctionManager is OwnableUpgradeSafe {
     uint256 imbalance = _getDiff(btcPriceInEth, vBtcPriceInEth).mul(vBtcOutstandingSupply);
 
     // cap by dillution bound
-    imbalance = Math.min(strudelSupply.mul(DILUTION_BOUND).mul(strudelPriceInEth).div(ACCURACY), imbalance);
+    imbalance = Math.min(
+      strudelSupply.mul(DILUTION_BOUND).mul(strudelPriceInEth).div(ACCURACY),
+      imbalance
+    );
 
     // pause if imbalance below dust threshold
     if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(DUST_THRESHOLD).div(ACCURACY)) {
@@ -103,16 +104,18 @@ contract AuctionManager is OwnableUpgradeSafe {
       imbalance = vBtcPriceInEth.mul(1e18).div(strudelPriceInEth);
       // auction off some vBTC
       vBtc.approve(address(auctionFactory), vBtcAmount);
-      currentAuction = IDutchAuction(auctionFactory.deployDutchAuction(
-        address(vBtc), 
-        vBtcAmount,
-        now,
-        now + DURATION,
-        address(strudel),
-        imbalance.mul(ACCURACY.add(PRICE_SPAN)).div(ACCURACY), // startPrice
-        imbalance.mul(ACCURACY.sub(PRICE_SPAN)).div(ACCURACY),  // minPrice
-        address(this)
-      ));
+      currentAuction = IDutchAuction(
+        auctionFactory.deployDutchAuction(
+          address(vBtc),
+          vBtcAmount,
+          now,
+          now + DURATION,
+          address(strudel),
+          imbalance.mul(ACCURACY.add(PRICE_SPAN)).div(ACCURACY), // startPrice
+          imbalance.mul(ACCURACY.sub(PRICE_SPAN)).div(ACCURACY), // minPrice
+          address(this)
+        )
+      );
     } else {
       // auction off some $TRDL
       // calculate imbalance in $TRDL
@@ -122,17 +125,18 @@ contract AuctionManager is OwnableUpgradeSafe {
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
 
-      currentAuction = IDutchAuction(auctionFactory.deployDutchAuction(
-        address(strudel), 
-        imbalance,
-        now,
-        now + DURATION,
-        address(vBtc),
-        vBtcAmount.mul(ACCURACY.add(PRICE_SPAN)).div(ACCURACY), // startPrice
-        vBtcAmount.mul(ACCURACY.sub(PRICE_SPAN)).div(ACCURACY),  // minPrice
-        address(this)
-      ));
+      currentAuction = IDutchAuction(
+        auctionFactory.deployDutchAuction(
+          address(strudel),
+          imbalance,
+          now,
+          now + DURATION,
+          address(vBtc),
+          vBtcAmount.mul(ACCURACY.add(PRICE_SPAN)).div(ACCURACY), // startPrice
+          vBtcAmount.mul(ACCURACY.sub(PRICE_SPAN)).div(ACCURACY), // minPrice
+          address(this)
+        )
+      );
     }
   }
-
 }
