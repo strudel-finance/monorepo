@@ -1,5 +1,5 @@
 import {BigNumber, Contract, utils} from 'ethers';
-import {ethers} from '@nomiclabs/buidler';
+import {ethers} from 'hardhat';
 const {keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack} = utils;
 
 export function expandTo18Decimals(n: number): BigNumber {

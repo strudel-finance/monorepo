@@ -19,11 +19,11 @@
     "deploy"
     ],
   "files": [
-    "./buidler.config.ts",
-    "node_modules/@nomiclabs/buidler-ethers/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/buidler-etherscan/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/buidler-waffle/src/type-extensions.d.ts",
-    "node_modules/buidler-typechain/src/type-extensions.d.ts",
-    "node_modules/@openzeppelin/buidler-upgrades/src/type-extensions.d.ts"
+    "./hardhat.config.ts",
+    "node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.d.ts",
+    "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.d.ts",
+    "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.d.ts",
+    "node_modules/hardhat-typechain/src/type-extensions.d.ts",
+    "node_modules/@openzeppelin/hardhat-upgrades/src/type-extensions.d.ts"
   ]
 }

@@ -1,4 +1,4 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
+import {ethers, upgrades} from 'hardhat';
 import {Signer, Contract} from 'ethers';
 import {getAdminAddress} from '@openzeppelin/upgrades-core';
 import chai from 'chai';
@@ -230,8 +230,11 @@ describe('TorchShip', async () => {
       // 100 per block farming rate starting at block 300 with bonus until block 1000
       const devAddr = await dev.getAddress();
       let torchShip = await deployShip(dev, instance, 100, 300, 1000, 10);
+      console.log('here -2');
       await torchShip.connect(dev).setDevFundDivRate(50);
+      console.log('here -1');
       await torchShip.connect(dev).add('100', lp.address, true);
+      console.log('here -0');
       await lp.connect(alice).approve(torchShip.address, '1000');
       await lp.connect(bob).approve(torchShip.address, '1000');
       await lp.connect(carol).approve(torchShip.address, '1000');
@@ -273,11 +276,13 @@ describe('TorchShip', async () => {
       );
       expect((await instance.balanceOf(devAddr)).valueOf()).to.eq(expandTo18Decimals(400));
 
+      console.log('here -11');
       // do a contract upgrade
       const TorchShip = (await ethers.getContractFactory('TorchShip')).connect(dev);
       torchShip = (await upgrades.upgradeProxy(torchShip.address, TorchShip, {
         unsafeAllowCustomTypes: true,
       })) as TorchShip;
+      console.log('here -12');
 
       // check variables
       let lastBlockHeight = await torchShip.lastBlockHeight();
@@ -286,8 +291,10 @@ describe('TorchShip', async () => {
       expect(windowSize).to.eq(10);
 
       // activate variance
+      console.log('here');
       const refToken = await new MockErc20Factory(minter).deploy('VBTC', 'VBTC', 18, '10000000000');
       await torchShip.initVariance(refToken.address, 63, 7);
+      console.log('here2');
 
       // check variables again
       lastBlockHeight = await torchShip.lastBlockHeight();

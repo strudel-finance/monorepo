@@ -1,4 +1,4 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
+import {ethers, upgrades} from 'hardhat';
 import {Signer, Contract} from 'ethers';
 import {getAdminAddress} from '@openzeppelin/upgrades-core';
 import chai from 'chai';

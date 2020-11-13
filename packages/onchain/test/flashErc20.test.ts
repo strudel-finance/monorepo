@@ -1,4 +1,4 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
+import {ethers, upgrades} from 'hardhat';
 import {Signer} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
