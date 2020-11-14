@@ -1,6 +1,7 @@
 import '@nomiclabs/hardhat-ganache';
 import '@nomiclabs/hardhat-waffle';
 import '@nomiclabs/hardhat-ethers';
+import '@openzeppelin/hardhat-upgrades'
 import 'hardhat-typechain';
 import 'hardhat-gas-reporter';
 import 'hardhat-deploy';

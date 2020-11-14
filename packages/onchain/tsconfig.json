@@ -19,11 +19,6 @@
     "deploy"
     ],
   "files": [
-    "./hardhat.config.ts",
-    "node_modules/@nomiclabs/hardhat-ethers/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/hardhat-etherscan/src/type-extensions.d.ts",
-    "node_modules/@nomiclabs/hardhat-waffle/src/type-extensions.d.ts",
-    "node_modules/hardhat-typechain/src/type-extensions.d.ts",
-    "node_modules/@openzeppelin/hardhat-upgrades/src/type-extensions.d.ts"
+    "./hardhat.config.ts"
   ]
 }
