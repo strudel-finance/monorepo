@@ -68,7 +68,7 @@ const FarmCards: React.FC = () => {
           : null,
       }
       const newFarmRows = [...farmRows]
-      if (i <= 2) {
+      if (i <= 1) {
         newFarmRows[0].push(farmWithStakedValue)
       } else {
         newFarmRows[1].push(farmWithStakedValue)
@@ -171,7 +171,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
 
   return (
     <StyledCardWrapper style={{ opacity: rowIndex === 1 && '0.5' }}>
-      {farm.isBalancer && <StyledCardAccent />}
+      {farm.pid == 1 && <StyledCardAccent />}
       <Card style={{ backgroundImage: `url(${getBackground()})` }}>
         <CardContent>
           <StyledContent>

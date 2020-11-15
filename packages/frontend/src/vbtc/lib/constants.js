@@ -89,6 +89,40 @@ UNI-V2 LP Address on mainnet for reference
 
 export const supportedPools = [
   {
+    pid: 1,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+    lpAddresses: {
+      1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
+    },
+    tokenAddresses: {
+      1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
+      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
+    },
+    name: 'Spin Strudel',
+    symbol: '$TRDL-ETH UNI-V2 LP',
+    tokenSymbol: 'STRDL',
+    icon: '1',
+  },
+  {
+    pid: 4,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
+    lpAddresses: {
+      1: '0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186d63980fd6e2ec61888f7b91c4bae4',
+    },
+    name: 'vBTC Spot',
+    symbol: 'vBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'vBTC',
+    icon: '2',
+  },
+  {
     pid: 0,
     isBalancer: true,
     balancerPoolAddresses: {
@@ -108,24 +142,6 @@ export const supportedPools = [
     symbol: 'VBTC-ETH LP',
     tokenSymbol: 'VBTC',
     icon: '2',
-  },
-  {
-    pid: 1,
-    isBalancer: false,
-    url:
-      'https://info.uniswap.org/pair/0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
-    lpAddresses: {
-      1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
-      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
-    },
-    tokenAddresses: {
-      1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
-      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
-    },
-    name: 'Spin Strudel',
-    symbol: '$TRDL-ETH UNI-V2 LP',
-    tokenSymbol: 'STRDL',
-    icon: '1',
   },
   {
     pid: 6,
@@ -179,22 +195,6 @@ export const supportedPools = [
     symbol: 'renBTC-ETH UNI-V2 LP',
     tokenSymbol: 'renBTC',
     icon: '🦏',
-  },
-  {
-    pid: 4,
-    isBalancer: false,
-    url:
-      'https://info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
-    lpAddresses: {
-      1: '0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
-    },
-    tokenAddresses: {
-      1: '0xe1406825186d63980fd6e2ec61888f7b91c4bae4',
-    },
-    name: 'vBTC Spot',
-    symbol: 'vBTC-ETH UNI-V2 LP',
-    tokenSymbol: 'vBTC',
-    icon: '2',
   },
   {
     pid: 5,
