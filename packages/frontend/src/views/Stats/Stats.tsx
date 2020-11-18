@@ -119,7 +119,76 @@ const StatsTable: React.FC<StatsTableProp> = ({ rows }) => {
     margin: 20px 0;
     font-weight: bold;
   `
-
+  const mapAddressToService = (
+    address: string,
+  ): { link: string; service: string } => {
+    const lookUp = {
+      '0xc11b1268c1a384e55c48c2391d8d480264a3a7f4': {
+        link: 'https://compound.finance/',
+        service: 'Compound Wrapped BTC',
+      },
+      '0xbf72da2bd84c5170618fbe5914b0eca9638d5eb5': {
+        link: 'https://oasis.app/borrow',
+        service: 'Maker: WBTC',
+      },
+      '0x3dfd23a6c5e8bbcfc9581d2e864a68feb6a076d3': {
+        link: 'https://app.aave.com/',
+        service: 'Aave: Lending Pool',
+      },
+      '0x93054188d876f558f4a66b2ef1d97d16edf0895b': {
+        link: 'https://www.curve.fi/ren/',
+        service: 'Curve.fi: REN Swap',
+      },
+      '0xbb2b8038a1640196fbe3e38816f3e67cba72d940': {
+        link:
+          'https://info.uniswap.org/pair/0xbb2b8038a1640196fbe3e38816f3e67cba72d940',
+        service: 'UniSwap V2: WBTC',
+      },
+      '0xceff51756c56ceffca006cd410b03ffc46dd3a58': {
+        link:
+          'https://sushiswap.vision/pair/0xceff51756c56ceffca006cd410b03ffc46dd3a58',
+        service: 'SushiSwap: WBTC',
+      },
+      '0x7fc77b5c7614e1533320ea6ddc2eb61fa00a9714': {
+        link: 'https://www.curve.fi/sbtc',
+        service: 'Curve.fi: sBTC',
+      },
+      '0x65b0bf8ee4947edd2a500d74e50a3d757dc79de0': {
+        link: 'https://nexo.io/borrow',
+        service: 'Nexo: WBTC Merchant Deposit',
+      },
+      '0x1eff8af5d577060ba4ac8a29a13525bb0ee2a3d5': {
+        link:
+          'https://pools.balancer.exchange/#/pool/0x1eff8af5d577060ba4ac8a29a13525bb0ee2a3d5',
+        service: 'Balancer: ETH/WBTC 50/50',
+      },
+      '0x20dd9e22d22dd0a6ef74a520cb08303b5fad5de7': {
+        link: 'https://www.hegic.co/',
+        service: 'Hegic: WBTC',
+      },
+      '0xc25099792e9349c7dd09759744ea681c7de2cb66': {
+        link: 'https://www.curve.fi/tbtc',
+        service: 'Curve.fi: tBTC',
+      },
+      '0xabbee9fc7a882499162323eeb7bf6614193312e3': {
+        link:
+          'https://tools.umaproject.org/?address=0xaBBee9fC7a882499162323EEB7BF6614193312e3',
+        service: 'UMA: uUSDrBTC',
+      },
+      '0x53463cd0b074e5fdafc55dce7b1c82adf1a43b2e': {
+        link: 'https://app.keeperdao.com/',
+        service: 'KeeperDAO',
+      },
+    }
+    if (address in lookUp) {
+      return lookUp[address]
+    } else {
+      return {
+        link: `https://etherscan.io/address/${address}`,
+        service: address,
+      }
+    }
+  }
   return (
     <>
       <TitleHeading>Biggest Tokenized Bitcoin Holders </TitleHeading>
@@ -145,7 +214,7 @@ const StatsTable: React.FC<StatsTableProp> = ({ rows }) => {
                     .div(rowItem.decimals)
                     .toString()
                   const labelId = `enhanced-table-checkbox-${index}`
-
+                  const { link, service } = mapAddressToService(rowItem.address)
                   return (
                     <TableRow
                       role="checkbox"
@@ -156,11 +225,8 @@ const StatsTable: React.FC<StatsTableProp> = ({ rows }) => {
                       }}
                     >
                       <TableCell>
-                        <a
-                          href={`https://etherscan.io/address/${rowItem.address}`}
-                          target="_blank"
-                        >
-                          {rowItem.address}
+                        <a href={link} target="_blank">
+                          {service}
                         </a>
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row">
@@ -216,6 +282,11 @@ const Stats: React.FC = () => {
         symbol: 'renBTC',
         decimal: 1e8,
       },
+      {
+        address: '0xfe18be6b3bd88a2d2a7f928d00292e7a9963cfc6',
+        symbol: 'sBTC',
+        decimal: 1e18,
+      },
     ]
 
     for (let i in tokens) {
@@ -236,15 +307,19 @@ const Stats: React.FC = () => {
       if (res === undefined) {
         return
       }
-      console.log(res.holders)
-
       for (let y in res.holders) {
-        tempRows.push({
-          address: res.holders[y].address,
-          balance: res.holders[y].balance,
-          token: tokens[i].symbol,
-          decimals: tokens[i].decimal,
-        })
+        if (
+          new BN(res.holders[y].balance)
+            .div(tokens[i].decimal)
+            .isGreaterThan(new BN(50))
+        ) {
+          tempRows.push({
+            address: res.holders[y].address,
+            balance: res.holders[y].balance,
+            token: tokens[i].symbol,
+            decimals: tokens[i].decimal,
+          })
+        }
       }
     }
     const compare = (a: RowItem, b: RowItem) => {
