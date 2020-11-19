@@ -1,19 +1,14 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
+import {ethers, upgrades} from 'hardhat';
 import {Signer} from 'ethers';
 import chai from 'chai';
 import {solidity} from 'ethereum-waffle';
 import vector from './testVector.json';
 import {expandTo18Decimals, advanceTime} from './shared/utilities';
-import {MockErc20} from '../typechain/MockErc20';
-import {MockErc20Factory} from '../typechain/MockErc20Factory';
+import {MockERC20} from '../typechain/MockERC20';
 import {MockPriceOracle} from '../typechain/MockPriceOracle';
-import {MockPriceOracleFactory} from '../typechain/MockPriceOracleFactory';
 import {DutchSwapAuction} from '../typechain/DutchSwapAuction';
-import {DutchSwapAuctionFactory} from '../typechain/DutchSwapAuctionFactory';
 import {DutchSwapFactory} from '../typechain/DutchSwapFactory';
-import {DutchSwapFactoryFactory} from '../typechain/DutchSwapFactoryFactory';
 import {AuctionManager} from '../typechain/AuctionManager';
-import {AuctionManagerFactory} from '../typechain/AuctionManagerFactory';
 
 chai.use(solidity);
 const {expect} = chai;
@@ -24,8 +19,8 @@ describe('AuctionManager', () => {
   let bob: Signer;
   let auctionTemplate: DutchSwapAuction;
   let factory: DutchSwapFactory;
-  let strudel: MockErc20;
-  let vBtc: MockErc20;
+  let strudel: MockERC20;
+  let vBtc: MockERC20;
   let btcPriceOracle: MockPriceOracle;
   let vBtcPriceOracle: MockPriceOracle;
   let strudelPriceOracle: MockPriceOracle;
@@ -33,27 +28,34 @@ describe('AuctionManager', () => {
 
   before(async () => {
     [alice, bob] = await ethers.getSigners();
-    strudel = await new MockErc20Factory(alice).deploy(
+    const MockErc20Factory = await ethers.getContractFactory("MockERC20");
+    strudel = await MockErc20Factory.deploy(
       'Strudel',
       '$TRDL',
       18,
       expandTo18Decimals(200000)
-    );
-    vBtc = await new MockErc20Factory(bob).deploy('VBTC', 'VBTC', 18, expandTo18Decimals(8));
-    auctionTemplate = await new DutchSwapAuctionFactory(alice).deploy();
-    factory = await new DutchSwapFactoryFactory(alice).deploy();
+    ) as MockERC20;
+    vBtc = await MockErc20Factory.deploy(
+      'VBTC', 'VBTC', 18, expandTo18Decimals(8)
+    ) as MockERC20;
+    const DutchSwapAuctionFactory = await ethers.getContractFactory("DutchSwapAuction");
+    auctionTemplate = await DutchSwapAuctionFactory.deploy() as DutchSwapAuction;
+    const DutchSwapFactoryFactory = await ethers.getContractFactory("DutchSwapFactory");
+    factory = await DutchSwapFactoryFactory.deploy() as DutchSwapFactory;
     await factory.initDutchSwapFactory(auctionTemplate.address, 0);
-    btcPriceOracle = await new MockPriceOracleFactory(alice).deploy();
-    vBtcPriceOracle = await new MockPriceOracleFactory(alice).deploy();
-    strudelPriceOracle = await new MockPriceOracleFactory(alice).deploy();
-    auctionManager = await new AuctionManagerFactory(alice).deploy(
+    const MockPriceOracleFactory = await ethers.getContractFactory("MockPriceOracle");
+    btcPriceOracle = await MockPriceOracleFactory.deploy() as MockPriceOracle;
+    vBtcPriceOracle = await MockPriceOracleFactory.deploy() as MockPriceOracle;
+    strudelPriceOracle = await MockPriceOracleFactory.deploy() as MockPriceOracle;
+    const AuctionManagerFactory = await ethers.getContractFactory("AuctionManager");
+    auctionManager = await AuctionManagerFactory.deploy(
       strudel.address,
       vBtc.address,
       btcPriceOracle.address,
       vBtcPriceOracle.address,
       strudelPriceOracle.address,
       factory.address
-    );
+    ) as AuctionManager;
   });
 
   it('should allow to start auction', async () => {
@@ -64,7 +66,8 @@ describe('AuctionManager', () => {
     await strudelPriceOracle.update('200');
     await auctionManager.rotateAuctions();
     let currentAuctionAddr = await auctionManager.currentAuction();
-    const auction = new DutchSwapAuctionFactory(alice).attach(currentAuctionAddr);
+    const DutchSwapAuctionFactory = await ethers.getContractFactory("DutchSwapAuction");
+    const auction = DutchSwapAuctionFactory.attach(currentAuctionAddr);
 
     // participate in vBTC buy auction
     await advanceTime(60 * 60 * 11 + 60 * 45);
@@ -90,7 +93,7 @@ describe('AuctionManager', () => {
     expect(bal.div('100000000000000').toString()).to.eq('139');
     await auctionManager.rotateAuctions();
     currentAuctionAddr = await auctionManager.currentAuction();
-    const auction2 = new DutchSwapAuctionFactory(alice).attach(currentAuctionAddr);
+    const auction2 = DutchSwapAuctionFactory.attach(currentAuctionAddr);
 
     // check results of buy auction
     await auction.connect(bob).withdrawTokens();

@@ -1,7 +1,7 @@
-import '@nomiclabs/hardhat-ganache';
 import '@nomiclabs/hardhat-waffle';
+import '@nomiclabs/hardhat-ganache';
 import '@nomiclabs/hardhat-ethers';
-import '@openzeppelin/hardhat-upgrades'
+import '@openzeppelin/hardhat-upgrades';
 import 'hardhat-typechain';
 import 'hardhat-gas-reporter';
 import 'hardhat-deploy';
@@ -17,8 +17,10 @@ const config = {
     optimizer: {enabled: true, runs: 500},
   },
   paths: {
-    sources: './contracts',
-    tests: './test',
+    sources: "./contracts",
+    tests: "./test",
+    cache: "./cache",
+    artifacts: "./artifacts"
   },
   typechain: {
     outDir: 'typechain',
