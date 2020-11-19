@@ -32,4 +32,8 @@ contract MockERC20 is ERC20UpgradeSafe {
   function burn(uint256 _amount) external {
     _burn(msg.sender, _amount);
   }
+
+  function renounceMinter() public {
+    // do nothing
+  }
 }

@@ -15,15 +15,15 @@ contract AuctionManager is OwnableUpgradeSafe {
   // used as factor when dealing with %
   uint256 constant ACCURACY = 1e4;
   // when 95% at market price, start selling
-  uint256 constant SELL_THRESHOLD = 9500;
+  uint256 public sellThreshold;
   // cap auctions at certain amount of $TRDL minted
-  uint256 constant DILUTION_BOUND = 70; // 0.7% of $TRDL total supply
+  uint256 public dilutionBound;
   // stop selling when volume small
-  uint256 constant DUST_THRESHOLD = 10; // 0.1% of $TRDL total supply
+  uint256 public dustThreshold;
   // % start_price above estimate, and % min_price below estimate
-  uint256 constant PRICE_SPAN = 2500; // 25%
+  uint256 public priceSpan;
   // auction duration
-  uint256 constant DURATION = (60 * 60 * 23) + (60 * 30); // ~23,5h
+  uint256 public auctionDuration;
 
   MockERC20 private strudel;
   IERC20 private vBtc;
@@ -41,12 +41,18 @@ contract AuctionManager is OwnableUpgradeSafe {
     address _strudelPriceOracle,
     address _auctionFactory
   ) public {
+    __Ownable_init();
     strudel = MockERC20(_strudelAddr);
     vBtc = IERC20(_vBtcAddr);
     btcPriceOracle = IPriceOracle(_btcPriceOracle);
     vBtcPriceOracle = IPriceOracle(_vBtcPriceOracle);
     strudelPriceOracle = IPriceOracle(_strudelPriceOracle);
     auctionFactory = IDutchSwapFactory(_auctionFactory);
+    sellThreshold = 9500; // vBTC @ 95% of BTC price or above
+    dilutionBound = 70; // 0.7% of $TRDL total supply
+    dustThreshold = 10; // 0.1% of $TRDL total supply
+    priceSpan = 2500; // 25%
+    auctionDuration = 84600; // ~23,5h
   }
 
   function _getDiff(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -61,7 +67,13 @@ contract AuctionManager is OwnableUpgradeSafe {
   function rotateAuctions() external {
     if (address(currentAuction) != address(0)) {
       require(currentAuction.auctionEnded(), "previous auction hasn't ended");
-      currentAuction.finaliseAuction();
+      try currentAuction.finaliseAuction()  {
+        // do nothing
+      } catch Error(string memory) {
+        // do nothing
+      } catch (bytes memory) {
+        // do nothing
+      }
       uint256 studelReserves = strudel.balanceOf(address(this));
       if (studelReserves > 0) {
         strudel.burn(studelReserves);
@@ -84,12 +96,12 @@ contract AuctionManager is OwnableUpgradeSafe {
 
     // cap by dillution bound
     imbalance = Math.min(
-      strudelSupply.mul(DILUTION_BOUND).mul(strudelPriceInEth).div(ACCURACY),
+      strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY),
       imbalance
     );
 
     // pause if imbalance below dust threshold
-    if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(DUST_THRESHOLD).div(ACCURACY)) {
+    if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(dustThreshold).div(ACCURACY)) {
       // pause auctions
       currentAuction = IDutchAuction(address(0));
       return;
@@ -97,7 +109,7 @@ contract AuctionManager is OwnableUpgradeSafe {
 
     // determine what kind of auction we want
     uint256 priceRelation = btcPriceInEth.mul(ACCURACY).div(vBtcPriceInEth);
-    if (priceRelation < ACCURACY.mul(ACCURACY).div(SELL_THRESHOLD)) {
+    if (priceRelation < ACCURACY.mul(ACCURACY).div(sellThreshold)) {
       // cap vBtcAmount by imbalance in vBTC
       vBtcAmount = Math.min(vBtcAmount, imbalance.div(vBtcPriceInEth));
       // calculate vBTC price
@@ -109,34 +121,72 @@ contract AuctionManager is OwnableUpgradeSafe {
           address(vBtc),
           vBtcAmount,
           now,
-          now + DURATION,
+          now + auctionDuration,
           address(strudel),
-          imbalance.mul(ACCURACY.add(PRICE_SPAN)).div(ACCURACY), // startPrice
-          imbalance.mul(ACCURACY.sub(PRICE_SPAN)).div(ACCURACY), // minPrice
+          imbalance.mul(ACCURACY.add(priceSpan)).div(ACCURACY), // startPrice
+          imbalance.mul(ACCURACY.sub(priceSpan)).div(ACCURACY), // minPrice
           address(this)
         )
       );
     } else {
-      // auction off some $TRDL
       // calculate imbalance in $TRDL
       imbalance = imbalance.div(strudelPriceInEth);
       strudel.mint(address(this), imbalance);
       strudel.approve(address(auctionFactory), imbalance);
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
-
+      // auction off some $TRDL
       currentAuction = IDutchAuction(
         auctionFactory.deployDutchAuction(
           address(strudel),
           imbalance,
           now,
-          now + DURATION,
+          now + auctionDuration,
           address(vBtc),
-          vBtcAmount.mul(ACCURACY.add(PRICE_SPAN)).div(ACCURACY), // startPrice
-          vBtcAmount.mul(ACCURACY.sub(PRICE_SPAN)).div(ACCURACY), // minPrice
+          vBtcAmount.mul(ACCURACY.add(priceSpan)).div(ACCURACY), // startPrice
+          vBtcAmount.mul(ACCURACY.sub(priceSpan)).div(ACCURACY), // minPrice
           address(this)
         )
       );
     }
+  }
+
+  function setSellThreshold(uint256 _threshold) external onlyOwner {
+    require(_threshold >= 6000, "threshold below 60% minimum");
+    require(_threshold <= 12000, "threshold above 120% maximum");
+    sellThreshold = _threshold;
+  }
+
+  function setDulutionBound(uint256 _dilutionBound) external onlyOwner {
+    require(_dilutionBound > dustThreshold, "dilution bound below dustThreshold");
+    require(_dilutionBound <= 1000, "dilution bound above 10% max value");
+    dilutionBound = _dilutionBound;
+  }
+
+  function setDustThreshold(uint256 _dustThreshold) external onlyOwner {
+    require(_dustThreshold > 0, "dust threshold can not be 0");
+    require(_dustThreshold < dilutionBound, "dust threshold above dilution bound");
+    dustThreshold = _dustThreshold;
+  }
+
+  function setPriceSpan(uint256 _priceSpan) external onlyOwner {
+    require(_priceSpan > 1000, "price span should have at least 10%");
+    require(_priceSpan < ACCURACY, "price span larger accuracy");
+    priceSpan = _priceSpan;
+  }
+
+  function setAuctionDuration(uint256 _auctionDuration) external onlyOwner {
+    require(_auctionDuration >= 3600, "auctions should run at laest for 1 hour");
+    require(_auctionDuration <= 604800, "auction duration should be less than week");
+    auctionDuration = _auctionDuration;
+  }
+
+  function renounceMinter() external onlyOwner {
+    strudel.renounceMinter();
+  }
+
+  function swipe(address tokenAddr) external onlyOwner {
+    IERC20 token = IERC20(tokenAddr);
+    token.transfer(owner(), token.balanceOf(address(this)));
   }
 }

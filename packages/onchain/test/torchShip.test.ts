@@ -403,7 +403,8 @@ describe('TorchShip', async () => {
       expect(latestPos).to.eq(2);
 
       // double observed supply
-      await refToken.mint(expandTo18Decimals(1));
+      const devAddr = await dev.getAddress();
+      await refToken.connect(dev).mint(devAddr, expandTo18Decimals(1));
 
       // update observations
       currentHeight += 2 * PERIOD_SIZE;
