@@ -18,6 +18,11 @@ export async function advanceBlock(height: number): Promise<any> {
   return ethers.provider.send('evm_mine', []);
 }
 
+export async function advanceTime(seconds: number): Promise<any> {
+  await ethers.provider.send('evm_increaseTime', [seconds]);
+  return ethers.provider.send('evm_mine', []);
+}
+
 export function encodePrice(reserve0: BigNumber, reserve1: BigNumber) {
   return reserve0.mul(BigNumber.from(2).pow(112)).div(reserve1);
 }
