@@ -8,7 +8,7 @@ const { PoorManRpc } = require('./utils/poorManRpc');
 
 let provider;
 
-exports.handler = async (event, context) => {
+exports.handler = async (event, context, callback) => {
   const providerUrl = process.env.PROVIDER_URL;
   const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
   const path = event.requestPath;
@@ -28,6 +28,9 @@ exports.handler = async (event, context) => {
     new DB(process.env.TABLE_NAME),
     provider,
     bclient,
+    process.env.CERT,
+    process.env.CHAIN,
+    process.env.PRIV,
   );
 
   if (path.indexOf('account') > -1 && method === 'GET') {
@@ -49,6 +52,24 @@ exports.handler = async (event, context) => {
   }
   if (path.indexOf('payment') > -1 && method === 'POST') {
       return await service.addBtcTx(event.path.txHash, body.txData);
+  }
+  if (path.indexOf('syn') > -1 && method === 'POST') {
+      const res = await service.paySyn(event.path.destination, event.path.amount);
+      callback(null, {
+        statusCode: 200,
+        headers: res.headers,
+        body: res.rawBody.toString('base64')
+      });
+      return;
+  }
+  if (path.indexOf('ack') > -1 && method === 'POST') {
+      const res = await service.payAck(body);
+      callback(null, {
+        statusCode: 200,
+        headers: res.headers,
+        body: res.rawBody.toString('base64')
+      });
+      return;
   }
   if (path.indexOf('watchlist') > -1 && method === 'GET') {
       return await service.getWatchlist();

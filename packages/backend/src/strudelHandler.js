@@ -1,15 +1,22 @@
 const { Errors } = require('leap-lambda-boilerplate');
 const ethers = require('ethers');
+const bitcore = require("bitcore-lib");
+const PaymentProtocol = require("bitcore-payment-protocol");
+
 const ADDR_REGEX = /0x[A-Fa-f0-9]{40}/;
 const { Transaction, opcodes } = require('bitcoinjs-lib');
 const getProof = require('./utils/proof');
+const PROTOCOL_ID = Buffer.from("07ffff", "hex"); // 2^19-1
 
 module.exports = class StrudelHandler {
 
-  constructor(db, provider, bclient) {
+  constructor(db, provider, bclient, cert, chain, priv) {
     this.db = db;
     this.provider = provider;
     this.bclient = bclient;
+    this.cert = cert;
+    this.chain = chain;
+    this.priv = priv;
   }
 
   async getAccount(accountAddr) {
@@ -50,6 +57,7 @@ module.exports = class StrudelHandler {
     // parse tx
     const tx = Transaction.fromBuffer(Buffer.from(txData.replace('0x', ''), 'hex'));
     const txId = tx.getId();
+    console.log('txId: ', txId);
 
     // verify hash
     const hashBuf = Buffer.from(txHash.replace('0x', ''), 'hex');
@@ -126,4 +134,87 @@ module.exports = class StrudelHandler {
     const proof = await getProof(this.bclient, txHash, blockHash, txData);
     return JSON.stringify(proof);
   }
+
+  async paySyn(destinationAddress, amount) {
+    if (!ADDR_REGEX.test(destinationAddress)) {
+      throw new Errors.BadRequest(`${destinationAddress} invalid ethereum address.`);
+    }
+    //const amount = req.params.amount;
+    // TODO: sanitize amount input
+
+    destinationAddress = destinationAddress.replace("0x", "");
+
+    const dataBuf = Buffer.alloc(23);
+    PROTOCOL_ID.copy(dataBuf, 0, 0, 3);
+    Buffer.from(destinationAddress, "hex").copy(dataBuf, 3, 0, 20);
+    const script = bitcore.Script.buildDataOut(dataBuf).toBuffer();
+    const output = new PaymentProtocol().makeOutput();
+    output.set("amount", amount);
+    output.set("script", script);
+
+    const now = (Date.now() / 1000) | 0;
+    const details = new PaymentProtocol("BTC").makePaymentDetails();
+    details.set("network", "main");
+    details.set("outputs", output.message);
+    details.set("time", now);
+    details.set("expires", now + 60 * 60 * 24);
+    details.set("memo", "A request to enter the strudel.");
+    details.set("payment_url", "https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/ack");
+    details.set("merchant_data", Buffer.from(JSON.stringify({ foo: "bar" })));
+    const certificates = new PaymentProtocol().makeX509Certificates();
+    certificates.set("certificate", [
+      this.cert,
+      this.chain,
+    ]);
+    const request = new PaymentProtocol().makePaymentRequest();
+    request.set("payment_details_version", 1);
+    request.set("pki_type", "x509+sha256");
+    request.set("pki_data", certificates.serialize());
+    console.log(details);
+    request.set("serialized_payment_details", details.serialize());
+    request.sign(this.priv);
+    const rawBody = request.serialize();
+
+    return {
+      headers: {
+          "Content-Type": PaymentProtocol.LEGACY_PAYMENT.BTC.REQUEST_CONTENT_TYPE,
+          "Content-Length": rawBody.length,
+          "Content-Transfer-Encoding": "binary",
+        },
+      rawBody
+    };
+  }
+
+  async payAck(bodyRaw) {
+    // Decode payment
+    const body = PaymentProtocol.Payment.decode(bodyRaw);
+    const payment = new PaymentProtocol().makePayment(body);
+    const merchantData = payment.get("merchant_data");
+    const transactions = payment.get("transactions");
+    const txData = transactions[0].toString("hex");
+    console.log("received tx: ", txData);
+
+    const rsp = await this.bclient.sendRawTransaction(txData);
+    console.log("broacasted respone: ", rsp);
+    const txHash = JSON.parse(rsp).result;
+    console.log("txHash:", txHash);
+
+    await this.addBtcTx(txHash, txData);
+
+    // Make a payment acknowledgement
+    const ack = new PaymentProtocol().makePaymentACK();
+    ack.set("payment", payment.message);
+    ack.set("memo", "Thank you for your payment!");
+    const rawBody = ack.serialize();
+
+    return {
+      headers: {
+        "Content-Type": PaymentProtocol.LEGACY_PAYMENT.BTC.ACK_CONTENT_TYPE,
+        "Content-Length": rawBody.length,
+        "Content-Transfer-Encoding": "binary",
+        },
+      rawBody
+    };
+  }
+
 }

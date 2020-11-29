@@ -1,8 +1,16 @@
 service: strudel-finance
+plugins:
+  - serverless-apigw-binary
+  - serverless-apigwy-binary
+  - serverless-offline
 
 custom:
   serverless-offline:
     port: 3001
+  apigwBinary:
+    types:
+      - 'application/bitcoin-paymentrequest'
+      - 'application/bitcoin-paymentack'
   table: strudel-${opt:stage}
   region: eu-west-1
   bcdRpc: 'bcd.strudel.finance'
@@ -71,6 +79,13 @@ responseMappings: &response_mappings
             Access-Control-Allow-Origin: "'*'"
 
 functions:
+  resize:
+    handler: lib/resize
+    events:
+      - http: 
+          method: get
+          path:  resize
+          contentHandling: CONVERT_TO_BINARY
   bridge-service:
     timeout: 30
     handler: src/strudel.handler
@@ -108,6 +123,16 @@ functions:
           cors: true
           response: *response_mappings
       - http:
+          method: post
+          path: /syn/{destination}/{amount}
+          integration: lambda
+          cors: true
+      - http:
+          method: post
+          path: /ack
+          integration: lambda
+          cors: true
+      - http:
           method: get
           path: /watchlist
           integration: lambda
@@ -119,9 +144,6 @@ functions:
           integration: lambda
           cors: true
           response: *response_mappings
-
-plugins:
-  - serverless-offline
 
 resources:
   Resources:

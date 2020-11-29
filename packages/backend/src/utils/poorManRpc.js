@@ -48,5 +48,16 @@ exports.PoorManRpc = class PoorManRpc {
     };
     return httpRequest(this.request, options);
   }
+
+  sendRawTransaction(txData) {
+    const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"sendrawtransaction","params":["${txData}"]}`;
+    const options = {
+      url: `http://${this.user}:${this.password}@${this.host}:${this.port}/`,
+      method: "POST",
+      headers: headers,
+      body: dataString
+    };
+    return httpRequest(this.request, options);
+  }
   
 }
