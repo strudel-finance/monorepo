@@ -6,7 +6,7 @@ const sinon = require('sinon');
 const StrudelHandler = require('./strudelHandler');
 const { DB } = require('./utils/db');
 const ethers = require('ethers');
-const Client = require('bitcoin-core');
+const { PoorManRpc } = require('./utils/poorManRpc');
 const { expect } = chai;
 const { ValidateSPV, ser } = require("@summa-tx/bitcoin-spv-js");
 const PROOF_DATA = require('./testData/proofData');
@@ -106,7 +106,7 @@ describe('StrudelHandler', () => {
         logs: [{}, {}, {}, {
           topics: [
             '0x3d023d90350b769385d88d9e75401f8b4e4431afbcb22be877125e15b5fb1d5b',
-            `0x${OP_RETURN_TX_ID_LE}`,
+            `0x${OP_RETURN_TX_ID_LE.replace('0x', '').match(/.{2}/g).reverse().join("")}`,
             `0x000000000000000000000000${ADDR2.replace('0x', '')}`
           ],
           data: '0x0000000000000000000000000000000000000000000000000011ac8de2d420000000000000000000000000000000000000000000000000000000000000000001'
@@ -204,7 +204,7 @@ describe('StrudelHandler', () => {
           "amount": "497480",
           "btcTxHash": OP_RETURN_TX_ID_LE,
           "dateCreated": DATE,
-          "outputIndex": "0"
+          "burnOutputIndex": "0"
         }]
       });
     });
@@ -212,15 +212,14 @@ describe('StrudelHandler', () => {
 
   describe('getInclusionProof', () => {
     it('should give proof', async () => {
-      const bclient = new Client();
+      const bclient = new PoorManRpc();
       sinon.stub(bclient, 'getBlock').resolves(PROOF_DATA.BLOCK);
-      sinon.stub(bclient, 'getBlockHeader').resolves(PROOF_DATA.BLOCK_HEADER);
+      sinon.stub(bclient, 'getHeader').resolves(PROOF_DATA.BLOCK_HEADER);
       
       const txid = PROOF_DATA.TXID;
       const blockhash = PROOF_DATA.BLOCK_HASH;
       
-      const rsp = await new StrudelHandler(null, null, bclient).getInclusionProof(txid, blockhash);
-
+      const rsp = await new StrudelHandler(null, null, bclient).getInclusionProof(txid, blockhash, PROOF_DATA.TXDATA);
       let SPVProof = ser.deserializeSPVProof(rsp);
       expect(ValidateSPV.validateProof(SPVProof)).to.eql(true);
     });

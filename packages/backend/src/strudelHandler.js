@@ -93,7 +93,6 @@ module.exports = class StrudelHandler {
     //   - same amount
     //   - same account
     const receipt = await this.provider.getTransactionReceipt(ethTxHash);
-    console.log(receipt);
     let parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
     // reverse 
     parsedTxHash = parsedTxHash.match(/.{2}/g).reverse().join("");
@@ -121,6 +120,9 @@ module.exports = class StrudelHandler {
   }
 
   async getInclusionProof(txHash, blockHash, txData) {
+    if (!txData) {
+      throw new Errors.BadRequest(`tx Data missing.`);
+    }
     const proof = await getProof(this.bclient, txHash, blockHash, txData);
     return JSON.stringify(proof);
   }
