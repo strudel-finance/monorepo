@@ -12,6 +12,7 @@ import VBTCProvider from './contexts/VBTCProvider'
 import useModal from './hooks/useModal'
 import theme from './theme'
 import Farms from './views/Farms'
+import Second from './views/Second'
 import Home from './views/Home'
 import Stake from './views/Stake'
 import { useTracking } from './hooks/useTracking'
@@ -54,6 +55,9 @@ const App: React.FC = () => {
       <Switch>
         <Route path="/" exact>
           <Home />
+        </Route>
+        <Route path="/second">
+          <Second />
         </Route>
         <Route path="/farms">
           <Farms />
