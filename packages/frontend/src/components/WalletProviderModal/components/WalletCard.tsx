@@ -18,12 +18,12 @@ interface WalletCardProps {
 const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title }) => {
   const [chainId, setChainId] = useState('')
 
-  useEffect(() => {
+  /*useEffect(() => {
     if (chainId.length && chainId !== '0x01') {
       showError('You are on an incorrect network. Please change to mainnet!')
       setChainId('')
     }
-  }, [chainId])
+  }, [chainId])*/
 
   return (
     <Card>

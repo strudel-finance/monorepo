@@ -164,7 +164,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
             <StyledBalanceWrapper>
               <QRCode
                 size={256}
-                value={`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
+                value={`bitcoin:?r=https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/${address}/${sb
                   .toSatoshi(value)
                   .toString()}`}
               />
@@ -173,7 +173,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
               <StyledBalance>
                 <p
                   style={{ wordBreak: 'break-all', textAlign: 'center' }}
-                >{`bitcoin:?r=https://bip70.strudel.finance/${address}/${sb
+                >{`bitcoin:?r=https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/${address}/${sb
                   .toSatoshi(value)
                   .toString()}`}</p>
                 <Label>Please scan the following QR code</Label>
