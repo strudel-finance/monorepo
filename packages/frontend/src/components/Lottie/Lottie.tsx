@@ -6,11 +6,8 @@ import vBTCSpin from './vBTC_spin.json'
 import strudelOnly from './Strudel_only.json'
 import terraFarm from './terra-farm.json'
 
-<<<<<<< Updated upstream
-=======
 import strudelHeaderAnimation1 from './ANIMATION_STRUDEL.json';
 
->>>>>>> Stashed changes
 const Lottie = () => {
   const options = {
     animationData: strudelHeaderAnimation1,

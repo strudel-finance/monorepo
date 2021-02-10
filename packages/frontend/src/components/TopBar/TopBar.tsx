@@ -5,6 +5,7 @@ import Container from '../Container'
 import Logo from '../Logo'
 
 import AccountButton from './components/AccountButton'
+import UniSwapButton from './components/UniSwapButton'
 import Nav from './components/Nav'
 
 interface TopBarProps {
@@ -23,12 +24,13 @@ const TopBar: React.FC<TopBarProps> = ({ onPresentMobileMenu }) => {
             <Nav />
           </StyledNavWrapper>
           <StyledAccountButtonWrapper>
-            <AccountButton />
+            <UniSwapButton />
+            {/*<AccountButton /> */ }
           </StyledAccountButtonWrapper>
           <StyledMenuButton onClick={onPresentMobileMenu}>
             <svg height="24" viewBox="0 0 24 24" width="24">
               <path d="M0 0h24v24H0z" fill="none"></path>
-              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"></path>
+              <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z" fill="white"></path>
             </svg>
           </StyledMenuButton>
         </StyledTopBarInner>
@@ -47,7 +49,7 @@ const StyledLogoWrapper = styled.div`
 const StyledTopBar = styled.div`
   position: sticky;
   top: 0;
-  background: white;
+  background: black;
   z-index: 99;
 `
 
@@ -72,7 +74,7 @@ const StyledAccountButtonWrapper = styled.div`
   align-items: center;
   display: flex;
   justify-content: flex-end;
-  width: 156px;
+  width: 260px;
   @media (max-width: 500px) {
     justify-content: center;
     width: auto;
@@ -85,6 +87,7 @@ const StyledMenuButton = styled.button`
   margin: 0;
   outline: 0;
   padding: 0;
+  cursor: pointer;
   display: none;
   @media (max-width: 500px) {
     align-items: center;
