@@ -24,7 +24,7 @@ const StyledAccountButton = styled.div`
     display: flex;
 `
 const SwapBtn = styled.button`
-  background-color: #fdb400 !important;
+  background-color: #0f70b7 !important;
   border-radius:30px;
   border:2px solid #1c6fa6;
   color: white;

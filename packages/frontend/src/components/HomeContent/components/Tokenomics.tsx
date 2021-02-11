@@ -2,6 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import Container from '@material-ui/core/Container'
 import backgroundImg from '../../../assets/img/bluewithbtc.png'
+import pdf from '../../../assets/pdf/download.pdf'
 
 const Tokenomics: React.FC = () => (
     <>
@@ -15,7 +16,8 @@ const Tokenomics: React.FC = () => (
                 <SectionRight>
                     <SectionDesc>$TRDL (/ˈstruːdəl/) is the governance and reward token for the Strudel Protocol. It is created on 2 separate occasions: <br/> When a user crosses BTC over the bridge, $TRDLs are minted alongside vBTC. <br/>  $TRDL rewards are distributed per block to liquidity providers of various terra-farming pools. <br/> 🚀 Terra-farming starts at block #11.021.639 with 1 $TRDL per block.</SectionDesc>
                     <BtnSection>
-                        <PitchDeckBtn target="_blank" href="https://etherscan.io/token/0x297d33e17e61c2ddd812389c2105193f8348188a">pitch deck</PitchDeckBtn>
+                       <PitchDeckBtn target="_blank" href="https://etherscan.io/token/0x297d33e17e61c2ddd812389c2105193f8348188a">etherscan</PitchDeckBtn>
+                       <PitchDeckBtn  href={pdf} download>pitchdeck</PitchDeckBtn>
                     </BtnSection>
                 </SectionRight>
                </SectionWraper>
@@ -96,15 +98,18 @@ const PitchDeckBtn = styled.a`
     border-radius: 30px;
     padding: 10px 20px;
     text-decoration: none;
+    margin:10px;
 `
 const BtnSection = styled.div`
     display:flex;
     justify-content: flex-end;
     margin-right: 50px;
     margin-top: 30px;
+    flex-wrap: wrap;
     @media only screen and (max-width: 768px){
         margin:auto;
         margin-top: 30px;
+        justify-content: center;
     }
 `
 export default Tokenomics

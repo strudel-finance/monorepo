@@ -131,7 +131,6 @@ const Home: React.FC = () => {
     <Page>
       <StyledLottieContainer>
         <Lottie /> 
-
       </StyledLottieContainer>
       <StyledLottieMobileContainer>
         <MobileLottie />

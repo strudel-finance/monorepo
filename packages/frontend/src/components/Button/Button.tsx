@@ -121,13 +121,15 @@ interface StyledButtonProps {
   padding: number
   size: number
 }
-
-const StyledButton = styled.button<StyledButtonProps>`
-  align-items: center;
-  background-color: ${(props) =>
+/*
+background-color: ${(props) =>
     !props.disabled
       ? props.theme.color.purple[100]
       : props.theme.color.purple[50]};
+*/
+const StyledButton = styled.button<StyledButtonProps>`
+  align-items: center;
+  background-color: #0f70b7;
   border: 0;
   border-radius: 12px;
   box-shadow: ${(props) => props.boxShadow};

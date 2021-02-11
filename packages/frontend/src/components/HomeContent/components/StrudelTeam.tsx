@@ -22,8 +22,8 @@ const StrudelTeam: React.FC = () => (
                             <MemberName>Xavier Vera</MemberName>
                             <MemberRole>CHIEF STRATEGY OFFICER</MemberRole>
                             <MemberSocialLink>
-                                <TwitterLink href="#"></TwitterLink>
-                                <LinkedinLink href="#"></LinkedinLink>
+                                <TwitterLink target="_blank" href="https://twitter.com/xaviveera"></TwitterLink>
+                                <LinkedinLink target="_blank" href="https://www.linkedin.com/in/xavier-vera-55126697/"></LinkedinLink>
                             </MemberSocialLink>
                         </TeamMember>
                         <TeamMember>
@@ -31,8 +31,8 @@ const StrudelTeam: React.FC = () => (
                             <MemberName>Emilio Andretta</MemberName>
                             <MemberRole>ADVISOR / PR</MemberRole>
                             <MemberSocialLink>
-                                <TwitterLink href="#"></TwitterLink>
-                                <LinkedinLink href="#"></LinkedinLink>
+                                <TwitterLink target="_blank" href="https://twitter.com/eandretta99"></TwitterLink>
+                                <LinkedinLink target="_blank" href="https://www.linkedin.com/in/emilio-andretta-a335bb17a/"></LinkedinLink>
                             </MemberSocialLink>
                         </TeamMember>
                         <TeamMember>
@@ -40,8 +40,8 @@ const StrudelTeam: React.FC = () => (
                             <MemberName>Carlos Vera Paz</MemberName>
                             <MemberRole>LEAD DEVELOPER</MemberRole>
                             <MemberSocialLink>
-                                <TwitterLink href="#"></TwitterLink>
-                                <LinkedinLink href="#"></LinkedinLink>
+                                <TwitterLink target="_blank" href="https://twitter.com/AtaxiaNQ"></TwitterLink>
+                                <LinkedinLink target="_blank" href="#"></LinkedinLink>
                             </MemberSocialLink>
                         </TeamMember>
                         <TeamMember>
@@ -49,8 +49,8 @@ const StrudelTeam: React.FC = () => (
                             <MemberName>Johann</MemberName>
                             <MemberRole>LEAD DEVELOPER</MemberRole>
                             <MemberSocialLink>
-                                <TwitterLink href="#"></TwitterLink>
-                                <LinkedinLink href="#"></LinkedinLink>
+                                <TwitterLink target="_blank" href="https://twitter.com/JohBa"></TwitterLink>
+                                <LinkedinLink target="_blank" href="#"></LinkedinLink>
                             </MemberSocialLink>
                         </TeamMember>
                         <TeamMember>
@@ -58,8 +58,8 @@ const StrudelTeam: React.FC = () => (
                             <MemberName>Keno Budde</MemberName>
                             <MemberRole>LEAD DEVELOPER</MemberRole>
                             <MemberSocialLink>
-                                <TwitterLink href="#"></TwitterLink>
-                                <LinkedinLink href="#"></LinkedinLink>
+                                <TwitterLink target="_blank" href="https://twitter.com/KenoBudde"></TwitterLink>
+                                <LinkedinLink target="_blank" href="https://www.linkedin.com/in/kenobudde/"></LinkedinLink>
                             </MemberSocialLink>
                         </TeamMember>
                     </TeamMembers>

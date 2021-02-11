@@ -23,10 +23,10 @@ const Nav: React.FC = () => {
       <StyledLink target="_blank" href="https://twitter.com/Cosmo_Strudel">
         <LinkImg src={footerTwitter}></LinkImg>
       </StyledLink>
-      <StyledLink target="_blank" href="#">
+      <StyledLink target="_blank" href="https://vm.tiktok.com/ZMeRBrCsJ/">
         <LinkImg src={footerTiktok}></LinkImg>
       </StyledLink>
-      <StyledLink target="_blank" href="#">
+      <StyledLink target="_blank" href="https://www.instagram.com/strudel.finance/">
         <LinkImg src={footerInstagram}></LinkImg>
       </StyledLink>
     </StyledNav>
