@@ -13,7 +13,7 @@ const HomeStrudel: React.FC = () => (
                 What is Strudel
             </SectionTitle>
             <SectionDesc>
-            Strudel is the first one-way, trustless bridge link- ing Bitcoin to Ethereum. vBTC, the resulting asset, trades off counterparty risk for market risk, bring- ing more diversity to the tokenized-BTC landscape. In the long term Strudel is about using the forces of crypto-economics to challenge the status quo of blockchain and free BTC from the grip of Wall Street.
+            Strudel is the first one-way, trustless bridge linking Bitcoin to Ethereum. vBTC, the resulting asset, trades off counterparty risk for market risk, bringing more diversity to the tokenized-BTC landscape. In the long term Strudel is about using the forces of crypto-economics to challenge the status quo of blockchain and free BTC from the grip of Wall Street.
             </SectionDesc>
         </FirstSectionLeft>
         <FirstSectionRight>

@@ -10,7 +10,7 @@ import strudelHeaderAnimation1 from './ANIMATION_STRUDEL.json';
 
 const Lottie = () => {
   const options = {
-    animationData: strudelHeaderAnimation1,
+    animationData: strudelHeaderAnimation,
     loop: true,
     autoplay: true,
   }

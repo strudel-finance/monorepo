@@ -137,7 +137,10 @@ const Home: React.FC = () => {
       </StyledLottieMobileContainer>
       {isCountComplete || isPast ? (
         <>
-        
+        <PageHeader
+            title="Enter the Strudel"
+            subtitle="Turn your BTC in vBTC and  earn intergalactical $TRDL rewards."
+          />
           {account && wallet.status === 'connected' ? (
             <Container fixed maxWidth="lg">
               <Grid container spacing={2}>
@@ -195,6 +198,27 @@ const Home: React.FC = () => {
 
             {/** Added new design code */}
             <HomeContent />
+            <Spacer size="lg" />
+
+            <Container>
+              <Balances />
+            </Container>
+            <Spacer size="lg" />
+            <Container>
+              <BalanceStrudel />
+            </Container>
+            <Spacer size="lg" />
+            <div
+              style={{
+                margin: '0 auto',
+              }}
+            >
+              <Button
+                text="🌋 See Terra Farms"
+                to="/farms"
+                variant="secondary"
+              />
+            </div>
           </>
         </>
       ) : (

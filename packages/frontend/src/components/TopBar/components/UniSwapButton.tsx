@@ -11,9 +11,9 @@ const UniSwapButton: React.FC<UniSwapButtonProps> = () => {
   return (
     <StyledAccountButton>
         
-        <SwapBtn  onClick={() =>{ window.location.href='http://google.com';}}>Buy $trdl</SwapBtn>
+        <SwapBtn onClick={() =>{ window.location.href='https://app.zerion.io/invest/asset/$TRDL-0x297d33e17e61c2ddd812389c2105193f8348188a';}}>Buy $trdl</SwapBtn>
      
-        <SwapBtn onClick={ () => {window.location.href='http://google.com';}}>Buy $vBTC</SwapBtn>
+        <SwapBtn onClick={ () => {window.location.href='https://app.zerion.io/invest/asset/VBTC-0xe1406825186d63980fd6e2ec61888f7b91c4bae4';}}>Buy $vBTC</SwapBtn>
      
     </StyledAccountButton>
   )
