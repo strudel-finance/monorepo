@@ -11,7 +11,6 @@ import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
 import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
-import HomeContent  from '../../components/HomeContent'
 import { StyledCount, RenderProps } from '../../utils/countHelper'
 import Grid from '@material-ui/core/Grid'
 import Balances from './components/Balances'
@@ -28,8 +27,8 @@ import { Transaction, LoadingStatus } from '../../types/types'
 import { makeStyles, withStyles } from '@material-ui/core'
 import { startDate } from '../../constants/countdown'
 import AstroFlying from '../../assets/img/AstroFlying.png'
-import useVBTC from '../../hooks/useVBTC'
 
+import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
   container: {
     background: '#fff',
@@ -130,14 +129,17 @@ const Home: React.FC = () => {
   return (
     <Page>
       <StyledLottieContainer>
-        <Lottie /> 
+        <Lottie />
       </StyledLottieContainer>
       <StyledLottieMobileContainer>
         <MobileLottie />
       </StyledLottieMobileContainer>
       {isCountComplete || isPast ? (
         <>
-        
+          <PageHeader
+            title="Enter the Strudel"
+            subtitle="Turn your BTC in vBTC and  earn intergalactical $TRDL rewards."
+          />
           {account && wallet.status === 'connected' ? (
             <Container fixed maxWidth="lg">
               <Grid container spacing={2}>
@@ -188,13 +190,49 @@ const Home: React.FC = () => {
             </div>
           )}
           <>
-            
-              
-            
             <Spacer size="lg" />
 
-            {/** Added new design code */}
-            <HomeContent />
+            <Grid container spacing={1}>
+              <AstroGrid item xs={2}>
+                <img src={AstroFlying} height="100" />
+              </AstroGrid>
+              <AstroGrid item xs={5}>
+                <StyledP>
+                  The Strudel is the first one-way, trustless bridge linking
+                  Bitcoin and Ethereum. 
+                </StyledP>
+                <StyledP>
+                  The bravest explorers that arrive on the other side will get
+                  extra $TRDL rewards.
+                </StyledP>
+                <StyledP>
+                  You can only enter the Strudel from one direction so be aware!
+                  This action is irreversible.  
+                </StyledP>
+              </AstroGrid>
+              <AstroGrid item xs={2}></AstroGrid>
+            </Grid>
+            <Spacer size="lg" />
+
+            <Container>
+              <Balances />
+            </Container>
+            <Spacer size="lg" />
+            <Container>
+              <BalanceStrudel />
+            </Container>
+            <Spacer size="lg" />
+            <div
+              style={{
+                margin: '0 auto',
+              }}
+            >
+              <Button
+                text="🌋 See Terra Farms"
+                to="/farms"
+                variant="secondary"
+              />
+            </div>
           </>
         </>
       ) : (
