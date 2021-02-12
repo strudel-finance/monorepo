@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import Container from '@material-ui/core/Container'
 import backgroundImg from '../../../assets/img/bluewithbtc.png'
-import pdf from '../../../assets/pdf/download.pdf'
+import pdf from '../../../assets/pdf/Strudel_Finance_Pitch_Deck.pdf'
 
 const Tokenomics: React.FC = () => (
     <>
