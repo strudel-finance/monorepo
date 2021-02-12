@@ -33,7 +33,8 @@ const Farm: React.FC = () => {
     name: '',
     icon: '',
   }
-    useEffect(() => {
+
+  useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
 

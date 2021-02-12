@@ -8,12 +8,6 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/">
         Home
       </StyledLink>
-      <StyledAbsoluteLink
-        href="https://medium.com/@strudelfinance/strudel-manifesto-580759f9634b"
-        target="_blank"
-      >
-        About
-      </StyledAbsoluteLink>
       <StyledLink exact activeClassName="active" to="/farms">
         Terra-Farms
       </StyledLink>
@@ -28,6 +22,12 @@ const Nav: React.FC = () => {
       >
         Help
       </StyledAbsoluteLink>
+      <StyledAbsoluteLink
+        href="https://medium.com/@strudelfinance/strudel-manifesto-580759f9634b"
+        target="_blank"
+      >
+        About
+      </StyledAbsoluteLink>
 
     </StyledNav>
   )
@@ -36,30 +36,19 @@ const Nav: React.FC = () => {
 const StyledNav = styled.nav`
   align-items: center;
   display: flex;
-  width:100%;
-  justify-content: space-around;
 `
 
 const StyledLink = styled(NavLink)`
-  color: white;
+  color: ${(props) => props.theme.color.grey[400]};
   font-weight: 700;
   padding-left: ${(props) => props.theme.spacing[3]}px;
   padding-right: ${(props) => props.theme.spacing[3]}px;
   text-decoration: none;
   &:hover {
-    color: #fdb400;
+    color: ${(props) => props.theme.color.grey[500]};
   }
   &.active {
     color: ${(props) => props.theme.color.primary.main};
-    position: relative;
-  }
-  &.active:after {
-    content: '';
-    position:absolute;
-    top: 44px;
-    width:100%;
-    left: 0;
-    border:2px solid #fdb400;
   }
   @media (max-width: 400px) {
     padding-left: ${(props) => props.theme.spacing[2]}px;
@@ -68,18 +57,17 @@ const StyledLink = styled(NavLink)`
 `
 
 const StyledAbsoluteLink = styled.a`
-  color: white;
+  color: ${(props) => props.theme.color.grey[400]};
   font-weight: 700;
   padding-left: ${(props) => props.theme.spacing[3]}px;
   padding-right: ${(props) => props.theme.spacing[3]}px;
   text-decoration: none;
   &:hover {
-    color: #fdb400;
+    color: ${(props) => props.theme.color.grey[500]};
   }
   &.active {
-    color: #fdb400;
+    color: ${(props) => props.theme.color.primary.main};
   }
-  
   @media (max-width: 400px) {
     padding-left: ${(props) => props.theme.spacing[2]}px;
     padding-right: ${(props) => props.theme.spacing[2]}px;
