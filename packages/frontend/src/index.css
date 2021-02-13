@@ -15,3 +15,15 @@ code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+.YoutubeStarted {
+  display: none;
+}
+
+.ShowSection{
+  display: block;
+}
+
+.HiddenSection {
+  display: none;
+}
