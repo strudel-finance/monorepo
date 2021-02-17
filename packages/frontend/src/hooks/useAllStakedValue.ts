@@ -21,6 +21,7 @@ export interface StakedValue {
   totalWethValue: BigNumber
   tokenPriceInWeth: BigNumber
   poolWeight: BigNumber
+  multiplier: BigNumber
 }
 
 const useAllStakedValue = () => {
@@ -42,12 +43,14 @@ const useAllStakedValue = () => {
           lpContract,
           tokenContract,
           balancerPoolContract,
+          multiplier
         }: {
           isBalancer: boolean
           pid: number
           lpContract: Contract
           tokenContract: Contract
           balancerPoolContract: Contract
+          multiplier: number
         }) =>
           getTotalLPWethValue(
             isBalancer,
@@ -59,10 +62,10 @@ const useAllStakedValue = () => {
             vbtcContract,
             balancerPoolContract,
             vbtc,
+            block
           ),
       ),
     )
-
     setBalance(balances)
   }, [account, masterChefContract, vbtc])
 
