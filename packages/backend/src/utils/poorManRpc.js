@@ -6,7 +6,7 @@ function httpRequest(request, params) {
         const data = JSON.parse(body);
         resolve(data.result);
       } else {
-        console.log('error:', response.statusCode, error);
+        console.log('error:', error);
         reject(response.body);
       }
     });

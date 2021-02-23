@@ -159,7 +159,7 @@ module.exports = class StrudelHandler {
     details.set("time", now);
     details.set("expires", now + 60 * 60 * 24);
     details.set("memo", "A request to enter the strudel.");
-    details.set("payment_url", "https://j3x0y5yg6c.execute-api.eu-west-1.amazonaws.com/production/ack");
+    details.set("payment_url", "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack");
     details.set("merchant_data", Buffer.from(JSON.stringify({ foo: "bar" })));
     const certificates = new PaymentProtocol().makeX509Certificates();
     certificates.set("certificate", [
@@ -170,19 +170,12 @@ module.exports = class StrudelHandler {
     request.set("payment_details_version", 1);
     request.set("pki_type", "x509+sha256");
     request.set("pki_data", certificates.serialize());
-    console.log(details);
+    console.log('syn: ', details);
     request.set("serialized_payment_details", details.serialize());
     request.sign(this.priv);
     const rawBody = request.serialize();
 
-    return {
-      headers: {
-          "Content-Type": PaymentProtocol.LEGACY_PAYMENT.BTC.REQUEST_CONTENT_TYPE,
-          "Content-Length": rawBody.length,
-          "Content-Transfer-Encoding": "binary",
-        },
-      rawBody
-    };
+    return rawBody;
   }
 
   async payAck(bodyRaw) {
@@ -194,9 +187,7 @@ module.exports = class StrudelHandler {
     const txData = transactions[0].toString("hex");
     console.log("received tx: ", txData);
 
-    const rsp = await this.bclient.sendRawTransaction(txData);
-    console.log("broacasted respone: ", rsp);
-    const txHash = JSON.parse(rsp).result;
+    const txHash = await this.bclient.sendRawTransaction(txData);
     console.log("txHash:", txHash);
 
     await this.addBtcTx(txHash, txData);
@@ -204,17 +195,9 @@ module.exports = class StrudelHandler {
     // Make a payment acknowledgement
     const ack = new PaymentProtocol().makePaymentACK();
     ack.set("payment", payment.message);
-    ack.set("memo", "Thank you for your payment!");
+    ack.set("memo", "You have entered the strudel!");
     const rawBody = ack.serialize();
-
-    return {
-      headers: {
-        "Content-Type": PaymentProtocol.LEGACY_PAYMENT.BTC.ACK_CONTENT_TYPE,
-        "Content-Length": rawBody.length,
-        "Content-Transfer-Encoding": "binary",
-        },
-      rawBody
-    };
+    return rawBody;
   }
 
 }
