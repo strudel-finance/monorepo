@@ -93,6 +93,15 @@ export const getPoolWeight = async (masterChefContract, pid) => {
   return new BigNumber(allocPoint).div(new BigNumber(totalAllocPoint))
 }
 
+export const getMultiplier = async (masterChefContract, blockNumber, vbtc) => {
+  if(blockNumber < 1){
+    blockNumber = await vbtc.web3.eth.getBlockNumber()
+  }
+    const multiplier = await masterChefContract.methods.getMultiplier(blockNumber -1, blockNumber).call()
+    return new BigNumber(multiplier).div(new BigNumber(10).pow(18))
+  
+}
+
 export const getEarned = async (masterChefContract, pid, account) => {
   return masterChefContract.methods.pendingStrudel(pid, account).call()
 }
@@ -136,6 +145,7 @@ export const getTotalLPWethValue = async (
   vbtcContract,
   balancerPoolContract,
   vbtc,
+  block
 ) => {
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
@@ -201,6 +211,7 @@ export const getTotalLPWethValue = async (
     totalWethValue: totalLpWethValue.div(new BigNumber(10).pow(18)),
     tokenPriceInWeth: wethAmount.div(tokenAmount),
     poolWeight: await getPoolWeight(masterChefContract, pid),
+    multiplier: await getMultiplier(masterChefContract, block, vbtc)
   }
 }
 

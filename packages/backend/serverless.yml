@@ -1,8 +1,16 @@
 service: strudel-finance
+plugins:
+  - serverless-apigw-binary
+  - serverless-offline
 
 custom:
   serverless-offline:
     port: 3001
+  apigwBinary:
+    types:
+      - 'application/bitcoin-paymentrequest'
+      - 'application/bitcoin-paymentack'
+      - 'application/bitcoin-payment'
   table: strudel-${opt:stage}
   region: eu-west-1
   bcdRpc: 'bcd.strudel.finance'
@@ -18,6 +26,10 @@ provider:
   region: ${self:custom.region}
   runtime: nodejs10.x
   timeout: 30
+  apiGateway:
+    binaryMediaTypes:
+      - 'application/bitcoin-paymentrequest'
+      - 'application/bitcoin-paymentack'
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -109,6 +121,26 @@ functions:
           response: *response_mappings
       - http:
           method: get
+          path: /syn/{destination}/{amount}
+          integration: lambda
+          request:
+            headers:
+              Content-Type: "'application/bitcoin-payment'"
+          response:
+            headers:
+              Content-Type: "'application/bitcoin-paymentrequest'"
+      - http:
+          method: post
+          path: /ack
+          integration: lambda
+          request:
+            headers:
+              Content-Type: "'application/bitcoin-payment'"
+          response:
+            headers:
+              Content-Type: "'application/bitcoin-paymentack'"
+      - http:
+          method: get
           path: /watchlist
           integration: lambda
           cors: true
@@ -119,9 +151,6 @@ functions:
           integration: lambda
           cors: true
           response: *response_mappings
-
-plugins:
-  - serverless-offline
 
 resources:
   Resources:
