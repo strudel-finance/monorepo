@@ -9,13 +9,12 @@ const Card: React.FC<StyleProps> = ({ children, style = {} }) => (
 )
 
 const StyledCard = styled.div`
-  background: ${(props) => props.theme.color.grey[200]};
-  border: 1px solid ${(props) => props.theme.color.grey[300]}ff;
   border-radius: 12px;
-  box-shadow: inset 1px 1px 0px ${(props) => props.theme.color.grey[100]};
+  box-shadow: 0px 10px 18px #00000014;
   display: flex;
   flex: 1;
   flex-direction: column;
+  min-height: 128px;
 `
 
 export default Card

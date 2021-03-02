@@ -135,7 +135,7 @@ const BalanceStrudel: React.FC = () => {
           <StyledBalances>
             <StyledBalance>
               <StrudelIcon />
-              <Spacer />
+              <Spacer size='xs' />
               <div style={{ flex: 1 }}>
                 <Label text="Your $TRDL Balance" />
                 <Value
@@ -173,12 +173,22 @@ const BalanceStrudel: React.FC = () => {
 
 const Footnote = styled.div`
   font-size: 14px;
-  padding: 8px 20px;
-  color: ${(props) => props.theme.color.grey[400]};
-  border-top: solid 1px ${(props) => props.theme.color.grey[300]};
+  padding: 16px 20px;
+  color: ${(props) => 'rgba(37,37,44,0.48);'};
+  position: relative;
+  :after {
+    content: " ";
+    position: absolute;
+    display: flex;
+    width: calc(100% - 40px);
+    height: 1px;
+    border-top: solid 1px #E9E9E9;
+    top: 0;
+    border-top: solid 1px ${(props) => '#E9E9E9'};
+  }
 `
 const FootnoteValue = styled.div`
-  font-family: 'Roboto Mono', monospace;
+    font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
   float: right;
 `
 
