@@ -138,7 +138,7 @@ export const supportedPools = [
     tokenSymbol: 'STRDL',
     icon: '1',
   },
-  {
+  /*{
     pid: 0,
     isBalancer: true,
     balancerPoolAddresses: {
@@ -227,5 +227,5 @@ export const supportedPools = [
     symbol: 'tBTC-ETH UNI-V2 LP',
     tokenSymbol: 'tBTC',
     icon: '🦕',
-  },
+  },*/
 ]
