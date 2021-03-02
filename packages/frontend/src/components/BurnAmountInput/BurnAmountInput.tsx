@@ -31,7 +31,7 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({onChange, value}) => {
 }
 
 const StyledTokenInput = styled.div`
-  margin: 5px;
+  margin: 5px 0;
 `
 
 const StyledSpacer = styled.div`

@@ -27,7 +27,7 @@ const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
 }
 
 const StyledTokenInput = styled.div`
-  margin: 5px;
+  margin: 5px 0;
 `
 
 const StyledSpacer = styled.div`

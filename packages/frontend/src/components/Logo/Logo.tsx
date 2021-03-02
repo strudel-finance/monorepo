@@ -1,13 +1,12 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
-import strudel from '../../assets/img/Strudel.png'
+import logoHeaderDark from '../../assets/img/logo-header-dark.svg'
 
 const Logo: React.FC = () => {
   return (
     <StyledLogo to="/">
-      <img src={strudel} height="32" style={{ marginTop: -4 }} />
-      <StyledText>Strudel Finance</StyledText>
+      <img src={logoHeaderDark} height="48" style={{ marginTop: -4 }} />
     </StyledLogo>
   )
 }
@@ -25,7 +24,7 @@ const StyledLogo = styled(Link)`
 
 const StyledText = styled.span`
   color: ${(props) => props.theme.color.grey[600]};
-  font-family: 'Falstin', sans-serif;
+  font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
   font-size: 20px;
   font-weight: 500;
   letter-spacing: 0.03em;

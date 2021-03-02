@@ -37,7 +37,7 @@ const Balances: React.FC = () => {
           <StyledBalances>
             <StyledBalance>
               <VBTCIcon />
-              <Spacer />
+              <Spacer size='xs' />
               <div style={{flex: 1}}>
                 <Label text="Your vBTC Balance" />
                 <ValueBTC
