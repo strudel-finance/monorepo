@@ -17,9 +17,7 @@ import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
 import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
-import { VBTCSpin } from '../../../components/Lottie'
-import StrudleLogoIcon from '../../../assets/img/Strudel-logo-Icon.png'
-import BtcIcon from '../../../assets/img/Strudel-Bitcoin-Icon.png'
+import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -222,6 +220,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
 }
 
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 9fc2045 (FarmCard got reverted by merge. Refix)
 
 =======
 >>>>>>> 3dbef3c (Changed the whole styling for the front-end)
