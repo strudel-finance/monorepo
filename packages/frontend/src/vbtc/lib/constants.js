@@ -89,20 +89,18 @@ UNI-V2 LP Address on mainnet for reference
 
 export const supportedPools = [
   {
-    pid: 1,
+    pid: 7,
     isBalancer: false,
     url:
-      'https://info.uniswap.org/pair/0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+      'https://app.sushi.com/pair/0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
     lpAddresses: {
-      1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
-      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
+      1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
     },
     tokenAddresses: {
       1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
-      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
     },
-    name: 'Spin Strudel',
-    symbol: '$TRDL-ETH UNI-V2 LP',
+    name: 'Strudel Sushi',
+    symbol: '$TRDL-ETH SLP',
     tokenSymbol: 'STRDL',
     icon: '1',
   },
@@ -122,6 +120,7 @@ export const supportedPools = [
     tokenSymbol: 'vBTC',
     icon: '2',
   },
+<<<<<<< HEAD
   // {
   //   pid: 0,
   //   isBalancer: true,
@@ -212,4 +211,114 @@ export const supportedPools = [
   //   tokenSymbol: 'tBTC',
   //   icon: '🦕',
   // },
+=======
+  {
+    pid: 1,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+    lpAddresses: {
+      1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
+      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
+    },
+    tokenAddresses: {
+      1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
+      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
+    },
+    name: 'Spin Strudel',
+    symbol: '$TRDL-ETH UNI-V2 LP',
+    tokenSymbol: 'STRDL',
+    icon: '1',
+  },
+  {
+    pid: 0,
+    isBalancer: true,
+    balancerPoolAddresses: {
+      1: '0xe044bC87a030D370D64a6cA4531a08a4e67444E0',
+      5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03',
+    },
+    url: 'https://pool.strudel.finance/#/',
+    lpAddresses: {
+      1: '0xd439932fbc03c0f646324ef09a4a0c28c0d4008b',
+      5: '0xcd43a034efbf5b314ab48d77b4cece93e6e7876b',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+      5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
+    },
+    name: 'Power vBTC',
+    symbol: 'VBTC-ETH LP',
+    tokenSymbol: 'VBTC',
+    icon: '2',
+  },
+  {
+    pid: 6,
+    isBalancer: false,
+    url: 'https://sushiswap.fi/pair/0xbcedc25cbb0ea44e03e41dc2d00d54fe6d4646db',
+    lpAddresses: {
+      1: '0xbcedc25cbb0ea44e03e41dc2d00d54fe6d4646db',
+      5: '',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+      5: '',
+    },
+    name: 'vBTC/tBTC',
+    symbol: 'vBTC tBTC Sushi LP',
+    tokenSymbol: 'vBTC',
+    icon: '3',
+  },
+  {
+    pid: 2,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0xBb2b8038a1640196FbE3e38816F3e67Cba72D940',
+    lpAddresses: {
+      1: '0xBb2b8038a1640196FbE3e38816F3e67Cba72D940',
+      5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
+    },
+    tokenAddresses: {
+      1: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
+      5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
+    },
+    name: 'WBTC Whale',
+    symbol: 'WBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'WBTC',
+    icon: '🐋',
+  },
+  {
+    pid: 3,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x81FbEf4704776cc5bBa0A5dF3a90056d2C6900B3',
+    lpAddresses: {
+      1: '0x81FbEf4704776cc5bBa0A5dF3a90056d2C6900B3',
+      5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
+    },
+    tokenAddresses: {
+      1: '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d',
+      5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
+    },
+    name: 'renBTC Rhino',
+    symbol: 'renBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'renBTC',
+    icon: '🦏',
+  },
+  {
+    pid: 5,
+    isBalancer: false,
+    url:
+      'https://info.uniswap.org/pair/0x854056Fd40C1B52037166285B2e54Fee774d33f6',
+    lpAddresses: {
+      1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
+    },
+    tokenAddresses: {
+      1: '0x8daebade922df735c38c80c7ebd708af50815faa',
+    },
+    name: 'tBTC Dino',
+    symbol: 'tBTC-ETH UNI-V2 LP',
+    tokenSymbol: 'tBTC',
+    icon: '🦕',
+  },
+>>>>>>> 33cf301 (added new sushi pool)
 ]
