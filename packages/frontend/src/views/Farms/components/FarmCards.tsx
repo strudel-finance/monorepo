@@ -19,12 +19,6 @@ import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
 import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
 
-import Farm1 from '../../../assets/img/Farm1.png'
-import Farm2 from '../../../assets/img/Farm2.png'
-import Farm3 from '../../../assets/img/Farm3.png'
-import Farm4 from '../../../assets/img/Farm4.png'
-import Farm5 from '../../../assets/img/Farm5.png'
-
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
   url?: string
@@ -125,20 +119,6 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
       </span>
     )
   }
-  const getBackground = (): string => {
-    switch (index % 5) {
-      case 0:
-        return Farm1
-      case 1:
-        return Farm2
-      case 2:
-        return Farm3
-      case 3:
-        return Farm4
-      case 4:
-        return Farm5
-    }
-  }
 
   useEffect(() => {
     async function fetchEarned() {
@@ -173,7 +153,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   return (
     <StyledCardWrapper style={{ opacity: rowIndex === 1 && '0.5' }}>
       {farm.pid == 1 && <StyledCardAccent />}
-      <Card style={{ backgroundImage: `url(${getBackground()})` }}>
+      <Card>
         <CardContent>
           <StyledContent>
             <CardIcon>
@@ -240,36 +220,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   )
 }
 
-const RainbowLight = keyframes`
-
-	0% {
-		background-position: 0% 50%;
-	}
-	50% {
-		background-position: 100% 50%;
-	}
-	100% {
-		background-position: 0% 50%;
-	}
-`
 
 const StyledCardAccent = styled.div`
-  background: linear-gradient(
-    45deg,
-    rgba(255, 0, 0, 1) 0%,
-    rgba(255, 154, 0, 1) 10%,
-    rgba(208, 222, 33, 1) 20%,
-    rgba(79, 220, 74, 1) 30%,
-    rgba(63, 218, 216, 1) 40%,
-    rgba(47, 201, 226, 1) 50%,
-    rgba(28, 127, 238, 1) 60%,
-    rgba(95, 21, 242, 1) 70%,
-    rgba(186, 12, 248, 1) 80%,
-    rgba(251, 7, 217, 1) 90%,
-    rgba(255, 0, 0, 1) 100%
-  );
   background-size: 300% 300%;
-  animation: ${RainbowLight} 2s linear infinite;
   border-radius: 12px;
   filter: blur(6px);
   position: absolute;
