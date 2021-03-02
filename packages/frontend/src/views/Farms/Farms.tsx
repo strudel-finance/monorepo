@@ -52,70 +52,51 @@ const Farms: React.FC = () => {
   return (
     <Switch>
       <Page>
-            {!!account ? (
-              <>
-                <Route exact path={path}>
-                  <PageHeader
-                    icon={
-                      <StyledMoving>
-                        <TerraFarm />
-                      </StyledMoving>
-                    }
-                    iconSize={200}
-                    subtitle="Earn $TRDL by staking LP Tokens."
-                    title="Terra-Farms to Explore"
-                  />
-                  <Container maxWidth="md">
-                    <StyledP>
-                      The Terra-Farms strengthen the protocol and the peg of
-                      vBTC to BTC.
+        {!!account ? (
+          <>
+            <Route exact path={path}>
+              <PageHeader
+                iconSize={200}
+                subtitle="Earn $TRDL by staking LP Tokens."
+                title="Terra-Farms to Explore"
+              />
+              <Container maxWidth="md" className='farm-container'>
+                <StyledP>
+                  The Terra-Farms strengthen the protocol and the peg of
+                  vBTC to BTC.
                     </StyledP>
-                    <StyledP>
-                      $TRDL is the crypto-economical incentive to stake and earn
-                      rewards by being short on <br /> BTC dominance and long on
-                      Ethereum.  
-                    </StyledP>
-                  </Container>
-                  <Spacer size="sm" />
-                  <FarmCards />
-                  <AstroWrapper>
-                    <img src={AstroWave} height="150" />
-                  </AstroWrapper>
-                </Route>
-                <Route path={`${path}/:farmId`}>
-                  <Farm />
-                </Route>
-              </>
-            ) : (
-              <div
-                style={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  flex: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <Button
-                  onClick={onPresentWalletProviderModal}
-                  text="🔓 Unlock Wallet"
-                />
-              </div>
-            )}
+                <StyledP>
+                    $TRDL is the crypto-economical incentive to stake and earn rewards.
+                  </StyledP>
+              </Container>
+              <Spacer size="sm" />
+              <FarmCards />
+            </Route>
+            <Route path={`${path}/:farmId`}>
+              <Farm />
+            </Route>
+          </>
+        ) : (
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            >
+              <Button
+                boxShadowGlow={true}
+                onClick={onPresentWalletProviderModal}
+                text="Unlock Wallet"
+              />
+            </div>
+          )}
 
       </Page>
     </Switch>
   )
 }
-const AstroWrapper = styled.div`
-  position: absolute;
-  bottom: 20px;
-  right: 10vw;
-  margin: auto;
-  z-index: -90000;
-  @media (max-width: 600px) and (orientation: portrait) {
-    display: none;
-  }
-`
 
 const StyledP = styled.p`
   text-align: center;
@@ -123,7 +104,7 @@ const StyledP = styled.p`
 
 const StyledMulti = styled.span`
   font-size: 35px;
-  font-family: 'Falstin', sans-serif;
+  font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
   font-weight: 700;
 `
 

@@ -368,7 +368,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
 export const ReddishTextTypography = withStyles({
   root: {
     color: '#322015',
-    fontFamily: 'Noto Sans',
+    fontFamily: 'azo-sans-web',
     fontSize: 16,
   },
 })(Typography)
@@ -380,26 +380,22 @@ const ReddishBoldTextTypography = withStyles({
 })(ReddishTextTypography)
 
 const TableCell = withStyles({
-  root: {
-    borderBottom: 'none',
-  },
   stickyHeader: {
-    background: 'white',
+    background: 'transparent',
   },
 })(MuiTableCell)
 
 const TableHead = withStyles({
   root: {
-    background: 'white',
+    background: 'transparent',
   },
 })(MuiTableHead)
 
 const useStyles = makeStyles((theme) => ({
   container: {
     borderColor: 'none',
-    background: '#d0e0fe',
+    background: '#FFFFFF',
     border: '1px solid #e2d6cfff',
-    boxShadow: 'inset 1px 1px 0px #f7f4f2',
     borderRadius: '12px',
     minHeight: 200,
     height: '100%',

@@ -14,7 +14,7 @@ const Label: React.FC<LabelProps> = ({text, checkbox}) => (
 )
 
 const StyledLabel = styled.div`
-  color: ${(props) => props.theme.color.grey[400]};
+  color: ${(props) => 'rgba(37,37,44,0.48);'};
 `
 
 export default Label

@@ -15,6 +15,7 @@ const StyledFooter = styled.footer`
   align-items: center;
   display: flex;
   justify-content: center;
+  
 `
 const StyledFooterInner = styled.div`
   align-items: center;

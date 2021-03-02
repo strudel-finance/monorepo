@@ -51,6 +51,7 @@ const useStyles = makeStyles((theme) => ({
 }))
 const AstroGrid = withStyles({
   item: {
+    lineHeight: 1,
     margin: 'auto',
     textAlign: 'center',
   },
@@ -103,7 +104,7 @@ const Home: React.FC = () => {
       onAddition={handleLastRequestChange}
       value={val}
       address={account}
-      onConfirm={() => {}}
+      onConfirm={() => { }}
     />,
   )
 
@@ -128,17 +129,11 @@ const Home: React.FC = () => {
   const isPast = startDate < new Date()
   return (
     <Page>
-      <StyledLottieContainer>
-        <Lottie />
-      </StyledLottieContainer>
-      <StyledLottieMobileContainer>
-        <MobileLottie />
-      </StyledLottieMobileContainer>
       {isCountComplete || isPast ? (
         <>
           <PageHeader
             title="Enter the Strudel"
-            subtitle="Turn your BTC in vBTC and  earn intergalactical $TRDL rewards."
+            subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
           />
           {account && wallet.status === 'connected' ? (
             <Container fixed maxWidth="lg">
@@ -175,42 +170,35 @@ const Home: React.FC = () => {
               </Grid>
             </Container>
           ) : (
-            <div
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                flex: 1,
-                justifyContent: 'center',
-              }}
-            >
-              <Button
-                onClick={onPresentWalletProviderModal}
-                text="🔓 Unlock Wallet"
-              />
-            </div>
-          )}
+              <div
+                style={{
+                  alignItems: 'center',
+                  display: 'flex',
+                  justifyContent: 'center',
+                }}
+              >
+                <Button
+                  borderButton={true}
+                  onClick={onPresentWalletProviderModal}
+                  text="Unlock Wallet"
+                />
+              </div>
+            )}
           <>
             <Spacer size="lg" />
 
             <Grid container spacing={1}>
-              <AstroGrid item xs={2}>
-                <img src={AstroFlying} height="100" />
+              <AstroGrid item lg={4} xs={1}>
+
               </AstroGrid>
-              <AstroGrid item xs={5}>
+              <AstroGrid item lg={4} xs={10}>
                 <StyledP>
-                  The Strudel is the first one-way, trustless bridge linking
-                  Bitcoin and Ethereum. 
-                </StyledP>
-                <StyledP>
-                  The bravest explorers that arrive on the other side will get
-                  extra $TRDL rewards.
-                </StyledP>
-                <StyledP>
-                  You can only enter the Strudel from one direction so be aware!
-                  This action is irreversible.  
+                  The Strudel is the first one-way, trustless bridge linking Bitcoin and Ethereum.
+                  The bravest explorers that arrive on the other side will get extra $TRDL rewards.
+                  You can only enter the Strudel from one direction so be aware! This action is irreversible.
                 </StyledP>
               </AstroGrid>
-              <AstroGrid item xs={2}></AstroGrid>
+              <AstroGrid item lg={4} xs={1}></AstroGrid>
             </Grid>
             <Spacer size="lg" />
 
@@ -228,7 +216,8 @@ const Home: React.FC = () => {
               }}
             >
               <Button
-                text="🌋 See Terra Farms"
+                borderButton={true}
+                text="See Terra Farms"
                 to="/farms"
                 variant="secondary"
               />
@@ -236,17 +225,17 @@ const Home: React.FC = () => {
           </>
         </>
       ) : (
-        <>
-          <Countdown
-            date={startDate}
-            renderer={renderer}
-            onComplete={handleCountEnd}
-          />
-          <MyStyledLink target="_blank" href="https://discord.gg/fBuHJCs">
-            Join the Discord
+          <>
+            <Countdown
+              date={startDate}
+              renderer={renderer}
+              onComplete={handleCountEnd}
+            />
+            <MyStyledLink target="_blank" href="https://discord.gg/fBuHJCs">
+              Join the Discord
           </MyStyledLink>
-        </>
-      )}
+          </>
+        )}
     </Page>
   )
 }
@@ -282,6 +271,10 @@ const StyledInfo = styled.h3`
   }
 `
 const StyledP = styled.p`
+  color: rgba(37,37,44,0.48);
   text-align: center;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
 `
 export default Home

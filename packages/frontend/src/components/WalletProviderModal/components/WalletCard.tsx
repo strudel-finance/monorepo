@@ -12,10 +12,11 @@ import showError from '../../../utils/showError'
 interface WalletCardProps {
   icon: React.ReactNode
   onConnect: () => void
-  title: string
+  title: string,
+  style?: any
 }
 
-const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title }) => {
+const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title, style }) => {
   const [chainId, setChainId] = useState('')
 
   /*useEffect(() => {
@@ -26,7 +27,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title }) => {
   }, [chainId])*/
 
   return (
-    <Card>
+    <Card style={style}>
       <CardContent>
         <CardIcon>{icon}</CardIcon>
         <CardTitle text={title} />

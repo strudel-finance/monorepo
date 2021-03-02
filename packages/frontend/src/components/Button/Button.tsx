@@ -4,6 +4,8 @@ import styled, { ThemeContext } from 'styled-components'
 import { Link } from 'react-router-dom'
 
 interface ButtonProps {
+  borderButton?: boolean
+  boxShadowGlow?: boolean,
   children?: React.ReactNode
   disabled?: boolean
   href?: string
@@ -23,6 +25,8 @@ const Button: React.FC<ButtonProps> = ({
   text,
   to,
   variant,
+  boxShadowGlow,
+  borderButton
 }) => {
   const { color, spacing } = useContext(ThemeContext)
 
@@ -84,37 +88,56 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <>
       {size !== 'xs' ? (
-        <StyledButton
-          boxShadow={boxShadow}
-          color={buttonColor}
-          disabled={disabled}
-          fontSize={fontSize}
-          onClick={onClick}
-          padding={buttonPadding}
-          size={buttonSize}
-        >
-          {children}
-          {ButtonChild}
-        </StyledButton>
+        borderButton ?
+          <StyledButtonBorder
+            boxShadowGlow={boxShadowGlow}
+            boxShadow={boxShadow}
+            color={buttonColor}
+            disabled={disabled}
+            fontSize={fontSize}
+            onClick={onClick}
+            padding={buttonPadding}
+            size={buttonSize}>
+            {children}
+            {ButtonChild}
+          </StyledButtonBorder>
+          :
+          <StyledButton
+            boxShadowGlow={boxShadowGlow}
+            boxShadow={boxShadow}
+            color={buttonColor}
+            disabled={disabled}
+            fontSize={fontSize}
+            onClick={onClick}
+            padding={buttonPadding}
+            size={buttonSize}
+          >
+            {children}
+            {ButtonChild}
+          </StyledButton>
       ) : (
-        <StyledSmallButton
-          boxShadow={boxShadow}
-          color={buttonColor}
-          disabled={disabled}
-          fontSize={fontSize}
-          onClick={onClick}
-          padding={buttonPadding}
-          size={buttonSize}
-        >
-          {children}
-        </StyledSmallButton>
-      )}
+          <StyledSmallButton
+            borderButton={borderButton}
+            boxShadowGlow={boxShadowGlow}
+            boxShadow={boxShadow}
+            color={buttonColor}
+            disabled={disabled}
+            fontSize={fontSize}
+            onClick={onClick}
+            padding={buttonPadding}
+            size={buttonSize}
+          >
+            {children}
+          </StyledSmallButton>
+        )}
     </>
   )
 }
 
 interface StyledButtonProps {
   boxShadow: string
+  borderButton?: boolean
+  boxShadowGlow?: boolean
   color: string
   disabled?: boolean
   fontSize: number
@@ -122,31 +145,50 @@ interface StyledButtonProps {
   size: number
 }
 
+const StyledButtonBorder = styled.button<StyledButtonProps>`
+  align-items: center;
+  border: 1px solid #25252C52;
+  border-radius: 9px;
+  background: transparent;
+  color: ${(props) => !props.disabled ? 'rgba(0, 0, 0, 1)' : 'rgba(0, 0, 0, 0.5)'};
+  cursor: pointer;
+  display: flex;
+  font-size: ${(props) => props.fontSize}px;
+  height: 48px;
+  justify-content: center;
+  outline: none;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
+  padding-left: ${(props) => props.padding}px;
+  padding-right: ${(props) => props.padding}px;
+  pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
+  width: 100%;
+`
+
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
-  background-color: ${(props) =>
-    !props.disabled
-      ? props.theme.color.purple[100]
-      : props.theme.color.purple[50]};
+  background-color: ${(props) => !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'};
   border: 0;
-  border-radius: 12px;
-  box-shadow: ${(props) => props.boxShadow};
+  border-radius: 9px;
   color: ${(props) =>
     !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
   cursor: pointer;
   display: flex;
   font-size: ${(props) => props.fontSize}px;
-  font-weight: 700;
-  height: ${(props) => props.size}px;
+  height: 48px;
   justify-content: center;
   outline: none;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
   padding-left: ${(props) => props.padding}px;
   padding-right: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
   width: 100%;
   &:hover {
-    background-color: ${(props) => props.theme.color.grey[100]};
-    color: ${(props) => props.theme.color.black};
+    background-color: ${(props) => 'rgba(236, 175, 78, 1);'};
+    transition: all 0.4s ease;
   }
 `
 
@@ -154,11 +196,10 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) =>
     !props.disabled
-      ? props.theme.color.purple[100]
-      : props.theme.color.purple[50]};
+      ? 'rgba(229, 147, 16, 1)'
+      : 'rgba(229, 147, 16, 0.5)'};
   border: 0;
-  border-radius: 4px;
-  box-shadow: ${(props) => props.boxShadow};
+  border-radius: 9px;
   color: ${(props) =>
     !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
   cursor: pointer;
@@ -166,12 +207,13 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
   font-weight: 700;
   justify-content: center;
   outline: none;
+  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
   padding-top: ${(props) => props.padding}px;
   padding-bottom: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
   &:hover {
-    background-color: ${(props) => props.theme.color.grey[100]};
-    color: ${(props) => props.theme.color.black};
+    background-color: ${(props) => 'rgba(236, 175, 78, 1);'};
+    transition: all 0.4s ease;
   }
 `
 
