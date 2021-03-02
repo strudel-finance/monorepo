@@ -10,7 +10,7 @@ The purpose of the Strudel is two-fold:
 
 **vBTC is the better wrappend BTC!** With a fully auditable supply and no risk of compromise it is the asset of choice for traders and DeFi users. 
 
-Read more about Strudel on [medium](https://medium.com/@strudelfinance) and follow us on [twitter](https://twitter.com/strudelfinance).
+Read more about Strudel on [medium](https://medium.com/@strudelfinance) and follow us on [twitter](https://twitter.com/EnterTheStrudel).
 
 ## Packages
 
