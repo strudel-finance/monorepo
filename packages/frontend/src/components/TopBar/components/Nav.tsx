@@ -17,13 +17,13 @@ const Nav: React.FC = () => {
         </StyledLink>
       )}
       <StyledAbsoluteLink
-        href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
+        href="https://strudel-finance.medium.com/"
         target="_blank"
       >
         Help
       </StyledAbsoluteLink>
       <StyledAbsoluteLink
-        href="https://medium.com/@strudelfinance/strudel-manifesto-580759f9634b"
+        href="https://strudel-finance.medium.com/"
         target="_blank"
       >
         About

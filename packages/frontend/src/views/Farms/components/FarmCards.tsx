@@ -18,6 +18,8 @@ import useVBTC from '../../../hooks/useVBTC'
 import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
 import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
+import StrudelImg from '../../../assets/img/Strudel-logo-Icon.png'
+import BTCImg from '../../../assets/img/Strudel-Bitcoin-Icon.png'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -53,6 +55,7 @@ const FarmCards: React.FC = () => {
             .times(STRUDEL_PER_BLOCK)
             .times(BLOCKS_PER_YEAR)
             .times(stakedValue[i].poolWeight)
+            .times(stakedValue[i].multiplier)
             .div(stakedValue[i].totalWethValue)
           : null,
         percentage: stakedValue[i]
@@ -137,11 +140,17 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const getSymbol = (icon: string): any => {
     switch (icon) {
       case '1':
+<<<<<<< HEAD
         return StrudleLogoIcon;
       case '2':
         return BtcIcon;
+=======
+        return StrudelImg
+      case '2':
+        return BTCImg
+>>>>>>> 5188884 (Changed nav links and farm card images)
       case '3':
-        return <VBTCSpin />
+        return BTCImg
       default:
         return icon
     }
@@ -156,7 +165,11 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
         <CardContent>
           <StyledContent>
             <CardIcon>
+<<<<<<< HEAD
               <img style={{ height: 48 }} src={getSymbol(farm.icon)} alt='icon'/>
+=======
+              <img style={{ height: 48 }} src={getSymbol(farm.icon)} />
+>>>>>>> 5188884 (Changed nav links and farm card images)
             </CardIcon>
 
             <StyledTitle>{farm.name}</StyledTitle>
