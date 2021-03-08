@@ -140,15 +140,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const getSymbol = (icon: string): any => {
     switch (icon) {
       case '1':
-<<<<<<< HEAD
-        return StrudleLogoIcon;
-      case '2':
-        return BtcIcon;
-=======
         return StrudelImg
       case '2':
         return BTCImg
->>>>>>> 5188884 (Changed nav links and farm card images)
       case '3':
         return BTCImg
       default:
@@ -165,11 +159,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
         <CardContent>
           <StyledContent>
             <CardIcon>
-<<<<<<< HEAD
-              <img style={{ height: 48 }} src={getSymbol(farm.icon)} alt='icon'/>
-=======
               <img style={{ height: 48 }} src={getSymbol(farm.icon)} />
->>>>>>> 5188884 (Changed nav links and farm card images)
             </CardIcon>
 
             <StyledTitle>{farm.name}</StyledTitle>
@@ -232,13 +222,6 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   )
 }
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 9fc2045 (FarmCard got reverted by merge. Refix)
-
-=======
->>>>>>> 3dbef3c (Changed the whole styling for the front-end)
 const StyledCardAccent = styled.div`
   background-size: 300% 300%;
   border-radius: 12px;
