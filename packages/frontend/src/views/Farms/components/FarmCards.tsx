@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import Countdown, { CountdownRenderProps } from 'react-countdown'
-import styled, { keyframes } from 'styled-components'
+import styled from 'styled-components'
 import { useWallet } from 'use-wallet'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
@@ -18,6 +18,8 @@ import useVBTC from '../../../hooks/useVBTC'
 import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
 import { bnToDec } from '../../../utils'
 import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
+import StrudelImg from '../../../assets/img/Strudel-logo-Icon.png'
+import BTCImg from '../../../assets/img/Strudel-Bitcoin-Icon.png'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -50,16 +52,16 @@ const FarmCards: React.FC = () => {
         ...stakedValue[i],
         apy: stakedValue[i]
           ? strudelPrice
-              .times(STRUDEL_PER_BLOCK)
-              .times(BLOCKS_PER_YEAR)
-              .times(stakedValue[i].poolWeight)
-              .times(stakedValue[i].multiplier)
-              .div(stakedValue[i].totalWethValue)
+            .times(STRUDEL_PER_BLOCK)
+            .times(BLOCKS_PER_YEAR)
+            .times(stakedValue[i].poolWeight)
+            .times(stakedValue[i].multiplier)
+            .div(stakedValue[i].totalWethValue)
           : null,
         percentage: stakedValue[i]
           ? Number(Number(stakedValue[i].poolWeight) * Number(100))
-              .toFixed(2)
-              .toString()
+            .toFixed(2)
+            .toString()
           : null,
       }
       const newFarmRows = [...farmRows]
@@ -86,10 +88,10 @@ const FarmCards: React.FC = () => {
           </StyledRow>
         ))
       ) : (
-        <StyledLoadingWrapper>
-          <Loader text="Exploring new planets ..." />
-        </StyledLoadingWrapper>
-      )}
+          <StyledLoadingWrapper>
+            <Loader text="Exploring new planets ..." />
+          </StyledLoadingWrapper>
+        )}
     </StyledCards>
   )
 }
@@ -138,11 +140,11 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const getSymbol = (icon: string): any => {
     switch (icon) {
       case '1':
-        return <StrudelMoving />
+        return StrudelImg
       case '2':
-        return <VBTCSpin />
+        return BTCImg
       case '3':
-        return <VBTCSpin />
+        return BTCImg
       default:
         return icon
     }
@@ -157,7 +159,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
         <CardContent>
           <StyledContent>
             <CardIcon>
-              <StyledMoving>{getSymbol(farm.icon)}</StyledMoving>
+              <img style={{ height: 48 }} src={getSymbol(farm.icon)} />
             </CardIcon>
 
             <StyledTitle>{farm.name}</StyledTitle>
@@ -194,10 +196,10 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
               <span>
                 {farm.apy
                   ? `${farm.apy
-                      .times(new BigNumber(100))
-                      .toNumber()
-                      .toLocaleString('en-US')
-                      .slice(0, -1)}%`
+                    .times(new BigNumber(100))
+                    .toNumber()
+                    .toLocaleString('en-US')
+                    .slice(0, -1)}%`
                   : 'Loading ...'}
               </span>
               {/* <span>
@@ -220,11 +222,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   )
 }
 
-
 const StyledCardAccent = styled.div`
   background-size: 300% 300%;
   border-radius: 12px;
-  filter: blur(6px);
   position: absolute;
   top: -2px;
   right: -2px;
