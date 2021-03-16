@@ -20,6 +20,7 @@ import { bnToDec } from '../../../utils'
 import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
 import StrudelImg from '../../../assets/img/Strudel-logo-Icon.png'
 import BTCImg from '../../../assets/img/Strudel-Bitcoin-Icon.png'
+import OneBTCImg from '../../../assets/img/onevBTC.png'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -65,7 +66,7 @@ const FarmCards: React.FC = () => {
           : null,
       }
       const newFarmRows = [...farmRows]
-      if (i <= 1) {
+      if (i <= 2) {
         newFarmRows[0].push(farmWithStakedValue)
       } else {
         newFarmRows[1].push(farmWithStakedValue)
@@ -145,6 +146,8 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
         return BTCImg
       case '3':
         return BTCImg
+      case '4':
+        return OneBTCImg
       default:
         return icon
     }

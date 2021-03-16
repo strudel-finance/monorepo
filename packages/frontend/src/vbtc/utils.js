@@ -135,6 +135,35 @@ const getValueOfTbtcWeth = async (
   return [totalLpWethValue, lpContractWeth]
 }
 
+const getValueOfTrdlWeth = async (
+  vbtc,
+  wethContract,
+  lpContract,
+  portionLp,
+) => {
+  // Get total weth value for the lpContract = w1
+  let trdlPool = new vbtc.web3.eth.Contract(
+    UNIV2PairAbi,
+    contractAddresses.trdlPool['1'],
+  )
+  let tbtc = new vbtc.web3.eth.Contract(ERC20Abi, contractAddresses.strudel['1'])
+  const tbtcContractWeth = await wethContract.methods
+    .balanceOf(trdlPool.options.address)
+    .call()
+  const tbtcContractTbtc = await tbtc.methods
+    .balanceOf(trdlPool.options.address)
+    .call()
+  const lpContractTBTC = await tbtc.methods
+    .balanceOf(lpContract.options.address)
+    .call()
+  let tbtcPrice = new BigNumber(tbtcContractWeth).div(
+    new BigNumber(tbtcContractTbtc),
+  )
+  let lpContractWeth = new BigNumber(lpContractTBTC).times(tbtcPrice)
+  let totalLpWethValue = portionLp.times(lpContractWeth).times(new BigNumber(2))
+  return [totalLpWethValue, lpContractWeth]
+}
+
 export const getTotalLPWethValue = async (
   isBalancer,
   masterChefContract,
@@ -170,6 +199,13 @@ export const getTotalLPWethValue = async (
   let lpWethWorth
   if (pid === 6) {
     ;[totalLpWethValue, lpContractWeth] = await getValueOfTbtcWeth(
+      vbtc,
+      wethContract,
+      lpContract,
+      portionLp,
+    )
+  } else if (pid === 8) {
+    ;[totalLpWethValue, lpContractWeth] = await getValueOfTrdlWeth(
       vbtc,
       wethContract,
       lpContract,
