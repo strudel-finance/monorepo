@@ -43,6 +43,9 @@ export const contractAddresses = {
     1: '0x8daebade922df735c38c80c7ebd708af50815faa',
     5: '',
   },
+  trdlPool: {
+    1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83'
+  },
   tbtcPool: {
     1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
     5: '',
@@ -119,6 +122,22 @@ export const supportedPools = [
     symbol: 'vBTC-ETH UNI-V2 LP',
     tokenSymbol: 'vBTC',
     icon: '2',
+  },
+  {
+    pid: 8,
+    isBalancer: false,
+    url:
+      'https://app.sushi.com/pair/0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
+    lpAddresses: {
+      1: '0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186d63980fd6e2ec61888f7b91c4bae4',
+    },
+    name: 'oneVBTC Party',
+    symbol: 'oneVBTC-$TRDL SLP',
+    tokenSymbol: 'onevBTC',
+    icon: '4',
   },
   {
     pid: 1,
