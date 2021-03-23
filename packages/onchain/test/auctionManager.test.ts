@@ -1,7 +1,6 @@
 import {ethers, upgrades} from 'hardhat';
 import {Signer} from 'ethers';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
 import vector from './testVector.json';
 import {expandTo18Decimals, advanceTime} from './shared/utilities';
 import {MockERC20} from '../typechain/MockERC20';
@@ -10,7 +9,6 @@ import {DutchSwapAuction} from '../typechain/DutchSwapAuction';
 import {DutchSwapFactory} from '../typechain/DutchSwapFactory';
 import {AuctionManager} from '../typechain/AuctionManager';
 
-chai.use(solidity);
 const {expect} = chai;
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
@@ -38,6 +36,8 @@ describe('AuctionManager', () => {
     vBtc = await MockErc20Factory.deploy(
       'VBTC', 'VBTC', 18, expandTo18Decimals(8)
     ) as MockERC20;
+    const bobAddr = await bob.getAddress();
+    await vBtc.transfer(bobAddr, expandTo18Decimals(8));
     const DutchSwapAuctionFactory = await ethers.getContractFactory("DutchSwapAuction");
     auctionTemplate = await DutchSwapAuctionFactory.deploy() as DutchSwapAuction;
     const DutchSwapFactoryFactory = await ethers.getContractFactory("DutchSwapFactory");

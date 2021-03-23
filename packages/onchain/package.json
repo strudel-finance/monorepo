@@ -37,7 +37,7 @@
     "ethereum-waffle": "^3.2.2",
     "ethereumjs-util": "^7.0.6",
     "ganache-core": "^2.13.2",
-    "hardhat": "^2.0.10",
+    "hardhat": "^2.1.10",
     "hardhat-deploy": "^0.7.0-beta.46",
     "hardhat-gas-reporter": "^1.0.1",
     "hardhat-typechain": "0.3.5",
