@@ -1,28 +1,23 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
+import {ethers, upgrades} from 'hardhat';
 import {Signer, Contract} from 'ethers';
 import {getAdminAddress} from '@openzeppelin/upgrades-core';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
 import {expandTo18Decimals, advanceBlock} from './shared/utilities';
 import {StrudelToken} from '../typechain/StrudelToken';
-import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxy from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
 import {V1TorchShip} from '../typechain/V1TorchShip';
-import {V1TorchShipFactory} from '../typechain/V1TorchShipFactory';
 import {TorchShip} from '../typechain/TorchShip';
-import {TorchShipFactory} from '../typechain/TorchShipFactory';
-import {MockErc20} from '../typechain/MockErc20';
-import {MockErc20Factory} from '../typechain/MockErc20Factory';
+import {MockERC20} from '../typechain/MockERC20';
 
-chai.use(solidity);
 const {expect} = chai;
 const PERIOD_SIZE = 9;
-let refToken: MockErc20;
+let refToken: MockERC20;
+
 
 async function deployStrudel(signer: Signer): Promise<StrudelToken> {
-  let factory = new StrudelTokenFactory(signer);
-  return factory.deploy();
+  const factory = await ethers.getContractFactory("StrudelToken");
+  return await factory.deploy() as StrudelToken;
 }
 
 async function deployShip(
@@ -74,7 +69,11 @@ async function deployNewShip(
   );
   await torchShip.deployed();
 
-  refToken = await new MockErc20Factory(dev).deploy('VBTC', 'VBTC', 18, expandTo18Decimals(1));
+  const MockERC20Factory = await ethers.getContractFactory("MockERC20");
+  const devAddr = await dev.getAddress();
+  refToken = await MockERC20Factory.deploy('VBTC', 'VBTC', 18, expandTo18Decimals(1)) as MockERC20;
+  await refToken.transfer(devAddr, expandTo18Decimals(1));
+  refToken.connect(dev);
   await torchShip.initVariance(refToken.address, windowSize, windowSize / PERIOD_SIZE);
 
   // prepare strudel
@@ -130,17 +129,20 @@ describe('TorchShip', async () => {
   });
 
   describe('With ERC/LP token added to the field', () => {
-    let lp: MockErc20;
-    let lp2: MockErc20;
+    let lp: MockERC20;
+    let lp2: MockERC20;
     beforeEach(async () => {
-      lp = await new MockErc20Factory(minter).deploy('LPToken', 'LP', 18, '10000000000');
+      const minterAddr = await minter.getAddress();
+      const MockERC20Factory = await ethers.getContractFactory("MockERC20");
+      lp = await MockERC20Factory.deploy('LPToken', 'LP', 18, '10000000000') as MockERC20;
+      lp.connect(minter);
       const aliceAddr = await alice.getAddress();
-      await lp.connect(minter).transfer(aliceAddr, '1000');
+      await lp.transfer(aliceAddr, '1000');
       const bobAddr = await bob.getAddress();
       await lp.transfer(bobAddr, '1000');
       const carolAddr = await carol.getAddress();
       await lp.transfer(carolAddr, '1000');
-      lp2 = await new MockErc20Factory(minter).deploy('LPToken2', 'LP2', 18, '10000000000');
+      lp2 = await MockERC20Factory.deploy('LPToken2', 'LP2', 18, '10000000000') as MockERC20;
       await lp2.transfer(aliceAddr, '1000');
       await lp2.transfer(bobAddr, '1000');
       await lp2.transfer(carolAddr, '1000');
@@ -286,7 +288,8 @@ describe('TorchShip', async () => {
       expect(windowSize).to.eq(10);
 
       // activate variance
-      const refToken = await new MockErc20Factory(minter).deploy('VBTC', 'VBTC', 18, '10000000000');
+      const MockERC20Factory = await ethers.getContractFactory("MockERC20");
+      const refToken = await MockERC20Factory.deploy('VBTC', 'VBTC', 18, '10000000000') as MockERC20;
       await torchShip.initVariance(refToken.address, 63, 7);
 
       // check variables again

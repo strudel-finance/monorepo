@@ -1,36 +1,33 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
+import {ethers, upgrades} from 'hardhat';
 import {BigNumber, Signer} from 'ethers';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
 import vector from './testVector.json';
 import {expandTo18Decimals, advanceBlock} from './shared/utilities';
 import {GovernanceToken} from '../typechain/GovernanceToken';
-import {GovernanceTokenFactory} from '../typechain/GovernanceTokenFactory';
-import {MockErc20} from '../typechain/MockErc20';
-import {MockErc20Factory} from '../typechain/MockErc20Factory';
+import {MockERC20} from '../typechain/MockErc20';
 import {MockGovBridge} from '../typechain/MockGovBridge';
-import {MockGovBridgeFactory} from '../typechain/MockGovBridgeFactory';
 
-chai.use(solidity);
 const {expect} = chai;
 const minInterval = 6;
 const maxInterval = minInterval * 52;
 
 describe('GovernanceToken', async () => {
   let signers: Signer[];
-  let strudel: MockErc20;
+  let strudel: MockERC20;
   let gov: GovernanceToken;
   let bridge: MockGovBridge;
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
-    strudel = await new MockErc20Factory(signers[0]).deploy(
+    const MockErc20Factory = await ethers.getContractFactory("MockERC20");
+    strudel = await MockErc20Factory.deploy(
       'strudel',
       '$TRDL',
       18,
       expandTo18Decimals(100000)
-    );
-    bridge = await new MockGovBridgeFactory(signers[0]).deploy();
+    ) as MockERC20;
+    const MockGovBridgeFactory = await ethers.getContractFactory("MockGovBridge");
+    bridge = await MockGovBridgeFactory.deploy() as MockGovBridge;
 
     const GovernanceToken = (await ethers.getContractFactory('GovernanceToken')).connect(
       signers[0]
