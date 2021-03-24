@@ -9,8 +9,11 @@ custom:
   apigwBinary:
     types:
       - 'application/bitcoin-paymentrequest'
+      - 'application/bitcoincash-paymentrequest'
       - 'application/bitcoin-paymentack'
+      - 'application/bitcoincash-paymentack'
       - 'application/bitcoin-payment'
+      - 'application/bitcoincash-payment'
   table: strudel-${opt:stage}
   region: eu-west-1
   bcdRpc: 'bcd.strudel.finance'
@@ -29,7 +32,9 @@ provider:
   apiGateway:
     binaryMediaTypes:
       - 'application/bitcoin-paymentrequest'
+      - 'application/bitcoincash-paymentrequest'
       - 'application/bitcoin-paymentack'
+      - 'application/bitcoincash-paymentack'
   iamRoleStatements:
     - Effect: Allow
       Action:
@@ -115,13 +120,35 @@ functions:
           response: *response_mappings
       - http:
           method: post
+          path: /bch/payment/{txHash}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
           path: /payment/{txHash}/output/{outputIndex}/addEthTx
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /bch/payment/{txHash}/output/{outputIndex}/addEthTx
           integration: lambda
           cors: true
           response: *response_mappings
       - http:
           method: get
           path: /syn/{destination}/{amount}
+          integration: lambda
+          request:
+            headers:
+              Content-Type: "'application/bitcoin-payment'"
+          response:
+            headers:
+              Content-Type: "'application/bitcoin-paymentrequest'"
+      - http:
+          method: get
+          path: /bch/syn/{destination}/{amount}
           integration: lambda
           request:
             headers:
@@ -140,6 +167,16 @@ functions:
             headers:
               Content-Type: "'application/bitcoin-paymentack'"
       - http:
+          method: post
+          path: /bch/ack
+          integration: lambda
+          request:
+            headers:
+              Content-Type: "'application/bitcoin-payment'"
+          response:
+            headers:
+              Content-Type: "'application/bitcoin-paymentack'"
+      - http:
           method: get
           path: /watchlist
           integration: lambda
@@ -148,6 +185,12 @@ functions:
       - http:
           method: post
           path: /proof/{txHash}/{blockHash}
+          integration: lambda
+          cors: true
+          response: *response_mappings
+      - http:
+          method: post
+          path: /bch/proof/{txHash}/{blockHash}
           integration: lambda
           cors: true
           response: *response_mappings

@@ -53,7 +53,7 @@ module.exports = class StrudelHandler {
     return 'Created';
   }
 
-  async addBtcTx(txHash, txData) {
+  async addBtcTx(txHash, txData, isBch = false) {
     // parse tx
     const tx = Transaction.fromBuffer(Buffer.from(txData.replace('0x', ''), 'hex'));
     const txId = tx.getId();
@@ -87,7 +87,7 @@ module.exports = class StrudelHandler {
       throw new Errors.ServerError(`output has 0 value.`);
     }
     const walletAddress = `0x${tx.outs[index].script.slice(5, 25).toString('hex')}`;
-    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`);
+    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`, isBch);
     return 'Created';
   }
 
@@ -135,7 +135,7 @@ module.exports = class StrudelHandler {
     return JSON.stringify(proof);
   }
 
-  async paySyn(destinationAddress, amount) {
+  async paySyn(destinationAddress, amount, isBch = false) {
     if (!ADDR_REGEX.test(destinationAddress)) {
       throw new Errors.BadRequest(`${destinationAddress} invalid ethereum address.`);
     }
@@ -153,13 +153,15 @@ module.exports = class StrudelHandler {
     output.set("script", script);
 
     const now = (Date.now() / 1000) | 0;
-    const details = new PaymentProtocol("BTC").makePaymentDetails();
+    const details = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentDetails();
     details.set("network", "main");
     details.set("outputs", output.message);
     details.set("time", now);
     details.set("expires", now + 60 * 60 * 24);
     details.set("memo", "A request to enter the strudel.");
-    details.set("payment_url", "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack");
+    details.set("payment_url", (isBch)
+      ? "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/ack"
+      : "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack");
     details.set("merchant_data", Buffer.from(JSON.stringify({ foo: "bar" })));
     const certificates = new PaymentProtocol().makeX509Certificates();
     certificates.set("certificate", [
@@ -178,7 +180,7 @@ module.exports = class StrudelHandler {
     return rawBody;
   }
 
-  async payAck(bodyRaw) {
+  async payAck(bodyRaw, isBch = false) {
     // Decode payment
     const body = PaymentProtocol.Payment.decode(bodyRaw);
     const payment = new PaymentProtocol().makePayment(body);
@@ -190,10 +192,10 @@ module.exports = class StrudelHandler {
     const txHash = await this.bclient.sendRawTransaction(txData);
     console.log("txHash:", txHash);
 
-    await this.addBtcTx(txHash, txData);
+    await this.addBtcTx(txHash, txData, isBch);
 
     // Make a payment acknowledgement
-    const ack = new PaymentProtocol().makePaymentACK();
+    const ack = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentACK();
     ack.set("payment", payment.message);
     ack.set("memo", "You have entered the strudel!");
     const rawBody = ack.serialize();
