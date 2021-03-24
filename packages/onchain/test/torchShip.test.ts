@@ -14,10 +14,9 @@ const {expect} = chai;
 const PERIOD_SIZE = 9;
 let refToken: MockERC20;
 
-
 async function deployStrudel(signer: Signer): Promise<StrudelToken> {
-  const factory = await ethers.getContractFactory("StrudelToken");
-  return await factory.deploy() as StrudelToken;
+  const factory = await ethers.getContractFactory('StrudelToken');
+  return (await factory.deploy()) as StrudelToken;
 }
 
 async function deployShip(
@@ -69,9 +68,14 @@ async function deployNewShip(
   );
   await torchShip.deployed();
 
-  const MockERC20Factory = await ethers.getContractFactory("MockERC20");
+  const MockERC20Factory = await ethers.getContractFactory('MockERC20');
   const devAddr = await dev.getAddress();
-  refToken = await MockERC20Factory.deploy('VBTC', 'VBTC', 18, expandTo18Decimals(1)) as MockERC20;
+  refToken = (await MockERC20Factory.deploy(
+    'VBTC',
+    'VBTC',
+    18,
+    expandTo18Decimals(1)
+  )) as MockERC20;
   await refToken.transfer(devAddr, expandTo18Decimals(1));
   refToken.connect(dev);
   await torchShip.initVariance(refToken.address, windowSize, windowSize / PERIOD_SIZE);
@@ -133,8 +137,8 @@ describe('TorchShip', async () => {
     let lp2: MockERC20;
     beforeEach(async () => {
       const minterAddr = await minter.getAddress();
-      const MockERC20Factory = await ethers.getContractFactory("MockERC20");
-      lp = await MockERC20Factory.deploy('LPToken', 'LP', 18, '10000000000') as MockERC20;
+      const MockERC20Factory = await ethers.getContractFactory('MockERC20');
+      lp = (await MockERC20Factory.deploy('LPToken', 'LP', 18, '10000000000')) as MockERC20;
       lp.connect(minter);
       const aliceAddr = await alice.getAddress();
       await lp.transfer(aliceAddr, '1000');
@@ -142,7 +146,7 @@ describe('TorchShip', async () => {
       await lp.transfer(bobAddr, '1000');
       const carolAddr = await carol.getAddress();
       await lp.transfer(carolAddr, '1000');
-      lp2 = await MockERC20Factory.deploy('LPToken2', 'LP2', 18, '10000000000') as MockERC20;
+      lp2 = (await MockERC20Factory.deploy('LPToken2', 'LP2', 18, '10000000000')) as MockERC20;
       await lp2.transfer(aliceAddr, '1000');
       await lp2.transfer(bobAddr, '1000');
       await lp2.transfer(carolAddr, '1000');
@@ -288,8 +292,13 @@ describe('TorchShip', async () => {
       expect(windowSize).to.eq(10);
 
       // activate variance
-      const MockERC20Factory = await ethers.getContractFactory("MockERC20");
-      const refToken = await MockERC20Factory.deploy('VBTC', 'VBTC', 18, '10000000000') as MockERC20;
+      const MockERC20Factory = await ethers.getContractFactory('MockERC20');
+      const refToken = (await MockERC20Factory.deploy(
+        'VBTC',
+        'VBTC',
+        18,
+        '10000000000'
+      )) as MockERC20;
       await torchShip.initVariance(refToken.address, 63, 7);
 
       // check variables again
