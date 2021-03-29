@@ -27,8 +27,9 @@ import { Transaction, LoadingStatus } from '../../types/types'
 import { makeStyles, withStyles } from '@material-ui/core'
 import { startDate } from '../../constants/countdown'
 import AstroFlying from '../../assets/img/AstroFlying.png'
+import BCHLogo from '../../assets/img/Bitcoin-Cash-BCH-icon.png'
+import BTCLogo from '../../assets/img/BTC-logo.jpeg'
 
-import useVBTC from '../../hooks/useVBTC'
 const useStyles = makeStyles((theme) => ({
   container: {
     background: '#fff',
@@ -135,57 +136,56 @@ const Home: React.FC = () => {
             title="Enter the Strudel"
             subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
           />
-          {account && wallet.status === 'connected' ? (
-            <Container fixed maxWidth="lg">
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={12} md={4}>
-                  <Container>
-                    <AddressInput
-                      address={formatAddress(account)}
-                      value={formatAddress(account)}
-                    />
-                    <BurnAmountInput
-                      onChange={handleAmountChange}
-                      value={val}
-                      symbol="BTC"
-                    />
-                    <Button text={'Get vBTC'} onClick={onPresentBurn} />
-                  </Container>
-                  <Spacer size="md" />
+          <div
+              style={{
+                margin: '0 auto',
+                display: 'flex'
+              }}
+            >
+              <Button
+                borderButton={true}
+                text="Burn BTC"
+                to="/BTC"
+                variant="secondary"
+                size='xxxl'
+                backgroundImage={BTCLogo}
+              />
+              <Spacer size="md" />
+              <Button
+                borderButton={true}
+                text="Burn BCH"
+                to="/BCH"
+                variant="secondary"
+                size='xxxl'
+                backgroundImage={BCHLogo}
+            /> 
+          </div>
+          <Spacer size="md" />
 
-                  <StyledInfo>
-                    ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
-                  </StyledInfo>
-                </Grid>
-                <Grid item xs={12} sm={12} md={8}>
-                  <TransactionsTableContainer
-                    account={account}
-                    previousAccount={previousAccount}
-                    lastRequest={lastRequest}
-                    handleSetLastRequest={handleSetLastRequest}
-                    checkAndRemoveLastRequest={checkAndRemoveLastRequest}
-                    wallet={wallet}
-                  />
-                </Grid>
-              </Grid>
-            </Container>
-          ) : (
-              <div
+          <div
                 style={{
                   alignItems: 'center',
                   display: 'flex',
-                  justifyContent: 'center',
                 }}
               >
                 <Button
                   borderButton={true}
                   onClick={onPresentWalletProviderModal}
-                  text="Unlock Wallet"
+              text="Unlock Wallet"
+               size='xxxl'
                 />
-              </div>
-            )}
+              <Spacer size="md" />
+                <Button
+                    borderButton={true}
+                    text="See Terra Farms"
+                    to="/farms"
+                    variant="secondary"
+                    size='xxxl'
+                  />
+
+          </div>
+          <Spacer size="md" />
           <>
-            <Spacer size="lg" />
 
             <Grid container spacing={1}>
               <AstroGrid item lg={4} xs={1}>
@@ -209,19 +209,6 @@ const Home: React.FC = () => {
             <Container>
               <BalanceStrudel />
             </Container>
-            <Spacer size="lg" />
-            <div
-              style={{
-                margin: '0 auto',
-              }}
-            >
-              <Button
-                borderButton={true}
-                text="See Terra Farms"
-                to="/farms"
-                variant="secondary"
-              />
-            </div>
           </>
         </>
       ) : (

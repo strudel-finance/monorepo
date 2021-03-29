@@ -10,10 +10,13 @@ interface ButtonProps {
   disabled?: boolean
   href?: string
   onClick?: () => void
-  size?: 'xs' | 'sm' | 'md' | 'lg'
+  size?: 'xs' | 'sm' | 'md' | 'lg' | 'xxxl'
   text?: string
   to?: string
   variant?: 'default' | 'secondary' | 'tertiary'
+  backgroundImage?: string
+  color?: string
+  BCH?: boolean
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -26,7 +29,9 @@ const Button: React.FC<ButtonProps> = ({
   to,
   variant,
   boxShadowGlow,
-  borderButton
+  borderButton,
+  backgroundImage,
+  BCH
 }) => {
   const { color, spacing } = useContext(ThemeContext)
 
@@ -87,22 +92,11 @@ const Button: React.FC<ButtonProps> = ({
 
   return (
     <>
-      {size !== 'xs' ? (
-        borderButton ?
-          <StyledButtonBorder
-            boxShadowGlow={boxShadowGlow}
-            boxShadow={boxShadow}
-            color={buttonColor}
-            disabled={disabled}
-            fontSize={fontSize}
-            onClick={onClick}
-            padding={buttonPadding}
-            size={buttonSize}>
-            {children}
-            {ButtonChild}
-          </StyledButtonBorder>
-          :
-          <StyledButton
+      {(() => {
+        if (size === 'xxxl'){
+          console.log('xxl BTN');
+          return (
+            <StyledXXLButton
             boxShadowGlow={boxShadowGlow}
             boxShadow={boxShadow}
             color={buttonColor}
@@ -111,13 +105,35 @@ const Button: React.FC<ButtonProps> = ({
             onClick={onClick}
             padding={buttonPadding}
             size={buttonSize}
+            backgroundImage={backgroundImage}
           >
             {children}
             {ButtonChild}
-          </StyledButton>
-      ) : (
-          <StyledSmallButton
-            borderButton={borderButton}
+            </StyledXXLButton>
+          )
+        }
+        
+        if (size !== 'xs') {
+          if (borderButton) 
+            return (
+              <StyledButtonBorder
+              boxShadowGlow={boxShadowGlow}
+              boxShadow={boxShadow}
+              color={buttonColor}
+              disabled={disabled}
+              fontSize={fontSize}
+              onClick={onClick}
+              padding={buttonPadding}
+              size={buttonSize}
+              BCH={BCH}
+              >
+              {children}
+              {ButtonChild}
+              </StyledButtonBorder>
+            )
+          
+          return (
+            <StyledButton
             boxShadowGlow={boxShadowGlow}
             boxShadow={boxShadow}
             color={buttonColor}
@@ -125,11 +141,32 @@ const Button: React.FC<ButtonProps> = ({
             fontSize={fontSize}
             onClick={onClick}
             padding={buttonPadding}
+            size={buttonSize}
+            BCH={BCH}
+            >
+            {children}
+            {ButtonChild}
+            </StyledButton>
+          )
+        }
+        
+        
+        
+        return (
+          <StyledSmallButton
+          borderButton={borderButton}
+          boxShadowGlow={boxShadowGlow}
+          boxShadow={boxShadow}
+          color={buttonColor}
+          disabled={disabled}
+          fontSize={fontSize}
+          onClick={onClick}
+          padding={buttonPadding}
             size={buttonSize}
           >
             {children}
           </StyledSmallButton>
-        )}
+        )})()}
     </>
   )
 }
@@ -143,6 +180,8 @@ interface StyledButtonProps {
   fontSize: number
   padding: number
   size: number
+  backgroundImage?: string
+  BCH?: boolean
 }
 
 const StyledButtonBorder = styled.button<StyledButtonProps>`
@@ -166,13 +205,41 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   width: 100%;
 `
 
+const StyledXXLButton = styled.button<StyledButtonProps>`
+  align-items: center;
+  border: 1px solid #25252C52;
+  border-radius: 9px;
+  background: transparent;
+  color: ${(props) => !props.disabled ? 'rgba(0, 0, 0, 1)' : 'rgba(0, 0, 0, 0.5)'};
+  cursor: pointer;
+  display: flex;
+  font-size: ${(props) => props.fontSize}px;
+  justify-content: center;
+  outline: none;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
+  padding-left: ${(props) => props.padding}px;
+  padding-right: ${(props) => props.padding}px;
+  pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
+  // width: 100%;
+  // height: 90px;
+  height: 48px;
+  width: 300px;
+  background-image: url(${(props) => (props.backgroundImage)});
+  background-position-y: center;
+  background-position-x: center;
+`
+
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
-  background-color: ${(props) => !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'};
+  background-color: ${(props) => {
+    if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)' 
+    return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+  }};
   border: 0;
   border-radius: 9px;
-  color: ${(props) =>
-    !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
+  color: ${(props) => !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
   cursor: pointer;
   display: flex;
   font-size: ${(props) => props.fontSize}px;
@@ -186,18 +253,14 @@ const StyledButton = styled.button<StyledButtonProps>`
   padding-right: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
   width: 100%;
-  &:hover {
-    background-color: ${(props) => 'rgba(236, 175, 78, 1);'};
-    transition: all 0.4s ease;
-  }
 `
 
 const StyledSmallButton = styled.button<StyledButtonProps>`
   align-items: center;
-  background-color: ${(props) =>
-    !props.disabled
-      ? 'rgba(229, 147, 16, 1)'
-      : 'rgba(229, 147, 16, 0.5)'};
+  background-color: ${(props) => {
+    if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)' 
+    return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+}};
   border: 0;
   border-radius: 9px;
   color: ${(props) =>

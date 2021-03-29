@@ -8,7 +8,11 @@ interface BurnAmountInputProps extends InputProps {
   symbol: string
 }
 
-const BurnAmountInput: React.FC<BurnAmountInputProps> = ({onChange, value}) => {
+const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
+  onChange,
+  value,
+  symbol,
+}) => {
   return (
     <StyledTokenInput>
       <Input
@@ -19,7 +23,7 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({onChange, value}) => {
         }
         endAdornment={
           <StyledTokenAdornmentWrapper>
-            <StyledTokenSymbol>BTC</StyledTokenSymbol>
+            <StyledTokenSymbol>{symbol}</StyledTokenSymbol>
           </StyledTokenAdornmentWrapper>
         }
         onChange={onChange}

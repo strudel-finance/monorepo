@@ -31,7 +31,8 @@ export interface TransactionTableProps {
   account: any
   previousAccount: any
   lastRequest: Transaction | undefined
-  handleSetLastRequest: (tx: Transaction) => void
+  handleSetLastRequest: any
+  // (tx: Transaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
 }

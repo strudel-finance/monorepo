@@ -20,6 +20,8 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import 'react-toastify/dist/ReactToastify.css'
 import RollbarErrorTracking from './errorTracking/rollbar'
+import BTC from './views/BTC'
+import BCH from './views/BCH'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -57,6 +59,12 @@ const App: React.FC = () => {
         </Route>
         <Route path="/farms">
           <Farms />
+        </Route>
+        <Route path="/BTC">
+          <BTC />
+        </Route>
+        <Route path="/BCH">
+          <BCH />
         </Route>
         {false && (
           <Route path="/staking">
