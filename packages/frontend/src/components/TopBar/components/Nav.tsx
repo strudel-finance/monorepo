@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useLocation } from 'react-router-dom'
 import styled from 'styled-components'
 
 const Nav: React.FC = () => {
@@ -10,6 +10,12 @@ const Nav: React.FC = () => {
       </StyledLink>
       <StyledLink exact activeClassName="active" to="/farms">
         Terra-Farms
+      </StyledLink>
+      <StyledLink exact activeClassName="active" to="/BTC">
+        Bitcoin
+      </StyledLink>
+      <StyledLink exact activeClassName="active" to="/BCH">
+        Bitcoin Cash
       </StyledLink>
       {false && (
         <StyledLink exact activeClassName="active" to="/staking">
@@ -28,7 +34,6 @@ const Nav: React.FC = () => {
       >
         About
       </StyledAbsoluteLink>
-
     </StyledNav>
   )
 }
@@ -47,7 +52,11 @@ const StyledLink = styled(NavLink)`
     color: ${(props) => props.theme.color.grey[500]};
   }
   &.active {
-    color: ${(props) => props.theme.color.primary.main};
+    color: ${(props) => {
+      return useLocation().pathname === '/BCH'
+        ? props.theme.color.BCHgreen[100]
+        : props.theme.color.primary.main
+    }};
   }
   @media (max-width: 400px) {
     padding-left: ${(props) => props.theme.spacing[2]}px;

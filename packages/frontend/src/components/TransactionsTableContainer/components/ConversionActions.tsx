@@ -21,6 +21,8 @@ import { getVbtcContract, proofOpReturnAndMint } from '../../../vbtc/utils'
 import { useWallet } from 'use-wallet'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
+import theme from '../../../theme'
+import { useLocation } from 'react-router'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -195,6 +197,7 @@ const ConversionActions: React.FC<Props> = ({
   const { account } = useWallet()
   const vbtc = useVBTC()
   const vbtcContract = getVbtcContract(vbtc)
+  const pathName = useLocation().pathname
 
   const targetBtcConfs = 6
   let isConfirmed = false
@@ -220,14 +223,19 @@ const ConversionActions: React.FC<Props> = ({
           <ExternalLink
             className={classes.viewLink}
             href={`https://sochain.com/tx/BTC/${tx.btcTxHash}`}
+            style={{
+              color:  pathName  === '/BCH' && theme.color.BCHgreen[100]
+            }}
+
           >
-            View BTC TX
+            View {pathName.slice(1)} TX
           </ExternalLink>
         )}
         {tx.ethTxHash && (
           <ExternalLink
             className={classes.viewLink}
             href={'https://etherscan.io/tx/' + tx.ethTxHash}
+            style={{ color: pathName  === '/BCH' && theme.color.BCHgreen[100] }}
           >
             View ETH TX
           </ExternalLink>

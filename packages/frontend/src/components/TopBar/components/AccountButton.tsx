@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react'
+import { useLocation } from 'react-router'
 import styled from 'styled-components'
 import { useWallet } from 'use-wallet'
 import useModal from '../../../hooks/useModal'
@@ -14,6 +15,7 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
     <WalletProviderModal />,
     'provider',
   )
+  const pathName = useLocation().pathname
 
   const { account } = useWallet()
 
@@ -24,9 +26,24 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
   return (
     <StyledAccountButton>
       {!account ? (
-        <Button onClick={handleUnlockClick} size="sm" text="Unlock Wallet" boxShadowGlow={true} />
+        <Button
+          onClick={handleUnlockClick}
+          size="sm"
+          text="Unlock Wallet"
+          boxShadowGlow={true}
+        />
       ) : (
-        <Button onClick={onPresentAccountModal} size="sm" text="My Wallet" />
+        <Button
+      
+             onClick={onPresentAccountModal}
+  
+                 size="sm"
+    
+               text="My Wallet"
+      
+             BCH={pathName === '/BCH'}
+        
+        />
       )}
     </StyledAccountButton>
   )

@@ -5,6 +5,10 @@ export const green = {
   500: '##00d1810',
 }
 
+export const BCHgreen = {
+  100: '#8dc351',
+}
+
 export const red = {
   100: '#FFFDFE',
   200: '#ffc2a8',
