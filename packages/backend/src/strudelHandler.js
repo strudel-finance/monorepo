@@ -168,7 +168,7 @@ module.exports = class StrudelHandler {
       this.cert,
       this.chain,
     ]);
-    const request = new PaymentProtocol().makePaymentRequest();
+    const request = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentRequest();
     request.set("payment_details_version", 1);
     request.set("pki_type", "x509+sha256");
     request.set("pki_data", certificates.serialize());
@@ -183,7 +183,7 @@ module.exports = class StrudelHandler {
   async payAck(bodyRaw, isBch = false) {
     // Decode payment
     const body = PaymentProtocol.Payment.decode(bodyRaw);
-    const payment = new PaymentProtocol().makePayment(body);
+    const payment = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePayment(body);
     const merchantData = payment.get("merchant_data");
     const transactions = payment.get("transactions");
     const txData = transactions[0].toString("hex");

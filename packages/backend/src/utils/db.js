@@ -58,7 +58,8 @@ exports.DB = class DB extends SimpleDb {
     // get sig, if any
     const rsp = await this.getAttr(walletAddress, {
       account: walletAddress,
-      burns: []
+      burns: [],
+      bchBurns: [],
     });
     if (rsp.v) {
       rsp.v = parseInt(rsp.v);

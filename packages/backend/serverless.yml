@@ -152,10 +152,10 @@ functions:
           integration: lambda
           request:
             headers:
-              Content-Type: "'application/bitcoin-payment'"
+              Content-Type: "'application/bitcoincash-payment'"
           response:
             headers:
-              Content-Type: "'application/bitcoin-paymentrequest'"
+              Content-Type: "'application/bitcoincash-paymentrequest'"
       - http:
           method: post
           path: /ack
@@ -172,10 +172,10 @@ functions:
           integration: lambda
           request:
             headers:
-              Content-Type: "'application/bitcoin-payment'"
+              Content-Type: "'application/bitcoincash-payment'"
           response:
             headers:
-              Content-Type: "'application/bitcoin-paymentack'"
+              Content-Type: "'application/bitcoincash-paymentack'"
       - http:
           method: get
           path: /watchlist
