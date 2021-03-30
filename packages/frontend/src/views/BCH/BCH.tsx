@@ -27,7 +27,7 @@ import BurnAmountInput from '../../components/BurnAmountInput'
 import { formatAddress } from '../../utils'
 import BurnModal from '../Home/components/BurnModal'
 import { Transaction } from '../../contexts/Transactions/types'
-import TransactionsTableContainer from '../../components/TransactionsTableContainer'
+import BCHTransactionsTableContainer from './components/BCHTransactionTable'
 
 const Container = withStyles({
   root: {
@@ -39,8 +39,6 @@ const Container = withStyles({
 const BCH: React.FC = () => {
   const [val, setVal] = useState('0')
   const [lastRequest, setLastRequest] = useState(undefined)
-
-  const [isCountComplete, setCountComplete] = useState(false)
 
   const wallet = useWallet()
   const account = wallet.account
@@ -115,7 +113,7 @@ const BCH: React.FC = () => {
               </StyledInfo>
             </Grid>
             <Grid item xs={12} sm={12} md={8}>
-              <TransactionsTableContainer
+              <BCHTransactionsTableContainer
                 account={account}
                 previousAccount={previousAccount}
                 lastRequest={lastRequest}
