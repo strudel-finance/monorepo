@@ -18,6 +18,8 @@ const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
+  const vbchBalanceMainnet = useTokenBalance('0x4af6e819b7042f1d7055d5030ba001b2ea998912')
+
   const {account}: {account: any} = useWallet()
 
   useEffect(() => {
@@ -30,7 +32,13 @@ const Balances: React.FC = () => {
     }
   }, [vbtc, setTotalVBTCSupply])
 
+  console.log(vbtcBalance, vbchBalanceMainnet, 'vbtc vbtc');
+  
+
   return (
+    <>
+    {/* BTC */}
+      
     <StyledWrapper>
       <Card>
         <CardContent>
@@ -61,6 +69,39 @@ const Balances: React.FC = () => {
         </CardContent>
       </Card>
     </StyledWrapper>
+
+    {/* BCH */}
+    <StyledWrapper>
+      <Card>
+        <CardContent>
+          <StyledBalances>
+            <StyledBalance>
+              <VBTCIcon />
+              <Spacer size='xs' />
+              <div style={{flex: 1}}>
+                <Label text="Your vBCH Balance" />
+                <ValueBTC
+                  value={!!account ? getBalanceNumber(vbchBalanceMainnet) : 'Locked'}
+                />
+              </div>
+            </StyledBalance>
+          </StyledBalances>
+        </CardContent>
+      </Card>
+      <Spacer />
+
+      <Card>
+        <CardContent>
+          <Label text="Total vBCH Supply" />
+          <ValueBTC
+            value={
+              totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
+            }
+          />
+        </CardContent>
+      </Card>
+      </StyledWrapper>
+      </>
   )
 }
 

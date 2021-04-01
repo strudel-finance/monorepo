@@ -22,6 +22,8 @@ const VBTCProvider: React.FC = ({children}) => {
   const {ethereum}: {ethereum: any} = useWallet()
   const [vbtc, setVbtc] = useState<any>()
 
+  console.log(ethereum, 'ethereum ethereum')
+  
   // @ts-ignore
   window.vbtc = vbtc
   // @ts-ignore
