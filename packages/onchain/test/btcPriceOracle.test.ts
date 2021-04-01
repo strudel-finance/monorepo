@@ -33,33 +33,36 @@ describe('BtcPriceOracle', () => {
   before(async () => {
     signers = await ethers.getSigners();
     const devAddr = await signers[0].getAddress();
-    const MockERC20Factory = await ethers.getContractFactory("MockERC20");
-    tBtc0 = await MockERC20Factory.deploy(
+    const MockERC20Factory = await ethers.getContractFactory('MockERC20');
+    tBtc0 = (await MockERC20Factory.deploy(
       'WBTC',
       'WBTC',
       8,
       expandTo18Decimals(10000)
-    ) as MockERC20;
-    tBtc1 = await MockERC20Factory.deploy(
+    )) as MockERC20;
+    tBtc1 = (await MockERC20Factory.deploy(
       'TBTC',
       'TBTC',
       8,
       expandTo18Decimals(10000)
-    ) as MockERC20;
-    wEth = await MockERC20Factory.deploy(
+    )) as MockERC20;
+    wEth = (await MockERC20Factory.deploy(
       'wEth',
       'WETH',
       18,
       expandTo18Decimals(10000)
-    ) as MockERC20;
+    )) as MockERC20;
 
     // deploy V2
-    const IUniswapV2FactoryFactory = await ethers.getContractFactory("IUniswapV2Factory");
-    factoryV2 = await IUniswapV2FactoryFactory.deploy(devAddr) as IUniswapV2Factory;
+    const IUniswapV2FactoryFactory = await ethers.getContractFactory('IUniswapV2Factory');
+    factoryV2 = (await IUniswapV2FactoryFactory.deploy(devAddr)) as IUniswapV2Factory;
 
     // deploy router
-    const IUniswapV2Router02Factory = await ethers.getContractFactory("IUniswapV2Router02");
-    router = await IUniswapV2Router02Factory.deploy(factoryV2.address, wEth.address) as IUniswapV2Router02;
+    const IUniswapV2Router02Factory = await ethers.getContractFactory('IUniswapV2Router02');
+    router = (await IUniswapV2Router02Factory.deploy(
+      factoryV2.address,
+      wEth.address
+    )) as IUniswapV2Router02;
 
     // create pair
     await factoryV2.createPair(wEth.address, tBtc0.address);
@@ -76,10 +79,10 @@ describe('BtcPriceOracle', () => {
     await pair0.mint(devAddr);
 
     // deploy oracle
-    const BtcPriceOracleFactory = await ethers.getContractFactory("BtcPriceOracle");
-    oracle = await BtcPriceOracleFactory.deploy(factoryV2.address, wEth.address, [
+    const BtcPriceOracleFactory = await ethers.getContractFactory('BtcPriceOracle');
+    oracle = (await BtcPriceOracleFactory.deploy(factoryV2.address, wEth.address, [
       tBtc0.address,
-    ]) as BtcPriceOracle;
+    ])) as BtcPriceOracle;
   });
 
   it('update', async () => {

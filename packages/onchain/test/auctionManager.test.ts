@@ -26,36 +26,34 @@ describe('AuctionManager', () => {
 
   before(async () => {
     [alice, bob] = await ethers.getSigners();
-    const MockErc20Factory = await ethers.getContractFactory("MockERC20");
-    strudel = await MockErc20Factory.deploy(
+    const MockErc20Factory = await ethers.getContractFactory('MockERC20');
+    strudel = (await MockErc20Factory.deploy(
       'Strudel',
       '$TRDL',
       18,
       expandTo18Decimals(200000)
-    ) as MockERC20;
-    vBtc = await MockErc20Factory.deploy(
-      'VBTC', 'VBTC', 18, expandTo18Decimals(8)
-    ) as MockERC20;
+    )) as MockERC20;
+    vBtc = (await MockErc20Factory.deploy('VBTC', 'VBTC', 18, expandTo18Decimals(8))) as MockERC20;
     const bobAddr = await bob.getAddress();
     await vBtc.transfer(bobAddr, expandTo18Decimals(8));
-    const DutchSwapAuctionFactory = await ethers.getContractFactory("DutchSwapAuction");
-    auctionTemplate = await DutchSwapAuctionFactory.deploy() as DutchSwapAuction;
-    const DutchSwapFactoryFactory = await ethers.getContractFactory("DutchSwapFactory");
-    factory = await DutchSwapFactoryFactory.deploy() as DutchSwapFactory;
+    const DutchSwapAuctionFactory = await ethers.getContractFactory('DutchSwapAuction');
+    auctionTemplate = (await DutchSwapAuctionFactory.deploy()) as DutchSwapAuction;
+    const DutchSwapFactoryFactory = await ethers.getContractFactory('DutchSwapFactory');
+    factory = (await DutchSwapFactoryFactory.deploy()) as DutchSwapFactory;
     await factory.initDutchSwapFactory(auctionTemplate.address, 0);
-    const MockPriceOracleFactory = await ethers.getContractFactory("MockPriceOracle");
-    btcPriceOracle = await MockPriceOracleFactory.deploy() as MockPriceOracle;
-    vBtcPriceOracle = await MockPriceOracleFactory.deploy() as MockPriceOracle;
-    strudelPriceOracle = await MockPriceOracleFactory.deploy() as MockPriceOracle;
-    const AuctionManagerFactory = await ethers.getContractFactory("AuctionManager");
-    auctionManager = await AuctionManagerFactory.deploy(
+    const MockPriceOracleFactory = await ethers.getContractFactory('MockPriceOracle');
+    btcPriceOracle = (await MockPriceOracleFactory.deploy()) as MockPriceOracle;
+    vBtcPriceOracle = (await MockPriceOracleFactory.deploy()) as MockPriceOracle;
+    strudelPriceOracle = (await MockPriceOracleFactory.deploy()) as MockPriceOracle;
+    const AuctionManagerFactory = await ethers.getContractFactory('AuctionManager');
+    auctionManager = (await AuctionManagerFactory.deploy(
       strudel.address,
       vBtc.address,
       btcPriceOracle.address,
       vBtcPriceOracle.address,
       strudelPriceOracle.address,
       factory.address
-    ) as AuctionManager;
+    )) as AuctionManager;
   });
 
   it('should allow to start auction', async () => {
@@ -66,7 +64,7 @@ describe('AuctionManager', () => {
     await strudelPriceOracle.update('200');
     await auctionManager.rotateAuctions();
     let currentAuctionAddr = await auctionManager.currentAuction();
-    const DutchSwapAuctionFactory = await ethers.getContractFactory("DutchSwapAuction");
+    const DutchSwapAuctionFactory = await ethers.getContractFactory('DutchSwapAuction');
     const auction = DutchSwapAuctionFactory.attach(currentAuctionAddr);
 
     // participate in vBTC buy auction

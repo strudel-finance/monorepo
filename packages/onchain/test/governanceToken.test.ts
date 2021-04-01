@@ -19,15 +19,15 @@ describe('GovernanceToken', async () => {
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
-    const MockErc20Factory = await ethers.getContractFactory("MockERC20");
-    strudel = await MockErc20Factory.deploy(
+    const MockErc20Factory = await ethers.getContractFactory('MockERC20');
+    strudel = (await MockErc20Factory.deploy(
       'strudel',
       '$TRDL',
       18,
       expandTo18Decimals(100000)
-    ) as MockERC20;
-    const MockGovBridgeFactory = await ethers.getContractFactory("MockGovBridge");
-    bridge = await MockGovBridgeFactory.deploy() as MockGovBridge;
+    )) as MockERC20;
+    const MockGovBridgeFactory = await ethers.getContractFactory('MockGovBridge');
+    bridge = (await MockGovBridgeFactory.deploy()) as MockGovBridge;
 
     const GovernanceToken = (await ethers.getContractFactory('GovernanceToken')).connect(
       signers[0]

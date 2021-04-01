@@ -17,10 +17,10 @@ const config = {
     optimizer: {enabled: true, runs: 500},
   },
   paths: {
-    sources: "./contracts",
-    tests: "./test",
-    cache: "./cache",
-    artifacts: "./artifacts"
+    sources: './contracts',
+    tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
   },
   typechain: {
     outDir: 'typechain',
