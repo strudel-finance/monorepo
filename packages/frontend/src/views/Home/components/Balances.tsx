@@ -11,97 +11,106 @@ import ValueBTC from '../../../components/ValueBTC'
 import VBTCIcon from '../../../components/VBTCIcon'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import {getVbtcAddress, getVbtcSupply} from '../../../vbtc/utils'
+import useVBCH from '../../../hooks/useVBCH'
+import {getVbchSupply, getVbtcAddress, getVbtcSupply} from '../../../bridgeTokens/utils'
 import {getBalanceNumber} from '../../../utils/formatBalance'
 
 const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
+  const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
+  const vbch = useVBCH()
+  
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
-  const vbchBalanceMainnet = useTokenBalance('0x4af6e819b7042f1d7055d5030ba001b2ea998912')
+  const vbchBalanceMainnet = useTokenBalance(
+    getVbtcAddress(vbch)
+  )
 
-  const {account}: {account: any} = useWallet()
+  const { account }: { account: any } = useWallet()
 
   useEffect(() => {
     async function fetchTotalSupply() {
-      const supply = await getVbtcSupply(vbtc)
-      setTotalVBTCSupply(supply)
+      const [vBTCSupply, vBCHSupply] = await Promise.all([getVbtcSupply(vbtc), getVbchSupply(vbch)])
+      
+      setTotalVBTCSupply(vBTCSupply)
+      setTotalVBCHSupply(vBCHSupply)
     }
-    if (vbtc) {
+    if (vbtc && vbch) {
       fetchTotalSupply()
     }
   }, [vbtc, setTotalVBTCSupply])
 
-  console.log(vbtcBalance, vbchBalanceMainnet, 'vbtc vbtc');
-  
-
   return (
     <>
-    {/* BTC */}
-      
-    <StyledWrapper>
-      <Card>
-        <CardContent>
-          <StyledBalances>
-            <StyledBalance>
-              <VBTCIcon />
-              <Spacer size='xs' />
-              <div style={{flex: 1}}>
-                <Label text="Your vBTC Balance" />
-                <ValueBTC
-                  value={!!account ? getBalanceNumber(vbtcBalance) : 'Locked'}
-                />
-              </div>
-            </StyledBalance>
-          </StyledBalances>
-        </CardContent>
-      </Card>
-      <Spacer />
+      {/* BTC */}
 
-      <Card>
-        <CardContent>
-          <Label text="Total vBTC Supply" />
-          <ValueBTC
-            value={
-              totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
-            }
-          />
-        </CardContent>
-      </Card>
-    </StyledWrapper>
+      <StyledWrapper>
+        <Card>
+          <CardContent>
+            <StyledBalances>
+              <StyledBalance>
+                <VBTCIcon />
+                <Spacer size="xs" />
+                <div style={{ flex: 1 }}>
+                  <Label text="Your vBTC Balance" />
+                  <ValueBTC
+                    value={!!account ? getBalanceNumber(vbtcBalance) : 'Locked'}
+                  />
+                </div>
+              </StyledBalance>
+            </StyledBalances>
+          </CardContent>
+        </Card>
+        <Spacer />
 
-    {/* BCH */}
-    <StyledWrapper>
-      <Card>
-        <CardContent>
-          <StyledBalances>
-            <StyledBalance>
-              <VBTCIcon />
-              <Spacer size='xs' />
-              <div style={{flex: 1}}>
-                <Label text="Your vBCH Balance" />
-                <ValueBTC
-                  value={!!account ? getBalanceNumber(vbchBalanceMainnet) : 'Locked'}
-                />
-              </div>
-            </StyledBalance>
-          </StyledBalances>
-        </CardContent>
-      </Card>
-      <Spacer />
-
-      <Card>
-        <CardContent>
-          <Label text="Total vBCH Supply" />
-          <ValueBTC
-            value={
-              totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
-            }
-          />
-        </CardContent>
-      </Card>
+        <Card>
+          <CardContent>
+            <Label text="Total vBTC Supply" />
+            <ValueBTC
+              value={
+                totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
+              }
+            />
+          </CardContent>
+        </Card>
       </StyledWrapper>
-      </>
+
+      {/* BCH */}
+      <StyledWrapper>
+        <Card>
+          <CardContent>
+            <StyledBalances>
+              <StyledBalance>
+                <VBTCIcon />
+                <Spacer size="xs" />
+                <div style={{ flex: 1 }}>
+                  <Label text="Your vBCH Balance" />
+                  <ValueBTC
+                    value={
+                      !!account
+                        ? getBalanceNumber(vbchBalanceMainnet)
+                        : 'Locked'
+                    }
+                  />
+                </div>
+              </StyledBalance>
+            </StyledBalances>
+          </CardContent>
+        </Card>
+        <Spacer />
+
+        <Card>
+          <CardContent>
+            <Label text="Total vBCH Supply" />
+            <ValueBTC
+              value={
+                totalVBCHSupply ? getBalanceNumber(totalVBCHSupply) : 'Locked'
+              }
+            />
+          </CardContent>
+        </Card>
+      </StyledWrapper>
+    </>
   )
 }
 

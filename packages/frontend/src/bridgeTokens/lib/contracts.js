@@ -3,6 +3,7 @@ import ERC20Abi from './abi/erc20.json'
 import MasterChefAbi from './abi/masterchef.json'
 import StrudelAbi from './abi/StrudelToken.json'
 import VBTCAbi from './abi/vbtc.json'
+import VBCHAbi from './abi/vbch.json'
 import UNIV2PairAbi from './abi/uni_v2_lp.json'
 import WETHAbi from './abi/weth.json'
 import BalancerPool from './abi/BPool.json'
@@ -29,7 +30,8 @@ export class Contracts {
     this.masterChef = new this.web3.eth.Contract(MasterChefAbi)
     this.weth = new this.web3.eth.Contract(WETHAbi)
     this.relay = new this.web3.eth.Contract(RelayAbi)
-
+    this.vbch = new this.web3.eth.Contract(VBCHAbi)
+    
     this.pools = supportedPools.map((pool) =>
       Object.assign(pool, {
         lpAddress: pool.lpAddresses[networkId],
@@ -50,17 +52,18 @@ export class Contracts {
   }
 
   setProvider(provider, networkId) {
-    const setProvider = (contract, address) => {
+    const _setProvider = (contract, address) => {
       contract.setProvider(provider)
       if (address) contract.options.address = address
       else console.error('Contract address not found in network', networkId)
     }
 
-    setProvider(this.vbtc, contractAddresses.vbtc[networkId])
-    setProvider(this.strudel, contractAddresses.strudel[networkId])
-    setProvider(this.masterChef, contractAddresses.masterChef[networkId])
-    setProvider(this.weth, contractAddresses.weth[networkId])
-    setProvider(this.relay, contractAddresses.relay[networkId])
+    _setProvider(this.vbtc, contractAddresses.vbtc[networkId])
+    _setProvider(this.strudel, contractAddresses.strudel[networkId])
+    _setProvider(this.masterChef, contractAddresses.masterChef[networkId])
+    _setProvider(this.weth, contractAddresses.weth[networkId])
+    _setProvider(this.relay, contractAddresses.relay[networkId])
+    _setProvider(this.vbch, contractAddresses.vbch[networkId])
 
     this.pools.forEach(
       ({
@@ -72,10 +75,10 @@ export class Contracts {
         balancerPoolContract,
       }) => {
         if (balancerPoolAddress) {
-          setProvider(balancerPoolContract, balancerPoolAddress)
+          _setProvider(balancerPoolContract, balancerPoolAddress)
         }
-        setProvider(lpContract, lpAddress)
-        setProvider(tokenContract, tokenAddress)
+        _setProvider(lpContract, lpAddress)
+        _setProvider(tokenContract, tokenAddress)
       },
     )
   }
@@ -83,6 +86,8 @@ export class Contracts {
   setDefaultAccount(account) {
     this.vbtc.options.from = account
     this.strudel.options.from = account
+    // !!!
+    // this.vbch.options.from = account
     this.masterChef.options.from = account
   }
 

@@ -8,6 +8,7 @@ import TopBar from './components/TopBar'
 import FarmsProvider from './contexts/Farms'
 import ModalsProvider from './contexts/Modals'
 import TransactionProvider from './contexts/Transactions'
+import VBCHProvider from './contexts/VBCHProvider'
 import VBTCProvider from './contexts/VBTCProvider'
 import useModal from './hooks/useModal'
 import theme from './theme'
@@ -88,11 +89,13 @@ const Providers: React.FC = ({ children }) => {
         }}
       >
         <VBTCProvider>
-          <TransactionProvider>
-            <FarmsProvider>
-              <ModalsProvider>{children}</ModalsProvider>
-            </FarmsProvider>
-          </TransactionProvider>
+          <VBCHProvider>
+            <TransactionProvider>
+              <FarmsProvider>
+                <ModalsProvider>{children}</ModalsProvider>
+              </FarmsProvider>
+            </TransactionProvider>
+          </VBCHProvider>
         </VBTCProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />

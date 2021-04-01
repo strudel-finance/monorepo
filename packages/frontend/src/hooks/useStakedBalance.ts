@@ -3,7 +3,7 @@ import {useCallback, useEffect, useState} from 'react'
 import BigNumber from 'bignumber.js'
 import {useWallet} from 'use-wallet'
 
-import {getStaked, getMasterChefContract} from '../vbtc/utils'
+import { getStaked, getMasterChefContract } from '../bridgeTokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 

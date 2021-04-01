@@ -44,7 +44,7 @@ export const contractAddresses = {
     5: '',
   },
   trdlPool: {
-    1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83'
+    1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
   },
   tbtcPool: {
     1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
@@ -68,6 +68,10 @@ export const contractAddresses = {
   },
   relay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
+    5: '',
+  },
+  vbch: {
+    1: '0x4af6e819b7042f1d7055d5030ba001b2ea998912',
     5: '',
   },
 }

@@ -4,7 +4,11 @@ import {provider} from 'web3-core'
 import BigNumber from 'bignumber.js'
 import {useWallet} from 'use-wallet'
 
-import {getEarned, getMasterChefContract, getFarms} from '../vbtc/utils'
+import {
+  getEarned,
+  getMasterChefContract,
+  getFarms,
+} from '../bridgeTokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 

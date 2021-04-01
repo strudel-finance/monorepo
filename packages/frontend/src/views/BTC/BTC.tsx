@@ -45,9 +45,6 @@ const BTC: React.FC = () => {
   const account = wallet.account
 
   useEffect(() => {
-    console.log(wallet, 'efff BTC')
-
-    //const seenDisclaimer = true
     if (!account) onPresentWalletProviderModal()
   }, [])
 
