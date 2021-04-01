@@ -26,7 +26,6 @@ import { Transaction, LoadingStatus } from '../../types/types'
 
 import { makeStyles, withStyles } from '@material-ui/core'
 import { startDate } from '../../constants/countdown'
-import AstroFlying from '../../assets/img/AstroFlying.png'
 import BCHLogo from '../../assets/img/Bitcoin-Cash-BCH-icon.png'
 import BTCLogo from '../../assets/img/BTC-logo.jpeg'
 
@@ -137,65 +136,62 @@ const Home: React.FC = () => {
             subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
           />
           <div
-              style={{
-                margin: '0 auto',
-                display: 'flex'
-              }}
-            >
-              <Button
-                borderButton={true}
-                text="Burn BTC"
-                to="/BTC"
-                variant="secondary"
-                size='xxxl'
-                backgroundImage={BTCLogo}
-              />
-              <Spacer size="md" />
-              <Button
-                borderButton={true}
-                text="Burn BCH"
-                to="/BCH"
-                variant="secondary"
-                size='xxxl'
-                backgroundImage={BCHLogo}
-            /> 
+            style={{
+              margin: '0 auto',
+              display: 'flex',
+            }}
+          >
+            <Button
+              borderButton={true}
+              text="Burn BTC"
+              to="/BTC"
+              variant="secondary"
+              size="xxxl"
+              backgroundImage={BTCLogo}
+            />
+            <Spacer size="md" />
+            <Button
+              borderButton={true}
+              text="Burn BCH"
+              to="/BCH"
+              variant="secondary"
+              size="xxxl"
+              backgroundImage={BCHLogo}
+            />
           </div>
           <Spacer size="md" />
-
           <div
-                style={{
-                  alignItems: 'center',
-                  display: 'flex',
-                }}
-              >
-                <Button
-                  borderButton={true}
-                  onClick={onPresentWalletProviderModal}
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+            }}
+          >
+            <Button
+              borderButton={true}
+              onClick={onPresentWalletProviderModal}
               text="Unlock Wallet"
-               size='xxxl'
-                />
-              <Spacer size="md" />
-                <Button
-                    borderButton={true}
-                    text="See Terra Farms"
-                    to="/farms"
-                    variant="secondary"
-                    size='xxxl'
-                  />
-
+              size="xxxl"
+            />
+            <Spacer size="md" />
+            <Button
+              borderButton={true}
+              text="See Terra Farms"
+              to="/farms"
+              variant="secondary"
+              size="xxxl"
+            />
           </div>
           <Spacer size="md" />
           <>
-
             <Grid container spacing={1}>
-              <AstroGrid item lg={4} xs={1}>
-
-              </AstroGrid>
+              <AstroGrid item lg={4} xs={1}></AstroGrid>
               <AstroGrid item lg={4} xs={10}>
                 <StyledP>
-                  The Strudel is the first one-way, trustless bridge linking Bitcoin and Ethereum.
-                  The bravest explorers that arrive on the other side will get extra $TRDL rewards.
-                  You can only enter the Strudel from one direction so be aware! This action is irreversible.
+                  The Strudel is the first one-way, trustless bridge linking
+                  Bitcoin and Ethereum. The bravest explorers that arrive on the
+                  other side will get extra $TRDL rewards. You can only enter
+                  the Strudel from one direction so be aware! This action is
+                  irreversible.
                 </StyledP>
               </AstroGrid>
               <AstroGrid item lg={4} xs={1}></AstroGrid>
@@ -212,17 +208,17 @@ const Home: React.FC = () => {
           </>
         </>
       ) : (
-          <>
-            <Countdown
-              date={startDate}
-              renderer={renderer}
-              onComplete={handleCountEnd}
-            />
-            <MyStyledLink target="_blank" href="https://discord.gg/fBuHJCs">
-              Join the Discord
+        <>
+          <Countdown
+            date={startDate}
+            renderer={renderer}
+            onComplete={handleCountEnd}
+          />
+          <MyStyledLink target="_blank" href="https://discord.gg/fBuHJCs">
+            Join the Discord
           </MyStyledLink>
-          </>
-        )}
+        </>
+      )}
     </Page>
   )
 }
