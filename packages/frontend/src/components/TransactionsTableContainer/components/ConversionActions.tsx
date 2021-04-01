@@ -17,7 +17,10 @@ import BurnModal from '../../../views/Home/components/BurnModal'
 import Button from '../../Button'
 
 import useVBTC from '../../../hooks/useVBTC'
-import { getVbtcContract, proofOpReturnAndMint } from '../../../vbtc/utils'
+import {
+  getVbtcContract,
+  proofOpReturnAndMint,
+} from '../../../bridgeTokens/utils'
 import { useWallet } from 'use-wallet'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'

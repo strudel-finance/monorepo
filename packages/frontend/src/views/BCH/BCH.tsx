@@ -45,8 +45,6 @@ const BCH: React.FC = () => {
 
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
   useEffect(() => {
-    console.log(wallet, 'efff BCH')
-
     //const seenDisclaimer = true
     if (!account) onPresentWalletProviderModal()
   }, [])

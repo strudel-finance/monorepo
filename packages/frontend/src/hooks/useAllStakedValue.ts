@@ -11,7 +11,7 @@ import {
   getVbtcContract,
   getFarms,
   getTotalLPWethValue,
-} from '../vbtc/utils'
+} from '../bridgeTokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 

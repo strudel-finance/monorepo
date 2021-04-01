@@ -15,7 +15,7 @@ import useAllStakedValue, {
 } from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
-import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
+import { getEarned, getMasterChefContract } from '../../../bridgeTokens/utils'
 import { bnToDec } from '../../../utils'
 import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
 import StrudelImg from '../../../assets/img/Strudel-logo-Icon.png'

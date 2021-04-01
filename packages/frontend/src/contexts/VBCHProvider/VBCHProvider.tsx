@@ -2,34 +2,34 @@ import React, { createContext, useEffect, useState } from 'react'
 
 import { useWallet } from 'use-wallet'
 
-import { Vbtc } from '../../bridgeTokens'
+import { Vbch } from '../../bridgeTokens/Vbch'
 
-export interface VBTCProvider {
-  vbtc?: typeof Vbtc
+export interface VBCHContext {
+  vbch?: typeof Vbch
 }
 
-export const Context = createContext<VBTCProvider>({
-  vbtc: undefined,
+export const Context = createContext<VBCHContext>({
+  vbch: undefined,
 })
 
 declare global {
   interface Window {
-    vbtcsauce: any
+    vbchsauce: any
   }
 }
 
-const VBTCProvider: React.FC = ({ children }) => {
+const VBCHProvider: React.FC = ({ children }) => {
   const { ethereum }: { ethereum: any } = useWallet()
-  const [vbtc, setVbtc] = useState<any>()
+  const [vbch, setVbch] = useState<any>()
 
   // @ts-ignore
-  window.vbtc = vbtc
+  window.vbch = vbch
   // @ts-ignore
   window.eth = ethereum
   useEffect(() => {
     if (ethereum) {
       const chainId = Number(ethereum.chainId)
-      const vbtcLib = new Vbtc(ethereum, chainId, false, {
+      const vbchLib = new Vbch(ethereum, chainId, false, {
         defaultAccount: ethereum.selectedAddress,
         defaultConfirmations: 1,
         autoGasMultiplier: 1.5,
@@ -39,12 +39,15 @@ const VBTCProvider: React.FC = ({ children }) => {
         accounts: [],
         ethereumNodeTimeout: 10000,
       })
-      setVbtc(vbtcLib)
-      window.vbtcsauce = vbtcLib
+
+      console.log(vbchLib, 'vbchLib vbchLib vbchLib')
+
+      setVbch(vbchLib)
+      window.vbchsauce = vbchLib
     }
   }, [ethereum])
 
-  return <Context.Provider value={{ vbtc }}>{children}</Context.Provider>
+  return <Context.Provider value={{ vbch }}>{children}</Context.Provider>
 }
 
-export default VBTCProvider
+export default VBCHProvider

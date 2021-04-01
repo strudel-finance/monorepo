@@ -24,7 +24,7 @@ import useInterval from '../../hooks/useInterval'
 import sb from 'satoshi-bitcoin'
 import { changeEndian } from '../../utils/changeEndian'
 import { Contract } from 'web3-eth-contract'
-import { getRelayContract } from '../../vbtc/utils'
+import { getRelayContract } from '../../bridgeTokens/utils'
 import useVBTC from '../../hooks/useVBTC'
 
 export interface TransactionTableProps {

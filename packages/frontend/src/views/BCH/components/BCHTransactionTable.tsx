@@ -24,7 +24,7 @@ import React, { useState, useRef, useEffect } from 'react'
 import sb from 'satoshi-bitcoin'
 // import { changeEndian } from '../../utils/changeEndian'
 import { Contract } from 'web3-eth-contract'
-import { getRelayContract } from '../../../vbtc/utils'
+import { getRelayContract } from '../../../bridgeTokens/utils'
 import { changeEndian } from '../../../utils/changeEndian'
 import useVBTC from '../../../hooks/useVBTC'
 import showError, { handleErrors } from '../../../utils/showError'
@@ -92,7 +92,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   ): Promise<boolean> => {
     const relayContract = getRelayContract(vbtc)
     const blockHashLittle = '0x' + changeEndian(blockHash)
-    console.log(blockHashLittle, blockHash, 'blockHashLittle')
 
     const bestKnownDigest = await relayContract.methods
       .getBestKnownDigest()
@@ -103,9 +102,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     // const heightDigest = await relayContract.methods
     //   .findHeight(bestKnownDigest)
     //   .call()
-
-    window.alert('aaaa')
-    console.log(heightTx, bestKnownDigest)
 
     return true
     // try {
@@ -265,11 +261,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                   return undefined
                 })
               if (res) {
-                console.log(
-                  highConfirmations,
-                  ' highConfirmations highConfirmations highConfirmations',
-                )
-
                 highConfirmations[key].blockHash = res.data.blockhash
                 highConfirmations[key].tx_hex = res.data.tx_hex
               }

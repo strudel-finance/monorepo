@@ -14,7 +14,10 @@ import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import { getStrudelAddress, getStrudelSupply } from '../../../vbtc/utils'
+import {
+  getStrudelAddress,
+  getStrudelSupply,
+} from '../../../bridgeTokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 
 const PendingRewards: React.FC = () => {

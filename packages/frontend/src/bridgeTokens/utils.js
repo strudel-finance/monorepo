@@ -261,6 +261,11 @@ export const getVbtcSupply = async (vbtc) => {
   return new BigNumber(await vbtc.contracts.vbtc.methods.totalSupply().call())
 }
 
+export const getVbchSupply = async (vbch) => {
+  console.log(vbch, 'vBCHSupply vBCHSupply vBCHSupply')
+  return new BigNumber(await vbch.contracts.vbch.methods.totalSupply().call())
+}
+
 export const getStrudelSupply = async (strudel) => {
   return new BigNumber(
     await strudel.contracts.strudel.methods.totalSupply().call(),

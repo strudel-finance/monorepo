@@ -1,5 +1,5 @@
 import {useContext} from 'react'
-import {Context} from '../contexts/VBTCProvider'
+import { Context } from '../contexts/VBTCProvider'
 
 const useVBTC = () => {
   const {vbtc} = useContext(Context)
