@@ -1,18 +1,18 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
-import {BigNumber, Signer} from 'ethers';
+import { ethers, upgrades } from '@nomiclabs/buidler';
+import { BigNumber, Signer } from 'ethers';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
+import { solidity } from 'ethereum-waffle';
 import vector from './testVector.json';
-import {expandTo18Decimals, advanceBlock} from './shared/utilities';
-import {GovernanceToken} from '../typechain/GovernanceToken';
-import {GovernanceTokenFactory} from '../typechain/GovernanceTokenFactory';
-import {MockErc20} from '../typechain/MockErc20';
-import {MockErc20Factory} from '../typechain/MockErc20Factory';
-import {MockGovBridge} from '../typechain/MockGovBridge';
-import {MockGovBridgeFactory} from '../typechain/MockGovBridgeFactory';
+import { expandTo18Decimals, advanceBlock } from './shared/utilities';
+import { GovernanceToken } from '../typechain/GovernanceToken';
+import { GovernanceTokenFactory } from '../typechain/GovernanceTokenFactory';
+import { MockErc20 } from '../typechain/MockErc20';
+import { MockErc20Factory } from '../typechain/MockErc20Factory';
+import { MockGovBridge } from '../typechain/MockGovBridge';
+import { MockGovBridgeFactory } from '../typechain/MockGovBridgeFactory';
 
 chai.use(solidity);
-const {expect} = chai;
+const { expect } = chai;
 const minInterval = 6;
 const maxInterval = minInterval * 52;
 

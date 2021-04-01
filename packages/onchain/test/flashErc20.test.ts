@@ -1,16 +1,16 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
-import {Signer} from 'ethers';
+import { ethers, upgrades } from '@nomiclabs/buidler';
+import { Signer } from 'ethers';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
+import { solidity } from 'ethereum-waffle';
 import vector from './testVector.json';
-import {expandTo18Decimals} from './shared/utilities';
-import {MockFlashErc20} from '../typechain/MockFlashErc20';
-import {MockFlashErc20Factory} from '../typechain/MockFlashErc20Factory';
-import {MockBorrower} from '../typechain/MockBorrower';
-import {MockBorrowerFactory} from '../typechain/MockBorrowerFactory';
+import { expandTo18Decimals } from './shared/utilities';
+import { MockFlashErc20 } from '../typechain/MockFlashErc20';
+import { MockFlashErc20Factory } from '../typechain/MockFlashErc20Factory';
+import { MockBorrower } from '../typechain/MockBorrower';
+import { MockBorrowerFactory } from '../typechain/MockBorrowerFactory';
 
 chai.use(solidity);
-const {expect} = chai;
+const { expect } = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
