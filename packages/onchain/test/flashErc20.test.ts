@@ -16,20 +16,19 @@ describe('FlashERC20', async () => {
 
   before(async () => {
     signers = await ethers.getSigners();
-    const MockFlashERC20Factory = await ethers.getContractFactory("MockFlashERC20");
-    vBtc = await MockFlashERC20Factory.deploy(
+    const MockFlashERC20Factory = await ethers.getContractFactory('MockFlashERC20');
+    vBtc = (await MockFlashERC20Factory.deploy(
       'vBTC',
       'VBTC',
       expandTo18Decimals(100000)
-    ) as MockFlashERC20;
+    )) as MockFlashERC20;
   });
 
   describe('flash loaning', async () => {
-    const MockBorrowerFactory = await ethers.getContractFactory("MockBorrower");
+    const MockBorrowerFactory = await ethers.getContractFactory('MockBorrower');
 
     it('should loan', async () => {
-      
-      let borrower = await MockBorrowerFactory.deploy(vBtc.address) as MockBorrower;
+      let borrower = (await MockBorrowerFactory.deploy(vBtc.address)) as MockBorrower;
       const amount = expandTo18Decimals(20900000);
       // try borrowing too much
       await expect(
@@ -47,7 +46,7 @@ describe('FlashERC20', async () => {
     });
 
     it('should notice reentrance', async () => {
-      let borrower = await MockBorrowerFactory.deploy(vBtc.address) as MockBorrower;
+      let borrower = (await MockBorrowerFactory.deploy(vBtc.address)) as MockBorrower;
       const amount = expandTo18Decimals(1);
       await vBtc.transfer(borrower.address, amount.div(1700));
       await expect(borrower.flashMint(amount, BYTES32_0, true)).to.be.revertedWith('ERR_REENTRY');

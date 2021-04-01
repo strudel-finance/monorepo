@@ -41,13 +41,13 @@ describe('VBTC', async () => {
     [bob, owner, admin] = await ethers.getSigners();
 
     // deploy infrastructure
-    const MockRelayFactory = await ethers.getContractFactory("MockRelay");
-    relay = await MockRelayFactory.deploy(BYTES32_0, 210, BYTES32_0, 211) as MockRelay;
-    const StrudelTokenFactory = await ethers.getContractFactory("StrudelToken");
-    strudel = await StrudelTokenFactory.deploy() as StrudelToken;
+    const MockRelayFactory = await ethers.getContractFactory('MockRelay');
+    relay = (await MockRelayFactory.deploy(BYTES32_0, 210, BYTES32_0, 211)) as MockRelay;
+    const StrudelTokenFactory = await ethers.getContractFactory('StrudelToken');
+    strudel = (await StrudelTokenFactory.deploy()) as StrudelToken;
     const ownerAddr = await owner.getAddress();
-    const TimelockFactory = await ethers.getContractFactory("Timelock");
-    ownerLock = await TimelockFactory.deploy(ownerAddr, 60 * 60 * 24) as Timelock;
+    const TimelockFactory = await ethers.getContractFactory('Timelock');
+    ownerLock = (await TimelockFactory.deploy(ownerAddr, 60 * 60 * 24)) as Timelock;
 
     // proxy deploy vBtc
     const VbtcToken = await ethers.getContractFactory('VbtcToken');
@@ -184,8 +184,8 @@ describe('VBTC', async () => {
       );
 
       // upgarde
-      const MockVbtcUpgradedFactory = await ethers.getContractFactory("MockVbtcUpgraded");
-      const newImpl = await MockVbtcUpgradedFactory.deploy() as MockVbtcUpgraded;
+      const MockVbtcUpgradedFactory = await ethers.getContractFactory('MockVbtcUpgraded');
+      const newImpl = (await MockVbtcUpgradedFactory.deploy()) as MockVbtcUpgraded;
       const proxy = new Contract(
         vBtc.address,
         JSON.stringify(AdminUpgradeabilityProxyArtifact.abi),

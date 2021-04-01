@@ -2,14 +2,14 @@
 
 pragma solidity 0.6.6;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "./erc20/MinterRole.sol";
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import "@openzeppelin/contracts/math/SafeMath.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./erc20/ITokenRecipient.sol";
 
 /// @title  BCH Token.
 /// @notice This is the Strudel ERC20 contract.
-contract BchMainnetToken is ERC20UpgradeSafe, MinterRole {
+contract BchMainnetToken is ERC20, Ownable {
   using SafeMath for uint256;
 
   uint256 constant BCH_CAP = 21 * 10**24;
@@ -23,9 +23,7 @@ contract BchMainnetToken is ERC20UpgradeSafe, MinterRole {
 
   uint256 private _reportedSupply;
 
-  constructor() public {
-    __ERC20_init("Bitcoin Cash by Strudel", "vBCH");
-    __Ownable_init();
+  constructor() ERC20("Bitcoin Cash by Strudel", "vBCH") public {
     uint256 chainId;
     assembly {
       chainId := chainid()
@@ -48,7 +46,7 @@ contract BchMainnetToken is ERC20UpgradeSafe, MinterRole {
    * @dev See {IERC20-totalSupply}.
    */
   function totalSupply() public view override returns (uint256) {
-      return _reportedSupply;
+    return _reportedSupply;
   }
 
   function reportSupply(uint256 newReportedSupply) external onlyOwner {
@@ -69,7 +67,7 @@ contract BchMainnetToken is ERC20UpgradeSafe, MinterRole {
 
     _approve(_account, _msgSender(), decreasedAllowance);
     _burn(_account, _amount);
-    _reportedSupply -= amount;
+    _reportedSupply = _reportedSupply.sub(_amount);
   }
 
   /// @dev Destroys `amount` tokens from `msg.sender`, reducing the
@@ -77,7 +75,7 @@ contract BchMainnetToken is ERC20UpgradeSafe, MinterRole {
   /// @param _amount   The amount of tokens that will be burnt.
   function burn(uint256 _amount) external {
     _burn(msg.sender, _amount);
-    _reportedSupply -= amount;
+    _reportedSupply = _reportedSupply.sub(_amount);
   }
 
   /// @notice           Set allowance for other address and notify.
