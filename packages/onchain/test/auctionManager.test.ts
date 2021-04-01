@@ -1,22 +1,22 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
-import {Signer} from 'ethers';
+import { ethers, upgrades } from '@nomiclabs/buidler';
+import { Signer } from 'ethers';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
+import { solidity } from 'ethereum-waffle';
 import vector from './testVector.json';
-import {expandTo18Decimals, advanceTime} from './shared/utilities';
-import {MockErc20} from '../typechain/MockErc20';
-import {MockErc20Factory} from '../typechain/MockErc20Factory';
-import {MockPriceOracle} from '../typechain/MockPriceOracle';
-import {MockPriceOracleFactory} from '../typechain/MockPriceOracleFactory';
-import {DutchSwapAuction} from '../typechain/DutchSwapAuction';
-import {DutchSwapAuctionFactory} from '../typechain/DutchSwapAuctionFactory';
-import {DutchSwapFactory} from '../typechain/DutchSwapFactory';
-import {DutchSwapFactoryFactory} from '../typechain/DutchSwapFactoryFactory';
-import {AuctionManager} from '../typechain/AuctionManager';
-import {AuctionManagerFactory} from '../typechain/AuctionManagerFactory';
+import { expandTo18Decimals, advanceTime } from './shared/utilities';
+import { MockErc20 } from '../typechain/MockErc20';
+import { MockErc20Factory } from '../typechain/MockErc20Factory';
+import { MockPriceOracle } from '../typechain/MockPriceOracle';
+import { MockPriceOracleFactory } from '../typechain/MockPriceOracleFactory';
+import { DutchSwapAuction } from '../typechain/DutchSwapAuction';
+import { DutchSwapAuctionFactory } from '../typechain/DutchSwapAuctionFactory';
+import { DutchSwapFactory } from '../typechain/DutchSwapFactory';
+import { DutchSwapFactoryFactory } from '../typechain/DutchSwapFactoryFactory';
+import { AuctionManager } from '../typechain/AuctionManager';
+import { AuctionManagerFactory } from '../typechain/AuctionManagerFactory';
 
 chai.use(solidity);
-const {expect} = chai;
+const { expect } = chai;
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 describe('AuctionManager', () => {

@@ -38,14 +38,14 @@ contract MockRelay is IRelay {
   /// @notice     Getter for bestKnownDigest
   /// @dev        This updated only by calling markNewHeaviest
   /// @return     The hash of the best marked chain tip
-  function getBestKnownDigest() public override view returns (bytes32) {
+  function getBestKnownDigest() public view override returns (bytes32) {
     return bestKnownDigest;
   }
 
   /// @notice     Getter for relayGenesis
   /// @dev        This is updated only by calling markNewHeaviest
   /// @return     The hash of the shared ancestor of the most recent fork
-  function getLastReorgCommonAncestor() public override view returns (bytes32) {
+  function getLastReorgCommonAncestor() public view override returns (bytes32) {
     return lastReorgCommonAncestor;
   }
 
@@ -70,7 +70,7 @@ contract MockRelay is IRelay {
   /// @dev            Will fail if the header is unknown
   /// @param _digest  The header digest to search for
   /// @return         The height of the header, or error if unknown
-  function findHeight(bytes32 _digest) external override view returns (uint256) {
+  function findHeight(bytes32 _digest) external view override returns (uint256) {
     uint256 height = heights[_digest];
     if (height == 0) {
       revert("Not included!");
@@ -85,7 +85,7 @@ contract MockRelay is IRelay {
     bytes32,
     bytes32,
     uint256
-  ) external override view returns (bool) {
+  ) external view override returns (bool) {
     return true;
   }
 

@@ -13,9 +13,12 @@ library ViewSPV {
   using ViewBTC for bytes29;
   using SafeMath for uint256;
 
-  uint256 constant ERR_BAD_LENGTH = 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
-  uint256 constant ERR_INVALID_CHAIN = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe;
-  uint256 constant ERR_LOW_WORK = 0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd;
+  uint256 constant ERR_BAD_LENGTH =
+    0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff;
+  uint256 constant ERR_INVALID_CHAIN =
+    0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe;
+  uint256 constant ERR_LOW_WORK =
+    0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffd;
 
   function getErrBadLength() internal pure returns (uint256) {
     return ERR_BAD_LENGTH;

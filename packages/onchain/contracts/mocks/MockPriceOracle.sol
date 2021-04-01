@@ -15,7 +15,7 @@ contract MockPriceOracle is IPriceOracle {
   }
 
   // note this will always return 0 before update has been called successfully for the first time.
-  function consult(uint256 amountOfX) external override view returns (uint256 priceInEth) {
+  function consult(uint256 amountOfX) external view override returns (uint256 priceInEth) {
     return priceAverage.mul(amountOfX).decode144();
   }
 }

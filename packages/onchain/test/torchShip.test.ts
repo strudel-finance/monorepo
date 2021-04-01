@@ -1,22 +1,22 @@
-import {ethers, upgrades} from '@nomiclabs/buidler';
-import {Signer, Contract} from 'ethers';
-import {getAdminAddress} from '@openzeppelin/upgrades-core';
+import { ethers, upgrades } from '@nomiclabs/buidler';
+import { Signer, Contract } from 'ethers';
+import { getAdminAddress } from '@openzeppelin/upgrades-core';
 import chai from 'chai';
-import {solidity} from 'ethereum-waffle';
-import {expandTo18Decimals, advanceBlock} from './shared/utilities';
-import {StrudelToken} from '../typechain/StrudelToken';
-import {StrudelTokenFactory} from '../typechain/StrudelTokenFactory';
+import { solidity } from 'ethereum-waffle';
+import { expandTo18Decimals, advanceBlock } from './shared/utilities';
+import { StrudelToken } from '../typechain/StrudelToken';
+import { StrudelTokenFactory } from '../typechain/StrudelTokenFactory';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxy from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
-import {V1TorchShip} from '../typechain/V1TorchShip';
-import {V1TorchShipFactory} from '../typechain/V1TorchShipFactory';
-import {TorchShip} from '../typechain/TorchShip';
-import {TorchShipFactory} from '../typechain/TorchShipFactory';
-import {MockErc20} from '../typechain/MockErc20';
-import {MockErc20Factory} from '../typechain/MockErc20Factory';
+import { V1TorchShip } from '../typechain/V1TorchShip';
+import { V1TorchShipFactory } from '../typechain/V1TorchShipFactory';
+import { TorchShip } from '../typechain/TorchShip';
+import { TorchShipFactory } from '../typechain/TorchShipFactory';
+import { MockErc20 } from '../typechain/MockErc20';
+import { MockErc20Factory } from '../typechain/MockErc20Factory';
 
 chai.use(solidity);
-const {expect} = chai;
+const { expect } = chai;
 const PERIOD_SIZE = 9;
 let refToken: MockErc20;
 
@@ -46,7 +46,7 @@ async function deployShip(
       bonusEndBlock,
       bonusMultiplier,
     ],
-    {unsafeAllowCustomTypes: true}
+    { unsafeAllowCustomTypes: true }
   );
   await torchShip.deployed();
 
@@ -70,7 +70,7 @@ async function deployNewShip(
   const torchShip = await upgrades.deployProxy(
     TorchShip,
     [strudel.address, expandTo18Decimals(strudelPerBlock), startBlock, bonusEndBlock, windowSize],
-    {unsafeAllowCustomTypes: true}
+    { unsafeAllowCustomTypes: true }
   );
   await torchShip.deployed();
 

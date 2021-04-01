@@ -1,11 +1,11 @@
-import {BuidlerRuntimeEnvironment, DeployFunction} from '@nomiclabs/buidler/types';
-const {ethers, upgrades} = require('@nomiclabs/buidler');
+import { BuidlerRuntimeEnvironment, DeployFunction } from '@nomiclabs/buidler/types';
+const { ethers, upgrades } = require('@nomiclabs/buidler');
 
 const func: DeployFunction = async function (bre: BuidlerRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = bre;
-  const {deploy, execute, read, log} = deployments;
+  const { deployments, getNamedAccounts } = bre;
+  const { deploy, execute, read, log } = deployments;
 
-  let {deployer, multisig} = await getNamedAccounts();
+  let { deployer, multisig } = await getNamedAccounts();
 
   if (bre.network.live && !multisig) {
     throw new Error('no multisig provided');
