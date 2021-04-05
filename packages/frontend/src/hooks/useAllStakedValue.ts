@@ -14,6 +14,7 @@ import {
 } from '../bridgeTokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
+import { ERC20Contract, UniContract } from '../bridgeTokens/lib/contracts.types'
 
 export interface StakedValue {
   tokenAmount: BigNumber
@@ -35,6 +36,8 @@ const useAllStakedValue = () => {
   const block = useBlock()
 
   const fetchAllStakedValue = useCallback(async () => {
+    console.log(farms, 'farms farms farms');
+    
     const balances: Array<StakedValue> = await Promise.all(
       farms.map(
         ({
@@ -42,27 +45,37 @@ const useAllStakedValue = () => {
           pid,
           lpContract,
           tokenContract,
-          balancerPoolContract,
-          multiplier
+          // !!! TODO: check removed variable !!!
+          // multiplier,
         }: {
+                            //       pid: number;
+                            // isBalancer: boolean;
+                            // url: string;
+                            // id: string;
+                            // name: string;
+                            // lpToken: string;
+                            // tokenSymbol: string;
+                            // earnToken: string;
+                            // earnTokenAddress: string;
+                            //         icon: string
+                            ///
           isBalancer: boolean
           pid: number
-          lpContract: Contract
-          tokenContract: Contract
-          balancerPoolContract: Contract
-          multiplier: number
+          lpContract: ERC20Contract | UniContract
+          tokenContract: ERC20Contract
+          // balancerPoolContract: Contract
+          // multiplier: number
         }) =>
           getTotalLPWethValue(
             isBalancer,
-            masterChefContract,
+            pid,
             wethContact,
             lpContract,
             tokenContract,
-            pid,
+            masterChefContract,
             vbtcContract,
-            balancerPoolContract,
             vbtc,
-            block
+            block,
           ),
       ),
     )

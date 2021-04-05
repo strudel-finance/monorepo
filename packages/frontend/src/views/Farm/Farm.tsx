@@ -42,7 +42,7 @@ const Farm: React.FC = () => {
   const { ethereum } = useWallet()
 
   const lpContract = useMemo(() => {
-    return getContract(ethereum as provider, lpTokenAddress)
+    return getContract(ethereum, lpTokenAddress)
   }, [ethereum, lpTokenAddress])
 
   const { onRedeem } = useRedeem(getMasterChefContract(vbtc))

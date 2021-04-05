@@ -8,6 +8,7 @@ import Spacer from '../../Spacer'
 import styled from 'styled-components'
 import getChainId from '../../../utils/cahinId'
 import showError from '../../../utils/showError'
+import useETH from '../../../hooks/useETH'
 
 interface WalletCardProps {
   icon: React.ReactNode

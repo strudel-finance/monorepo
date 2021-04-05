@@ -14,31 +14,42 @@ import useVBTC from '../../../hooks/useVBTC'
 import useVBCH from '../../../hooks/useVBCH'
 import {getVbchSupply, getVbtcAddress, getVbtcSupply} from '../../../bridgeTokens/utils'
 import {getBalanceNumber} from '../../../utils/formatBalance'
+import { getEth } from '../../../utils/getEth'
+import useETH from '../../../hooks/useETH'
 
 const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const vbch = useVBCH()
-  
+
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
-  const vbchBalanceMainnet = useTokenBalance(
-    getVbtcAddress(vbch)
-  )
-
-  const { account }: { account: any } = useWallet()
-
+  const vbchBalanceMainnet = useTokenBalance(getVbtcAddress(vbch))
+  const { eth } = useETH()
+  
   useEffect(() => {
+    // getEth().then((eth) => {
+    //   if (eth) {
+    //     setAccount(eth.account)
+    //   }
+    // })
+    
     async function fetchTotalSupply() {
-      const [vBTCSupply, vBCHSupply] = await Promise.all([getVbtcSupply(vbtc), getVbchSupply(vbch)])
-      
-      setTotalVBTCSupply(vBTCSupply)
-      setTotalVBCHSupply(vBCHSupply)
+      const [vBTCSupply, vBCHSupply] = await Promise.all([
+        getVbtcSupply(vbtc),
+        getVbchSupply(vbch),
+      ])
+
+      if (vBTCSupply !== totalVBTCSupply || vBCHSupply !== totalVBCHSupply) {
+        
+        setTotalVBTCSupply(vBTCSupply)
+        setTotalVBCHSupply(vBCHSupply)
+      }
     }
     if (vbtc && vbch) {
       fetchTotalSupply()
     }
-  }, [vbtc, setTotalVBTCSupply])
+  }, [vbtc, vbch])
 
   return (
     <>
@@ -54,7 +65,7 @@ const Balances: React.FC = () => {
                 <div style={{ flex: 1 }}>
                   <Label text="Your vBTC Balance" />
                   <ValueBTC
-                    value={!!account ? getBalanceNumber(vbtcBalance) : 'Locked'}
+                    value={!!eth?.account ? getBalanceNumber(vbtcBalance) : 'Locked'}
                   />
                 </div>
               </StyledBalance>
@@ -87,7 +98,7 @@ const Balances: React.FC = () => {
                   <Label text="Your vBCH Balance" />
                   <ValueBTC
                     value={
-                      !!account
+                      !!eth?.account
                         ? getBalanceNumber(vbchBalanceMainnet)
                         : 'Locked'
                     }

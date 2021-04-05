@@ -23,6 +23,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import RollbarErrorTracking from './errorTracking/rollbar'
 import BTC from './views/BTC'
 import BCH from './views/BCH'
+import EthProvider from './contexts/EthProvider'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -48,6 +49,7 @@ const App: React.FC = () => {
   const handlePresentMobileMenu = useCallback(() => {
     setMobileMenu(true)
   }, [setMobileMenu])
+
   useTracking('UA-179869676-1')
 
   return (
@@ -88,6 +90,8 @@ const Providers: React.FC = ({ children }) => {
           },
         }}
       >
+        {/* pro */}
+        <EthProvider>
         <VBTCProvider>
           <VBCHProvider>
             <TransactionProvider>
@@ -96,7 +100,9 @@ const Providers: React.FC = ({ children }) => {
               </FarmsProvider>
             </TransactionProvider>
           </VBCHProvider>
-        </VBTCProvider>
+          </VBTCProvider>
+        </EthProvider>
+          
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>

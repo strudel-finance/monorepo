@@ -19,6 +19,7 @@ import {
   getStrudelSupply,
 } from '../../../bridgeTokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
+import { getEth } from '../../../utils/getEth'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -119,9 +120,16 @@ const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
-  const { account, ethereum }: { account: any; ethereum: any } = useWallet()
+  // const { account, ethereum }: { account: any; ethereum: any } = useWallet()
+
+  const [account, setAccount] = useState<any>()
 
   useEffect(() => {
+    getEth().then((eth) => {
+      if (eth) {
+        setAccount(eth.provider)
+      }
+    })
     async function fetchTotalSupply() {
       const supply = await getStrudelSupply(vbtc)
       setTotalSupply(supply)
@@ -138,7 +146,7 @@ const BalanceStrudel: React.FC = () => {
           <StyledBalances>
             <StyledBalance>
               <StrudelIcon />
-              <Spacer size='xs' />
+              <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your $TRDL Balance" />
                 <Value
@@ -167,7 +175,9 @@ const BalanceStrudel: React.FC = () => {
           />
         </CardContent>
         <Footnote>
-        <FootnoteValue><Multiplier /> $TRDL / block</FootnoteValue>
+          <FootnoteValue>
+            <Multiplier /> $TRDL / block
+          </FootnoteValue>
         </Footnote>
       </Card>
     </StyledWrapper>
