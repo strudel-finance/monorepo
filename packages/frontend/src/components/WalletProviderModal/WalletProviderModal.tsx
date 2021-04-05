@@ -12,11 +12,16 @@ import ModalContent from '../ModalContent'
 import ModalTitle from '../ModalTitle'
 import Spacer from '../Spacer'
 import WalletCard from './components/WalletCard'
+import { useWeb3React } from '@web3-react/core'
+import useETH from '../../hooks/useETH'
 
 const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
   const { account, connect } = useWallet()
+  const { eth, setUpdate } = useETH()
 
   useEffect(() => {
+    console.log('after call')
+
     if (account) {
       onDismiss()
     }
@@ -32,15 +37,17 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
             <WalletCard
               style={{ boxShadow: 'none' }}
               icon={<img src={metamaskLogo} style={{ height: 32 }} />}
-              onConnect={() => connect('injected')}
+              onConnect={() => connect('injected').then(() => setUpdate(true))}
               title="Metamask"
             />
           </StyledWalletCard>
           <StyledWalletCard>
             <WalletCard
-              style={{ boxShadow: 'none'}}
+              style={{ boxShadow: 'none' }}
               icon={<img src={walletConnectLogo} style={{ height: 24 }} />}
-              onConnect={() => connect('walletconnect')}
+              onConnect={() =>
+                connect('walletconnect').then(() => setUpdate(true))
+              }
               title="WalletConnect"
             />
           </StyledWalletCard>

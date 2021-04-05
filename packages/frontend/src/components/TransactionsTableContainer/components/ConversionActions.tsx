@@ -26,6 +26,8 @@ import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 import theme from '../../../theme'
 import { useLocation } from 'react-router'
+import { VbtcContract } from '../../../bridgeTokens/lib/contracts.types'
+import { Vbtc } from '../../../bridgeTokens'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -82,8 +84,8 @@ const getProof = async (
 const callProofHelper = async (
   proof: Proof,
   burnOutputIndex: number,
-  account: any,
-  vbtcContract: any,
+  account: string,
+  vbtcContract: VbtcContract,
 ): Promise<string> => {
   return await proofOpReturnAndMint(
     vbtcContract,
@@ -120,9 +122,9 @@ const waitForTxReceipt = async (
 const callProofOpReturnAndMint = async (
   tx: Transaction,
   handleLoading: (ls: LoadingStatus) => void,
-  account: any,
-  vbtcContract: any,
-  vbtc: any,
+  account: string,
+  vbtcContract: VbtcContract,
+  vbtc: Vbtc,
   blockHash: string,
   tx_hex: string,
 ) => {

@@ -3,9 +3,11 @@ import React, { createContext, useEffect, useState } from 'react'
 import { useWallet } from 'use-wallet'
 
 import { Vbch } from '../../bridgeTokens/Vbch'
+import useETH from '../../hooks/useETH'
+import { getEth } from '../../utils/getEth'
 
 export interface VBCHContext {
-  vbch?: typeof Vbch
+  vbch?: Vbch
 }
 
 export const Context = createContext<VBCHContext>({
@@ -19,33 +21,40 @@ declare global {
 }
 
 const VBCHProvider: React.FC = ({ children }) => {
-  const { ethereum }: { ethereum: any } = useWallet()
+  // const { ethereum }: { ethereum: any } = useWallet()
   const [vbch, setVbch] = useState<any>()
 
+  const [provider, setProvider] = useState<any>()
+  const { eth } = useETH()
+  
   // @ts-ignore
   window.vbch = vbch
   // @ts-ignore
-  window.eth = ethereum
+  window.eth = provider
   useEffect(() => {
-    if (ethereum) {
-      const chainId = Number(ethereum.chainId)
-      const vbchLib = new Vbch(ethereum, chainId, false, {
-        defaultAccount: ethereum.selectedAddress,
-        defaultConfirmations: 1,
-        autoGasMultiplier: 1.5,
-        testing: false,
-        defaultGas: '6000000',
-        defaultGasPrice: '1000000000000',
-        accounts: [],
-        ethereumNodeTimeout: 10000,
-      })
+    // getEth().then((eth) => {
+    //   if (eth) {
+    //     setProvider(eth.provider)
+    //   }
+    // })
+    
+      if (eth) {
+        const chainId = Number(eth.provider.chainId)
+        const vbchLib = new Vbch(eth.provider, chainId, false, {
+          defaultAccount: eth.provider.selectedAddress,
+          defaultConfirmations: 1,
+          autoGasMultiplier: 1.5,
+          testing: false,
+          defaultGas: '6000000',
+          defaultGasPrice: '1000000000000',
+          accounts: [],
+          ethereumNodeTimeout: 10000,
+        })
 
-      console.log(vbchLib, 'vbchLib vbchLib vbchLib')
-
-      setVbch(vbchLib)
-      window.vbchsauce = vbchLib
-    }
-  }, [ethereum])
+        setVbch(vbchLib)
+        window.vbchsauce = vbchLib
+      }
+  }, [eth])
 
   return <Context.Provider value={{ vbch }}>{children}</Context.Provider>
 }
