@@ -8,6 +8,7 @@ interface PageHeaderProps {
   iconSize?: number
   subtitle?: string
   title?: string
+  className?: string
 }
 
 const PageHeader: React.FC<PageHeaderProps> = ({
@@ -15,6 +16,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   iconSize = 120,
   subtitle,
   title,
+  className
 }) => {
   const StyledIcon = styled.div`
     & > div {
@@ -28,7 +30,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
   `
   return (
     <Container size="sm">
-      <StyledPageHeader>
+      <StyledPageHeader className={className}>
         {icon && <StyledIcon>{icon}</StyledIcon>}
         <StyledTitle>{title}</StyledTitle>
         <StyledSubtitle>{subtitle}</StyledSubtitle>

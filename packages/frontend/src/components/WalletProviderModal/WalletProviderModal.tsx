@@ -48,7 +48,7 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
       </ModalContent>
 
       <ModalActions>
-        <Button text="Cancel" variant="secondary" onClick={onDismiss} />
+        <Button hideBoxShadow={true} text="Cancel" variant="secondary" onClick={onDismiss} />
       </ModalActions>
     </Modal>
   )

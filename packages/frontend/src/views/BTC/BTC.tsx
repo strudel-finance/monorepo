@@ -79,7 +79,7 @@ const BTC: React.FC = () => {
       // onAddition={handleLastRequestChange}
       value={val}
       address={account}
-      onConfirm={() => {}}
+      onConfirm={() => { }}
     />,
   )
 
@@ -98,9 +98,9 @@ const BTC: React.FC = () => {
         subtitle="Turn your BCH into vBTC, and earn $TRDL rewards."
       />
       {account && wallet.status === 'connected' && (
-        <Container fixed maxWidth="lg">
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={4}>
+        <div className='custom-container btc'>
+          <Grid container spacing={2} className='txt-grid'>
+            <Grid item xs={12} sm={12} md={4} className='main-box-grid'>
               <Container>
                 <AddressInput
                   address={formatAddress(account)}
@@ -111,15 +111,15 @@ const BTC: React.FC = () => {
                   value={val}
                   symbol="BTC"
                 />
-                <Button text={'Get vBTC'} onClick={onPresentBurn} />
+                <Button className='glow-btn orange' text='Buy now vBTC' onClick={onPresentBurn} />
               </Container>
               <Spacer size="md" />
 
-              <StyledInfo>
-                ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
+              <StyledInfo className='styled-info'>
+                <span>Degen Tip</span>: Strudel only spins in one direction!
               </StyledInfo>
             </Grid>
-            <Grid item xs={12} sm={12} md={8}>
+            <Grid item xs={12} sm={12} md={7} className='main-table-grid'>
               <TransactionsTableContainer
                 account={account}
                 previousAccount={previousAccount}
@@ -130,7 +130,7 @@ const BTC: React.FC = () => {
               />
             </Grid>
           </Grid>
-        </Container>
+        </div>
       )}
     </>
   )

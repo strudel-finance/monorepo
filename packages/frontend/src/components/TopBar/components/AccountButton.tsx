@@ -7,7 +7,7 @@ import Button from '../../Button'
 import WalletProviderModal from '../../WalletProviderModal'
 import AccountModal from './AccountModal'
 
-interface AccountButtonProps {}
+interface AccountButtonProps { }
 
 const AccountButton: React.FC<AccountButtonProps> = (props) => {
   const [onPresentAccountModal] = useModal(<AccountModal />)
@@ -34,15 +34,10 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
         />
       ) : (
         <Button
-      
-             onClick={onPresentAccountModal}
-  
-                 size="sm"
-    
-               text="My Wallet"
-      
-             BCH={pathName === '/BCH'}
-        
+          onClick={onPresentAccountModal}
+          size="sm"
+          text="My Wallet"
+          BCH={pathName === '/BCH'}
         />
       )}
     </StyledAccountButton>
