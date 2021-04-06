@@ -1,9 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react'
-import { setTimeout } from 'timers'
-import { useWallet } from 'use-wallet'
-import { Vbtc } from '../../bridgeTokens'
+import { Vbtc } from '../../bridgeTokens/index'
 import useETH from '../../hooks/useETH'
-import { getEth } from '../../utils/getEth'
 
 export interface VBTCProvider {
   vbtc?: Vbtc

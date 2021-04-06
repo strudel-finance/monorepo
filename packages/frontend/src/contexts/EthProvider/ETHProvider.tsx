@@ -25,7 +25,6 @@ const ETHProvider: React.FC = ({ children }) => {
     setUpdate(false)
     getEth().then((eth) => {
       if (eth) {
-        console.log('notttt smoooo')
         setEth(eth)
       }
     })

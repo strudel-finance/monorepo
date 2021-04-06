@@ -20,8 +20,6 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
   const { eth, setUpdate } = useETH()
 
   useEffect(() => {
-    console.log('after call')
-
     if (account) {
       onDismiss()
     }

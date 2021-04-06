@@ -93,22 +93,21 @@ const Button: React.FC<ButtonProps> = ({
   return (
     <>
       {(() => {
-        if (size === 'xxxl'){
-          console.log('xxl BTN');
+        if (size === 'xxxl') {
           return (
             <StyledXXLButton
-            boxShadowGlow={boxShadowGlow}
-            boxShadow={boxShadow}
-            color={buttonColor}
-            disabled={disabled}
-            fontSize={fontSize}
-            onClick={onClick}
-            padding={buttonPadding}
-            size={buttonSize}
-            backgroundImage={backgroundImage}
-          >
-            {children}
-            {ButtonChild}
+              boxShadowGlow={boxShadowGlow}
+              boxShadow={boxShadow}
+              color={buttonColor}
+              disabled={disabled}
+              fontSize={fontSize}
+              onClick={onClick}
+              padding={buttonPadding}
+              size={buttonSize}
+              backgroundImage={backgroundImage}
+            >
+              {children}
+              {ButtonChild}
             </StyledXXLButton>
           )
         }

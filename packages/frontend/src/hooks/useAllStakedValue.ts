@@ -36,8 +36,6 @@ const useAllStakedValue = () => {
   const block = useBlock()
 
   const fetchAllStakedValue = useCallback(async () => {
-    console.log(farms, 'farms farms farms');
-    
     const balances: Array<StakedValue> = await Promise.all(
       farms.map(
         ({
@@ -45,20 +43,20 @@ const useAllStakedValue = () => {
           pid,
           lpContract,
           tokenContract,
-          // !!! TODO: check removed variable !!!
-          // multiplier,
-        }: {
-                            //       pid: number;
-                            // isBalancer: boolean;
-                            // url: string;
-                            // id: string;
-                            // name: string;
-                            // lpToken: string;
-                            // tokenSymbol: string;
-                            // earnToken: string;
-                            // earnTokenAddress: string;
-                            //         icon: string
-                            ///
+        }: // !!! TODO: check removed variable !!!
+        // multiplier,
+        {
+          //       pid: number;
+          // isBalancer: boolean;
+          // url: string;
+          // id: string;
+          // name: string;
+          // lpToken: string;
+          // tokenSymbol: string;
+          // earnToken: string;
+          // earnTokenAddress: string;
+          //         icon: string
+          ///
           isBalancer: boolean
           pid: number
           lpContract: ERC20Contract | UniContract

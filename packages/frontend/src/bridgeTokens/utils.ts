@@ -78,7 +78,7 @@ export const getFarms = (vbtc: Vbtc) => {
           lpContract,
           // balancerPoolAddress,
           // balancerPoolContract,
-        }) => ({
+        } : any ) => ({
           pid,
           isBalancer,
           url,
@@ -95,7 +95,7 @@ export const getFarms = (vbtc: Vbtc) => {
           icon,
           // balancerPoolAddress,
           // balancerPoolContract,
-        }),
+        } as any),
       )
     : []
 }
@@ -132,8 +132,6 @@ export const getEarned = async (
   pid: any,
   account: string,
 ) => {
-  console.log(masterChefContract, 'masterChefContract')
-
   return masterChefContract.methods.pendingStrudel(pid, account).call()
 }
 
@@ -213,8 +211,6 @@ export const getTotalLPWethValue = async (
   block: number,
 ) => {
   // Get balance of the token address
-  console.log(lpContract.options.address, 'lpContract.options.address')
-
   const tokenAmountWholeLP = await tokenContract.methods
     .balanceOf(lpContract.options.address)
     .call()
