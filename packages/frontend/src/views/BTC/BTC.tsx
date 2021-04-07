@@ -2,31 +2,20 @@ import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 import { useWallet } from 'use-wallet'
 
-import StrudelIcon from '../../components/StrudelIcon'
-import AstroWave from '../../assets/img/astroWave.png'
-import ThumbsUp from '../../assets/img/thumbs_up_astronaut.png'
-
 import Button from '../../components/Button'
-import Page from '../../components/Page'
-
 import PageHeader from '../../components/PageHeader'
-import WalletProviderModal from '../../components/WalletProviderModal'
-
 import useModal from '../../hooks/useModal'
-
-import Farm from '../Farm'
 import styled from 'styled-components'
 import { Grid, withStyles } from '@material-ui/core'
 import MuiContainer from '@material-ui/core/Container'
-import { TerraFarm } from '../../components/Lottie'
 import Spacer from '../../components/Spacer'
-import MuiPaper from '@material-ui/core/Paper'
 import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
 import { formatAddress } from '../../utils'
 import BurnModal from '../Home/components/BurnModal'
 import { Transaction } from '../../contexts/Transactions/types'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
+import useETH from '../../hooks/useETH'
 
 const Container = withStyles({
   root: {
@@ -39,16 +28,8 @@ const BTC: React.FC = () => {
   const [val, setVal] = useState('0')
   const [lastRequest, setLastRequest] = useState(undefined)
 
-  const [isCountComplete, setCountComplete] = useState(false)
-
-  const wallet = useWallet()
-  const account = wallet.account
-
-  useEffect(() => {
-    if (!account) onPresentWalletProviderModal()
-  }, [])
-
-  const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
+  const { eth } = useETH()
+  const account = eth?.account
 
   const usePrevious = (value: any) => {
     const ref = useRef()
@@ -94,7 +75,7 @@ const BTC: React.FC = () => {
         title="Enter the Strudel"
         subtitle="Turn your BCH into vBTC, and earn $TRDL rewards."
       />
-      {account && wallet.status === 'connected' && (
+      {account && (
         <Container fixed maxWidth="lg">
           <Grid container spacing={2}>
             <Grid item xs={12} sm={12} md={4}>
@@ -123,7 +104,7 @@ const BTC: React.FC = () => {
                 lastRequest={lastRequest}
                 handleSetLastRequest={handleSetLastRequest}
                 checkAndRemoveLastRequest={checkAndRemoveLastRequest}
-                wallet={wallet}
+                wallet={eth}
               />
             </Grid>
           </Grid>

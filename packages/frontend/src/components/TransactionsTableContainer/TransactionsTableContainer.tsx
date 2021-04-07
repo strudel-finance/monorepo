@@ -144,7 +144,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           signal: abortController.signal,
         }
       : {}
-    if (wallet.status === 'connected') {
+    if (account) {
       let res = await fetch(
         `${apiServer}/production/account/${account}`,
         abortProps,

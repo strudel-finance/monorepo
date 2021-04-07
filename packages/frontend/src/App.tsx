@@ -1,7 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Route,
+  Switch,
+  useLocation,
+} from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
-import { UseWalletProvider } from 'use-wallet'
+import { useWallet, UseWalletProvider } from 'use-wallet'
 import DisclaimerModal from './components/DisclaimerModal'
 import MobileMenu from './components/MobileMenu'
 import TopBar from './components/TopBar'
@@ -10,8 +15,8 @@ import ModalsProvider from './contexts/Modals'
 import TransactionProvider from './contexts/Transactions'
 import VBCHProvider from './contexts/VBCHProvider'
 import VBTCProvider from './contexts/VBTCProvider'
-import useModal from './hooks/useModal'
-import theme from './theme'
+import BTCtheme from './theme/BTC.theme'
+import BCHtheme from './theme/BCH.theme'
 import Farms from './views/Farms'
 import Home from './views/Home'
 import Stake from './views/Stake'
@@ -24,6 +29,13 @@ import RollbarErrorTracking from './errorTracking/rollbar'
 import BTC from './views/BTC'
 import BCH from './views/BCH'
 import EthProvider from './contexts/EthProvider'
+import useETH from './hooks/useETH'
+
+declare global {
+  interface Window {
+    ethereum: any
+  }
+}
 
 const ErrorFallback = (any: any) => {
   return (
@@ -41,6 +53,25 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
+  const { setUpdate } = useETH()
+  
+  if (window.ethereum) {
+    window.ethereum.on('accountsChanged', (accounts: any) => {
+      setUpdate(true)
+    })
+  } else {
+    window.addEventListener(
+      'ethereum#initialized',
+      () => { 
+        window.ethereum.on('accountsChanged', (accounts: any) => {
+          setUpdate(true)
+        })
+      },
+      {
+        once: true,
+      },
+    )
+  }
 
   const handleDismissMobileMenu = useCallback(() => {
     setMobileMenu(false)
@@ -81,8 +112,10 @@ const App: React.FC = () => {
 
 const Providers: React.FC = ({ children }) => {
   return (
-    <ThemeProvider theme={theme}>
-      <UseWalletProvider
+    <ThemeProvider
+           theme={useLocation().pathname.includes('/BCH') ? BCHtheme : BTCtheme}
+    >
+    <UseWalletProvider
         chainId={1}
         connectors={{
           walletconnect: {
@@ -92,49 +125,28 @@ const Providers: React.FC = ({ children }) => {
       >
         {/* pro */}
         <EthProvider>
-        <VBTCProvider>
-          <VBCHProvider>
-            <TransactionProvider>
-              <FarmsProvider>
-                <ModalsProvider>{children}</ModalsProvider>
-              </FarmsProvider>
-            </TransactionProvider>
-          </VBCHProvider>
+          <VBTCProvider>
+            <VBCHProvider>
+              <TransactionProvider>
+                <FarmsProvider>
+                  <ModalsProvider>{children}</ModalsProvider>
+                </FarmsProvider>
+              </TransactionProvider>
+            </VBCHProvider>
           </VBTCProvider>
         </EthProvider>
-          
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>
   )
 }
 
-const Disclaimer: React.FC = () => {
-  const markSeen = useCallback(() => {
-    localStorage.setItem('disclaimer', 'seen')
-  }, [])
-
-  const [onPresentDisclaimerModal] = useModal(
-    <DisclaimerModal onConfirm={markSeen} />,
-  )
-
-  useEffect(() => {
-    //const seenDisclaimer = true
-    const seenDisclaimer = localStorage.getItem('disclaimer')
-    if (!seenDisclaimer) {
-      onPresentDisclaimerModal()
-    }
-  }, [])
-
-  return <div />
-}
-
 export default () => (
-  <Providers>
-    <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
-      <Router>
-        <App />
-      </Router>
-    </ErrorBoundary>
-  </Providers>
+      <BrowserRouter>
+        <Providers >
+          <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
+              <App />
+          </ErrorBoundary>
+        </Providers>
+      </BrowserRouter>
 )

@@ -1,21 +1,20 @@
 import BigNumber from 'bignumber.js'
 import React, {useEffect, useState} from 'react'
 import styled from 'styled-components'
-import {useWallet} from 'use-wallet'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
 import ValueBTC from '../../../components/ValueBTC'
-
 import VBTCIcon from '../../../components/VBTCIcon'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
 import useVBCH from '../../../hooks/useVBCH'
 import {getVbchSupply, getVbtcAddress, getVbtcSupply} from '../../../bridgeTokens/utils'
 import {getBalanceNumber} from '../../../utils/formatBalance'
-import { getEth } from '../../../utils/getEth'
 import useETH from '../../../hooks/useETH'
+import { Vbtc } from '../../../bridgeTokens'
+import { Vbch } from '../../../bridgeTokens/Vbch'
 
 const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
@@ -26,30 +25,29 @@ const Balances: React.FC = () => {
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
   const vbchBalanceMainnet = useTokenBalance(getVbtcAddress(vbch))
   const { eth } = useETH()
+
+  const fetchTotalSupply = async (vbtc: Vbtc, vbch: Vbch) => {
+
+    const [vBTCSupply, vBCHSupply] = await Promise.all([
+      getVbtcSupply(vbtc),
+      getVbchSupply(vbch),
+    ])
+    
+    
+    if ((vBTCSupply !== totalVBTCSupply || vBCHSupply !== totalVBCHSupply) && eth?.account) {
+      setTotalVBTCSupply(vBTCSupply)
+      setTotalVBCHSupply(vBCHSupply)
+    } 
+  }
   
   useEffect(() => {
-    // getEth().then((eth) => {
-    //   if (eth) {
-    //     setAccount(eth.account)
-    //   }
-    // })
-    
-    async function fetchTotalSupply() {
-      const [vBTCSupply, vBCHSupply] = await Promise.all([
-        getVbtcSupply(vbtc),
-        getVbchSupply(vbch),
-      ])
-
-      if (vBTCSupply !== totalVBTCSupply || vBCHSupply !== totalVBCHSupply) {
-        
-        setTotalVBTCSupply(vBTCSupply)
-        setTotalVBCHSupply(vBCHSupply)
-      }
+    if (vbtc && vbch && eth?.account) {
+      fetchTotalSupply(vbtc, vbch)
+    } else {
+      setTotalVBTCSupply(undefined)
+      setTotalVBCHSupply(undefined)
     }
-    if (vbtc && vbch) {
-      fetchTotalSupply()
-    }
-  }, [vbtc, vbch])
+  }, [vbtc, vbch, eth?.account])
 
   return (
     <>
@@ -78,7 +76,7 @@ const Balances: React.FC = () => {
           <CardContent>
             <Label text="Total vBTC Supply" />
             <ValueBTC
-              value={
+              value={                
                 totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
               }
             />

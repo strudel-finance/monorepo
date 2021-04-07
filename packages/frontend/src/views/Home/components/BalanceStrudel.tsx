@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import CountUp from 'react-countup'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
@@ -19,7 +18,7 @@ import {
   getStrudelSupply,
 } from '../../../bridgeTokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
-import { getEth } from '../../../utils/getEth'
+import useETH from '../../../hooks/useETH'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -120,24 +119,26 @@ const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
-  // const { account, ethereum }: { account: any; ethereum: any } = useWallet()
+  const { eth } = useETH()
+  const acc = eth?.account
 
   const [account, setAccount] = useState<any>()
 
   useEffect(() => {
-    getEth().then((eth) => {
-      if (eth) {
-        setAccount(eth.provider)
-      }
-    })
+    setAccount(acc)
+
+    if (!acc) setTotalSupply(undefined)
+  }, [acc])
+
+  useEffect(() => {
+    if (vbtc) {
+      fetchTotalSupply()
+    }
     async function fetchTotalSupply() {
       const supply = await getStrudelSupply(vbtc)
       setTotalSupply(supply)
     }
-    if (vbtc) {
-      fetchTotalSupply()
-    }
-  }, [vbtc, setTotalSupply])
+  }, [vbtc])
 
   return (
     <StyledWrapper>

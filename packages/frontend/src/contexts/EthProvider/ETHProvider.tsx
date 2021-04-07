@@ -1,9 +1,9 @@
 import React, { createContext, Dispatch, useEffect, useState } from 'react'
-import { useWallet } from 'use-wallet'
 import { getEth } from '../../utils/getEth'
+import { ConnectorUpdate } from '@web3-react/types'
 
 export interface ETHProvider {
-  eth?: { account: string; provider: any }
+  eth?: ConnectorUpdate<string | number>
   setUpdate: Dispatch<any>
 }
 
@@ -13,20 +13,14 @@ export const Context = createContext<ETHProvider>({
 })
 
 const ETHProvider: React.FC = ({ children }) => {
-  const [eth, setEth] = useState<any>()
+  const [eth, setEth] = useState<ConnectorUpdate<string | number> | null>()
   const [update, setUpdate] = useState<boolean>(true)
-
-  // console.log(ethereum, '\n', account, '\n', provider, 'duce duce');
-
-  // @ts-ignore
-  window.eth = ethereum
 
   useEffect(() => {
     setUpdate(false)
     getEth().then((eth) => {
-      if (eth) {
-        setEth(eth)
-      }
+      if (eth) setEth(eth)
+      else setEth(null)
     })
   }, [update])
 

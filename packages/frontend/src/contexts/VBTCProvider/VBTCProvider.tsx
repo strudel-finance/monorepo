@@ -17,19 +17,12 @@ declare global {
 }
 
 const VBTCProvider: React.FC = ({ children }) => {
-  // const { ethereum }: { ethereum: any } = useWallet()
   const [vbtc, setVbtc] = useState<any>()
-  // const [account, setAccount] = useState<any>()
-  const [provider, setProvider] = useState<any>()
-  
-  const {eth} = useETH()
-  // console.log(ethereum, '\n', account, '\n', provider, 'duce duce');
-  
-  
+  const { eth } = useETH()
+
   // @ts-ignore
   window.vbtc = vbtc
-  // @ts-ignore
-  // window.eth = ethereum
+
   useEffect(() => {
     if (eth) {
       const chainId = Number(eth.provider.chainId)
@@ -45,7 +38,7 @@ const VBTCProvider: React.FC = ({ children }) => {
       })
       setVbtc(vbtcLib)
       window.vbtcsauce = vbtcLib
-    }
+    } else setVbtc(undefined)
   }, [eth])
 
   return <Context.Provider value={{ vbtc }}>{children}</Context.Provider>

@@ -6,8 +6,6 @@ import MuiTableCell from '@material-ui/core/TableCell'
 import MuiTableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
-// import ConversionStatus from './components/ConversionStatus'
-// import ConversionActions from './components/ConversionActions'
 import {
   Transaction,
   LoadingStatus,
@@ -17,13 +15,7 @@ import {
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 import React, { useState, useRef, useEffect } from 'react'
-// import { apiServer } from '../../constants/backendAddresses'
-// import RollbarErrorTracking from '../../errorTracking/rollbar'
-// import showError, { handleErrors } from '../../utils/showError'
-// import useInterval from '../../hooks/useInterval'
 import sb from 'satoshi-bitcoin'
-// import { changeEndian } from '../../utils/changeEndian'
-import { Contract } from 'web3-eth-contract'
 import { getRelayContract } from '../../../bridgeTokens/utils'
 import { changeEndian } from '../../../utils/changeEndian'
 import useVBTC from '../../../hooks/useVBTC'
@@ -33,8 +25,6 @@ import useInterval from '../../../hooks/useInterval'
 import { apiServer } from '../../../constants/backendAddresses'
 import ConversionStatus from '../../../components/TransactionsTableContainer/components/ConversionStatus'
 import ConversionActions from '../../../components/TransactionsTableContainer/components/ConversionActions'
-// import { getRelayContract } from '../../vbtc/utils'
-// import useVBTC from '../../hooks/useVBTC'
 
 export interface TransactionTableProps {
   account: any
@@ -168,7 +158,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           signal: abortController.signal,
         }
       : {}
-    if (wallet.status === 'connected') {
+    if (account) {
       const res = await fetch(
         `${apiServer}/production/account/${account}`,
         abortProps,

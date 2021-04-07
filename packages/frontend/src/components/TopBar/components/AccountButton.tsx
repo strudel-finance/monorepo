@@ -15,7 +15,6 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
     <WalletProviderModal />,
     'provider',
   )
-  const pathName = useLocation().pathname
 
   const { account } = useWallet()
 
@@ -34,15 +33,9 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
         />
       ) : (
         <Button
-      
-             onClick={onPresentAccountModal}
-  
-                 size="sm"
-    
-               text="My Wallet"
-      
-             BCH={pathName === '/BCH'}
-        
+          onClick={onPresentAccountModal}
+          size="sm"
+          text="My Wallet"
         />
       )}
     </StyledAccountButton>

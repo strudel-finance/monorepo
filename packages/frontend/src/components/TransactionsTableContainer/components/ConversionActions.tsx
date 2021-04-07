@@ -24,7 +24,6 @@ import {
 import { useWallet } from 'use-wallet'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
-import theme from '../../../theme'
 import { useLocation } from 'react-router'
 import { VbtcContract } from '../../../bridgeTokens/lib/contracts.types'
 import { Vbtc } from '../../../bridgeTokens'
@@ -228,9 +227,6 @@ const ConversionActions: React.FC<Props> = ({
           <ExternalLink
             className={classes.viewLink}
             href={`https://sochain.com/tx/BTC/${tx.btcTxHash}`}
-            style={{
-              color:  pathName  === '/BCH' && theme.color.BCHgreen[100]
-            }}
 
           >
             View {pathName.slice(1)} TX
@@ -240,7 +236,6 @@ const ConversionActions: React.FC<Props> = ({
           <ExternalLink
             className={classes.viewLink}
             href={'https://etherscan.io/tx/' + tx.ethTxHash}
-            style={{ color: pathName  === '/BCH' && theme.color.BCHgreen[100] }}
           >
             View ETH TX
           </ExternalLink>

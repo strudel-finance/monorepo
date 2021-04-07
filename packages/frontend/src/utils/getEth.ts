@@ -7,9 +7,10 @@ export const injected = new InjectedConnector({
   supportedChainIds: [1, 5],
 })
 
-export const getEth = async (): Promise<ConnectorUpdate<string | number>> => {
+export const getEth = async (): Promise<ConnectorUpdate<
+  string | number
+> | null> => {
   const isAuthorized = await injected.isAuthorized()
-  if (isAuthorized) {
-    return await injected.activate()
-  }
+  if (isAuthorized) return await injected.activate()
+  return null
 }

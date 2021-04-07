@@ -53,9 +53,9 @@ const StyledLink = styled(NavLink)`
   }
   &.active {
     color: ${(props) => {
-      return useLocation().pathname === '/BCH'
-        ? props.theme.color.BCHgreen[100]
-        : props.theme.color.primary.main
+      // return useLocation().pathname === '/BCH'
+      // ? props.theme.color.BCHgreen[100]
+      return props.theme.color.primary.main
     }};
   }
   @media (max-width: 400px) {

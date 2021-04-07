@@ -31,7 +31,6 @@ const Button: React.FC<ButtonProps> = ({
   boxShadowGlow,
   borderButton,
   backgroundImage,
-  BCH
 }) => {
   const { color, spacing } = useContext(ThemeContext)
 
@@ -111,28 +110,45 @@ const Button: React.FC<ButtonProps> = ({
             </StyledXXLButton>
           )
         }
-        
+
         if (size !== 'xs') {
-          if (borderButton) 
+          if (borderButton)
             return (
               <StyledButtonBorder
-              boxShadowGlow={boxShadowGlow}
-              boxShadow={boxShadow}
-              color={buttonColor}
-              disabled={disabled}
-              fontSize={fontSize}
-              onClick={onClick}
-              padding={buttonPadding}
-              size={buttonSize}
-              BCH={BCH}
+                  boxShadowGlow={boxShadowGlow}
+                  boxShadow={boxShadow}
+                  color={buttonColor}
+                  disabled={disabled}
+                  fontSize={fontSize}
+                  onClick={onClick}
+                  padding={buttonPadding}
+                  size={buttonSize}
               >
-              {children}
-              {ButtonChild}
+                  {children}
+                  {ButtonChild}
               </StyledButtonBorder>
             )
-          
+
           return (
             <StyledButton
+                boxShadowGlow={boxShadowGlow}
+                boxShadow={boxShadow}
+                color={buttonColor}
+                disabled={disabled}
+                fontSize={fontSize}
+                onClick={onClick}
+                padding={buttonPadding}
+                size={buttonSize}
+            >
+                {children}
+                {ButtonChild}
+            </StyledButton>
+          )
+        }
+
+        return (
+          <StyledSmallButton
+            borderButton={borderButton}
             boxShadowGlow={boxShadowGlow}
             boxShadow={boxShadow}
             color={buttonColor}
@@ -141,31 +157,11 @@ const Button: React.FC<ButtonProps> = ({
             onClick={onClick}
             padding={buttonPadding}
             size={buttonSize}
-            BCH={BCH}
-            >
-            {children}
-            {ButtonChild}
-            </StyledButton>
-          )
-        }
-        
-        
-        
-        return (
-          <StyledSmallButton
-          borderButton={borderButton}
-          boxShadowGlow={boxShadowGlow}
-          boxShadow={boxShadow}
-          color={buttonColor}
-          disabled={disabled}
-          fontSize={fontSize}
-          onClick={onClick}
-          padding={buttonPadding}
-            size={buttonSize}
           >
             {children}
           </StyledSmallButton>
-        )})()}
+        )
+      })()}
     </>
   )
 }
@@ -188,7 +184,12 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   border: 1px solid #25252C52;
   border-radius: 9px;
   background: transparent;
-  color: ${(props) => !props.disabled ? 'rgba(0, 0, 0, 1)' : 'rgba(0, 0, 0, 0.5)'};
+  background-color: ${(props) => {
+      console.log(props.theme.color.primary.main, 'hhehheheh');
+      return props.theme.color.primary.main
+      // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
+      // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+    }};
   cursor: pointer;
   display: flex;
   font-size: ${(props) => props.fontSize}px;
@@ -233,8 +234,10 @@ const StyledXXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-    if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)' 
-    return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+    console.log(props.theme.color.primary.main);
+    return props.theme.color.primary.main
+    // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
+    // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
   }};
   border: 0;
   border-radius: 9px;
@@ -257,8 +260,9 @@ const StyledButton = styled.button<StyledButtonProps>`
 const StyledSmallButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-    if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)' 
-    return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+    return props.theme.color.primary.main
+    // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)' 
+    // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
 }};
   border: 0;
   border-radius: 9px;

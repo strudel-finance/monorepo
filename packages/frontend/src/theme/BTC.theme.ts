@@ -9,7 +9,7 @@ import {
   BCHgreen,
 } from './colors'
 
-const theme = {
+const BTCtheme = {
   borderRadius: 12,
   breakpoints: {
     mobile: 500,
@@ -19,7 +19,7 @@ const theme = {
     grey,
     blue,
     purple,
-    BCHgreen: BCHgreen,
+    // BCHgreen: BCHgreen,
     primary: {
       light: red[200],
       main: red[500],
@@ -42,4 +42,4 @@ const theme = {
   topBarSize: 72,
 }
 
-export default theme
+export default BTCtheme
