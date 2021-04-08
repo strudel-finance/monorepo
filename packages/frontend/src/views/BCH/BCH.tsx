@@ -1,17 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import { useWallet } from 'use-wallet'
-
-import StrudelIcon from '../../components/StrudelIcon'
-import AstroWave from '../../assets/img/astroWave.png'
-import ThumbsUp from '../../assets/img/thumbs_up_astronaut.png'
-
-import Button from '../../components/Button'
 import Page from '../../components/Page'
 
 import PageHeader from '../../components/PageHeader'
-import WalletProviderModal from '../../components/WalletProviderModal'
-
 import useModal from '../../hooks/useModal'
 import styled from 'styled-components'
 import { Grid, withStyles } from '@material-ui/core'
@@ -25,6 +15,7 @@ import BurnModal from '../Home/components/BurnModal'
 import { Transaction } from '../../contexts/Transactions/types'
 import BCHTransactionsTableContainer from './components/BCHTransactionTable'
 import useETH from '../../hooks/useETH'
+import Button from '../../components/Button'
 
 const Container = withStyles({
   root: {

@@ -6,7 +6,7 @@ import {
   useLocation,
 } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
-import { useWallet, UseWalletProvider } from 'use-wallet'
+import { UseWalletProvider } from 'use-wallet'
 import DisclaimerModal from './components/DisclaimerModal'
 import MobileMenu from './components/MobileMenu'
 import TopBar from './components/TopBar'
@@ -53,18 +53,18 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
-  const { setUpdate } = useETH()
+  const { setStatus } = useETH()
   
   if (window.ethereum) {
     window.ethereum.on('accountsChanged', (accounts: any) => {
-      setUpdate(true)
+      setStatus('active')
     })
   } else {
     window.addEventListener(
       'ethereum#initialized',
       () => { 
         window.ethereum.on('accountsChanged', (accounts: any) => {
-          setUpdate(true)
+          setStatus('active')
         })
       },
       {

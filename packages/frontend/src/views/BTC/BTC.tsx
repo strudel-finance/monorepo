@@ -1,7 +1,4 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
-import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import { useWallet } from 'use-wallet'
-
 import Button from '../../components/Button'
 import PageHeader from '../../components/PageHeader'
 import useModal from '../../hooks/useModal'

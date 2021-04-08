@@ -20,13 +20,6 @@ interface WalletCardProps {
 const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title, style }) => {
   const [chainId, setChainId] = useState('')
 
-  /*useEffect(() => {
-    if (chainId.length && chainId !== '0x01') {
-      showError('You are on an incorrect network. Please change to mainnet!')
-      setChainId('')
-    }
-  }, [chainId])*/
-
   return (
     <Card style={style}>
       <CardContent>

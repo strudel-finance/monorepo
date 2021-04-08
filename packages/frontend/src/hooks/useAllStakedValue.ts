@@ -1,10 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
-import { provider } from 'web3-core'
-
 import BigNumber from 'bignumber.js'
-import { useWallet } from 'use-wallet'
-import { Contract } from 'web3-eth-contract'
-
 import {
   getMasterChefContract,
   getWethContract,
@@ -15,6 +10,7 @@ import {
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 import { ERC20Contract, UniContract } from '../bridgeTokens/lib/contracts.types'
+import useETH from './useETH'
 
 export interface StakedValue {
   tokenAmount: BigNumber
@@ -27,7 +23,8 @@ export interface StakedValue {
 
 const useAllStakedValue = () => {
   const [balances, setBalance] = useState([] as Array<StakedValue>)
-  const { account }: { account: string; ethereum: provider } = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
   const farms = getFarms(vbtc)
   const masterChefContract = getMasterChefContract(vbtc)
@@ -43,26 +40,12 @@ const useAllStakedValue = () => {
           pid,
           lpContract,
           tokenContract,
-        }: // !!! TODO: check removed variable !!!
-        // multiplier,
+        }: 
         {
-          //       pid: number;
-          // isBalancer: boolean;
-          // url: string;
-          // id: string;
-          // name: string;
-          // lpToken: string;
-          // tokenSymbol: string;
-          // earnToken: string;
-          // earnTokenAddress: string;
-          //         icon: string
-          ///
           isBalancer: boolean
           pid: number
           lpContract: ERC20Contract | UniContract
           tokenContract: ERC20Contract
-          // balancerPoolContract: Contract
-          // multiplier: number
         }) =>
           getTotalLPWethValue(
             isBalancer,

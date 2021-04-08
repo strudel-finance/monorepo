@@ -4,28 +4,28 @@ import { ConnectorUpdate } from '@web3-react/types'
 
 export interface ETHProvider {
   eth?: ConnectorUpdate<string | number>
-  setUpdate: Dispatch<any>
+  setStatus: Dispatch<any>
 }
 
 export const Context = createContext<ETHProvider>({
   eth: undefined,
-  setUpdate: () => {},
+  setStatus: () => {},
 })
 
 const ETHProvider: React.FC = ({ children }) => {
   const [eth, setEth] = useState<ConnectorUpdate<string | number> | null>()
-  const [update, setUpdate] = useState<boolean>(true)
+  const [status, setStatus] = useState<'active' | 'inactive'>('active')
 
   useEffect(() => {
-    setUpdate(false)
-    getEth().then((eth) => {
-      if (eth) setEth(eth)
-      else setEth(null)
+    getEth(status).then((eth) => {
+      if (eth && status === 'active') {
+        setEth(eth)
+      } else setEth(null)
     })
-  }, [update])
+  }, [status])
 
   return (
-    <Context.Provider value={{ eth, setUpdate }}>{children}</Context.Provider>
+    <Context.Provider value={{ eth, setStatus }}>{children}</Context.Provider>
   )
 }
 

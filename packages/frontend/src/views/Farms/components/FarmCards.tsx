@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import Countdown, { CountdownRenderProps } from 'react-countdown'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
@@ -17,10 +16,10 @@ import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
 import { getEarned, getMasterChefContract } from '../../../bridgeTokens/utils'
 import { bnToDec } from '../../../utils'
-import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
 import StrudelImg from '../../../assets/img/Strudel-logo-Icon.png'
 import BTCImg from '../../../assets/img/Strudel-Bitcoin-Icon.png'
 import OneBTCImg from '../../../assets/img/onevBTC.png'
+import useETH from '../../../hooks/useETH'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -31,7 +30,6 @@ interface FarmWithStakedValue extends Farm, StakedValue {
 
 const FarmCards: React.FC = () => {
   const [farms] = useFarms()
-  const { account } = useWallet()
   const stakedValue = useAllStakedValue()
 
   const strudelIndex = farms.findIndex(
@@ -107,7 +105,8 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
-  const { account } = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const { lpTokenAddress } = farm
   const vbtc = useVBTC()
 

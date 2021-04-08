@@ -1,17 +1,16 @@
 import {useCallback} from 'react'
 
 import useVBTC from './useVBTC'
-import {useWallet} from 'use-wallet'
-
 import { stake, getMasterChefContract } from '../bridgeTokens/utils'
+import useETH from './useETH'
 
 const useStake = (pid: number) => {
-  const {account} = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
 
   const handleStake = useCallback(
     async (amount: string) => {
-      // !!! TODO: is that number !!!!
       const txHash = await stake(
         getMasterChefContract(vbtc),
         pid,

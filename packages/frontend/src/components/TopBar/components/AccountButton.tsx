@@ -1,7 +1,7 @@
-import React, { useCallback } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useLocation } from 'react-router'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
+import useETH from '../../../hooks/useETH'
 import useModal from '../../../hooks/useModal'
 import Button from '../../Button'
 import WalletProviderModal from '../../WalletProviderModal'
@@ -16,11 +16,29 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
     'provider',
   )
 
-  const { account } = useWallet()
+  const [shortAdd, setShortAdd] = useState<string>()
 
-  const handleUnlockClick = useCallback(() => {
-    onPresentWalletProviderModal()
-  }, [onPresentWalletProviderModal])
+  const { eth } = useETH()
+  const account = eth?.account
+
+    console.log(account, 'acc acc acc')
+
+    const handleUnlockClick = useCallback(onPresentWalletProviderModal, [
+      onPresentWalletProviderModal,
+    ])
+
+  useEffect(() => {
+    console.log(account, 'account doso');
+    
+      if(account)
+       setShortAdd(
+        account.substring(0, 6) +
+        '...' +
+        account.substring(
+          account.length - 4,
+          account.length,
+        ))
+    }, [account])
 
   return (
     <StyledAccountButton>
@@ -35,7 +53,7 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
         <Button
           onClick={onPresentAccountModal}
           size="sm"
-          text="My Wallet"
+          text={shortAdd}
         />
       )}
     </StyledAccountButton>

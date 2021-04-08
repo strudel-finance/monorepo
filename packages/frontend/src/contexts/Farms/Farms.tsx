@@ -1,6 +1,5 @@
 import React, {useState} from 'react'
 
-import {useWallet} from 'use-wallet'
 import useVBTC from '../../hooks/useVBTC'
 
 import { getFarms } from '../../bridgeTokens/utils'

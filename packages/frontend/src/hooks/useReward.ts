@@ -1,12 +1,12 @@
 import {useCallback} from 'react'
 
 import useVBTC from './useVBTC'
-import {useWallet} from 'use-wallet'
-
 import { harvest, getMasterChefContract } from '../bridgeTokens/utils'
+import useETH from './useETH'
 
 const useReward = (pid: number) => {
-  const {account} = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
   const masterChefContract = getMasterChefContract(vbtc)
 

@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import { useWallet } from 'use-wallet'
 
 import StrudelIcon from '../../components/StrudelIcon'
 import AstroWave from '../../assets/img/astroWave.png'

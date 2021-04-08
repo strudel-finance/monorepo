@@ -80,32 +80,4 @@ export class Vbch {
     // TODO: Find operations
     // this.operation.setNetworkId(networkId)
   }
-
-  // setDefaultAccount(account: string) {
-  //   this.web3.eth.defaultAccount = account
-  //   this.contracts.setDefaultAccount(account)
-  // }
-
-  // getDefaultAccount() {
-  //   return this.web3.eth.defaultAccount
-  // }
-
-  // loadAccount(account: string) {
-  //   const newAccount = this.web3.eth.accounts.wallet.add(account.privateKey)
-
-  //   if (
-  //     !newAccount ||
-  //     (account.address &&
-  //       account.address.toLowerCase() !== newAccount.address.toLowerCase())
-  //   ) {
-  //     throw new Error(`Loaded account address mismatch.
-  //       Expected ${account.address}, got ${
-  //       newAccount ? newAccount.address : null
-  //     }`)
-  //   }
-  // }
-
-  // toBigN(a) {
-  //   return BigNumber(a)
-  // }
 }

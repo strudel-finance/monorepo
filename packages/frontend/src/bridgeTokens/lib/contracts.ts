@@ -60,7 +60,6 @@ export class Contracts {
     this.web3 = web3
     this.defaultConfirmations = options.defaultConfirmations
     this.autoGasMultiplier = options.autoGasMultiplier || 1.5
-    // !!! TODO: is this shit in use??? !!!
     this.confirmationType = Types.ConfirmationType.Confirmed
     this.defaultGas = options.defaultGas
     this.defaultGasPrice = options.defaultGasPrice
@@ -110,8 +109,6 @@ export class Contracts {
     _setProvider(this.weth, contractAddresses.weth[networkId])
     _setProvider(this.relay, contractAddresses.relay[networkId])
     _setProvider(this.vbch, contractAddresses.vbch[networkId])
-
-    // !!! TODO !!!
 
     this.pools.forEach(
       ({

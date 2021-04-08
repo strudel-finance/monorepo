@@ -21,12 +21,12 @@ import {
   getVbtcContract,
   proofOpReturnAndMint,
 } from '../../../bridgeTokens/utils'
-import { useWallet } from 'use-wallet'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 import { useLocation } from 'react-router'
 import { VbtcContract } from '../../../bridgeTokens/lib/contracts.types'
 import { Vbtc } from '../../../bridgeTokens'
+import useETH from '../../../hooks/useETH'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -92,8 +92,8 @@ const callProofHelper = async (
     proof,
     burnOutputIndex,
   )
-  // TODO: errors
 }
+
 const sleep = (milliseconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
@@ -198,7 +198,7 @@ const ConversionActions: React.FC<Props> = ({
   handleLoading,
   isLoading,
 }) => {
-  const { account } = useWallet()
+  const { eth } = useETH()
   const vbtc = useVBTC()
   const vbtcContract = getVbtcContract(vbtc)
   const pathName = useLocation().pathname
@@ -251,7 +251,7 @@ const ConversionActions: React.FC<Props> = ({
                     callProofOpReturnAndMint(
                       tx,
                       handleLoading,
-                      account,
+                      eth?.account,
                       vbtcContract,
                       vbtc,
                       confirmation.blockHash,

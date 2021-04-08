@@ -1,6 +1,5 @@
 import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import WalletProviderModal from '../../components/WalletProviderModal'
 import Countdown from 'react-countdown'
 import strudel from '../../assets/img/Strudel.png'
@@ -20,7 +19,6 @@ import formatAddress from '../../utils/formatAddress'
 import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import Container from '@material-ui/core/Container'
-import TransactionsTableContainer from '../../components/TransactionsTableContainer'
 import { StyledLink } from '../../components/Footer/components/Nav'
 import { Transaction, LoadingStatus } from '../../types/types'
 
@@ -28,6 +26,7 @@ import { makeStyles, withStyles } from '@material-ui/core'
 import { startDate } from '../../constants/countdown'
 import BCHLogo from '../../assets/img/Bitcoin-Cash-BCH-icon.png'
 import BTCLogo from '../../assets/img/BTC-logo.jpeg'
+import useETH from '../../hooks/useETH'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -69,8 +68,8 @@ const Home: React.FC = () => {
 
   const [isCountComplete, setCountComplete] = useState(false)
 
-  const wallet = useWallet()
-  const account = wallet.account
+  const { eth } = useETH()
+  const account = eth?.account
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
 
   const usePrevious = (value: any) => {

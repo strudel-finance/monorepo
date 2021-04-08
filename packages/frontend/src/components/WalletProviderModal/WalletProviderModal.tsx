@@ -1,29 +1,25 @@
 import React, { useEffect } from 'react'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
-
 import metamaskLogo from '../../assets/img/metamask-fox.svg'
 import walletConnectLogo from '../../assets/img/wallet-connect.svg'
-
 import Button from '../Button'
 import Modal, { ModalProps } from '../Modal'
 import ModalActions from '../ModalActions'
 import ModalContent from '../ModalContent'
 import ModalTitle from '../ModalTitle'
-import Spacer from '../Spacer'
 import WalletCard from './components/WalletCard'
-import { useWeb3React } from '@web3-react/core'
 import useETH from '../../hooks/useETH'
+import { useWallet } from 'use-wallet'
 
 const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
-  const { account, connect } = useWallet()
-  const { eth, setUpdate } = useETH()
+  const { connect } = useWallet()
+  const { setStatus, eth } = useETH()
 
   useEffect(() => {
-    if (account) {
+    if (eth?.account) {
       onDismiss()
     }
-  }, [account, onDismiss])
+  }, [eth?.account, onDismiss])
 
   return (
     <Modal>
@@ -35,7 +31,11 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
             <WalletCard
               style={{ boxShadow: 'none' }}
               icon={<img src={metamaskLogo} style={{ height: 32 }} />}
-              onConnect={() => connect('injected').then(() => setUpdate(true))}
+              onConnect={() =>
+               
+                connect('injected').then(() => setStatus('active'))
+              
+              }
               title="Metamask"
             />
           </StyledWalletCard>
@@ -44,7 +44,7 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
               style={{ boxShadow: 'none' }}
               icon={<img src={walletConnectLogo} style={{ height: 24 }} />}
               onConnect={() =>
-                connect('walletconnect').then(() => setUpdate(true))
+                connect('walletconnect').then(() => setStatus('active'))
               }
               title="WalletConnect"
             />

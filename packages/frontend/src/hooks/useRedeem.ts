@@ -1,11 +1,11 @@
-import {useCallback} from 'react'
-import {useWallet} from 'use-wallet'
-import {Contract} from 'web3-eth-contract'
+import { useCallback } from 'react'
 import { MasterChefContract } from '../bridgeTokens/lib/contracts.types'
 import { redeem } from '../bridgeTokens/utils'
+import useETH from './useETH'
 
 const useRedeem = (masterChefContract: MasterChefContract) => {
-  const { account } = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
 
   const handleRedeem = useCallback(async () => {
     const txHash = await redeem(masterChefContract, account)
