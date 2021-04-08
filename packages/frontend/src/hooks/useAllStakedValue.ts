@@ -40,12 +40,11 @@ const useAllStakedValue = () => {
           pid,
           lpContract,
           tokenContract,
-        }: 
-        {
+        }: {
           isBalancer: boolean
           pid: number
-          lpContract: ERC20Contract | UniContract
-          tokenContract: ERC20Contract
+          lpContract: any
+          tokenContract: any
         }) =>
           getTotalLPWethValue(
             isBalancer,
@@ -57,7 +56,7 @@ const useAllStakedValue = () => {
             vbtcContract,
             vbtc,
             block,
-          ),
+          )
       ),
     )
     setBalance(balances)

@@ -76,9 +76,7 @@ export const getFarms = (vbtc: Vbtc) => {
           tokenContract,
           lpAddress,
           lpContract,
-          // balancerPoolAddress,
-          // balancerPoolContract,
-        } : any ) => ({
+        }) => ({
           pid,
           isBalancer,
           url,
@@ -93,9 +91,8 @@ export const getFarms = (vbtc: Vbtc) => {
           earnToken: '$TRDL',
           earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
-          // balancerPoolAddress,
-          // balancerPoolContract,
-        } as any),
+
+        }),
       )
     : []
 }
@@ -211,6 +208,8 @@ export const getTotalLPWethValue = async (
   block: number,
 ) => {
   // Get balance of the token address
+  console.log(lpContract.options.address, 'lpContract.options.address')
+
   const tokenAmountWholeLP = await tokenContract.methods
     .balanceOf(lpContract.options.address)
     .call()

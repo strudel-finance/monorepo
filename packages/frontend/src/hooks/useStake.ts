@@ -11,6 +11,9 @@ const useStake = (pid: number) => {
 
   const handleStake = useCallback(
     async (amount: string) => {
+      // !!! TODO: is that number !!!!
+      console.log(typeof amount, '!!! TODO: is that number !!!! 111 ')
+
       const txHash = await stake(
         getMasterChefContract(vbtc),
         pid,

@@ -126,6 +126,7 @@ export class Contracts {
         _setProvider(tokenContract, tokenAddress)
       },
     )
+
   }
 
   setDefaultAccount(account: string) {

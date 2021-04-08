@@ -15,6 +15,7 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
     <WalletProviderModal />,
     'provider',
   )
+  const pathName = useLocation().pathname
 
   const [shortAdd, setShortAdd] = useState<string>()
 

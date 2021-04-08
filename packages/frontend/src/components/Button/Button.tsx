@@ -148,14 +148,14 @@ const Button: React.FC<ButtonProps> = ({
 
         return (
           <StyledSmallButton
-            borderButton={borderButton}
-            boxShadowGlow={boxShadowGlow}
-            boxShadow={boxShadow}
-            color={buttonColor}
-            disabled={disabled}
-            fontSize={fontSize}
-            onClick={onClick}
-            padding={buttonPadding}
+          borderButton={borderButton}
+          boxShadowGlow={boxShadowGlow}
+          boxShadow={boxShadow}
+          color={buttonColor}
+          disabled={disabled}
+          fontSize={fontSize}
+          onClick={onClick}
+          padding={buttonPadding}
             size={buttonSize}
           >
             {children}
