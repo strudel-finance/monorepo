@@ -32,9 +32,11 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
               style={{ boxShadow: 'none' }}
               icon={<img src={metamaskLogo} style={{ height: 32 }} />}
               onConnect={() =>
-               
-                connect('injected').then(() => setStatus('active'))
-              
+                connect('injected').then(() => {
+                  console.log('acccctive acccctive');
+                  
+                  setStatus('active')
+                })
               }
               title="Metamask"
             />
@@ -53,7 +55,12 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
       </ModalContent>
 
       <ModalActions>
-        <Button text="Cancel" variant="secondary" onClick={onDismiss} />
+        <Button
+          hideBoxShadow={true}
+          text="Cancel"
+          variant="secondary"
+          onClick={onDismiss}
+        />
       </ModalActions>
     </Modal>
   )

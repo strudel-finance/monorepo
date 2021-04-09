@@ -182,6 +182,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
             </StyledDetails>
             <Spacer />
             <Button
+              hideBoxShadow={true}
               disabled={!poolActive}
               text={poolActive ? 'Select' : undefined}
               to={`/farms/${farm.id}`}

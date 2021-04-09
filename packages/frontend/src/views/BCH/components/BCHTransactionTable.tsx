@@ -25,6 +25,7 @@ import useInterval from '../../../hooks/useInterval'
 import { apiServer } from '../../../constants/backendAddresses'
 import ConversionStatus from '../../../components/TransactionsTableContainer/components/ConversionStatus'
 import ConversionActions from '../../../components/TransactionsTableContainer/components/ConversionActions'
+import useVBCH from '../../../hooks/useVBCH'
 
 export interface TransactionTableProps {
   account: any
@@ -68,7 +69,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
   const [confirmations, setConfirmations] = useState({})
-  const vbtc = useVBTC()
+  const vbch = useVBCH()
 
   const handleLoading = (ls: LoadingStatus) => {
     let tempLoading = isLoading
@@ -229,7 +230,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           (tx) =>
             !tx.confirmed &&
             (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
-              confirmations[tx.btcTxHash] === undefined),
+              !confirmations[tx.btcTxHash]),
         )
 
         const highConfirmations = {}
@@ -261,58 +262,11 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             ) {
               highConfirmations[key].isRelayed = await getInclusion(
                 highConfirmations[key].blockHash,
-                vbtc,
+                vbch,
               )
             }
           }
         }
-
-        /**
-         * {
-  "status" : "success",
-  "data" : {
-    "network" : "BTC",
-    "txid" : "88e3c5541525db408cc7ca05dbd2f58b201b21724a43eba1219cf03b29c584c7",
-    "blockhash" : "000000000000000000002834ed5979c38e07bdfc72c7603c1f7ac901c79e1975",
-    "confirmations" : 26748,
-    "time" : 1601138185,
-    "inputs" : [
-      {
-        "input_no" : 0,
-        "value" : "0.00035136",
-        "address" : "1NGQfz1N1RvcwZK4Cu8Y2y3spc25bniymt",
-        "type" : "pubkeyhash",
-        "script" : "304402207bc43b7491ad852ae38de1fe83bb067b61f36ae7a71a7a58cd399858c5d7c3e702207922661ba12ad58dbdbf074f623aa9abc3289cb2f02aa7772ba6e4476c16a07b01 032cd923031604836a6070972a29e98bfdc1620d671e4df00f93a6704dcbfc327b",
-        "witness" : null,
-        "from_output" : {
-          "txid" : "d05142c0b09454f0b72b968f9f81684147a621cca86e16c686e3c73390cf07ca",
-          "output_no" : 1
-        }
-      }
-    ],
-    "outputs" : [
-      {
-        "output_no" : 0,
-        "value" : "0.00000500",
-        "address" : "nonstandard",
-        "type" : "nulldata",
-        "script" : "OP_RETURN 07ffff8db6b632d743aef641146dc943acb64957155388"
-      },
-      {
-        "output_no" : 1,
-        "value" : "0.00020804",
-        "address" : "1GAR51RHhwXB8rT8HC8KdZtRo2hk53TCE7",
-        "type" : "pubkeyhash",
-        "script" : "OP_DUP OP_HASH160 a651b8e729f18cee91b940e48b05b6e9cad74f04 OP_EQUALVERIFY OP_CHECKSIG"
-      }
-    ],
-    "tx_hex" : "0200000001ca07cf9033c7e386c6166ea8cc21a6474168819f8f962bb7f05494b0c04251d0010000006a47304402207bc43b7491ad852ae38de1fe83bb067b61f36ae7a71a7a58cd399858c5d7c3e702207922661ba12ad58dbdbf074f623aa9abc3289cb2f02aa7772ba6e4476c16a07b0121032cd923031604836a6070972a29e98bfdc1620d671e4df00f93a6704dcbfc327bffffffff02f401000000000000196a1707ffff8db6b632d743aef641146dc943acb6495715538844510000000000001976a914a651b8e729f18cee91b940e48b05b6e9cad74f0488ac00000000",
-    "size" : 225,
-    "version" : 2,
-    "locktime" : 0
-  }
-}
-         */
 
         const newConfirmations: Record<string, Confirmation> = {}
         for (const transaction of transactionsWithLowConfirmations) {
@@ -371,11 +325,11 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             </TableRow>
           </TableHead>
           <TableBody>
-            {lastRequest !== undefined && (
+            {lastRequest && (
               <TableRow key="stub">
                 <TableCell align="left">
                   <ReddishTextTypography variant="caption">
-                    {lastRequest.value} BTC → vBTC
+                    {lastRequest.value} BCH → vBCH
                   </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
@@ -395,7 +349,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                 <TableRow key={i}>
                   <TableCell align="left">
                     <ReddishTextTypography variant="caption">
-                      {tx.value} BTC → vBTC
+                      {tx.value} BCH → vBCH
                     </ReddishTextTypography>
                   </TableCell>
                   <TableCell>

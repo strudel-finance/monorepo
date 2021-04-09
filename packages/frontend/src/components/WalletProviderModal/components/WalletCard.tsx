@@ -27,6 +27,7 @@ const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title, style }
         <CardTitle text={title} />
         <Spacer />
         <Button
+          hideBoxShadow={true}
           onClick={async () => {
             onConnect()
             setChainId(await getChainId())

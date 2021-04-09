@@ -1,32 +1,29 @@
-import React, { useCallback, useState, useMemo, useEffect, useRef } from 'react'
+import React, { useCallback, useState, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import WalletProviderModal from '../../components/WalletProviderModal'
 import Countdown from 'react-countdown'
 import strudel from '../../assets/img/Strudel.png'
 import Button from '../../components/Button'
-//import Container from '../../components/Container'
 import Page from '../../components/Page'
 import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
-import AddressInput from '../../components/AddressInput'
-import BurnAmountInput from '../../components/BurnAmountInput'
 import { StyledCount, RenderProps } from '../../utils/countHelper'
 import Grid from '@material-ui/core/Grid'
 import Balances from './components/Balances'
 import BalanceStrudel from './components/BalanceStrudel'
-import Lottie, { MobileLottie } from '../../components/Lottie'
-import formatAddress from '../../utils/formatAddress'
+import BalanceBCH from './components/BalanceBCH'
 import useModal from '../../hooks/useModal'
 import BurnModal from './components/BurnModal'
 import Container from '@material-ui/core/Container'
 import { StyledLink } from '../../components/Footer/components/Nav'
-import { Transaction, LoadingStatus } from '../../types/types'
+import { Transaction } from '../../types/types'
 
 import { makeStyles, withStyles } from '@material-ui/core'
 import { startDate } from '../../constants/countdown'
 import BCHLogo from '../../assets/img/Bitcoin-Cash-BCH-icon.png'
 import BTCLogo from '../../assets/img/BTC-logo.jpeg'
 import useETH from '../../hooks/useETH'
+import { icons } from '../../helpers/icon'
 
 const useStyles = makeStyles((theme) => ({
   container: {
@@ -131,60 +128,88 @@ const Home: React.FC = () => {
       {isCountComplete || isPast ? (
         <>
           <PageHeader
+            className='page-header'
             title="Enter the Strudel"
             subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
           />
           <div
+// <<<<<<< HEAD
+//             style={{
+//               margin: '0 auto',
+//               display: 'flex',
+//             }}
+//           >
+//             <Button
+//               borderButton={true}
+//               text="Burn BTC"
+//               to="/BTC"
+//               variant="secondary"
+//               size="xxxl"
+//               backgroundImage={BTCLogo}
+//             />
+//             <Spacer size="md" />
+//             <Button
+//               borderButton={true}
+//               text="Burn BCH"
+//               to="/BCH"
+//               variant="secondary"
+//               size="xxxl"
+//               backgroundImage={BCHLogo}
+//             />
+//           </div>
+//           <Spacer size="md" />
+//           <div
+//             style={{
+//               alignItems: 'center',
+//               display: 'flex',
+//             }}
+//           >
+//             <Button
+//               borderButton={true}
+//               onClick={onPresentWalletProviderModal}
+//               text="Unlock Wallet"
+//               size="xxxl"
+//             />
+//             <Spacer size="md" />
+//             <Button
+//               borderButton={true}
+//               text="See Terra Farms"
+//               to="/farms"
+//               variant="secondary"
+//               size="xxxl"
+// =======
+            className='main-head'
             style={{
               margin: '0 auto',
-              display: 'flex',
+              display: 'flex'
             }}
           >
             <Button
-              borderButton={true}
+              icon={icons.fire}
+              className='glow-btn orange'
               text="Burn BTC"
               to="/BTC"
-              variant="secondary"
-              size="xxxl"
-              backgroundImage={BTCLogo}
             />
-            <Spacer size="md" />
+            <Spacer size="lg" />
             <Button
-              borderButton={true}
+              icon={icons.fire}
+              className='glow-btn green'
               text="Burn BCH"
               to="/BCH"
-              variant="secondary"
-              size="xxxl"
-              backgroundImage={BCHLogo}
-            />
-          </div>
-          <Spacer size="md" />
-          <div
-            style={{
-              alignItems: 'center',
-              display: 'flex',
-            }}
-          >
-            <Button
-              borderButton={true}
-              onClick={onPresentWalletProviderModal}
-              text="Unlock Wallet"
-              size="xxxl"
-            />
-            <Spacer size="md" />
-            <Button
-              borderButton={true}
-              text="See Terra Farms"
-              to="/farms"
-              variant="secondary"
-              size="xxxl"
             />
           </div>
           <Spacer size="md" />
           <>
+{/* <<<<<<< HEAD
             <Grid container spacing={1}>
               <AstroGrid item lg={4} xs={1}></AstroGrid>
               <AstroGrid item lg={4} xs={10}>
+======= */}
+            <Grid container spacing={1} className='txt-grid'>
+              <AstroGrid item lg={4} xs={1}>
+              </AstroGrid>
+              <AstroGrid item lg={4} xs={8}>
+{/* >>>>>>> feature/bch-styling */}
                 <StyledP>
                   The Strudel is the first one-way, trustless bridge linking
                   Bitcoin and Ethereum. The bravest explorers that arrive on the
@@ -196,11 +221,14 @@ const Home: React.FC = () => {
               <AstroGrid item lg={4} xs={1}></AstroGrid>
             </Grid>
             <Spacer size="lg" />
-
             <Container>
               <Balances />
             </Container>
             <Spacer size="lg" />
+            <Container>
+              <BalanceBCH />
+              <Spacer size="lg" />
+            </Container>
             <Container>
               <BalanceStrudel />
             </Container>

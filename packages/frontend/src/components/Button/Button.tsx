@@ -2,10 +2,12 @@ import React, { useContext, useMemo } from 'react'
 import styled, { ThemeContext } from 'styled-components'
 
 import { Link } from 'react-router-dom'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 
 interface ButtonProps {
   borderButton?: boolean
   boxShadowGlow?: boolean,
+  hideBoxShadow?: boolean,
   children?: React.ReactNode
   disabled?: boolean
   href?: string
@@ -16,7 +18,9 @@ interface ButtonProps {
   variant?: 'default' | 'secondary' | 'tertiary'
   backgroundImage?: string
   color?: string
-  BCH?: boolean
+  BCH?: boolean,
+  className?: string,
+  icon?: any
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -31,6 +35,10 @@ const Button: React.FC<ButtonProps> = ({
   boxShadowGlow,
   borderButton,
   backgroundImage,
+  BCH,
+  className,
+  icon,
+  hideBoxShadow
 }) => {
   const { color, spacing } = useContext(ThemeContext)
 
@@ -94,43 +102,10 @@ const Button: React.FC<ButtonProps> = ({
       {(() => {
         if (size === 'xxxl') {
           return (
-            <StyledXXLButton
-              boxShadowGlow={boxShadowGlow}
-              boxShadow={boxShadow}
-              color={buttonColor}
-              disabled={disabled}
-              fontSize={fontSize}
-              onClick={onClick}
-              padding={buttonPadding}
-              size={buttonSize}
-              backgroundImage={backgroundImage}
-            >
-              {children}
-              {ButtonChild}
-            </StyledXXLButton>
-          )
-        }
-
-        if (size !== 'xs') {
-          if (borderButton)
-            return (
-              <StyledButtonBorder
-                  boxShadowGlow={boxShadowGlow}
-                  boxShadow={boxShadow}
-                  color={buttonColor}
-                  disabled={disabled}
-                  fontSize={fontSize}
-                  onClick={onClick}
-                  padding={buttonPadding}
-                  size={buttonSize}
-              >
-                  {children}
-                  {ButtonChild}
-              </StyledButtonBorder>
-            )
-
-          return (
-            <StyledButton
+            <>
+              <StyledXXLButton
+                hideBoxShadow={hideBoxShadow}
+                className={className}
                 boxShadowGlow={boxShadowGlow}
                 boxShadow={boxShadow}
                 color={buttonColor}
@@ -139,27 +114,97 @@ const Button: React.FC<ButtonProps> = ({
                 onClick={onClick}
                 padding={buttonPadding}
                 size={buttonSize}
-            >
+                backgroundImage={backgroundImage}
+              >
+                {icon &&
+                  <div className='icon-wrap'>
+                    <FontAwesomeIcon icon={icon} />
+                  </div>
+                }
                 {children}
                 {ButtonChild}
-            </StyledButton>
+              </StyledXXLButton>
+            </>
           )
         }
 
+        if (size !== 'xs') {
+          if (borderButton)
+            return (
+              <>
+                <StyledButtonBorder
+                  hideBoxShadow={hideBoxShadow}
+                  className={className}
+                  boxShadowGlow={boxShadowGlow}
+                  boxShadow={boxShadow}
+                  color={buttonColor}
+                  disabled={disabled}
+                  fontSize={fontSize}
+                  onClick={onClick}
+                  padding={buttonPadding}
+                  size={buttonSize}
+                  BCH={BCH}
+                >
+                  {icon &&
+                    <div>
+                      <FontAwesomeIcon icon={icon} />
+                    </div>
+                  }
+                  {children}
+                  {ButtonChild}
+                </StyledButtonBorder>
+              </>
+            )
+
+          return (
+            <>
+              <StyledButton
+                hideBoxShadow={hideBoxShadow}
+                className={className}
+                boxShadowGlow={boxShadowGlow}
+                boxShadow={boxShadow}
+                color={buttonColor}
+                disabled={disabled}
+                fontSize={fontSize}
+                onClick={onClick}
+                padding={buttonPadding}
+                size={buttonSize}
+                BCH={BCH}
+              >
+                {icon &&
+                  <div className='icon-wrap'>
+                    <FontAwesomeIcon icon={icon} />
+                  </div>
+                }
+                {children}
+                {ButtonChild}
+              </StyledButton>
+            </>
+          )
+        }
         return (
-          <StyledSmallButton
-          borderButton={borderButton}
-          boxShadowGlow={boxShadowGlow}
-          boxShadow={boxShadow}
-          color={buttonColor}
-          disabled={disabled}
-          fontSize={fontSize}
-          onClick={onClick}
-          padding={buttonPadding}
-            size={buttonSize}
-          >
-            {children}
-          </StyledSmallButton>
+          <>
+            <StyledSmallButton
+              hideBoxShadow={hideBoxShadow}
+              className={className}
+              borderButton={borderButton}
+              boxShadowGlow={boxShadowGlow}
+              boxShadow={boxShadow}
+              color={buttonColor}
+              disabled={disabled}
+              fontSize={fontSize}
+              onClick={onClick}
+              padding={buttonPadding}
+              size={buttonSize}
+            >
+              {icon &&
+                <div>
+                  <FontAwesomeIcon icon={icon} />
+                </div>
+              }
+              {children}
+            </StyledSmallButton>
+          </>
         )
       })()}
     </>
@@ -176,7 +221,8 @@ interface StyledButtonProps {
   padding: number
   size: number
   backgroundImage?: string
-  BCH?: boolean
+  BCH?: boolean,
+  hideBoxShadow?: boolean
 }
 
 const StyledButtonBorder = styled.button<StyledButtonProps>`
@@ -198,7 +244,12 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   outline: none;
   font-weight: 700;
   letter-spacing: 1px;
-  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
+  box-shadow: ${(props) => {
+    if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
+    if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    if (props.hideBoxShadow) return 'none'
+    return !props.disabled ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+  }}
   padding-left: ${(props) => props.padding}px;
   padding-right: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
@@ -218,7 +269,12 @@ const StyledXXLButton = styled.button<StyledButtonProps>`
   outline: none;
   font-weight: 700;
   letter-spacing: 1px;
-  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
+  box-shadow: ${(props) => {
+    if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
+    if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    if (props.hideBoxShadow) return 'none'
+    return !props.disabled ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+  }}
   padding-left: ${(props) => props.padding}px;
   padding-right: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
@@ -234,10 +290,15 @@ const StyledXXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
+// <<<<<<< HEAD
     console.log(props.theme.color.primary.main);
     return props.theme.color.primary.main
     // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
     // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+// =======
+//     if (props.BCH) return !props.disabled ? '#2fcf6d' : 'rgba(229, 147, 16, 0.5)'
+//     return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+// >>>>>>> feature/bch-styling
   }};
   border: 0;
   border-radius: 9px;
@@ -250,7 +311,12 @@ const StyledButton = styled.button<StyledButtonProps>`
   outline: none;
   font-weight: 700;
   letter-spacing: 1px;
-  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
+  box-shadow: ${(props) => {
+    if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
+    if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    if (props.hideBoxShadow) return 'none'
+    return !props.disabled ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+  }};
   padding-left: ${(props) => props.padding}px;
   padding-right: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
@@ -260,10 +326,12 @@ const StyledButton = styled.button<StyledButtonProps>`
 const StyledSmallButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
+// <<<<<<< HEAD
     return props.theme.color.primary.main
-    // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)' 
+    // if (props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
     // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
-}};
+  }};
+   
   border: 0;
   border-radius: 9px;
   color: ${(props) =>
@@ -273,7 +341,12 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
   font-weight: 700;
   justify-content: center;
   outline: none;
-  box-shadow: ${(props) => props.boxShadowGlow ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : ''}; 
+  box-shadow: ${(props) => {
+    if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
+    if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    if (props.hideBoxShadow) return 'none'
+    return !props.disabled ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+  }}
   padding-top: ${(props) => props.padding}px;
   padding-bottom: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};

@@ -11,7 +11,7 @@ interface AddressInputProps extends InputProps {
 const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
   const disabled = 'disabled'
   return (
-    <StyledTokenInput>
+    <StyledTokenInput className='styled-token-input'>
       <Input
         startAdornment={
           <StyledTokenAdornmentWrapper>
@@ -52,7 +52,7 @@ const StyledMaxText = styled.div`
 `
 
 const StyledTokenSymbol = styled.span`
-  color: ${(props) => props.theme.color.grey[600]};
+  color: rgba(37,37,44,0.48);
   font-weight: 700;
 `
 

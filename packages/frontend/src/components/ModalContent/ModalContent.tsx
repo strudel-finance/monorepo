@@ -1,8 +1,12 @@
 import React from 'react'
 import styled from 'styled-components'
 
-const ModalContent: React.FC = ({ children }) => {
-  return <StyledModalContent>{children}</StyledModalContent>
+export interface ModalProps {
+  className?: string,
+}
+
+const ModalContent: React.FC<ModalProps> = ({ children, className }) => {
+  return <StyledModalContent className={className}>{children}</StyledModalContent>
 }
 
 export const StyledModalContent = styled.div`

@@ -6,7 +6,7 @@ export const green = {
 }
 
 export const BCHgreen = {
-  100: '#8dc351',
+  100: '#2fcf6d',
 }
 
 export const red = {

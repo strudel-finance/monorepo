@@ -2,13 +2,15 @@ import React from 'react'
 import styled, { keyframes } from 'styled-components'
 
 export interface ModalProps {
-  onDismiss?: () => void
+  onDismiss?: () => void,
+  className?: string,
+  classNameChilderen?: string
 }
 
-const Modal: React.FC = ({ children }) => {
+const Modal: React.FC<ModalProps> = ({ children, className, classNameChilderen }) => {
   return (
-    <StyledResponsiveWrapper>
-      <StyledModal>{children}</StyledModal>
+    <StyledResponsiveWrapper className={className}>
+      <StyledModal className={classNameChilderen}>{children}</StyledModal>
     </StyledResponsiveWrapper>
   )
 }

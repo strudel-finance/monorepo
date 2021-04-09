@@ -26,6 +26,8 @@ import { changeEndian } from '../../utils/changeEndian'
 import { Contract } from 'web3-eth-contract'
 import { getRelayContract } from '../../bridgeTokens/utils'
 import useVBTC from '../../hooks/useVBTC'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { icons } from '../../helpers/icon'
 
 export interface TransactionTableProps {
   account: any
@@ -141,8 +143,8 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const handleTransactionUpdate = async (abortController?: any) => {
     let abortProps = abortController
       ? {
-          signal: abortController.signal,
-        }
+        signal: abortController.signal,
+      }
       : {}
     if (account) {
       let res = await fetch(
@@ -293,7 +295,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar style={{ maxHeight: 250 }}>
+      <SimpleBar style={{ maxHeight: 336 }}>
         <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
@@ -305,27 +307,40 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
               <TableCell>
                 <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
               </TableCell>
-              <TableCell>
-                <div className={classes.actionsCell}></div>
-              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {lastRequest !== undefined && (
+            {lastRequest && (
               <TableRow key="stub">
                 <TableCell align="left">
-                  <ReddishTextTypography variant="caption">
-                    {lastRequest.value} BTC → vBTC
+                  <ReddishTextTypography
+                    className="reddish-typo"
+                    variant="caption"
+                  >
+                    {lastRequest.value} BTC{' '}
+                    <span className="reddish-icon">
+                      <FontAwesomeIcon icon={icons.chevronRight} />{' '}
+                    </span>{' '}
+                    vBTC
                   </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">
+                  {/* @TODO: Intergrate the colors there is green and orange ^^ */}
+                  <ReddishTextTypography
+                    className="reddish-chip green"
+                    variant="caption"
+                  >
                     <ConversionStatus tx={lastRequest} />
-                  </Typography>
+                  </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
                   <Grid container justify="flex-end">
-                    <ConversionActions tx={lastRequest} />
+                    <ReddishTextTypography
+                      className="reddish-typo"
+                      variant="caption"
+                    >
+                      <ConversionActions tx={lastRequest} />
+                    </ReddishTextTypography>
                   </Grid>
                 </TableCell>
               </TableRow>

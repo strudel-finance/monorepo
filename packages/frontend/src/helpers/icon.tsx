@@ -1,4 +1,5 @@
 import * as fab from "@fortawesome/free-brands-svg-icons";
+import * as fal from "@fortawesome/pro-light-svg-icons";
 
 export const icons = {
     instagram: fab.faInstagram,
@@ -9,5 +10,7 @@ export const icons = {
     twitter: fab.faTwitter,
     medium: fab.faMedium,
     discord: fab.faDiscord,
-    github: fab.faGithub
+    github: fab.faGithub,
+    fire: fal.faFire,
+    chevronRight: fal.faChevronRight
 }

@@ -22,9 +22,9 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
   return (
     <React.Fragment>
       <ReddishTextTypography variant="caption">
-        {!tx.hasOwnProperty('confirmed') ? (
+        {!tx.hasOwnProperty('confirmed') && (
           <span>{`Waiting for BTC to be sent`}</span>
-        ) : null}
+        )}
         {tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed ? (
           <span>
             BTC transaction confirming (

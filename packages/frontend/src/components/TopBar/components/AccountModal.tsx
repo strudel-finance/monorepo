@@ -17,7 +17,7 @@ import StrudelIcon from '../../StrudelIcon'
 import useETH from '../../../hooks/useETH'
 
 const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
-  const { eth, setStatus: setStatus } = useETH()
+  const { eth, setStatus } = useETH()
   const account = eth?.account
 
   const handleSignOutClick = useCallback(() => {

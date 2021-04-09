@@ -15,17 +15,14 @@ import Value from '../../../components/Value'
 import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
-import { Transaction } from '../../../types/types'
 import QRCode from 'qrcode.react'
 import StrudelIcon from '../../../components/StrudelIcon'
 import useVBTC from '../../../hooks/useVBTC'
-import { getVbtcSupply } from '../../../bridgeTokens/utils'
 import BitcoinIcon from '../../../components/BitcoinIcon'
 import VBTCIcon from '../../../components/VBTCIcon'
-import vortex from '../../../assets/img/vortex.png'
-
 import MuiGrid from '@material-ui/core/Grid'
-
+import { getVbtcSupply } from '../../../bridgeTokens/utils'
+import { Transaction } from '../../../types/types'
 import sb from 'satoshi-bitcoin'
 
 interface BurnModalProps extends ModalProps {
@@ -106,57 +103,70 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }
 
   return (
-    <Modal>
-      <ModalTitle text={`Confirm Transaction`} />
-      <ModalContent>
-        <Spacer size="sm" />
+    <Modal className="modal-wrap" classNameChilderen="modal-child-wrap">
+      <div className="big-title">Confirm Transaction</div>
+      <ModalContent className="modal-content">
         {!continued ? (
           <>
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <BitcoinIcon size={60} />
-                  <Label>{value.toString() + 'BTC'} </Label>
-                </StyledBalance>
-              </StyledBalanceWrapper>
+            <div className="burn-item">
+              <div className="burn-item-img">
+                <VBTCIcon size={48} />
+              </div>
+              <div className="burn-item-content">
+                <div className="burn-item-title">vBTC Amount</div>
+                <div className="burn-item-amount">
+                  {value.toString() + ' vBTC'}
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <img src={vortex} height="120" />
-                </StyledBalance>
-              </StyledBalanceWrapper>
+            <div className="burn-item">
+              <div className="burn-item-img">
+                <StrudelIcon size={48} />
+              </div>
+              <div className="burn-item-content">
+                <div className="burn-item-title">$TRDL Amount</div>
+                <div className="burn-item-amount">{strudelAmount} $TRDL</div>
+              </div>
             </div>
-            <Grid container spacing={1}>
-              <Grid item xs={5}>
-                <StyledBalance>
-                  <VBTCIcon size={60} />
-                  <Label>{value.toString() + ' vBTC'} </Label>
-                </StyledBalance>
-              </Grid>
-
-              <Grid item xs={2}>
-                <Label style={{ textAlign: 'center' }}>+</Label>
-              </Grid>
-
-              <Grid item xs={5}>
-                <StyledBalance>
-                  <StrudelIcon size={60} />
-                  <Label>{'~ ' + strudelAmount + ' $TRDL'} </Label>
-                </StyledBalance>
-              </Grid>
-            </Grid>
-            <Spacer size="sm" />
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <DangerLabel
-                    checkbox={<Checkbox onChange={handleCheckboxChange} />}
-                    text="❗️Attention: You can only mint vBTC when burning BTC ❗️"
-                    onClick={handleClick}
+            <div className="burn-divider"></div>
+            <div className="burn-item">
+              <div className="burn-item-img">
+                <BitcoinIcon size={48} />
+              </div>
+              <div className="burn-item-content">
+                <div className="burn-item-title">BTC Amount</div>
+                <div className="burn-item-amount">{value.toString()} BTC</div>
+              </div>
+            </div>
+            <div className="checkbox-wrap">
+              <DangerLabel
+                className="danger-label"
+                color="rgba(229,147,16,1)"
+                checkbox={<Checkbox onChange={handleCheckboxChange} />}
+                text="Attention: You can only mint vBTC when burning BTC"
+                onClick={handleClick}
+              />
+            </div>
+            <div className="modal-btm">
+              {!continued ? (
+                <ModalActions>
+                  <Button
+                    borderButton={true}
+                    onClick={onDismiss}
+                    text="Cancel"
                   />
-                </StyledBalance>
-              </StyledBalanceWrapper>
+                  <Button
+                    className="glow-btn orange"
+                    text="Confirm transaction"
+                    onClick={handleContinue}
+                    disabled={!checked}
+                  />
+                </ModalActions>
+              ) : (
+                <ModalActions>
+                  <Button onClick={onDismiss} text="Close" />
+                </ModalActions>
+              )}
             </div>
           </>
         ) : (
@@ -190,22 +200,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
             </StyledBalanceWrapper>
           </>
         )}
-        <Spacer size="sm" />
       </ModalContent>
-      {!continued ? (
-        <ModalActions>
-          <Button
-            onClick={handleContinue}
-            text="Continue"
-            disabled={!checked}
-          />
-          <Button onClick={onDismiss} text="Cancel" />
-        </ModalActions>
-      ) : (
-        <ModalActions>
-          <Button onClick={onDismiss} text="Close" />
-        </ModalActions>
-      )}
     </Modal>
   )
 }

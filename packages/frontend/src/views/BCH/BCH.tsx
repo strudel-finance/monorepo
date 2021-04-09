@@ -16,6 +16,9 @@ import { Transaction } from '../../contexts/Transactions/types'
 import BCHTransactionsTableContainer from './components/BCHTransactionTable'
 import useETH from '../../hooks/useETH'
 import Button from '../../components/Button'
+import { icons } from '../../helpers/icon'
+import { Account } from '../../bridgeTokens/lib/accounts'
+import TransactionsTableContainer from '../../components/TransactionsTableContainer'
 
 const Container = withStyles({
   root: {
@@ -53,7 +56,7 @@ const BCH: React.FC = () => {
   }
 
   const [onPresentBurn] = useModal(
-    <BurnModal value={val} address={account} onConfirm={() => {}} />,
+    <BurnModal value={val} address={account} onConfirm={() => { }} />,
   )
 
   const handleAmountChange = useCallback(
@@ -70,10 +73,18 @@ const BCH: React.FC = () => {
         title="Enter the Strudel"
         subtitle="Turn your BCH into vBTC, and earn $TRDL rewards."
       />
+{/* <<<<<<< HEAD
       {account && (
-        <Container fixed maxWidth="lg">
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={4}>
+    <Container fixed maxWidth="lg">
+        <div className='custom-container bch'>
+          <Grid container spacing={2} className='txt-grid'>
+            <Grid item xs={12} sm={12} md={4} className='main-box-grid'>
+======= */}
+      {account && (
+        <div className='custom-container bch'>
+          <Grid container spacing={2} className='txt-grid'>
+            <Grid item xs={12} sm={12} md={4} className='main-box-grid'>
+{/* >>>>>>> feature/bch-styling */}
               <Container>
                 <AddressInput
                   address={formatAddress(account)}
@@ -84,15 +95,15 @@ const BCH: React.FC = () => {
                   value={val}
                   symbol="BCH"
                 />
-                <Button text={'Get vBTC'} onClick={onPresentBurn} />
+                <Button className='glow-btn green' text='Buy now vBCH' onClick={onPresentBurn} />
               </Container>
               <Spacer size="md" />
 
-              <StyledInfo>
-                ☝️︎ <b>Degen Tip</b>: Strudel only spins in one direction!
+              <StyledInfo className='styled-info'>
+                <span>Degen Tip</span>: Strudel only spins in one direction!
               </StyledInfo>
             </Grid>
-            <Grid item xs={12} sm={12} md={8}>
+            <Grid item xs={12} sm={12} md={7} className='main-table-grid'>
               <BCHTransactionsTableContainer
                 account={account}
                 previousAccount={previousAccount}
@@ -103,8 +114,7 @@ const BCH: React.FC = () => {
               />
             </Grid>
           </Grid>
-        </Container>
-        // </div>
+        </div>
       )}
     </>
   )
