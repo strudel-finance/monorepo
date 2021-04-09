@@ -53,19 +53,22 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
-  const { setStatus } = useETH()
+  const { setStatus, setAccount } = useETH()
+  const accountChange = (accounts: string[]) => {
+    if (!accounts.length) setStatus('inactive')
+    else {
+      setStatus('active')
+      setAccount(accounts[0])
+    }
+  }
   
   if (window.ethereum) {
-    window.ethereum.on('accountsChanged', (accounts: any) => {
-      setStatus('active')
-    })
+    window.ethereum.on('accountsChanged', accountChange)
   } else {
     window.addEventListener(
       'ethereum#initialized',
       () => { 
-        window.ethereum.on('accountsChanged', (accounts: any) => {
-          setStatus('active')
-        })
+        window.ethereum.on('accountsChanged', accountChange)
       },
       {
         once: true,
