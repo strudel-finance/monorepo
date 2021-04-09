@@ -12,6 +12,7 @@ import "./summa-tx/IRelay.sol";
 
 interface IERC20 {
   function mint(address account, uint256 amount) external returns (bool);
+  function transfer(address account, uint256 amount) external returns (bool);
 }
 
 /// @title  VBTC Token.
