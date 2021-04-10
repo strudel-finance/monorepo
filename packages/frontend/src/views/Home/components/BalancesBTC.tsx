@@ -19,29 +19,24 @@ import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
 import { Vbtc } from '../../../tokens'
 import { Vbch } from '../../../tokens/Vbch'
+import useInfura from '../../../hooks/useInfura'
 
 const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
 
+  const infura = useInfura()
+
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
   const { eth } = useETH()
 
-  const fetchTotalSupply = async (vbtc: Vbtc) => {
-    const vBTCSupply = await getVbtcSupply(vbtc)
-
-    if (vBTCSupply !== totalVBTCSupply && eth?.account) {
-      setTotalVBTCSupply(vBTCSupply)
-    }
-  }
-
   useEffect(() => {
-    if (vbtc && eth?.account) {
-      fetchTotalSupply(vbtc)
-    } else {
-      setTotalVBTCSupply(undefined)
-    }
-  }, [vbtc, eth?.account])
+    if (infura)
+      infura.vBCH.methods
+        .totalSupply()
+        .call()
+        .then((s: any) => setTotalVBTCSupply(new BigNumber(s)))
+  }, [infura])
 
   return (
     <StyledWrapper>

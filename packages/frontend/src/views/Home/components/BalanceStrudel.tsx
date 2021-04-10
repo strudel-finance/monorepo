@@ -16,6 +16,7 @@ import useVBTC from '../../../hooks/useVBTC'
 import { getStrudelAddress, getStrudelSupply } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
+import useInfura from '../../../hooks/useInfura'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -118,24 +119,41 @@ const BalanceStrudel: React.FC = () => {
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const { eth } = useETH()
   const acc = eth?.account
-
+  const infura = useInfura()
   const [account, setAccount] = useState<any>()
 
-  useEffect(() => {
-    setAccount(acc)
-
-    if (!acc) setTotalSupply(undefined)
-  }, [acc])
 
   useEffect(() => {
-    if (vbtc) {
-      fetchTotalSupply()
-    }
-    async function fetchTotalSupply() {
-      const supply = await getStrudelSupply(vbtc)
-      setTotalSupply(supply)
-    }
-  }, [vbtc])
+    if (infura)
+      infura.vBCH.methods
+                    .totalSupply()
+                    .call()
+                    .then((s: any) => setTotalSupply(new BigNumber(s)))
+  }, [infura])
+
+  // useEffect(() => {
+  //   setAccount(acc)
+
+  //   if (!acc) setTotalSupply(undefined)
+  // }, [acc])
+
+  // useEffect(() => {
+  //   if (vbtc) {
+  //     fetchTotalSupply()
+  //   }
+  //   async function fetchTotalSupply() {
+  //     const supply = await getStrudelSupply(vbtc)
+  //     setTotalSupply(supply)
+  //   }
+  // }, [vbtc])
+
+  useEffect(() => {
+    if       (infura)
+      infura.vBCH.methods
+                    .totalSupply()
+                    .call()
+                    .then((s: any) => setTotalSupply(new BigNumber(s)))
+  }, [infura])
 
   return (
     <StyledWrapper>

@@ -1,25 +1,11 @@
 import React, {useEffect} from 'react'
 import styled from 'styled-components'
 import chef from '../../assets/img/chef.png'
-
-import { useParams } from 'react-router-dom'
-import {provider} from 'web3-core'
-
 import Page from '../../components/Page'
 import Button from '../../components/Button'
 import PageHeader from '../../components/PageHeader'
 import WalletProviderModal from '../../components/WalletProviderModal'
-
 import useModal from '../../hooks/useModal'
-
-import useVBTC from '../../hooks/useVBTC'
-import useFarm from '../../hooks/useFarm'
-import useRedeem from '../../hooks/useRedeem'
-import {getContract} from '../../utils/erc20'
-import { getMasterChefContract } from '../../tokens/utils'
-
-import Harvest from './components/Harvest'
-import Stake from './components/Stake'
 import useETH from '../../hooks/useETH'
 
 const Farm: React.FC = () => {

@@ -19,29 +19,30 @@ import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBCH from '../../../hooks/useVBCH'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import { contractAddresses } from '../../../tokens/lib/constants'
+import useInfura from '../../../hooks/useInfura'
 const Contract = require('web3-eth-contract')
 const XDAI_NETWORK_ID = 100
 const ERC20Abi = require('../../../tokens/lib/abi/erc20.json')
 
 const BalanceBCH: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
-  const [xDaiVBCHSupply, setXDaiVBCHSupply] = useState<BigNumber>()
-  const [xDaiVBCHBalance, setXDaiVBCHBalance] = useState<BigNumber>()
   const vbch = useVBCH()
+  // !!! TODO: type
+  const infura = useInfura()
 
   const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
-  
+
   const { eth } = useETH()
 
-  const fetchTotalSupply = async (vbch: Vbch) => {
-    const vBCHSupply = await getVbchSupply(vbch)
+  // const fetchTotalSupply = async (vbch: Vbch) => {
+  //   const vBCHSupply = await getVbchSupply(vbch)
 
-    if (vBCHSupply !== totalVBCHSupply && eth?.account) {
-      setTotalVBCHSupply(vBCHSupply)
-    }
-  }
+  //   if (vBCHSupply !== totalVBCHSupply && eth?.account) {
+  //     setTotalVBCHSupply(vBCHSupply)
+  //   }
+  // }
 
-  (Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
+  ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
 
   const contract = new Contract(
     // add ABI item as type
@@ -49,35 +50,21 @@ const BalanceBCH: React.FC = () => {
     contractAddresses.vbch[XDAI_NETWORK_ID],
   )
 
-  useEffect(() => {
-    if (vbch && eth?.account) {
-      fetchTotalSupply(vbch)
-
-      contract.methods
-      .balanceOf(eth?.account)
-      .call()
-        .then((s: any) => {
-          console.log(s, 'sssss');
-          
-          setXDaiVBCHBalance(new BigNumber(s))
-        })
-    } else {
-      setTotalVBCHSupply(undefined)
-    }
-  }, [vbch, eth?.account])
+  // useEffect(() => {
+  //   if (vbch && eth?.account) {
+  //     fetchTotalSupply(vbch)
+  //   } else {
+  //     setTotalVBCHSupply(undefined)
+  //   }
+  // }, [vbch, eth?.account])
 
   useEffect(() => {
-    
-
-    contract.methods
-      .totalSupply()
-      .call()
-      .then((s: any) => setXDaiVBCHSupply(new BigNumber(s)))
-    
-    console.log(eth?.account, 'eth?.accounteth?.accounteth?.account');
-    
-    
-  }, [])
+    if       (infura)
+      infura.vBCH.methods
+                    .totalSupply()
+                    .call()
+                    .then((s: any) => setTotalVBCHSupply(new BigNumber(s)))
+  }, [infura])
 
   return (
     <StyledWrapper>

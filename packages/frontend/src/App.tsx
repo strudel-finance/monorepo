@@ -15,6 +15,7 @@ import ModalsProvider from './contexts/Modals'
 import TransactionProvider from './contexts/Transactions'
 import VBCHProvider from './contexts/VBCHProvider'
 import VBTCProvider from './contexts/VBTCProvider'
+import InfuraProvider from './contexts/InfuraProvider'
 import BTCtheme from './theme/BTC.theme'
 import BCHtheme from './theme/BCH.theme'
 import Farms from './views/Farms'
@@ -127,6 +128,7 @@ const Providers: React.FC = ({ children }) => {
         }}
       >
         {/* pro */}
+          <InfuraProvider>
         <WalletProvider>
           <VBTCProvider>
             <VBCHProvider>
@@ -136,8 +138,9 @@ const Providers: React.FC = ({ children }) => {
                 </FarmsProvider>
               </TransactionProvider>
             </VBCHProvider>
-          </VBTCProvider>
+            </VBTCProvider>
           </WalletProvider>
+            </InfuraProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>
