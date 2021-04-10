@@ -31,12 +31,6 @@ import BCH from './views/BCH'
 import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
 
-// declare global {
-//   interface Window {
-//     ethereum: any
-//   }
-// }
-
 const ErrorFallback = (any: any) => {
   return (
     <div role="alert">
