@@ -1,17 +1,12 @@
 import BigNumber from 'bignumber.js'
 import { withStyles } from '@material-ui/core'
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
-import CardIcon from '../../../components/CardIcon'
 import Modal, { ModalProps } from '../../../components/Modal'
 import ModalActions from '../../../components/ModalActions'
-import ModalTitle from '../../../components/ModalTitle'
 import ModalContent from '../../../components/ModalContent'
-import TokenInput from '../../../components/TokenInput'
-import { getFullDisplayBalance } from '../../../utils/formatBalance'
-import Value from '../../../components/Value'
 import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
@@ -22,15 +17,16 @@ import BitcoinIcon from '../../../components/BitcoinIcon'
 import VBTCIcon from '../../../components/VBTCIcon'
 import MuiGrid from '@material-ui/core/Grid'
 import { getVbtcSupply } from '../../../bridgeTokens/utils'
-import { Transaction } from '../../../types/types'
-import sb from 'satoshi-bitcoin'
+import { BTCTransaction } from '../../../types/types'
+import { urlAssembler } from '../../../utils/urlAssembler'
 
 interface BurnModalProps extends ModalProps {
   value: number | string
   address: string
   onConfirm?: (amount: string) => void
-  onAddition?: (tx: Transaction) => void
+  onAddition?: (tx: BTCTransaction) => void
   continueV?: boolean
+  coin: 'bitcoin' | 'bitcoincash'
 }
 
 const Label = styled.div`
@@ -52,6 +48,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   onAddition,
   continueV = false,
   onDismiss,
+  coin
 }) => {
   const [val, setVal] = useState('')
   const [pendingTx, setPendingTx] = useState(false)
@@ -103,7 +100,8 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }
 
   return (
-    <Modal className="modal-wrap" classNameChilderen="modal-child-wrap">
+  
+    (<Modal className="modal-wrap" classNameChilderen="modal-child-wrap">
       <div className="big-title">Confirm Transaction</div>
       <ModalContent className="modal-content">
         {!continued ? (
@@ -147,20 +145,11 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 onClick={handleClick}
               />
             </div>
-            <div className="modal-btm">
+            <div className='modal-btm'>
               {!continued ? (
                 <ModalActions>
-                  <Button
-                    borderButton={true}
-                    onClick={onDismiss}
-                    text="Cancel"
-                  />
-                  <Button
-                    className="glow-btn orange"
-                    text="Confirm transaction"
-                    onClick={handleContinue}
-                    disabled={!checked}
-                  />
+                  <Button borderButton={true} onClick={onDismiss} text="Cancel" />
+                  <Button className='glow-btn orange' text='Confirm transaction' onClick={handleContinue} disabled={!checked} />
                 </ModalActions>
               ) : (
                 <ModalActions>
@@ -168,41 +157,37 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 </ModalActions>
               )}
             </div>
-          </>
-        ) : (
-          <>
-            <StyledBalanceWrapper>
-              <QRCode
-                size={256}
-                value={`bitcoin:?r=https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/${address}/${sb
-                  .toSatoshi(value)
-                  .toString()}`}
-              />
-            </StyledBalanceWrapper>
-            <StyledBalanceWrapper>
-              <StyledBalance>
-                <p
-                  style={{ wordBreak: 'break-all', textAlign: 'center' }}
-                >{`bitcoin:?r=https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/${address}/${sb
-                  .toSatoshi(value)
-                  .toString()}`}</p>
-                <Label>Please scan the following QR code</Label>
-                <Label style={{ fontWeight: 500 }}>
-                  Check compatible{' '}
-                  <a
-                    href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
-                    target="_blank"
-                  >
-                    wallets
-                  </a>
-                </Label>
-              </StyledBalance>
-            </StyledBalanceWrapper>
-          </>
-        )}
+            </>)
+        : (                   <>
+                      <StyledBalanceWrapper>
+                        <QRCode
+                          size={256}
+                          value={urlAssembler(coin, address, value)}
+                        />
+                      </StyledBalanceWrapper>
+                      <StyledBalanceWrapper>
+                        <StyledBalance>
+                          <p
+                            style={{ wordBreak: 'break-all', textAlign: 'center' }}
+                          >{urlAssembler(coin, address, value)}</p>
+                          <Label>Please scan the following QR code</Label>
+                          <Label style={{ fontWeight: 500 }}>
+                            Check compatible{' '}
+                            <a
+                              href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
+                              target="_blank"
+                            >
+                              wallets
+                            </a>
+                          </Label>
+                        </StyledBalance>
+                      </StyledBalanceWrapper>
+                    </>
+          )}
+        <Spacer size="sm" />
       </ModalContent>
     </Modal>
-  )
+  ))
 }
 
 const StyledBalance = styled.div`

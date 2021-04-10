@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
 import {
-  Transaction,
+  BTCTransaction,
   LoadingStatus,
   SoChainConfirmedGetTx,
   Confirmation,
@@ -32,9 +32,8 @@ import { icons } from '../../helpers/icon'
 export interface TransactionTableProps {
   account: any
   previousAccount: any
-  lastRequest: Transaction | undefined
-  handleSetLastRequest: any
-  // (tx: Transaction) => void
+  lastRequest: BTCTransaction | undefined
+  handleSetLastRequest: (tx: BTCTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
 }
@@ -58,7 +57,7 @@ interface AccountRequest {
   ]
 }
 
-const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
+const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   account,
   previousAccount,
   lastRequest,
@@ -143,8 +142,8 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const handleTransactionUpdate = async (abortController?: any) => {
     let abortProps = abortController
       ? {
-        signal: abortController.signal,
-      }
+          signal: abortController.signal,
+        }
       : {}
     if (account) {
       let res = await fetch(
@@ -173,10 +172,10 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
         return
       }
       if (passedAccount.current === account) {
-        let resNew: Transaction[] = []
+        let resNew: BTCTransaction[] = []
         if (isAccountRequest(res)) {
           res.burns.map((tx, i) => {
-            let txNew: Transaction = {
+            let txNew: BTCTransaction = {
               ethAddress: account,
               value: sb.toBitcoin(tx.amount),
               txCreatedAt: new Date(tx.dateCreated),
@@ -213,18 +212,24 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
     if (account != null) {
       await handleTransactionUpdate()
       if (transactions.length > 0) {
-        let transactionsT: Transaction[] = transactions
+        let transactionsT: BTCTransaction[] = transactions
         let transactionsWithLowConfirmations = transactionsT.filter(
-          (tx) =>
-            !tx.confirmed &&
-            (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
-              confirmations[tx.btcTxHash] === undefined),
+          (tx) => !tx.confirmed && (
+                !confirmations[tx.btcTxHash] ||
+                confirmations[tx.btcTxHash]?.confirmations < BTC_ACCEPTANCE)
         )
 
         let highConfirmations = {}
+
+        console.log(confirmations,'confirmations 11111');
+
         await Object.keys(confirmations).forEach(async (key) => {
+          console.log('inside loop 22222');
+          
           if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
+            
             highConfirmations[key] = confirmations[key]
+            console.log(key,confirmations[key], 'BCHtxHash');
             if (!highConfirmations[key].blockHash) {
               let res = await fetch(
                 `https://sochain.com/api/v2/get_tx/BTC/${key}`,
@@ -239,6 +244,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                   showError('SoChain API Error: ' + e.message)
                   return undefined
                 })
+              
               if (res !== undefined) {
                 highConfirmations[key].blockHash = res.data.blockhash
                 highConfirmations[key].tx_hex = res.data.tx_hex
@@ -255,7 +261,11 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
             }
           }
         })
+        
+        
+        
         let newConfirmations: Record<string, Confirmation> = {}
+        console.log(transactionsWithLowConfirmations,'confirmations 333');
         for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
           let res = await fetch(
             `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
@@ -274,17 +284,26 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           if (res === undefined || res.data.confirmations === undefined) {
             continue
           }
+
+          console.log(res.data.confirmations, 'res.data.confirmations 44444');
+          
           let confirmation: Confirmation = {
             confirmations: res.data.confirmations,
           }
+
           newConfirmations[
             transactionsWithLowConfirmations[i].btcTxHash
           ] = confirmation
+
+          console.log(JSON.stringify(confirmation), 'confirmation, newConfirmations 55555');
+
         }
+
         const confirmationsRecombined = {
           ...highConfirmations,
           ...newConfirmations,
         }
+        
         if (passedAccount.current === account) {
           setConfirmations(confirmationsRecombined)
         }
@@ -307,6 +326,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
               <TableCell>
                 <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
               </TableCell>
+              
             </TableRow>
           </TableHead>
           <TableBody>
@@ -431,4 +451,4 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default TransactionsTableContainer
+export default BTCTransactionsTableContainer

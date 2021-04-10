@@ -7,10 +7,10 @@ import MuiTableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
 import Typography from '@material-ui/core/Typography'
 import {
-  Transaction,
+  BTCTransaction,
   LoadingStatus,
-  SoChainConfirmedGetTx,
-  Confirmation,
+  AccountRequest,
+  BCHTransaction,
 } from '../../../types/types'
 import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
@@ -18,7 +18,6 @@ import React, { useState, useRef, useEffect } from 'react'
 import sb from 'satoshi-bitcoin'
 import { getRelayContract } from '../../../bridgeTokens/utils'
 import { changeEndian } from '../../../utils/changeEndian'
-import useVBTC from '../../../hooks/useVBTC'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 import useInterval from '../../../hooks/useInterval'
@@ -26,13 +25,13 @@ import { apiServer } from '../../../constants/backendAddresses'
 import ConversionStatus from '../../../components/TransactionsTableContainer/components/ConversionStatus'
 import ConversionActions from '../../../components/TransactionsTableContainer/components/ConversionActions'
 import useVBCH from '../../../hooks/useVBCH'
+import { Vbch } from '../../../bridgeTokens/Vbch'
 
 export interface TransactionTableProps {
   account: any
   previousAccount: any
-  lastRequest: Transaction | undefined
-  handleSetLastRequest: any
-  // (tx: Transaction) => void
+  lastRequest: BTCTransaction | undefined
+  handleSetLastRequest: (tx: BCHTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
 }
@@ -42,19 +41,7 @@ interface SoChainConfirmed {
     confirmations: number
   }
 }
-interface AccountRequest {
-  account: string
-  burns: [
-    {
-      amount: string // satoshis
-      dateCreated: Date
-      btcTxHash: string
-      status: string
-      burnOutputIndex: string
-      ethTxHash?: string
-    },
-  ]
-}
+
 
 const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   account,
@@ -65,10 +52,10 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   wallet,
 }) => {
   const POLL_DURATION_TXS = 1500
-  const BTC_ACCEPTANCE = 6
+  const BCH_ACCEPTANCE = 60
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
-  const [confirmations, setConfirmations] = useState({})
+  const [confirmed, setConfirmed] = useState({})
   const vbch = useVBCH()
 
   const handleLoading = (ls: LoadingStatus) => {
@@ -79,9 +66,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
 
   const getInclusion = async (
     blockHash: string,
-    vbtc: any,
+    vbch: Vbch,
   ): Promise<boolean> => {
-    const relayContract = getRelayContract(vbtc)
+    const relayContract = getRelayContract(vbch)
     const blockHashLittle = '0x' + changeEndian(blockHash)
 
     const bestKnownDigest = await relayContract.methods
@@ -160,7 +147,8 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
         }
       : {}
     if (account) {
-      const res = await fetch(
+      // change with .env
+      const res: AccountRequest = await fetch(
         `${apiServer}/production/account/${account}`,
         abortProps,
       )
@@ -181,20 +169,19 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           }
           return undefined
         })
-      if (res === undefined) {
+      if (!res) {
         return
       }
       if (passedAccount.current === account) {
-        const resNew: Transaction[] = []
+        const resNew: BCHTransaction[] = []
         if (isAccountRequest(res)) {
-          res.burns.map((tx, i) => {
-            const txNew: Transaction = {
+          res.bchBurns.map((tx, i) => {
+            const txNew: BCHTransaction = {
               ethAddress: account,
               value: sb.toBitcoin(tx.amount),
               txCreatedAt: new Date(tx.dateCreated),
-              btcTxHash: tx.btcTxHash,
+              bchTxHash: tx.bchTxHash,
               burnOutputIndex: tx.burnOutputIndex,
-              confirmed: tx.status === 'paid' ? true : false,
             }
             if (tx.ethTxHash) {
               txNew.ethTxHash = tx.ethTxHash
@@ -225,53 +212,30 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     if (account) {
       await handleTransactionUpdate()
       if (transactions.length) {
-        // let transactionsT: Transaction[] = transactions
+        console.log(transactions, confirmed,'transactions transactions');
+        
         const transactionsWithLowConfirmations = transactions.filter(
-          (tx) =>
-            !tx.confirmed &&
-            (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
-              !confirmations[tx.btcTxHash]),
+          (tx) => {
+            console.log(
+              confirmed,
+              tx.bchTxHash,
+              confirmed[tx.bchTxHash],
+              confirmed[tx.bchTxHash]?.confirmations < BCH_ACCEPTANCE, 'aaaa');
+            
+            return  (
+              !confirmed[tx.bchTxHash] ||
+              confirmed[tx.bchTxHash]?.confirmations < BCH_ACCEPTANCE)}
         )
 
-        const highConfirmations = {}
-        for (let key of Object.keys(confirmations)) {
-          if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
-            highConfirmations[key] = confirmations[key]
-            if (!highConfirmations[key].blockHash) {
-              let res = await fetch(
-                `https://sochain.com/api/v2/get_tx/BTC/${key}`,
-              )
-                .then(handleErrors)
-                .then((response) => response.json())
-                .then((res: SoChainConfirmedGetTx) => res)
-                .catch((e) => {
-                  RollbarErrorTracking.logErrorInRollbar(
-                    'SoChain fetch tx error' + e.message,
-                  )
-                  showError('SoChain API Error: ' + e.message)
-                  return undefined
-                })
-              if (res) {
-                highConfirmations[key].blockHash = res.data.blockhash
-                highConfirmations[key].tx_hex = res.data.tx_hex
-              }
-            }
-            if (
-              highConfirmations[key].blockHash &&
-              !highConfirmations[key].isRelayed
-            ) {
-              highConfirmations[key].isRelayed = await getInclusion(
-                highConfirmations[key].blockHash,
-                vbch,
-              )
-            }
-          }
-        }
-
-        const newConfirmations: Record<string, Confirmation> = {}
+        const newConfirmations: {
+          blockHash: string,
+          confirmations: number,
+          isRelayed: boolean
+        } | {} = {}
+        
         for (const transaction of transactionsWithLowConfirmations) {
           const res = await fetch(
-            `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transaction.btcTxHash}`,
+            `https://rest.bitcoin.com/v2/transaction/details/${transaction.bchTxHash}`,
           )
             .then(handleErrors)
             .then((response) => response.json())
@@ -283,20 +247,38 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               return undefined
             })
 
-          if (!res || !res.data.confirmations) {
-            continue
+          if (!res || !res.confirmations) continue
+
+          const {confirmations, blockhash} = res
+          const {bchTxHash} = transaction
+          
+          newConfirmations[bchTxHash] = {
+            confirmations,
           }
-          const confirmation: Confirmation = {
-            confirmations: res.data.confirmations,
+          
+          console.log(newConfirmations,bchTxHash, 'BCHtxHash');
+
+          if (res.confirmations >= BCH_ACCEPTANCE) {
+                console.log(res, 'res.data res.data res.data');
+                
+                newConfirmations[bchTxHash].blockHash = blockhash
+                // newConfirmations[bchTxHash].tx_hex = txid
+            if (
+              newConfirmations[bchTxHash].blockHash &&
+              !newConfirmations[bchTxHash].isRelayed
+            ) {
+              // highConfirmations[bchTxHash].isRelayed = await getInclusion(
+              //   highConfirmations[bchTxHash].blockHash,
+              //   vbch,
+              // )
+            }
           }
-          newConfirmations[transaction.btcTxHash] = confirmation
-        }
-        const confirmationsRecombined = {
-          ...highConfirmations,
-          ...newConfirmations,
-        }
-        if (passedAccount.current === account) {
-          setConfirmations(confirmationsRecombined)
+
+          console.log(newConfirmations,'newConfirmations');
+
+          if (passedAccount.current === account) {
+            setConfirmed(newConfirmations)
+          }
         }
       }
     }
@@ -319,9 +301,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               <TableCell>
                 <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
               </TableCell>
-              <TableCell>
+              {/* <TableCell>
                 <div className={classes.actionsCell}></div>
-              </TableCell>
+              </TableCell> */}
             </TableRow>
           </TableHead>
           <TableBody>
@@ -356,7 +338,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                     <Typography variant="caption">
                       <ConversionStatus
                         tx={tx}
-                        confirmations={confirmations[tx.btcTxHash]}
+                        confirmations={confirmed[tx.bchTxHash]}
                       />
                     </Typography>
                   </TableCell>
@@ -364,7 +346,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                     <Grid container justify="flex-end">
                       <ConversionActions
                         tx={tx}
-                        confirmation={confirmations[tx.btcTxHash]}
+                        confirmation={confirmed[tx.bchTxHash]}
                         handleLoading={handleLoading}
                         isLoading={isLoading}
                       />

@@ -14,7 +14,9 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
   symbol,
 }) => {
   return (
-    <StyledTokenInput className={`styled-token-input ${symbol === 'BTC' ? 'btc' : 'bch'}`}>
+    <StyledTokenInput
+      className={`styled-token-input ${symbol === 'BTC' ? 'btc' : 'bch'}`}
+    >
       <Input
         startAdornment={
           <StyledTokenAdornmentWrapper>
@@ -22,13 +24,13 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
           </StyledTokenAdornmentWrapper>
         }
         endAdornment={
-          <StyledTokenAdornmentWrapper className='styled-token-wrapper'>
+          <StyledTokenAdornmentWrapper className="styled-token-wrapper">
             <StyledTokenSymbol>{symbol}</StyledTokenSymbol>
           </StyledTokenAdornmentWrapper>
         }
         onChange={onChange}
-        placeholder="0"
-        value={value}
+        placeholder="Enter the amount here"
+        value={value == '0' ? undefined : value}
       />
     </StyledTokenInput>
   )

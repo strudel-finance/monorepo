@@ -15,18 +15,17 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
     <WalletProviderModal />,
     'provider',
   )
-  const pathName = useLocation().pathname
 
   const [shortAdd, setShortAdd] = useState<string>()
 
   const { eth } = useETH()
   const account = eth?.account
 
-    console.log(account, 'acc acc acc')
+  console.log(account, 'acc acc acc')
 
-    const handleUnlockClick = useCallback(onPresentWalletProviderModal, [
-      onPresentWalletProviderModal,
-    ])
+  const handleUnlockClick = useCallback(onPresentWalletProviderModal, [
+    onPresentWalletProviderModal,
+  ])
 
   useEffect(() => {
     console.log(account, 'account doso');

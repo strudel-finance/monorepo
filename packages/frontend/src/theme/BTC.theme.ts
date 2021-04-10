@@ -4,7 +4,7 @@ import {
   green,
   purple,
   grey,
-  red,
+  BTCYellow,
   white,
   BCHgreen,
 } from './colors'
@@ -21,11 +21,14 @@ const BTCtheme = {
     purple,
     // BCHgreen: BCHgreen,
     primary: {
-      light: red[200],
-      main: red[500],
+      light: BTCYellow[200],
+      main: BTCYellow[500],
     },
     secondary: {
       main: green[500],
+    },
+    shadow: {
+      light: BTCYellow[200],
     },
     white,
   },

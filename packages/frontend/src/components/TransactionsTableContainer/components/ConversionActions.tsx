@@ -6,7 +6,7 @@ import React from 'react'
 import { ExternalLink } from './ExternalLink'
 import {
   Proof,
-  Transaction,
+  BTCTransaction,
   LoadingStatus,
   Confirmation,
 } from '../../../types/types'
@@ -43,7 +43,7 @@ interface pushEthParam {
 
 const pushEthTxHash = async (
   ethParam: pushEthParam,
-  tx: Transaction,
+  tx: BTCTransaction,
 ): Promise<Response> => {
   const url =
     apiServer +
@@ -119,7 +119,7 @@ const waitForTxReceipt = async (
 }
 
 const callProofOpReturnAndMint = async (
-  tx: Transaction,
+  tx: BTCTransaction,
   handleLoading: (ls: LoadingStatus) => void,
   account: string,
   vbtcContract: VbtcContract,
@@ -186,7 +186,7 @@ const callProofOpReturnAndMint = async (
 }
 
 interface Props {
-  tx: Transaction
+  tx: BTCTransaction
   confirmation?: Confirmation
   handleLoading?: (ls: LoadingStatus) => void
   isLoading?: any
@@ -210,7 +210,12 @@ const ConversionActions: React.FC<Props> = ({
   }
   const classes = useStyles()
   const [showModal] = useModal(
-    <BurnModal value={tx.value} address={tx.ethAddress} continueV={true} />,
+    <BurnModal
+      value={tx.value}
+      address={tx.ethAddress}
+      continueV={true}
+      coin="bitcoin"
+    />,
   )
 
   return (

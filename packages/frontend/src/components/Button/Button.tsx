@@ -143,13 +143,12 @@ const Button: React.FC<ButtonProps> = ({
                   onClick={onClick}
                   padding={buttonPadding}
                   size={buttonSize}
-                  BCH={BCH}
                 >
-                  {icon &&
+                  {icon && (
                     <div>
                       <FontAwesomeIcon icon={icon} />
                     </div>
-                  }
+                  )}
                   {children}
                   {ButtonChild}
                 </StyledButtonBorder>
@@ -169,13 +168,12 @@ const Button: React.FC<ButtonProps> = ({
                 onClick={onClick}
                 padding={buttonPadding}
                 size={buttonSize}
-                BCH={BCH}
               >
-                {icon &&
-                  <div className='icon-wrap'>
+                {icon && (
+                  <div className="icon-wrap">
                     <FontAwesomeIcon icon={icon} />
                   </div>
-                }
+                )}
                 {children}
                 {ButtonChild}
               </StyledButton>
@@ -290,19 +288,13 @@ const StyledXXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-// <<<<<<< HEAD
-    console.log(props.theme.color.primary.main);
+    console.log(props.theme.color.primary.main)
     return props.theme.color.primary.main
-    // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
-    // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
-// =======
-//     if (props.BCH) return !props.disabled ? '#2fcf6d' : 'rgba(229, 147, 16, 0.5)'
-//     return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
-// >>>>>>> feature/bch-styling
   }};
   border: 0;
   border-radius: 9px;
-  color: ${(props) => !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
+  color: ${(props) =>
+    !props.disabled ? props.theme.color.white : props.theme.color.grey[400]};
   cursor: pointer;
   display: flex;
   font-size: ${(props) => props.fontSize}px;
@@ -312,10 +304,16 @@ const StyledButton = styled.button<StyledButtonProps>`
   font-weight: 700;
   letter-spacing: 1px;
   box-shadow: ${(props) => {
-    if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
-    if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
-    if (props.hideBoxShadow) return 'none'
-    return !props.disabled ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+      // if (props.BCH)
+  console.log(props.theme.color.shadow.light, 'kakakkakak');
+  
+      // if (props.hideBoxShadow) return 'none'
+  return props.theme.color.shadow.light
+  // '0px 0px 30px rgb(47 208 109 / 48%);'
+    // if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    // return !props.disabled
+    //   ? '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    //   : '0px 0px 30px rgba(229, 147, 16, 0.48)'
   }};
   padding-left: ${(props) => props.padding}px;
   padding-right: ${(props) => props.padding}px;
@@ -326,10 +324,7 @@ const StyledButton = styled.button<StyledButtonProps>`
 const StyledSmallButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-// <<<<<<< HEAD
     return props.theme.color.primary.main
-    // if (props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
-    // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
   }};
    
   border: 0;
@@ -345,7 +340,9 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
     if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
     if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
     if (props.hideBoxShadow) return 'none'
-    return !props.disabled ? '0px 0px 30px rgba(229, 147, 16, 0.48)' : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    return !props.disabled
+      ? '0px 0px 30px rgba(229, 147, 16, 0.48)'
+      : '0px 0px 30px rgba(229, 147, 16, 0.48)'
   }}
   padding-top: ${(props) => props.padding}px;
   padding-bottom: ${(props) => props.padding}px;

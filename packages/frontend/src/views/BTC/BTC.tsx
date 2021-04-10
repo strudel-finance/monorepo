@@ -12,7 +12,9 @@ import { formatAddress } from '../../utils'
 import BurnModal from '../Home/components/BurnModal'
 import TransactionsTableContainer from '../../components/TransactionsTableContainer'
 import useETH from '../../hooks/useETH'
-import { Transaction } from '../../types/types'
+import { BTCTransaction } from '../../types/types'
+import WalletProviderModal from '../../components/WalletProviderModal'
+import Page from '../../components/Page'
 
 const Container = withStyles({
   root: {
@@ -45,11 +47,11 @@ const BTC: React.FC = () => {
 
   const previousAccount = usePrevious(account)
 
-  const handleSetLastRequest = (tx: Transaction) => {
+  const handleSetLastRequest = (tx: BTCTransaction) => {
     setLastRequest(tx)
   }
 
-  const handleLastRequestChange = (tx: Transaction) => {
+  const handleLastRequestChange = (tx: BTCTransaction) => {
     setLastRequest(tx)
     window.localStorage.setItem(account, JSON.stringify(tx))
   }
@@ -59,7 +61,8 @@ const BTC: React.FC = () => {
       onAddition={handleLastRequestChange}
       value={val}
       address={account}
-      onConfirm={() => { }}
+      onConfirm={() => {}}
+      coin="bitcoin"
     />,
   )
 
@@ -69,25 +72,24 @@ const BTC: React.FC = () => {
     },
     [setVal],
   )
+  
+  const [onPresentWalletProviderModal] = useModal(
+    <WalletProviderModal />,
+    'provider',
+  )
 
   return (
-    // <Switch>
     <>
-      <PageHeader
+    {
+      account?(
+    <>
+        <PageHeader
         title="Enter the Strudel"
-        subtitle="Turn your BCH into vBTC, and earn $TRDL rewards."
+        subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
       />
-{/* <<<<<<< HEAD
-      {account && (
-        <Container fixed maxWidth="lg">
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={12} md={4}>
-======= */}
-      {account && (
-        <div className='custom-container btc'>
-          <Grid container spacing={2} className='txt-grid'>
-            <Grid item xs={12} sm={12} md={4} className='main-box-grid'>
-{/* >>>>>>> feature/bch-styling */}
+        <div className="custom-container btc">
+          <Grid container spacing={2} className="txt-grid">
+            <Grid item xs={12} sm={12} md={4} className="main-box-grid">
               <Container>
                 <AddressInput
                   address={formatAddress(account)}
@@ -98,15 +100,19 @@ const BTC: React.FC = () => {
                   value={val}
                   symbol="BTC"
                 />
-                <Button className='glow-btn orange' text='Buy now vBTC' onClick={onPresentBurn} />
+                <Button
+                  className="glow-btn orange"
+                  text="Buy now vBTC"
+                  onClick={onPresentBurn}
+                />
               </Container>
               <Spacer size="md" />
 
-              <StyledInfo className='styled-info'>
+              <StyledInfo className="styled-info">
                 <span>Degen Tip</span>: Strudel only spins in one direction!
               </StyledInfo>
             </Grid>
-            <Grid item xs={12} sm={12} md={7} className='main-table-grid'>
+            <Grid item xs={12} sm={12} md={7} className="main-table-grid">
               <TransactionsTableContainer
                 account={account}
                 previousAccount={previousAccount}
@@ -118,6 +124,25 @@ const BTC: React.FC = () => {
             </Grid>
           </Grid>
         </div>
+        </>
+        ) :
+        (
+          <Page>
+        <div
+          style={{
+            alignItems: 'center',
+            display: 'flex',
+            flex: 1,
+            justifyContent: 'center',
+          }}
+        >
+            <Button
+            boxShadowGlow={true}
+            onClick={onPresentWalletProviderModal}
+            text="Unlock Wallet"
+          />
+            </div>
+            </Page>
       )}
     </>
   )

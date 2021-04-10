@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 
 export interface InputProps {
@@ -18,14 +18,21 @@ const Input: React.FC<InputProps> = ({
   value,
   disabled,
 }) => {
+
+  console.log(value, placeholder, 'valuevaluevalue2222');
+  
+
   return (
     <StyledInputWrapper>
       {!!startAdornment && startAdornment}
       <StyledInput
+        min="0"
+        type="number"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         disabled={disabled}
+        onKeyDown={ (evt) => evt.key == '.' || evt.key === 'e' && evt.preventDefault() }
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>

@@ -8,14 +8,14 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/">
         Home
       </StyledLink>
-      <StyledLink exact activeClassName="active" to="/farms">
-        Terra-Farms
-      </StyledLink>
       <StyledLink exact activeClassName="active" to="/BTC">
         Bitcoin
       </StyledLink>
       <StyledLink exact activeClassName="active" to="/BCH">
         Bitcoin Cash
+      </StyledLink>
+      <StyledLink exact activeClassName="active" to="/farms">
+        Terra-Farms
       </StyledLink>
       {false && (
         <StyledLink exact activeClassName="active" to="/staking">

@@ -9,16 +9,17 @@ interface AddressInputProps extends InputProps {
 }
 
 const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
-  const disabled = 'disabled'
+console.log(value, 'valuevaluevalue1111')
+
   return (
-    <StyledTokenInput className='styled-token-input'>
+    <StyledTokenInput className="styled-token-input">
       <Input
         startAdornment={
           <StyledTokenAdornmentWrapper>
             <StyledInfo>Address</StyledInfo>
           </StyledTokenAdornmentWrapper>
         }
-        placeholder="0"
+        placeholder={value}
         value={value}
         disabled={true}
       />

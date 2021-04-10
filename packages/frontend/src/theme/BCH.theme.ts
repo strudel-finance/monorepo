@@ -4,7 +4,7 @@ import {
   green,
   purple,
   grey,
-  red,
+  BTCYellow,
   white,
   BCHgreen,
 } from './colors'
@@ -21,11 +21,13 @@ const BCHtheme = {
     purple,
     // BCHgreen: BCHgreen,
     primary: {
-      light: BCHgreen[100],
       main: BCHgreen[100],
     },
     secondary: {
       main: green[500],
+    },
+    shadow: {
+      light: BCHgreen[200],
     },
     white,
   },
