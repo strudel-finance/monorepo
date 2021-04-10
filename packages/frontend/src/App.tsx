@@ -62,13 +62,13 @@ const App: React.FC = () => {
     }
   }
   
-  if (window.ethereum) {
-    window.ethereum.on('accountsChanged', accountChange)
+  if ((window as any).ethereum) {
+    (window as any).ethereum.on('accountsChanged', accountChange)
   } else {
-    window.addEventListener(
+    (window as any).addEventListener(
       'ethereum#initialized',
       () => { 
-        window.ethereum.on('accountsChanged', accountChange)
+        (window as any).ethereum.on('accountsChanged', accountChange)
       },
       {
         once: true,
