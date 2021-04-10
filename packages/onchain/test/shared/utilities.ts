@@ -1,6 +1,6 @@
-import {BigNumber, Contract, utils} from 'ethers';
-import {ethers} from '@nomiclabs/buidler';
-const {keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack} = utils;
+import { BigNumber, Contract, utils } from 'ethers';
+import { ethers } from '@nomiclabs/buidler';
+const { keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack } = utils;
 
 export function expandTo18Decimals(n: number): BigNumber {
   return BigNumber.from(n).mul(BigNumber.from(10).pow(18));
@@ -15,6 +15,11 @@ export async function advanceBlock(height: number): Promise<any> {
     pos--;
   }
   await ethers.provider.send('evm_increaseTime', [1]);
+  return ethers.provider.send('evm_mine', []);
+}
+
+export async function advanceTime(seconds: number): Promise<any> {
+  await ethers.provider.send('evm_increaseTime', [seconds]);
   return ethers.provider.send('evm_mine', []);
 }
 

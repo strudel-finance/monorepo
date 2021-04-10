@@ -5,6 +5,17 @@ export const green = {
   500: '##00d1810',
 }
 
+export const BCHgreen = {
+  100: '#2fcf6d',
+  200: '0px 0px 30px rgb(47 208 109 / 48%)',
+}
+
+export const BTCYellow = {
+  100: 'rgba(229, 147, 16, 1)',
+  500: 'rgba(229, 147, 16, 1)',
+  200: '0px 0px 30px rgb(229 147 16 / 48%)',
+}
+
 export const red = {
   100: '#FFFDFE',
   200: '#ffc2a8',

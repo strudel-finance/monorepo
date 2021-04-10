@@ -2,13 +2,15 @@ import React from 'react'
 import styled, { keyframes } from 'styled-components'
 
 export interface ModalProps {
-  onDismiss?: () => void
+  onDismiss?: () => void,
+  className?: string,
+  classNameChilderen?: string
 }
 
-const Modal: React.FC = ({ children }) => {
+const Modal: React.FC<ModalProps> = ({ children, className, classNameChilderen }) => {
   return (
-    <StyledResponsiveWrapper>
-      <StyledModal>{children}</StyledModal>
+    <StyledResponsiveWrapper className={className}>
+      <StyledModal className={classNameChilderen}>{children}</StyledModal>
     </StyledResponsiveWrapper>
   )
 }
@@ -36,10 +38,9 @@ const StyledResponsiveWrapper = styled.div`
 const StyledModal = styled.div`
   margin: auto;
   overflow-y: auto;
-  background: ${(props) => props.theme.color.grey[200]};
-  border: 1px solid ${(props) => props.theme.color.grey[300]}ff;
+  background: ${(props) => '#FFFFFF'};
   border-radius: 12px;
-  box-shadow: inset 1px 1px 0px ${(props) => props.theme.color.grey[100]};
+  box-shadow: 0px 10px 18px #00000014;
   display: flex;
   flex-direction: column;
   position: relative;

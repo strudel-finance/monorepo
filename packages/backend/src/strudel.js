@@ -7,12 +7,26 @@ const request = require('request');
 const { PoorManRpc } = require('./utils/poorManRpc');
 
 let provider;
+const CERT = 'stripped_from_github';
+const CHAIN = 'stripped_from_github';
+const PRIV = 'stripped_from_github';
 
-exports.handler = async (event, context) => {
+exports.handler = async (event, context, callback) => {
   const providerUrl = process.env.PROVIDER_URL;
-  const body = typeof event.body === 'string' ? JSON.parse(event.body) : event.body;
-  const path = event.requestPath;
-  const method = event.method;
+  let body;
+  try {
+    body = JSON.parse(event.body);
+  } catch (err) {
+    body = event.body;
+  }
+  let path = event.requestPath;
+  let method = event.method;
+  // proxy requests (like /ack) have a different structure
+  if (!event.requestPath) {
+    path = event.path;
+    method = event.httpMethod;
+  };
+  
 
   if (!provider) {
     provider = new ethers.providers.JsonRpcProvider(providerUrl);
@@ -28,6 +42,9 @@ exports.handler = async (event, context) => {
     new DB(process.env.TABLE_NAME),
     provider,
     bclient,
+    Buffer.from(CERT, 'hex'),
+    Buffer.from(CHAIN, 'hex'),
+    Buffer.from(PRIV, 'hex'),
   );
 
   if (path.indexOf('account') > -1 && method === 'GET') {
@@ -49,6 +66,22 @@ exports.handler = async (event, context) => {
   }
   if (path.indexOf('payment') > -1 && method === 'POST') {
       return await service.addBtcTx(event.path.txHash, body.txData);
+  }
+  if (path.indexOf('syn') > -1 && method === 'GET') {
+      const res = await service.paySyn(event.path.destination, event.path.amount);
+      return res.toString('base64');
+  }
+  if (path.indexOf('ack') > -1 && method === 'POST') {
+      const res = await service.payAck(body);
+      const response = {
+        statusCode: 200,
+        headers: {
+          "Content-Type": "application/bitcoin-paymentack"
+        },
+        body: res.toString('base64'),
+          isBase64Encoded: true
+      };
+      callback(null, response);
   }
   if (path.indexOf('watchlist') > -1 && method === 'GET') {
       return await service.getWatchlist();

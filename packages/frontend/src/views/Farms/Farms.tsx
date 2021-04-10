@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import { useWallet } from 'use-wallet'
 
 import StrudelIcon from '../../components/StrudelIcon'
 import AstroWave from '../../assets/img/astroWave.png'
@@ -8,10 +7,6 @@ import ThumbsUp from '../../assets/img/thumbs_up_astronaut.png'
 
 import Button from '../../components/Button'
 import Page from '../../components/Page'
-import Countdown from 'react-countdown'
-import { startDate, endRewardsDate } from '../../constants/countdown'
-
-import { StyledCount, RenderProps } from '../../utils/countHelper'
 
 import PageHeader from '../../components/PageHeader'
 import WalletProviderModal from '../../components/WalletProviderModal'
@@ -27,6 +22,7 @@ import MuiContainer from '@material-ui/core/Container'
 import { TerraFarm } from '../../components/Lottie'
 import Spacer from '../../components/Spacer'
 import MuiPaper from '@material-ui/core/Paper'
+import useETH from '../../hooks/useETH'
 
 const Paper = withStyles({
   rounded: {
@@ -50,114 +46,59 @@ const Container = withStyles({
 })(MuiContainer)
 
 const Farms: React.FC = () => {
-  const [isCountComplete, setCountComplete] = useState(false)
-
   const { path } = useRouteMatch()
-  const { account } = useWallet()
-  const handleCountEnd = () => {
-    setCountComplete(true)
-  }
-  const renderer = ({ days, hours, minutes, seconds }: RenderProps) => {
-    // Render a countdown
-    return (
-      <>
-        {days}d:{hours}h:{minutes}min:{seconds}s
-      </>
-    )
-  }
+  const { eth } = useETH()
+  const account = eth?.account
+
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
-  const isPast = startDate < new Date()
   return (
     <Switch>
       <Page>
-        {isCountComplete || isPast ? (
+        {!!account ? (
           <>
-            {!!account ? (
-              <>
-                <Route exact path={path}>
-                  <PageHeader
-                    icon={
-                      <StyledMoving>
-                        <TerraFarm />
-                      </StyledMoving>
-                    }
-                    iconSize={200}
-                    subtitle="Earn $TRDL by staking LP Tokens."
-                    title="Terra-Farms to Explore"
-                  />
-                  <Container maxWidth="md">
-                    <Paper elevation={7}>
-                      <StyledP style={{ fontSize: '28px' }}>
-                        <StyledMulti>4x</StyledMulti> $TRDL bonus for{' '}
-                        <span>
-                          <Countdown
-                            date={endRewardsDate}
-                            renderer={renderer}
-                          />
-                        </span>{' '}
-                        <wbr />
-                        <img src={ThumbsUp} height="50px" />
-                      </StyledP>
-                    </Paper>
-                    <StyledP>
-                      The Terra-Farms strengthen the protocol and the peg of
-                      vBTC to BTC.
-                    </StyledP>
-                    <StyledP>
-                      $TRDL is the crypto-economical incentive to stake and earn
-                      rewards by being short on <br /> BTC dominance and long on
-                      Ethereum.  
-                    </StyledP>
-                  </Container>
-                  <Spacer size="sm" />
-                  <FarmCards />
-                  <AstroWrapper>
-                    <img src={AstroWave} height="150" />
-                  </AstroWrapper>
-                </Route>
-                <Route path={`${path}/:farmId`}>
-                  <Farm />
-                </Route>
-              </>
-            ) : (
-              <div
-                style={{
-                  alignItems: 'center',
-                  display: 'flex',
-                  flex: 1,
-                  justifyContent: 'center',
-                }}
-              >
-                <Button
-                  onClick={onPresentWalletProviderModal}
-                  text="🔓 Unlock Wallet"
-                />
-              </div>
-            )}
+            <Route exact path={path}>
+              <PageHeader
+                iconSize={200}
+                subtitle="Earn $TRDL by staking LP Tokens."
+                title="Terra-Farms to Explore"
+              />
+              <Container maxWidth="md" className="farm-container">
+                <StyledP>
+                  The Terra-Farms strengthen the protocol and the peg of vBTC to
+                  BTC.
+                </StyledP>
+                <StyledP>
+                  $TRDL is the crypto-economical incentive to stake and earn
+                  rewards.
+                </StyledP>
+              </Container>
+              <Spacer size="sm" />
+              <FarmCards />
+            </Route>
+            <Route path={`${path}/:farmId`}>
+              <Farm />
+            </Route>
           </>
         ) : (
-          <StyledCount>
-            <Countdown
-              date={startDate}
-              renderer={renderer}
-              onComplete={handleCountEnd}
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              boxShadowGlow={true}
+              onClick={onPresentWalletProviderModal}
+              text="Unlock Wallet"
             />
-          </StyledCount>
+          </div>
         )}
       </Page>
     </Switch>
   )
 }
-const AstroWrapper = styled.div`
-  position: absolute;
-  bottom: 20px;
-  right: 10vw;
-  margin: auto;
-  z-index: -90000;
-  @media (max-width: 600px) and (orientation: portrait) {
-    display: none;
-  }
-`
 
 const StyledP = styled.p`
   text-align: center;
@@ -165,7 +106,7 @@ const StyledP = styled.p`
 
 const StyledMulti = styled.span`
   font-size: 35px;
-  font-family: 'Falstin', sans-serif;
+  font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
   font-weight: 700;
 `
 

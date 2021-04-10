@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import CountUp from 'react-countup'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
@@ -14,8 +13,9 @@ import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import { getStrudelAddress, getStrudelSupply } from '../../../vbtc/utils'
+import { getStrudelAddress, getStrudelSupply } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
+import useETH from '../../../hooks/useETH'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -70,21 +70,72 @@ const PendingRewards: React.FC = () => {
   )
 }
 
+
+const Multiplier: React.FC = () => {
+  const [start, setStart] = useState(0)
+  const [end, setEnd] = useState(0)
+  const [scale, setScale] = useState(1)
+
+  let multiplier = new BigNumber(1);
+  const allStakedValue = useAllStakedValue()
+
+  if (allStakedValue && allStakedValue.length) {
+    multiplier = allStakedValue[0].multiplier
+  }
+
+  //hi
+  useEffect(() => {
+    setEnd(multiplier.toNumber())
+  }, [multiplier])
+
+  return (
+    <span
+      style={{
+        transform: `scale(${scale})`,
+        transformOrigin: 'right bottom',
+        transition: 'transform 0.5s',
+        display: 'inline-block',
+      }}
+    >
+      <CountUp
+        start={start}
+        end={end}
+        decimals={end < 0 ? 4 : end > 1e5 ? 0 : 3}
+        duration={1}
+        onStart={() => {
+          setScale(1.25)
+          setTimeout(() => setScale(1), 600)
+        }}
+        separator=","
+      />
+    </span>
+  )
+}
+
 const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
-  const { account, ethereum }: { account: any; ethereum: any } = useWallet()
+  const { eth } = useETH()
+  const acc = eth?.account
+
+  const [account, setAccount] = useState<any>()
 
   useEffect(() => {
+    setAccount(acc)
+
+    if (!acc) setTotalSupply(undefined)
+  }, [acc])
+
+  useEffect(() => {
+    if (vbtc) {
+      fetchTotalSupply()
+    }
     async function fetchTotalSupply() {
       const supply = await getStrudelSupply(vbtc)
       setTotalSupply(supply)
     }
-    if (vbtc) {
-      fetchTotalSupply()
-    }
-  }, [vbtc, setTotalSupply])
+  }, [vbtc])
 
   return (
     <StyledWrapper>
@@ -93,7 +144,7 @@ const BalanceStrudel: React.FC = () => {
           <StyledBalances>
             <StyledBalance>
               <StrudelIcon />
-              <Spacer />
+              <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your $TRDL Balance" />
                 <Value
@@ -122,8 +173,9 @@ const BalanceStrudel: React.FC = () => {
           />
         </CardContent>
         <Footnote>
-          New rewards per block
-          <FootnoteValue>4 $TRDL</FootnoteValue>
+          <FootnoteValue>
+            <Multiplier /> $TRDL / block
+          </FootnoteValue>
         </Footnote>
       </Card>
     </StyledWrapper>
@@ -132,12 +184,22 @@ const BalanceStrudel: React.FC = () => {
 
 const Footnote = styled.div`
   font-size: 14px;
-  padding: 8px 20px;
-  color: ${(props) => props.theme.color.grey[400]};
-  border-top: solid 1px ${(props) => props.theme.color.grey[300]};
+  padding: 16px 20px;
+  color: ${(props) => 'rgba(37,37,44,0.48);'};
+  position: relative;
+  :after {
+    content: " ";
+    position: absolute;
+    display: flex;
+    width: calc(100% - 40px);
+    height: 1px;
+    border-top: solid 1px #E9E9E9;
+    top: 0;
+    border-top: solid 1px ${(props) => '#E9E9E9'};
+  }
 `
 const FootnoteValue = styled.div`
-  font-family: 'Roboto Mono', monospace;
+    font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
   float: right;
 `
 

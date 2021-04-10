@@ -1,22 +1,23 @@
 import React from 'react'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
+import useETH from '../../../hooks/useETH'
 import usePendingTransactions from '../../../hooks/usePendingTransactions'
 import Button from '../../Button'
 
 interface TxButtonProps {}
 
 const TxButton: React.FC<TxButtonProps> = () => {
-  const { account } = useWallet()
+  const { eth } = useETH()
+
   const pendingTransactions = usePendingTransactions()
   return (
     <>
-      {!!account && !!pendingTransactions.length ? (
+      {!!eth?.account && !!pendingTransactions.length ? (
         <StyledTxButton>
           <Button
             size="sm"
             text={`${pendingTransactions.length} Transaction(s)`}
-            href={`https://etherscan.io/address/${account}`}
+            href={`https://etherscan.io/address/${eth?.account}`}
           />
         </StyledTxButton>
       ) : null}

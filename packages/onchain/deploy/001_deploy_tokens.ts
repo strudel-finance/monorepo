@@ -1,18 +1,18 @@
-import {BuidlerRuntimeEnvironment, DeployFunction} from '@nomiclabs/buidler/types';
-const {ethers, upgrades} = require('@nomiclabs/buidler');
+import { BuidlerRuntimeEnvironment, DeployFunction } from '@nomiclabs/buidler/types';
+const { ethers, upgrades } = require('@nomiclabs/buidler');
 
 const func: DeployFunction = async function (bre: BuidlerRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = bre;
-  const {deploy, execute, read, log} = deployments;
+  const { deployments, getNamedAccounts } = bre;
+  const { deploy, execute, read, log } = deployments;
 
-  const {deployer, relayer} = await getNamedAccounts();
+  const { deployer, relayer } = await getNamedAccounts();
 
   // for upgrades
   const AdminLock = await deployments.get('AdminLock');
   // for gov params
   const OwnerLock = await deployments.get('OwnerLock');
 
-  const Strudel = await deploy('StrudelToken', {from: deployer, args: [], log: true});
+  const Strudel = await deploy('StrudelToken', { from: deployer, args: [], log: true });
 
   const bridgeRelayRewards = '30000000000000000000'; // 30 $TRDL per relay
 
@@ -20,7 +20,7 @@ const func: DeployFunction = async function (bre: BuidlerRuntimeEnvironment) {
   const VBTC = await upgrades.deployProxy(
     VBTCToken,
     [relayer, Strudel.address, 3, bridgeRelayRewards],
-    {unsafeAllowCustomTypes: true}
+    { unsafeAllowCustomTypes: true }
   );
   await VBTC.deployed();
   save('VBTCToken', VBTC);
@@ -39,15 +39,15 @@ const func: DeployFunction = async function (bre: BuidlerRuntimeEnvironment) {
   //   log: true,
   // });
 
-  await execute('VBTCToken_Proxy', {from: deployer, log: true}, 'changeAdmin', AdminLock.address);
+  await execute('VBTCToken_Proxy', { from: deployer, log: true }, 'changeAdmin', AdminLock.address);
 
-  await execute('VBTCToken', {from: deployer, log: true}, 'transferOwnership', OwnerLock.address);
+  await execute('VBTCToken', { from: deployer, log: true }, 'transferOwnership', OwnerLock.address);
 
-  await execute('StrudelToken', {from: deployer, log: true}, 'addMinter', VBTC.address);
+  await execute('StrudelToken', { from: deployer, log: true }, 'addMinter', VBTC.address);
 
   await execute(
     'StrudelToken',
-    {from: deployer, log: true},
+    { from: deployer, log: true },
     'transferOwnership',
     OwnerLock.address
   );

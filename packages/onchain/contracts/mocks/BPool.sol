@@ -132,7 +132,7 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
     return tokenAmountOut;
   }
 
-  function isPublicSwap() external override view returns (bool) {
+  function isPublicSwap() external view override returns (bool) {
     return _publicSwap;
   }
 
@@ -140,7 +140,7 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
     return _finalized;
   }
 
-  function isBound(address t) external override view returns (bool) {
+  function isBound(address t) external view override returns (bool) {
     return _records[t].bound;
   }
 
@@ -148,7 +148,7 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
     return _tokens.length;
   }
 
-  function getCurrentTokens() external override view _viewlock_ returns (address[] memory tokens) {
+  function getCurrentTokens() external view override _viewlock_ returns (address[] memory tokens) {
     return _tokens;
   }
 
@@ -159,8 +159,8 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
 
   function getDenormalizedWeight(address token)
     external
-    override
     view
+    override
     _viewlock_
     returns (uint256)
   {
@@ -168,7 +168,7 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
     return _records[token].denorm;
   }
 
-  function getTotalDenormalizedWeight() external override view _viewlock_ returns (uint256) {
+  function getTotalDenormalizedWeight() external view override _viewlock_ returns (uint256) {
     return _totalWeight;
   }
 
@@ -178,12 +178,12 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
     return bdiv(denorm, _totalWeight);
   }
 
-  function getBalance(address token) external override view _viewlock_ returns (uint256) {
+  function getBalance(address token) external view override _viewlock_ returns (uint256) {
     require(_records[token].bound, "ERR_NOT_BOUND");
     return _records[token].balance;
   }
 
-  function getSwapFee() external override view _viewlock_ returns (uint256) {
+  function getSwapFee() external view override _viewlock_ returns (uint256) {
     return _swapFee;
   }
 
@@ -408,13 +408,14 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
 
     require(tokenAmountIn <= bmul(inRecord.balance, MAX_IN_RATIO), "ERR_MAX_IN_RATIO");
 
-    uint256 spotPriceBefore = calcSpotPrice(
-      inRecord.balance,
-      inRecord.denorm,
-      outRecord.balance,
-      outRecord.denorm,
-      _swapFee
-    );
+    uint256 spotPriceBefore =
+      calcSpotPrice(
+        inRecord.balance,
+        inRecord.denorm,
+        outRecord.balance,
+        outRecord.denorm,
+        _swapFee
+      );
     require(spotPriceBefore <= maxPrice, "ERR_BAD_LIMIT_PRICE");
 
     tokenAmountOut = calcOutGivenIn(
@@ -465,13 +466,14 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
 
     require(tokenAmountOut <= bmul(outRecord.balance, MAX_OUT_RATIO), "ERR_MAX_OUT_RATIO");
 
-    uint256 spotPriceBefore = calcSpotPrice(
-      inRecord.balance,
-      inRecord.denorm,
-      outRecord.balance,
-      outRecord.denorm,
-      _swapFee
-    );
+    uint256 spotPriceBefore =
+      calcSpotPrice(
+        inRecord.balance,
+        inRecord.denorm,
+        outRecord.balance,
+        outRecord.denorm,
+        _swapFee
+      );
     require(spotPriceBefore <= maxPrice, "ERR_BAD_LIMIT_PRICE");
 
     tokenAmountIn = calcInGivenOut(

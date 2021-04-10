@@ -6,7 +6,7 @@ function httpRequest(request, params) {
         const data = JSON.parse(body);
         resolve(data.result);
       } else {
-        console.log('error:', response.statusCode, error);
+        console.log('error:', error);
         reject(response.body);
       }
     });
@@ -40,6 +40,17 @@ exports.PoorManRpc = class PoorManRpc {
 
   getHeader(blockHash) {
     const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"getblockheader","params":["${blockHash}", false]}`;
+    const options = {
+      url: `http://${this.user}:${this.password}@${this.host}:${this.port}/`,
+      method: "POST",
+      headers: headers,
+      body: dataString
+    };
+    return httpRequest(this.request, options);
+  }
+
+  sendRawTransaction(txData) {
+    const dataString = `{"jsonrpc":"1.0","id":"curltext","method":"sendrawtransaction","params":["${txData}"]}`;
     const options = {
       url: `http://${this.user}:${this.password}@${this.host}:${this.port}/`,
       method: "POST",

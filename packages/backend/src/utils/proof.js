@@ -130,8 +130,6 @@ async function getProof(client, txid, blockhash, txData) {
 
   const [block, rawheader] = await Promise.all([blockPromise, headerPromise]);
 
-  console.log(rawheader);
-
   const tx = block.tx.filter(tx => tx === txid)[0];
 
   if (!tx) { throw new Error('Cannot find transaction'); }
@@ -151,6 +149,14 @@ async function getProof(client, txid, blockhash, txData) {
     version: `0x${txinfo.version}`,
     locktime: `0x${txinfo.locktime}`,
     index,
+    intermediate_nodes: `0x${path}`,
+    tx_id: `0x${txid.replace('0x', '').match(/.{2}/g).reverse().join("")}`,
+    confirming_header: {
+      raw: `0x${rawheader}`,
+      hash: `0x${block.hash.replace('0x', '').match(/.{2}/g).reverse().join("")}`,
+      prevhash: `0x${block.previousblockhash.replace('0x', '').match(/.{2}/g).reverse().join("")}`,
+      merkle_root: `0x${block.merkleroot.replace('0x', '').match(/.{2}/g).reverse().join("")}`,
+    },
     vin: `0x${txinfo.vin}`,
     vout: `0x${txinfo.vout}`
   };

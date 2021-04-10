@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import styled from 'styled-components'
 
 export interface InputProps {
@@ -22,10 +22,15 @@ const Input: React.FC<InputProps> = ({
     <StyledInputWrapper>
       {!!startAdornment && startAdornment}
       <StyledInput
+        min="0"
+        type="number"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         disabled={disabled}
+        onKeyDown={(evt) =>
+          evt.key == '.' || (evt.key === 'e' && evt.preventDefault())
+        }
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>
@@ -34,12 +39,8 @@ const Input: React.FC<InputProps> = ({
 
 const StyledInputWrapper = styled.div`
   align-items: center;
-  background-color: ${(props) => props.theme.color.grey[200]};
   border-radius: ${(props) => props.theme.borderRadius}px;
-  box-shadow: inset 4px 4px 8px ${(props) => props.theme.color.grey[300]},
-    inset -6px -6px 12px ${(props) => props.theme.color.grey[100]};
   display: flex;
-  height: 72px;
   padding: 0 ${(props) => props.theme.spacing[3]}px;
 `
 

@@ -55,12 +55,14 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   // governance params
   // Dev fund
   uint256 public devFundDivRate;
-  // Block number when bonus STRDL period ends.
-  uint256 public bonusEndBlock;
+  // last time when total supply of reference token observed
+  // formerly bonusEndBlock: Block number when bonus STRDL period ends.
+  uint256 public lastBlockHeight;
   // STRDL tokens created per block.
   uint256 public strudelPerBlock;
-  // Bonus muliplier for early strudel makers.
-  uint256 public bonusMultiplier;
+  // the window size for variance calculation
+  // formerly bonusMultiplier: Bonus muliplier for early strudel makers.
+  uint256 public windowSize;
   // The block number when STRDL mining starts.
   uint256 public startBlock;
 
@@ -72,20 +74,30 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   // Total allocation points. Must be the sum of all allocation points in all pools.
   uint256 public totalAllocPoint;
 
+  // new since farming 2.0
+  address private referenceToken;
+  // the number of observations stored during the window
+  // immutable
+  uint8 public granularity;
+  // list of observations as ringbuffer
+  uint256[] public observations;
+  // position
+  uint8 public latestPos;
+
   function initialize(
     address _strudel,
     uint256 _strudelPerBlock,
     uint256 _startBlock,
-    uint256 _bonusEndBlock,
-    uint256 _bonusMultiplier
+    uint256 _lastBlockHeight,
+    uint256 _windowSize
   ) public initializer {
     __Ownable_init();
     strudel = StrudelToken(_strudel);
     require(_strudelPerBlock >= 10**15, "forgot the decimals for $TRDL?");
     strudelPerBlock = _strudelPerBlock;
-    bonusEndBlock = _bonusEndBlock;
+    lastBlockHeight = _lastBlockHeight;
     startBlock = _startBlock;
-    bonusMultiplier = _bonusMultiplier;
+    windowSize = _windowSize;
     totalAllocPoint = 0;
     devFundDivRate = 17;
   }
@@ -100,19 +112,55 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     }
   }
 
+  // update the totalSupply for the observation at the current timestamp. each observation is updated at most
+  // once per epoch period.
+  function updateVariance() public {
+    if (referenceToken == address(0)) {
+      return;
+    }
+
+    uint256 currentTotal = IERC20(referenceToken).totalSupply();
+
+    // populate the array with empty observations (first call only)
+    for (uint256 i = observations.length; i < granularity; i++) {
+      observations.push(currentTotal);
+    }
+
+    if (block.number.sub(lastBlockHeight) >= windowSize.div(granularity)) {
+      uint8 nextPos = (latestPos >= granularity - 1) ? 0 : latestPos + 1;
+      observations[nextPos] = currentTotal;
+      lastBlockHeight = block.number;
+      latestPos = nextPos;
+    }
+  }
+
   function poolLength() external view returns (uint256) {
     return poolInfo.length;
   }
 
   // Return reward multiplier over the given _from to _to block.
   function getMultiplier(uint256 _from, uint256 _to) public view returns (uint256) {
-    if (_to <= bonusEndBlock) {
-      return _to.sub(_from).mul(bonusMultiplier);
-    } else if (_from >= bonusEndBlock) {
-      return _to.sub(_from);
-    } else {
-      return bonusEndBlock.sub(_from).mul(bonusMultiplier).add(_to.sub(bonusEndBlock));
+    // fallback before not initialized
+    if (referenceToken == address(0)) {
+      if (_to <= lastBlockHeight) {
+        return _to.sub(_from).mul(windowSize).mul(1e18);
+      } else if (_from >= lastBlockHeight) {
+        return _to.sub(_from).mul(1e18);
+      } else {
+        return lastBlockHeight.sub(_from).mul(windowSize).add(_to.sub(lastBlockHeight)).mul(1e18);
+      }
     }
+
+    uint256 average = 0;
+    for (uint256 i = 0; i < granularity; i++) {
+      average += observations[i];
+    }
+    average = average.div(granularity);
+    uint256 latestSupply = observations[latestPos];
+
+    // get the variance, normalize over supply
+    uint256 variance = latestSupply.sub(average).mul(1e19).div(latestSupply).add(1e18);
+    return _to.sub(_from).mul(variance);
   }
 
   // View function to see pending STRDLs on frontend.
@@ -123,9 +171,8 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 lpSupply = pool.lpToken.balanceOf(address(this));
     if (block.number > pool.lastRewardBlock && lpSupply != 0) {
       uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-      uint256 strudelReward = multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(
-        totalAllocPoint
-      );
+      uint256 strudelReward =
+        multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(totalAllocPoint).div(1e18);
       accStrudelPerShare = accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));
     }
     return user.amount.mul(accStrudelPerShare).div(1e12).sub(user.rewardDebt);
@@ -151,9 +198,8 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
       return;
     }
     uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-    uint256 strudelReward = multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(
-      totalAllocPoint
-    );
+    uint256 strudelReward =
+      multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(totalAllocPoint).div(1e18);
     strudel.mint(owner(), strudelReward.div(devFundDivRate));
     strudel.mint(address(this), strudelReward);
     pool.accStrudelPerShare = pool.accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));
@@ -164,6 +210,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
   function deposit(uint256 _pid, uint256 _amount) external {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
+    updateVariance();
     updatePool(_pid);
     if (user.amount > 0) {
       uint256 pending = user.amount.mul(pool.accStrudelPerShare).div(1e12).sub(user.rewardDebt);
@@ -180,6 +227,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     PoolInfo storage pool = poolInfo[_pid];
     UserInfo storage user = userInfo[_pid][msg.sender];
     require(user.amount >= _amount, "withdraw: not good");
+    updateVariance();
     updatePool(_pid);
     uint256 pending = user.amount.mul(pool.accStrudelPerShare).div(1e12).sub(user.rewardDebt);
     safeStrudelTransfer(msg.sender, pending);
@@ -207,7 +255,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 _allocPoint,
     IERC20 _lpToken,
     bool _withUpdate
-  ) public onlyOwner {
+  ) external onlyOwner {
     if (_withUpdate) {
       massUpdatePools();
     }
@@ -228,7 +276,7 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 _pid,
     uint256 _allocPoint,
     bool _withUpdate
-  ) public onlyOwner {
+  ) external onlyOwner {
     if (_withUpdate) {
       massUpdatePools();
     }
@@ -236,22 +284,29 @@ contract TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     poolInfo[_pid].allocPoint = _allocPoint;
   }
 
-  function setDevFundDivRate(uint256 _devFundDivRate) public onlyOwner {
+  function setDevFundDivRate(uint256 _devFundDivRate) external onlyOwner {
     require(_devFundDivRate > 0, "!devFundDivRate-0");
     devFundDivRate = _devFundDivRate;
   }
 
-  function setBonusEndBlock(uint256 _bonusEndBlock) public onlyOwner {
-    bonusEndBlock = _bonusEndBlock;
-  }
-
-  function setStrudelPerBlock(uint256 _strudelPerBlock) public onlyOwner {
+  function setStrudelPerBlock(uint256 _strudelPerBlock) external onlyOwner {
     require(_strudelPerBlock > 0, "!strudelPerBlock-0");
     strudelPerBlock = _strudelPerBlock;
   }
 
-  function setBonusMultiplier(uint256 _bonusMultiplier) public onlyOwner {
-    require(_bonusMultiplier > 0, "!bonusMultiplier-0");
-    bonusMultiplier = _bonusMultiplier;
+  function initVariance(
+    address token_,
+    uint256 windowSize_,
+    uint8 granularity_
+  ) external {
+    require(referenceToken == address(0), "already initialized");
+    require(granularity_ > 1, "TorchShip: GRANULARITY");
+    require(windowSize_ % granularity_ == 0, "TorchShip: WINDOW_NOT_EVENLY_DIVISIBLE");
+    massUpdatePools();
+    referenceToken = token_;
+    windowSize = windowSize_;
+    granularity = granularity_;
+    lastBlockHeight = block.number - (windowSize_ / granularity_);
+    updateVariance();
   }
 }

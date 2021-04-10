@@ -6,7 +6,7 @@ import React from 'react'
 import { ExternalLink } from './ExternalLink'
 import {
   Proof,
-  Transaction,
+  BTCTransaction,
   LoadingStatus,
   Confirmation,
 } from '../../../types/types'
@@ -17,10 +17,13 @@ import BurnModal from '../../../views/Home/components/BurnModal'
 import Button from '../../Button'
 
 import useVBTC from '../../../hooks/useVBTC'
-import { getVbtcContract, proofOpReturnAndMint } from '../../../vbtc/utils'
-import { useWallet } from 'use-wallet'
+import { getVbtcContract, proofOpReturnAndMint } from '../../../tokens/utils'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
+import { useLocation } from 'react-router'
+import { VbtcContract } from '../../../tokens/lib/contracts.types'
+import { Vbtc } from '../../../tokens'
+import useETH from '../../../hooks/useETH'
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -37,7 +40,7 @@ interface pushEthParam {
 
 const pushEthTxHash = async (
   ethParam: pushEthParam,
-  tx: Transaction,
+  tx: BTCTransaction,
 ): Promise<Response> => {
   const url =
     apiServer +
@@ -77,8 +80,8 @@ const getProof = async (
 const callProofHelper = async (
   proof: Proof,
   burnOutputIndex: number,
-  account: any,
-  vbtcContract: any,
+  account: string,
+  vbtcContract: VbtcContract,
 ): Promise<string> => {
   return await proofOpReturnAndMint(
     vbtcContract,
@@ -86,8 +89,8 @@ const callProofHelper = async (
     proof,
     burnOutputIndex,
   )
-  // TODO: errors
 }
+
 const sleep = (milliseconds: number) => {
   return new Promise((resolve) => setTimeout(resolve, milliseconds))
 }
@@ -113,11 +116,11 @@ const waitForTxReceipt = async (
 }
 
 const callProofOpReturnAndMint = async (
-  tx: Transaction,
+  tx: BTCTransaction,
   handleLoading: (ls: LoadingStatus) => void,
-  account: any,
-  vbtcContract: any,
-  vbtc: any,
+  account: string,
+  vbtcContract: VbtcContract,
+  vbtc: Vbtc,
   blockHash: string,
   tx_hex: string,
 ) => {
@@ -180,7 +183,7 @@ const callProofOpReturnAndMint = async (
 }
 
 interface Props {
-  tx: Transaction
+  tx: BTCTransaction
   confirmation?: Confirmation
   handleLoading?: (ls: LoadingStatus) => void
   isLoading?: any
@@ -192,9 +195,10 @@ const ConversionActions: React.FC<Props> = ({
   handleLoading,
   isLoading,
 }) => {
-  const { account } = useWallet()
+  const { eth } = useETH()
   const vbtc = useVBTC()
   const vbtcContract = getVbtcContract(vbtc)
+  const pathName = useLocation().pathname
 
   const targetBtcConfs = 6
   let isConfirmed = false
@@ -203,7 +207,12 @@ const ConversionActions: React.FC<Props> = ({
   }
   const classes = useStyles()
   const [showModal] = useModal(
-    <BurnModal value={tx.value} address={tx.ethAddress} continueV={true} />,
+    <BurnModal
+      value={tx.value}
+      address={tx.ethAddress}
+      continueV={true}
+      coin="bitcoin"
+    />,
   )
 
   return (
@@ -220,8 +229,9 @@ const ConversionActions: React.FC<Props> = ({
           <ExternalLink
             className={classes.viewLink}
             href={`https://sochain.com/tx/BTC/${tx.btcTxHash}`}
+
           >
-            View BTC TX
+            View {pathName.slice(1)} TX
           </ExternalLink>
         )}
         {tx.ethTxHash && (
@@ -243,7 +253,7 @@ const ConversionActions: React.FC<Props> = ({
                     callProofOpReturnAndMint(
                       tx,
                       handleLoading,
-                      account,
+                      eth?.account,
                       vbtcContract,
                       vbtc,
                       confirmation.blockHash,

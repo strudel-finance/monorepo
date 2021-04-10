@@ -234,9 +234,10 @@ library TypedMemView {
     if (!isType(memView, _expected)) {
       (, uint256 g) = encodeHex(uint256(typeOf(memView)));
       (, uint256 e) = encodeHex(uint256(_expected));
-      string memory err = string(
-        abi.encodePacked("Type assertion failed. Got 0x", uint80(g), ". Expected 0x", uint80(e))
-      );
+      string memory err =
+        string(
+          abi.encodePacked("Type assertion failed. Got 0x", uint80(g), ". Expected 0x", uint80(e))
+        );
       revert(err);
     }
     return memView;

@@ -1,4 +1,4 @@
-import {usePlugin} from '@nomiclabs/buidler/config';
+import { usePlugin } from '@nomiclabs/buidler/config';
 
 usePlugin('@nomiclabs/buidler-ganache');
 usePlugin('@nomiclabs/buidler-waffle');
@@ -17,7 +17,7 @@ const config = {
   defaultNetwork: 'buidlerevm',
   solc: {
     version: '0.6.6',
-    optimizer: {enabled: true, runs: 500},
+    optimizer: { enabled: true, runs: 500 },
   },
   paths: {
     sources: './contracts',

@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
 import {
-  Transaction,
+  BTCTransaction,
   LoadingStatus,
   SoChainConfirmedGetTx,
   Confirmation,
@@ -24,14 +24,16 @@ import useInterval from '../../hooks/useInterval'
 import sb from 'satoshi-bitcoin'
 import { changeEndian } from '../../utils/changeEndian'
 import { Contract } from 'web3-eth-contract'
-import { getRelayContract } from '../../vbtc/utils'
+import { getRelayContract } from '../../tokens/utils'
 import useVBTC from '../../hooks/useVBTC'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { icons } from '../../helpers/icon'
 
 export interface TransactionTableProps {
   account: any
   previousAccount: any
-  lastRequest: Transaction | undefined
-  handleSetLastRequest: (tx: Transaction) => void
+  lastRequest: BTCTransaction | undefined
+  handleSetLastRequest: (tx: BTCTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
 }
@@ -55,7 +57,7 @@ interface AccountRequest {
   ]
 }
 
-const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
+const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   account,
   previousAccount,
   lastRequest,
@@ -143,7 +145,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           signal: abortController.signal,
         }
       : {}
-    if (wallet.status === 'connected') {
+    if (account) {
       let res = await fetch(
         `${apiServer}/production/account/${account}`,
         abortProps,
@@ -170,10 +172,10 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
         return
       }
       if (passedAccount.current === account) {
-        let resNew: Transaction[] = []
+        let resNew: BTCTransaction[] = []
         if (isAccountRequest(res)) {
           res.burns.map((tx, i) => {
-            let txNew: Transaction = {
+            let txNew: BTCTransaction = {
               ethAddress: account,
               value: sb.toBitcoin(tx.amount),
               txCreatedAt: new Date(tx.dateCreated),
@@ -210,17 +212,18 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
     if (account != null) {
       await handleTransactionUpdate()
       if (transactions.length > 0) {
-        let transactionsT: Transaction[] = transactions
+        let transactionsT: BTCTransaction[] = transactions
         let transactionsWithLowConfirmations = transactionsT.filter(
-          (tx) =>
-            !tx.confirmed &&
-            (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
-              confirmations[tx.btcTxHash] === undefined),
+          (tx) => !tx.confirmed && (
+                !confirmations[tx.btcTxHash] ||
+                confirmations[tx.btcTxHash]?.confirmations < BTC_ACCEPTANCE)
         )
 
         let highConfirmations = {}
+
         await Object.keys(confirmations).forEach(async (key) => {
           if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
+            
             highConfirmations[key] = confirmations[key]
             if (!highConfirmations[key].blockHash) {
               let res = await fetch(
@@ -236,6 +239,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                   showError('SoChain API Error: ' + e.message)
                   return undefined
                 })
+              
               if (res !== undefined) {
                 highConfirmations[key].blockHash = res.data.blockhash
                 highConfirmations[key].tx_hex = res.data.tx_hex
@@ -252,6 +256,9 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
             }
           }
         })
+        
+        
+        
         let newConfirmations: Record<string, Confirmation> = {}
         for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
           let res = await fetch(
@@ -271,17 +278,22 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           if (res === undefined || res.data.confirmations === undefined) {
             continue
           }
+
           let confirmation: Confirmation = {
             confirmations: res.data.confirmations,
           }
+
           newConfirmations[
             transactionsWithLowConfirmations[i].btcTxHash
           ] = confirmation
+
         }
+
         const confirmationsRecombined = {
           ...highConfirmations,
           ...newConfirmations,
         }
+        
         if (passedAccount.current === account) {
           setConfirmations(confirmationsRecombined)
         }
@@ -292,7 +304,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar style={{ maxHeight: 250 }}>
+      <SimpleBar style={{ maxHeight: 336 }}>
         <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
@@ -304,27 +316,41 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
               <TableCell>
                 <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
               </TableCell>
-              <TableCell>
-                <div className={classes.actionsCell}></div>
-              </TableCell>
+              
             </TableRow>
           </TableHead>
           <TableBody>
-            {lastRequest !== undefined && (
+            {lastRequest && (
               <TableRow key="stub">
                 <TableCell align="left">
-                  <ReddishTextTypography variant="caption">
-                    {lastRequest.value} BTC → vBTC
+                  <ReddishTextTypography
+                    className="reddish-typo"
+                    variant="caption"
+                  >
+                    {lastRequest.value} BTC{' '}
+                    <span className="reddish-icon">
+                      <FontAwesomeIcon icon={icons.chevronRight} />{' '}
+                    </span>{' '}
+                    vBTC
                   </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">
+                  {/* @TODO: Intergrate the colors there is green and orange ^^ */}
+                  <ReddishTextTypography
+                    className="reddish-chip green"
+                    variant="caption"
+                  >
                     <ConversionStatus tx={lastRequest} />
-                  </Typography>
+                  </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
                   <Grid container justify="flex-end">
-                    <ConversionActions tx={lastRequest} />
+                    <ReddishTextTypography
+                      className="reddish-typo"
+                      variant="caption"
+                    >
+                      <ConversionActions tx={lastRequest} />
+                    </ReddishTextTypography>
                   </Grid>
                 </TableCell>
               </TableRow>
@@ -368,7 +394,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
 export const ReddishTextTypography = withStyles({
   root: {
     color: '#322015',
-    fontFamily: 'Noto Sans',
+    fontFamily: 'azo-sans-web',
     fontSize: 16,
   },
 })(Typography)
@@ -380,26 +406,22 @@ const ReddishBoldTextTypography = withStyles({
 })(ReddishTextTypography)
 
 const TableCell = withStyles({
-  root: {
-    borderBottom: 'none',
-  },
   stickyHeader: {
-    background: 'white',
+    background: 'transparent',
   },
 })(MuiTableCell)
 
 const TableHead = withStyles({
   root: {
-    background: 'white',
+    background: 'transparent',
   },
 })(MuiTableHead)
 
 const useStyles = makeStyles((theme) => ({
   container: {
     borderColor: 'none',
-    background: '#d0e0fe',
+    background: '#FFFFFF',
     border: '1px solid #e2d6cfff',
-    boxShadow: 'inset 1px 1px 0px #f7f4f2',
     borderRadius: '12px',
     minHeight: 200,
     height: '100%',
@@ -419,4 +441,4 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default TransactionsTableContainer
+export default BTCTransactionsTableContainer

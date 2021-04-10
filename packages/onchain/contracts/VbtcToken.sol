@@ -37,8 +37,8 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   // immutable
   StrudelToken private strudel;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-  bytes32
-    public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+  bytes32 public constant PERMIT_TYPEHASH =
+    0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // gov params
   IRelay public relay;
@@ -210,14 +210,15 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BTC_CAP
-    uint256 rewardAmount = BTC_CAP
-      .mul(3)
-      .mul(sqrtVbtcAfter)
-      .add(sqrtVbtcBefore**3)
-      .sub(BTC_CAP.mul(3).mul(sqrtVbtcBefore))
-      .sub(sqrtVbtcAfter**3)
-      .div(3)
-      .div(BTC_CAP_SQRT);
+    uint256 rewardAmount =
+      BTC_CAP
+        .mul(3)
+        .mul(sqrtVbtcAfter)
+        .add(sqrtVbtcBefore**3)
+        .sub(BTC_CAP.mul(3).mul(sqrtVbtcBefore))
+        .sub(sqrtVbtcAfter**3)
+        .div(3)
+        .div(BTC_CAP_SQRT);
     strudel.mint(account, rewardAmount);
     strudel.mint(owner(), rewardAmount.div(devFundDivRate));
   }
@@ -236,46 +237,14 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     require(false, "not implemented");
   }
 
-  function addHeaders(bytes calldata _anchor, bytes calldata _headers) external returns (bool) {
-    require(relay.addHeaders(_anchor, _headers), "add header failed");
-    strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
-  }
-
-  function addHeadersWithRetarget(
-    bytes calldata _oldPeriodStartHeader,
-    bytes calldata _oldPeriodEndHeader,
-    bytes calldata _headers
-  ) external returns (bool) {
-    require(
-      relay.addHeadersWithRetarget(_oldPeriodStartHeader, _oldPeriodEndHeader, _headers),
-      "add header with retarget failed"
-    );
-    strudel.mint(msg.sender, relayReward.mul(_headers.length / 80));
-  }
-
-  function markNewHeaviest(
-    bytes32 _ancestor,
-    bytes calldata _currentBest,
-    bytes calldata _newBest,
-    uint256 _limit
-  ) external returns (bool) {
-    require(
-      relay.markNewHeaviest(_ancestor, _currentBest, _newBest, _limit),
-      "mark new heaviest failed"
-    );
-    strudel.mint(msg.sender, relayReward);
-  }
-
   /// @dev             Burns an amount of the token from the given account's balance.
   ///                  deducting from the sender's allowance for said account.
   ///                  Uses the internal _burn function.
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
-      _amount,
-      "ERC20: burn amount exceeds allowance"
-    );
+    uint256 decreasedAllowance =
+      allowance(_account, _msgSender()).sub(_amount, "ERC20: burn amount exceeds allowance");
 
     _approve(_account, _msgSender(), decreasedAllowance);
     _burn(_account, _amount);
@@ -322,13 +291,14 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     bytes32 s
   ) external {
     require(deadline >= block.timestamp, "vBTC: EXPIRED");
-    bytes32 digest = keccak256(
-      abi.encodePacked(
-        "\x19\x01",
-        DOMAIN_SEPARATOR,
-        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-      )
-    );
+    bytes32 digest =
+      keccak256(
+        abi.encodePacked(
+          "\x19\x01",
+          DOMAIN_SEPARATOR,
+          keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+        )
+      );
     address recoveredAddress = ecrecover(digest, v, r, s);
     require(recoveredAddress != address(0) && recoveredAddress == owner, "VBTC: INVALID_SIGNATURE");
     _approve(owner, spender, value);

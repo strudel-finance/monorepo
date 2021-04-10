@@ -1,12 +1,12 @@
 import {useCallback} from 'react'
 
 import useVBTC from './useVBTC'
-import {useWallet} from 'use-wallet'
-
-import {stake, getMasterChefContract} from '../vbtc/utils'
+import { stake, getMasterChefContract } from '../tokens/utils'
+import useETH from './useETH'
 
 const useStake = (pid: number) => {
-  const {account} = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
 
   const handleStake = useCallback(
@@ -17,7 +17,6 @@ const useStake = (pid: number) => {
         amount,
         account,
       )
-      console.log(txHash)
     },
     [account, pid, vbtc],
   )

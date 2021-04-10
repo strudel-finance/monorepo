@@ -1,12 +1,13 @@
 import Typography from '@material-ui/core/Typography'
 import React from 'react'
+import { useLocation } from 'react-router'
 
-import { Transaction, Confirmation } from '../../../types/types'
+import { BTCTransaction, Confirmation } from '../../../types/types'
 
 import { ReddishTextTypography } from '../TransactionsTableContainer'
 
 interface Props {
-  tx: Transaction
+  tx: BTCTransaction
   confirmations?: Confirmation
 }
 
@@ -19,15 +20,17 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
     confirmation = confirmations.confirmations
   }
 
+  const coin = useLocation().pathname.slice(1)
+
   return (
     <React.Fragment>
       <ReddishTextTypography variant="caption">
-        {!tx.hasOwnProperty('confirmed') ? (
-          <span>{`Waiting for BTC to be sent`}</span>
-        ) : null}
+        {!tx.hasOwnProperty('confirmed') && (
+          <span>{`Waiting for ${coin} to be sent`}</span>
+        )}
         {tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed ? (
           <span>
-            BTC transaction confirming (
+            {coin} transaction confirming (
             {confirmation === undefined || confirmation < 0
               ? '...'
               : confirmation}

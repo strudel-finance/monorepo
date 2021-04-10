@@ -1,5 +1,5 @@
 import React from 'react'
-import vbtc from '../../assets/img/Strudel.png'
+import vbtc from '../../assets/img/Strudel-logo-Icon.png'
 
 interface StrudelIconProps {
   size?: number

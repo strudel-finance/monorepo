@@ -2,8 +2,7 @@ import React, {useEffect} from 'react'
 import styled from 'styled-components'
 import chef from '../../assets/img/chef.png'
 
-import {useParams} from 'react-router-dom'
-import {useWallet} from 'use-wallet'
+import { useParams } from 'react-router-dom'
 import {provider} from 'web3-core'
 
 import Page from '../../components/Page'
@@ -17,21 +16,20 @@ import useVBTC from '../../hooks/useVBTC'
 import useFarm from '../../hooks/useFarm'
 import useRedeem from '../../hooks/useRedeem'
 import {getContract} from '../../utils/erc20'
-import {getMasterChefContract} from '../../vbtc/utils'
+import { getMasterChefContract } from '../../tokens/utils'
 
 import Harvest from './components/Harvest'
 import Stake from './components/Stake'
+import useETH from '../../hooks/useETH'
 
 const Farm: React.FC = () => {
-  const {account} = useWallet()
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
 
   useEffect(() => {
     window.scrollTo(0, 0)
   }, [])
-
-  const vbtc = useVBTC()
-  const {ethereum} = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
 
   // const lpContract = useMemo(() => {
   //   return getContract(ethereum as provider, lpTokenAddress)

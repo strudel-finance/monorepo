@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import { provider } from 'web3-core'
 import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
@@ -9,10 +8,11 @@ import useFarm from '../../hooks/useFarm'
 import useRedeem from '../../hooks/useRedeem'
 import Button from '../../components/Button'
 import useVBTC from '../../hooks/useVBTC'
-import { getMasterChefContract } from '../../vbtc/utils'
+import { getMasterChefContract } from '../../tokens/utils'
 import { getContract } from '../../utils/erc20'
 import Harvest from './components/Harvest'
 import Stake from './components/Stake'
+import useETH from '../../hooks/useETH'
 
 const Farm: React.FC = () => {
   const { farmId } = useParams()
@@ -39,11 +39,12 @@ const Farm: React.FC = () => {
   }, [])
 
   const vbtc = useVBTC()
-  const { ethereum } = useWallet()
+  const { eth } = useETH()
+  const provider = eth?.provider
 
   const lpContract = useMemo(() => {
-    return getContract(ethereum as provider, lpTokenAddress)
-  }, [ethereum, lpTokenAddress])
+    return getContract(provider, lpTokenAddress)
+  }, [provider, lpTokenAddress])
 
   const { onRedeem } = useRedeem(getMasterChefContract(vbtc))
 

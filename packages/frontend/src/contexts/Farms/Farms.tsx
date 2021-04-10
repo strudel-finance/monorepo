@@ -1,9 +1,8 @@
 import React, {useState} from 'react'
 
-import {useWallet} from 'use-wallet'
 import useVBTC from '../../hooks/useVBTC'
 
-import {getFarms} from '../../vbtc/utils'
+import { getFarms } from '../../tokens/utils'
 
 import Context from './context'
 

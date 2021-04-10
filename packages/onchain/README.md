@@ -34,9 +34,3 @@ Good place to understand contract relationships:
 
 ### Governance part 2
 ![strudel on-chain user stories (6)](https://user-images.githubusercontent.com/659301/95352486-92880f00-08c2-11eb-8228-fd9fa06f7e3a.png)
-
-### Peg Algorithm trading Up
-![Strudel Price Peg (4)](https://user-images.githubusercontent.com/659301/95352475-9156e200-08c2-11eb-94ea-0e54f887c1f9.png)
-
-### Peg Algorithm trading Down
-![Strudel Price Peg (3)](https://user-images.githubusercontent.com/659301/95352468-9025b500-08c2-11eb-8411-340b87515b0e.png)

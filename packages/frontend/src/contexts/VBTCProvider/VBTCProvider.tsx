@@ -1,14 +1,12 @@
-import React, {createContext, useEffect, useState} from 'react'
+import React, { createContext, useEffect, useState } from 'react'
+import { Vbtc } from '../../tokens/index'
+import useETH from '../../hooks/useETH'
 
-import {useWallet} from 'use-wallet'
-
-import {Vbtc} from '../../vbtc'
-
-export interface VBTCContext {
-  vbtc?: typeof Vbtc
+export interface VBTCProvider {
+  vbtc?: Vbtc
 }
 
-export const Context = createContext<VBTCContext>({
+export const Context = createContext<VBTCProvider>({
   vbtc: undefined,
 })
 
@@ -18,19 +16,18 @@ declare global {
   }
 }
 
-const VBTCProvider: React.FC = ({children}) => {
-  const {ethereum}: {ethereum: any} = useWallet()
+const VBTCProvider: React.FC = ({ children }) => {
   const [vbtc, setVbtc] = useState<any>()
+  const { eth } = useETH()
 
   // @ts-ignore
   window.vbtc = vbtc
-  // @ts-ignore
-  window.eth = ethereum
+
   useEffect(() => {
-    if (ethereum) {
-      const chainId = Number(ethereum.chainId)
-      const vbtcLib = new Vbtc(ethereum, chainId, false, {
-        defaultAccount: ethereum.selectedAddress,
+    if (eth) {
+      const chainId = Number(eth.provider.chainId)
+      const vbtcLib = new Vbtc(eth.provider, chainId, false, {
+        defaultAccount: eth.provider.selectedAddress,
         defaultConfirmations: 1,
         autoGasMultiplier: 1.5,
         testing: false,
@@ -40,11 +37,12 @@ const VBTCProvider: React.FC = ({children}) => {
         ethereumNodeTimeout: 10000,
       })
       setVbtc(vbtcLib)
-      window.vbtcsauce = vbtcLib
-    }
-  }, [ethereum])
 
-  return <Context.Provider value={{vbtc}}>{children}</Context.Provider>
+      window.vbtcsauce = vbtcLib
+    } else setVbtc(undefined)
+  }, [eth])
+
+  return <Context.Provider value={{ vbtc }}>{children}</Context.Provider>
 }
 
 export default VBTCProvider
