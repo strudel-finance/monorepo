@@ -23,7 +23,7 @@ contract BchMainnetToken is ERC20, Ownable {
 
   uint256 private _reportedSupply;
 
-  constructor() ERC20("Bitcoin Cash by Strudel", "vBCH") public {
+  constructor() public ERC20("Bitcoin Cash by Strudel", "vBCH") {
     uint256 chainId;
     assembly {
       chainId := chainid()
@@ -45,7 +45,7 @@ contract BchMainnetToken is ERC20, Ownable {
   /**
    * @dev See {IERC20-totalSupply}.
    */
-  function totalSupply() public view override returns (uint256) {
+  function totalSupply() public override view returns (uint256) {
     return _reportedSupply;
   }
 
