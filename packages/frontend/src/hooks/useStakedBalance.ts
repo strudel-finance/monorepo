@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import BigNumber from 'bignumber.js'
-import { getStaked, getMasterChefContract } from '../bridgeTokens/utils'
+import { getStaked, getMasterChefContract } from '../tokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 import useETH from './useETH'

@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react'
-import { Vbch } from '../../bridgeTokens/Vbch'
+import { Vbch } from '../../tokens/Vbch'
 import useETH from '../../hooks/useETH'
 
 export interface VBCHContext {
@@ -25,6 +25,7 @@ const VBCHProvider: React.FC = ({ children }) => {
   useEffect(() => {
     if (eth) {
       const chainId = Number(eth.provider.chainId)
+
       const vbchLib = new Vbch(eth.provider, chainId, false, {
         defaultAccount: eth.provider.selectedAddress,
         defaultConfirmations: 1,
@@ -35,7 +36,6 @@ const VBCHProvider: React.FC = ({ children }) => {
         accounts: [],
         ethereumNodeTimeout: 10000,
       })
-
       setVbch(vbchLib)
       window.vbchsauce = vbchLib
     } else setVbch(undefined)

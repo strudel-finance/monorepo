@@ -14,11 +14,11 @@ import {
   getVbchSupply,
   getVbtcAddress,
   getVbtcSupply,
-} from '../../../bridgeTokens/utils'
+} from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
-import { Vbtc } from '../../../bridgeTokens'
-import { Vbch } from '../../../bridgeTokens/Vbch'
+import { Vbtc } from '../../../tokens'
+import { Vbch } from '../../../tokens/Vbch'
 
 const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()

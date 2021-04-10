@@ -1,5 +1,5 @@
 import { useContext } from 'react'
-import { Context } from '../contexts/EthProvider'
+import { Context } from '../contexts/WalletProvider'
 
 const useETH = () => {
   const eth = useContext(Context)

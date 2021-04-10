@@ -13,10 +13,7 @@ import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import {
-  getStrudelAddress,
-  getStrudelSupply,
-} from '../../../bridgeTokens/utils'
+import { getStrudelAddress, getStrudelSupply } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
 

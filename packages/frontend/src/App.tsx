@@ -28,8 +28,8 @@ import 'react-toastify/dist/ReactToastify.css'
 import RollbarErrorTracking from './errorTracking/rollbar'
 import BTC from './views/BTC'
 import BCH from './views/BCH'
-import EthProvider from './contexts/EthProvider'
 import useETH from './hooks/useETH'
+import WalletProvider from './contexts/WalletProvider'
 
 declare global {
   interface Window {
@@ -127,7 +127,7 @@ const Providers: React.FC = ({ children }) => {
         }}
       >
         {/* pro */}
-        <EthProvider>
+        <WalletProvider>
           <VBTCProvider>
             <VBCHProvider>
               <TransactionProvider>
@@ -137,7 +137,7 @@ const Providers: React.FC = ({ children }) => {
               </TransactionProvider>
             </VBCHProvider>
           </VBTCProvider>
-        </EthProvider>
+          </WalletProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>

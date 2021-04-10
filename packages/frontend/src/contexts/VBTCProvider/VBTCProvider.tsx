@@ -1,5 +1,5 @@
 import React, { createContext, useEffect, useState } from 'react'
-import { Vbtc } from '../../bridgeTokens/index'
+import { Vbtc } from '../../tokens/index'
 import useETH from '../../hooks/useETH'
 
 export interface VBTCProvider {
@@ -37,6 +37,7 @@ const VBTCProvider: React.FC = ({ children }) => {
         ethereumNodeTimeout: 10000,
       })
       setVbtc(vbtcLib)
+
       window.vbtcsauce = vbtcLib
     } else setVbtc(undefined)
   }, [eth])

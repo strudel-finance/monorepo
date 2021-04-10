@@ -2,7 +2,7 @@ import React, {useState} from 'react'
 
 import useVBTC from '../../hooks/useVBTC'
 
-import { getFarms } from '../../bridgeTokens/utils'
+import { getFarms } from '../../tokens/utils'
 
 import Context from './context'
 

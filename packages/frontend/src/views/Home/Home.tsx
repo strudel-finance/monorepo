@@ -11,6 +11,7 @@ import Grid from '@material-ui/core/Grid'
 import Balances from './components/BalancesBTC'
 import BalanceStrudel from './components/BalanceStrudel'
 import BalanceBCH from './components/BalancesBCH'
+import BalancesBCHXDAI from './components/BalancesBCHXDAI'
 import useModal from '../../hooks/useModal'
 import Container from '@material-ui/core/Container'
 import { StyledLink } from '../../components/Footer/components/Nav'
@@ -137,6 +138,10 @@ const Home: React.FC = () => {
             <Spacer size="lg" />
             <Container>
               <BalanceBCH />
+              <Spacer size="lg" />
+            </Container>
+            <Container>
+              <BalancesBCHXDAI />
               <Spacer size="lg" />
             </Container>
             <Container>

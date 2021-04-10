@@ -2,7 +2,7 @@ import {useCallback} from 'react'
 
 import useVBTC from './useVBTC'
 
-import { unstake, getMasterChefContract } from '../bridgeTokens/utils'
+import { unstake, getMasterChefContract } from '../tokens/utils'
 import useETH from './useETH'
 
 const useUnstake = (pid: number) => {

@@ -16,7 +16,7 @@ import useVBTC from '../../../hooks/useVBTC'
 import BitcoinIcon from '../../../components/BitcoinIcon'
 import VBTCIcon from '../../../components/VBTCIcon'
 import MuiGrid from '@material-ui/core/Grid'
-import { getVbtcSupply } from '../../../bridgeTokens/utils'
+import { getVbtcSupply } from '../../../tokens/utils'
 import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
 

@@ -39,8 +39,6 @@ export const getVbtcAddress = (vbtc: Vbtc): string => {
 }
 
 export const getVbchAddress = (vbch: Vbch): string => {
-  console.log(vbch, 'vbchvbchvbchvbch')
-
   return vbch && vbch.vbchAddress
 }
 

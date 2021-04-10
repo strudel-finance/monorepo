@@ -6,7 +6,7 @@ import {provider} from 'web3-core'
 import {Contract} from 'web3-eth-contract'
 
 import {getAllowance} from '../utils/erc20'
-import { getMasterChefContract } from '../bridgeTokens/utils'
+import { getMasterChefContract } from '../tokens/utils'
 import useETH from './useETH'
 
 const useAllowance = (lpContract: Contract) => {

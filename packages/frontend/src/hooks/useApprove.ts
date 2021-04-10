@@ -3,7 +3,7 @@ import useVBTC from './useVBTC'
 import { provider } from 'web3-core'
 import { Contract } from 'web3-eth-contract'
 
-import { approve, getMasterChefContract } from '../bridgeTokens/utils'
+import { approve, getMasterChefContract } from '../tokens/utils'
 import useETH from './useETH'
 
 const useApprove = (lpContract: Contract) => {

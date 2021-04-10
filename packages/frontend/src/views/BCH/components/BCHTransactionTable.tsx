@@ -16,7 +16,7 @@ import SimpleBar from 'simplebar-react'
 import 'simplebar/dist/simplebar.min.css'
 import React, { useState, useRef, useEffect } from 'react'
 import sb from 'satoshi-bitcoin'
-import { getRelayContract } from '../../../bridgeTokens/utils'
+import { getRelayContract } from '../../../tokens/utils'
 import { changeEndian } from '../../../utils/changeEndian'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
@@ -25,7 +25,7 @@ import { apiServer } from '../../../constants/backendAddresses'
 import ConversionStatus from '../../../components/TransactionsTableContainer/components/ConversionStatus'
 import ConversionActions from '../../../components/TransactionsTableContainer/components/ConversionActions'
 import useVBCH from '../../../hooks/useVBCH'
-import { Vbch } from '../../../bridgeTokens/Vbch'
+import { Vbch } from '../../../tokens/Vbch'
 
 export interface TransactionTableProps {
   account: any

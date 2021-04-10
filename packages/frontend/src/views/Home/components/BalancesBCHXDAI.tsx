@@ -1,11 +1,7 @@
 import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import {
-  getVbchAddress,
-  getVbchSupply,
-
-} from '../../../tokens/utils'
+import { getVbchAddress, getVbchSupply } from '../../../tokens/utils'
 import { Vbch } from '../../../tokens/Vbch'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
@@ -23,14 +19,14 @@ const Contract = require('web3-eth-contract')
 const XDAI_NETWORK_ID = 100
 const ERC20Abi = require('../../../tokens/lib/abi/erc20.json')
 
-const BalanceBCH: React.FC = () => {
+const BalancesBCHXDAI: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
   const [xDaiVBCHSupply, setXDaiVBCHSupply] = useState<BigNumber>()
   const [xDaiVBCHBalance, setXDaiVBCHBalance] = useState<BigNumber>()
   const vbch = useVBCH()
 
   const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
-  
+
   const { eth } = useETH()
 
   const fetchTotalSupply = async (vbch: Vbch) => {
@@ -41,7 +37,7 @@ const BalanceBCH: React.FC = () => {
     }
   }
 
-  (Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
+  ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
 
   const contract = new Contract(
     // add ABI item as type
@@ -54,11 +50,11 @@ const BalanceBCH: React.FC = () => {
       fetchTotalSupply(vbch)
 
       contract.methods
-      .balanceOf(eth?.account)
-      .call()
+        .balanceOf(eth?.account)
+        .call()
         .then((s: any) => {
-          console.log(s, 'sssss');
-          
+          console.log(s, 'sssss')
+
           setXDaiVBCHBalance(new BigNumber(s))
         })
     } else {
@@ -67,16 +63,12 @@ const BalanceBCH: React.FC = () => {
   }, [vbch, eth?.account])
 
   useEffect(() => {
-    
-
     contract.methods
       .totalSupply()
       .call()
       .then((s: any) => setXDaiVBCHSupply(new BigNumber(s)))
-    
-    console.log(eth?.account, 'eth?.accounteth?.accounteth?.account');
-    
-    
+
+    console.log(eth?.account, 'eth?.accounteth?.accounteth?.account')
   }, [])
 
   return (
@@ -88,11 +80,18 @@ const BalanceBCH: React.FC = () => {
               <VBTHIcon />
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
-                <Label text="Your vBCH Balance on ETH mainnet" />
-                <ValueBTC
+                <Label text="Your vBCH Balance on Binance Smart Chain" />
+                {/* <ValueBTC
                   value={
                     !!eth?.account
                       ? getBalanceNumber(vbchBalanceMainnet)
+                      : 'Locked'
+                  }
+                /> */}
+                <ValueBTC
+                  value={
+                    !!xDaiVBCHBalance
+                      ? getBalanceNumber(xDaiVBCHBalance)
                       : 'Locked'
                   }
                 />
@@ -105,11 +104,15 @@ const BalanceBCH: React.FC = () => {
 
       <Card>
         <CardContent>
-          <Label text="Total vBCH Supply on ETH mainnet" />
-          <ValueBTC
+          <Label text="Total vBCH Supply on Binance Smart Chain" />
+          {/* <ValueBTC
             value={
               totalVBCHSupply ? getBalanceNumber(totalVBCHSupply) : 'Locked'
             }
+          /> */}
+          {/* add the styling */}
+          <ValueBTC
+            value={xDaiVBCHSupply ? getBalanceNumber(xDaiVBCHSupply) : 'Locked'}
           />
         </CardContent>
       </Card>
@@ -137,4 +140,4 @@ const StyledBalance = styled.div`
   flex: 1;
 `
 
-export default BalanceBCH
+export default BalancesBCHXDAI

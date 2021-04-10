@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
-import { MasterChefContract } from '../bridgeTokens/lib/contracts.types'
-import { redeem } from '../bridgeTokens/utils'
+import { MasterChefContract } from '../tokens/lib/contracts.types'
+import { redeem } from '../tokens/utils'
 import useETH from './useETH'
 
 const useRedeem = (masterChefContract: MasterChefContract) => {

@@ -6,10 +6,10 @@ import {
   getVbtcContract,
   getFarms,
   getTotalLPWethValue,
-} from '../bridgeTokens/utils'
+} from '../tokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
-import { ERC20Contract, UniContract } from '../bridgeTokens/lib/contracts.types'
+import { ERC20Contract, UniContract } from '../tokens/lib/contracts.types'
 import useETH from './useETH'
 
 export interface StakedValue {

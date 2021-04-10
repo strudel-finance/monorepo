@@ -17,15 +17,12 @@ import BurnModal from '../../../views/Home/components/BurnModal'
 import Button from '../../Button'
 
 import useVBTC from '../../../hooks/useVBTC'
-import {
-  getVbtcContract,
-  proofOpReturnAndMint,
-} from '../../../bridgeTokens/utils'
+import { getVbtcContract, proofOpReturnAndMint } from '../../../tokens/utils'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 import { useLocation } from 'react-router'
-import { VbtcContract } from '../../../bridgeTokens/lib/contracts.types'
-import { Vbtc } from '../../../bridgeTokens'
+import { VbtcContract } from '../../../tokens/lib/contracts.types'
+import { Vbtc } from '../../../tokens'
 import useETH from '../../../hooks/useETH'
 
 const useStyles = makeStyles((theme) => ({

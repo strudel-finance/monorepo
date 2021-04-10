@@ -3,7 +3,7 @@ import { provider } from 'web3-core'
 
 import BigNumber from 'bignumber.js'
 
-import { getEarned, getMasterChefContract } from '../bridgeTokens/utils'
+import { getEarned, getMasterChefContract } from '../tokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
 import useETH from './useETH'
