@@ -178,22 +178,22 @@ contract BchBridge is OwnableUpgradeSafe {
     account = address(bytes20(opReturnPayload.index(3, ADDR_LEN)));
 
     uint256 sqrtVbtcBefore = Babylonian.sqrt(mintedSupply);
-    // bch.mint(account, amount);
-    bch.transfer(account, amount);
+    bch.mint(account, amount);
+    //bch.transfer(account, amount);
     uint256 sqrtVbtcAfter = Babylonian.sqrt(mintedSupply.add(amount));
 
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BCH_CAP
-    // uint256 rewardAmount = BCH_CAP
-    //   .mul(3)
-    //   .mul(sqrtVbtcAfter)
-    //   .add(sqrtVbtcBefore**3)
-    //   .sub(BCH_CAP.mul(3).mul(sqrtVbtcBefore))
-    //   .sub(sqrtVbtcAfter**3)
-    //   .div(3)
-    //   .div(BCH_CAP_SQRT);
-    // strudel.mint(account, rewardAmount);
+    uint256 rewardAmount = BCH_CAP
+      .mul(3)
+      .mul(sqrtVbtcAfter)
+      .add(sqrtVbtcBefore**3)
+      .sub(BCH_CAP.mul(3).mul(sqrtVbtcBefore))
+      .sub(sqrtVbtcAfter**3)
+      .div(3)
+      .div(BCH_CAP_SQRT);
+    strudel.mint(account, rewardAmount);
   }
 
   function setRelayAddress(address _newRelayAddr) external onlyOwner {
