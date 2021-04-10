@@ -82,3 +82,5 @@ typechain
 .openzeppelin
 dist/
 deployments
+build
+.vscode
