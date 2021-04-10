@@ -1,3 +1,11 @@
+.DS_*
+*.log
+logs
+**/*.backup.*
+**/*.back.*
 node_modules
 worker
 .env
+../build
+./build
+build

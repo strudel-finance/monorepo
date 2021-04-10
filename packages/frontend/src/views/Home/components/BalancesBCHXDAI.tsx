@@ -68,7 +68,7 @@ const BalancesBCHXDAI: React.FC = () => {
                 <Label text="Your vBCH Balance on Binance Smart Chain" />
                 <ValueBTC
                   value={
-                    !!eth?.account && totalVBCHSupply
+                    !!eth?.account && xDaiVBCHBalance
                       ? getBalanceNumber(xDaiVBCHBalance)
                       : 'Locked'
                   }

@@ -22,7 +22,7 @@ import { Vbch } from '../../../tokens/Vbch'
 import useInfura from '../../../hooks/useInfura'
 
 const Balances: React.FC = () => {
-  const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
+  const [totalVBTCSupply, setTotalVBTCSupply] = useState<string>()
   const vbtc = useVBTC()
 
   const infura = useInfura()
@@ -32,10 +32,10 @@ const Balances: React.FC = () => {
 
   useEffect(() => {
     if (infura)
-      infura.vBCH.methods
+      infura.vBTC.methods
         .totalSupply()
         .call()
-        .then((s: any) => setTotalVBTCSupply(new BigNumber(s)))
+        .then((s: any) => setTotalVBTCSupply(s))
   }, [infura])
 
   return (
@@ -63,11 +63,7 @@ const Balances: React.FC = () => {
       <Card>
         <CardContent>
           <Label text="Total vBTC Supply" />
-          <ValueBTC
-            value={
-              totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
-            }
-          />
+          <ValueBTC value={totalVBTCSupply || 'Locked'} />
         </CardContent>
       </Card>
     </StyledWrapper>
