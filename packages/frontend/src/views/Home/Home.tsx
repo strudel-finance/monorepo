@@ -72,32 +72,6 @@ const Home: React.FC = () => {
     return ref.current
   }
 
-  const checkAndRemoveLastRequest = () => {
-    if (lastRequest !== undefined) {
-      window.localStorage.removeItem(account)
-      setLastRequest(undefined)
-    }
-  }
-
-  const previousAccount = usePrevious(account)
-
-  const handleLastRequestChange = (tx: BTCTransaction) => {
-    console.log(tx, 'tx tx tx')
-
-    setLastRequest(tx)
-    window.localStorage.setItem(account, JSON.stringify(tx))
-  }
-
-  const handleSetLastRequest = (tx: BTCTransaction) => {
-    setLastRequest(tx)
-  }
-
-  const handleAmountChange = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
-      setVal(e.currentTarget.value)
-    },
-    [setVal],
-  )
   const handleCountEnd = () => {
     setCountComplete(true)
   }

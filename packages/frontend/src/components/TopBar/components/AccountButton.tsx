@@ -21,15 +21,11 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
   const { eth } = useETH()
   const account = eth?.account
 
-  console.log(account, 'acc acc acc')
-
   const handleUnlockClick = useCallback(onPresentWalletProviderModal, [
     onPresentWalletProviderModal,
   ])
 
   useEffect(() => {
-    console.log(account, 'account doso');
-    
       if(account)
        setShortAdd(
         account.substring(0, 6) +

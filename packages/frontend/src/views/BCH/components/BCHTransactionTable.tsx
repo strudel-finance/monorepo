@@ -212,19 +212,10 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     if (account) {
       await handleTransactionUpdate()
       if (transactions.length) {
-        console.log(transactions, confirmed,'transactions transactions');
-        
         const transactionsWithLowConfirmations = transactions.filter(
-          (tx) => {
-            console.log(
-              confirmed,
-              tx.bchTxHash,
-              confirmed[tx.bchTxHash],
-              confirmed[tx.bchTxHash]?.confirmations < BCH_ACCEPTANCE, 'aaaa');
-            
-            return  (
-              !confirmed[tx.bchTxHash] ||
-              confirmed[tx.bchTxHash]?.confirmations < BCH_ACCEPTANCE)}
+          (tx) => (
+            !confirmed[tx.bchTxHash] ||
+            confirmed[tx.bchTxHash]?.confirmations < BCH_ACCEPTANCE)
         )
 
         const newConfirmations: {
@@ -255,11 +246,8 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           newConfirmations[bchTxHash] = {
             confirmations,
           }
-          
-          console.log(newConfirmations,bchTxHash, 'BCHtxHash');
 
           if (res.confirmations >= BCH_ACCEPTANCE) {
-                console.log(res, 'res.data res.data res.data');
                 
                 newConfirmations[bchTxHash].blockHash = blockhash
                 // newConfirmations[bchTxHash].tx_hex = txid
@@ -273,8 +261,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               // )
             }
           }
-
-          console.log(newConfirmations,'newConfirmations');
 
           if (passedAccount.current === account) {
             setConfirmed(newConfirmations)

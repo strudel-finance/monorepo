@@ -229,7 +229,6 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   border-radius: 9px;
   background: transparent;
   background-color: ${(props) => {
-      console.log(props.theme.color.primary.main, 'hhehheheh');
       return props.theme.color.primary.main
       // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
       // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
@@ -288,7 +287,6 @@ const StyledXXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-    console.log(props.theme.color.primary.main)
     return props.theme.color.primary.main
   }};
   border: 0;
@@ -305,8 +303,6 @@ const StyledButton = styled.button<StyledButtonProps>`
   letter-spacing: 1px;
   box-shadow: ${(props) => {
       // if (props.BCH)
-  console.log(props.theme.color.shadow.light, 'kakakkakak');
-  
       // if (props.hideBoxShadow) return 'none'
   return props.theme.color.shadow.light
   // '0px 0px 30px rgb(47 208 109 / 48%);'

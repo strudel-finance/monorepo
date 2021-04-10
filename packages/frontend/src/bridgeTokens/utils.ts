@@ -101,8 +101,6 @@ export const getPoolWeight = async (
   masterChefContract: MasterChefContract,
   pid: number,
 ) => {
-  console.log(masterChefContract, '')
-
   const { allocPoint } = await masterChefContract.methods.poolInfo(pid).call()
   const totalAllocPoint = await masterChefContract.methods
     .totalAllocPoint()
@@ -208,8 +206,6 @@ export const getTotalLPWethValue = async (
   block: number,
 ) => {
   // Get balance of the token address
-  console.log(lpContract.options.address, 'lpContract.options.address')
-
   const tokenAmountWholeLP = await tokenContract.methods
     .balanceOf(lpContract.options.address)
     .call()
@@ -329,7 +325,6 @@ export const proofOpReturnAndMint = async (
       .send({ from: account })
       // TODO
       .on('transactionHash', (tx: any) => {
-        console.log(tx, 'tx tx tx')
         return tx.transactionHash
       })
   )
@@ -348,8 +343,6 @@ export const stake = async (
     )
     .send({ from: account })
     .on('transactionHash', (tx: any) => {
-      console.log(tx, 'tx tx tx')
-
       return tx.transactionHash
     })
 }
@@ -367,7 +360,6 @@ export const unstake = async (
     )
     .send({ from: account })
     .on('transactionHash', (tx: any) => {
-      console.log(tx)
       return tx.transactionHash
     })
 }

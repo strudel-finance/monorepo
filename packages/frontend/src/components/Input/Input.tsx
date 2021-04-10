@@ -18,10 +18,6 @@ const Input: React.FC<InputProps> = ({
   value,
   disabled,
 }) => {
-
-  console.log(value, placeholder, 'valuevaluevalue2222');
-  
-
   return (
     <StyledInputWrapper>
       {!!startAdornment && startAdornment}
@@ -32,7 +28,9 @@ const Input: React.FC<InputProps> = ({
         value={value}
         onChange={onChange}
         disabled={disabled}
-        onKeyDown={ (evt) => evt.key == '.' || evt.key === 'e' && evt.preventDefault() }
+        onKeyDown={(evt) =>
+          evt.key == '.' || (evt.key === 'e' && evt.preventDefault())
+        }
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>

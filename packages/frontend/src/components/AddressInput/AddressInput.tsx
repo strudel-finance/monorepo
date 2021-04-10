@@ -8,9 +8,7 @@ interface AddressInputProps extends InputProps {
   address: string
 }
 
-const AddressInput: React.FC<AddressInputProps> = ({value, onChange}) => {
-console.log(value, 'valuevaluevalue1111')
-
+const AddressInput: React.FC<AddressInputProps> = ({ value, onChange }) => {
   return (
     <StyledTokenInput className="styled-token-input">
       <Input

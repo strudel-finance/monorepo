@@ -30,9 +30,6 @@ const BCH: React.FC = () => {
   const { eth } = useETH()
   const account = eth?.account
 
-  console.log(account,'accountaccountaccount');
-  
-
   const usePrevious = (value: any) => {
     const ref = useRef()
     useEffect(() => {
@@ -83,68 +80,67 @@ const BCH: React.FC = () => {
   return (
     <>
       {account ? (
-         <>
-         <PageHeader
-           title="Enter the Strudel"
-           subtitle="Turn your BCH into vBCH, and earn $TRDL rewards."
-         />
-        <div className="custom-container bch">
-          <Grid container spacing={2} className="txt-grid">
-            <Grid item xs={12} sm={12} md={4} className="main-box-grid">
-              <Container>
-                <AddressInput
-                  address={formatAddress(account)}
-                  value={formatAddress(account)}
-                />
-                <BurnAmountInput
-                  onChange={handleAmountChange}
-                  value={val}
-                  symbol="BCH"
-                />
-                <Button
-                  className="glow-btn green"
-                  text="Buy now vBCH"
-                  onClick={onPresentBurn}
-                />
-              </Container>
-              <Spacer size="md" />
+        <>
+          <PageHeader
+            title="Enter the Strudel"
+            subtitle="Turn your BCH into vBCH, and earn $TRDL rewards."
+          />
+          <div className="custom-container bch">
+            <Grid container spacing={2} className="txt-grid">
+              <Grid item xs={12} sm={12} md={4} className="main-box-grid">
+                <Container>
+                  <AddressInput
+                    address={formatAddress(account)}
+                    value={formatAddress(account)}
+                  />
+                  <BurnAmountInput
+                    onChange={handleAmountChange}
+                    value={val}
+                    symbol="BCH"
+                  />
+                  <Button
+                    className="glow-btn green"
+                    text="Buy now vBCH"
+                    onClick={onPresentBurn}
+                  />
+                </Container>
+                <Spacer size="md" />
 
-              <StyledInfo className="styled-info">
-                <span>Degen Tip</span>: Strudel only spins in one direction!
-              </StyledInfo>
+                <StyledInfo className="styled-info">
+                  <span>Degen Tip</span>: Strudel only spins in one direction!
+                </StyledInfo>
+              </Grid>
+              <Grid item xs={12} sm={12} md={7} className="main-table-grid">
+                <BCHTransactionsTableContainer
+                  account={account}
+                  previousAccount={previousAccount}
+                  lastRequest={lastRequest}
+                  handleSetLastRequest={handleSetLastRequest}
+                  checkAndRemoveLastRequest={checkAndRemoveLastRequest}
+                  wallet={eth}
+                />
+              </Grid>
             </Grid>
-            <Grid item xs={12} sm={12} md={7} className="main-table-grid">
-              <BCHTransactionsTableContainer
-                account={account}
-                previousAccount={previousAccount}
-                lastRequest={lastRequest}
-                handleSetLastRequest={handleSetLastRequest}
-                checkAndRemoveLastRequest={checkAndRemoveLastRequest}
-                wallet={eth}
-              />
-            </Grid>
-          </Grid>
           </div>
-        </>  
-      ):
-      (
+        </>
+      ) : (
         <Page>
-      <div
-        style={{
-          alignItems: 'center',
-          display: 'flex',
-          flex: 1,
-          justifyContent: 'center',
-        }}
-      >
-          <Button
-          boxShadowGlow={true}
-          onClick={onPresentWalletProviderModal}
-          text="Unlock Wallet"
-        />
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              boxShadowGlow={true}
+              onClick={onPresentWalletProviderModal}
+              text="Unlock Wallet"
+            />
           </div>
-          </Page>
-    )}
+        </Page>
+      )}
     </>
   )
 }

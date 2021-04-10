@@ -40,7 +40,6 @@ const FarmCards: React.FC = () => {
     strudelIndex >= 0 && stakedValue[strudelIndex]
       ? stakedValue[strudelIndex].tokenPriceInWeth
       : new BigNumber(0)
-  //console.log(strudelPrice.toString())
   const BLOCKS_PER_YEAR = new BigNumber(2336000)
   const STRUDEL_PER_BLOCK = new BigNumber(1)
 

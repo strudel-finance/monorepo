@@ -221,15 +221,10 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
 
         let highConfirmations = {}
 
-        console.log(confirmations,'confirmations 11111');
-
         await Object.keys(confirmations).forEach(async (key) => {
-          console.log('inside loop 22222');
-          
           if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
             
             highConfirmations[key] = confirmations[key]
-            console.log(key,confirmations[key], 'BCHtxHash');
             if (!highConfirmations[key].blockHash) {
               let res = await fetch(
                 `https://sochain.com/api/v2/get_tx/BTC/${key}`,
@@ -265,7 +260,6 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
         
         
         let newConfirmations: Record<string, Confirmation> = {}
-        console.log(transactionsWithLowConfirmations,'confirmations 333');
         for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
           let res = await fetch(
             `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
@@ -285,8 +279,6 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             continue
           }
 
-          console.log(res.data.confirmations, 'res.data.confirmations 44444');
-          
           let confirmation: Confirmation = {
             confirmations: res.data.confirmations,
           }
@@ -294,8 +286,6 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           newConfirmations[
             transactionsWithLowConfirmations[i].btcTxHash
           ] = confirmation
-
-          console.log(JSON.stringify(confirmation), 'confirmation, newConfirmations 55555');
 
         }
 

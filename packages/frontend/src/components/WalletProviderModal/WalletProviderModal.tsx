@@ -33,8 +33,6 @@ const WalletProviderModal: React.FC<ModalProps> = ({ onDismiss }) => {
               icon={<img src={metamaskLogo} style={{ height: 32 }} />}
               onConnect={() =>
                 connect('injected').then(() => {
-                  console.log('acccctive acccctive');
-                  
                   setStatus('active')
                 })
               }
