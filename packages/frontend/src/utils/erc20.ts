@@ -4,13 +4,10 @@ import { Contract } from 'web3-eth-contract'
 import { AbiItem } from 'web3-utils'
 import ERC20ABI from '../constants/abi/ERC20.json'
 
-export const getContract = (provider: any, address: string) => {
+export const getContract = (provider: any, address: string): any => {
   const web3 = new Web3(provider)
   // !!! TODO: add interface !!!
-  const contract = new web3.eth.Contract(
-    ERC20ABI as AbiItem[],
-    address,
-  ) 
+  const contract = new web3.eth.Contract(ERC20ABI as AbiItem[], address)
   return contract
 }
 

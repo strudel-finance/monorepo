@@ -64,21 +64,15 @@ export class Contracts {
     this.defaultGas = options.defaultGas
     this.defaultGasPrice = options.defaultGasPrice
 
-    this.strudel = new this.web3.eth.Contract(
-      StrudelAbi as AbiItem[],
-    ) as StrudelContract
-    this.vbtc = new this.web3.eth.Contract(VBTCAbi as AbiItem[]) as VbtcContract
+    this.strudel = new this.web3.eth.Contract(StrudelAbi as AbiItem[]) as any
+    this.vbtc = new this.web3.eth.Contract(VBTCAbi as AbiItem[]) as any
     this.masterChef = new this.web3.eth.Contract(
       MasterChefAbi as AbiItem[],
-    ) as MasterChefContract
-    this.weth = new this.web3.eth.Contract(WETHAbi as AbiItem[]) as WethContract
-    this.relay = new this.web3.eth.Contract(
-      RelayAbi as AbiItem[],
-    ) as RelayContract
+    ) as any
+    this.weth = new this.web3.eth.Contract(WETHAbi as AbiItem[]) as any
+    this.relay = new this.web3.eth.Contract(RelayAbi as AbiItem[]) as any
     // !!! TODO: add type
-    this.vbch = new this.web3.eth.Contract(
-      VBCHAbi as AbiItem[],
-    ) as ERC20Contract
+    this.vbch = new this.web3.eth.Contract(VBCHAbi as AbiItem[]) as any
 
     this.pools = supportedPools.map((pool) => {
       return Object.assign(pool, {
@@ -86,10 +80,10 @@ export class Contracts {
         tokenAddress: pool.tokenAddresses[networkId],
         lpContract: new this.web3.eth.Contract(
           UNIV2PairAbi as AbiItem[],
-        ) as UniContract,
+        ) as any,
         tokenContract: new this.web3.eth.Contract(
           ERC20Abi as AbiItem[],
-        ) as ERC20Contract,
+        ) as any,
       })
     })
 
