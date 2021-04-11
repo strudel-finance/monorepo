@@ -128,12 +128,11 @@ const BalanceStrudel: React.FC = () => {
     
     if (infura)
     infura.trdl.methods
-    .totalSupply()
-    .call()
-    .then((a: any) => {
-      console.log(a, 'trdltrdtrdltrd')
-      setTotalSupply(a)
-    })
+      .totalSupply()
+      .call()
+      .then((a: any) => {
+        setTotalSupply(a)
+      })
   }, [infura])
 
   // useEffect(() => {

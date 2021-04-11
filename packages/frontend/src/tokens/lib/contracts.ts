@@ -69,9 +69,6 @@ export class Contracts {
       StrudelAbi as AbiItem[],
     ) as StrudelContract
     this.vbtc = new this.web3.eth.Contract(VBTCAbi as AbiItem[]) as VbtcContract
-    this.bridge = new this.web3.eth.Contract(
-      VBTCAbi as AbiItem[],
-    ) as VbtcContract
     this.masterChef = new this.web3.eth.Contract(
       MasterChefAbi as AbiItem[],
     ) as MasterChefContract
@@ -110,7 +107,6 @@ export class Contracts {
     }
 
     _setProvider(this.vbtc, contractAddresses.vbtc[networkId])
-    _setProvider(this.bridge, contractAddresses.vbtc[networkId])
     _setProvider(this.strudel, contractAddresses.strudel[networkId])
     _setProvider(this.masterChef, contractAddresses.masterChef[networkId])
     _setProvider(this.weth, contractAddresses.weth[networkId])
@@ -138,8 +134,6 @@ export class Contracts {
   setDefaultAccount(account: string) {
     this.vbtc.options.from = account
     this.strudel.options.from = account
-    // !!!
-    // this.vbch.options.from = account
     this.masterChef.options.from = account
   }
 }

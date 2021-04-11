@@ -1,10 +1,13 @@
 import React, { createContext, useEffect, useState } from 'react'
-import { Vbtc } from '../../tokens/index'
 import useETH from '../../hooks/useETH'
+import { AbiItem } from 'web3-utils'
+import { contractAddresses } from '../../tokens/lib/constants'
+import { VbtcContract } from '../../tokens/lib/contracts.types'
+const Contract = require('web3-eth-contract')
+const vbtcAbi = require('../../tokens/lib/abi/vbtc.json')
 const XDAI_NETWORK_ID = 100
-
 export interface VBTCProvider {
-  bridge?: Vbtc
+  bridge?: VbtcContract
 }
 
 export const Context = createContext<VBTCProvider>({
@@ -20,17 +23,12 @@ const BridgeProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (eth) {
-      const chainId = Number(eth.provider.chainId)
-      const bridgeLib = new Vbtc(eth.provider, chainId, false, {
-        defaultAccount: eth.provider.selectedAddress,
-        defaultConfirmations: 1,
-        autoGasMultiplier: 1.5,
-        testing: false,
-        defaultGas: '6000000',
-        defaultGasPrice: '1000000000',
-        accounts: [],
-        ethereumNodeTimeout: 10000,
-      })
+      Contract.setProvider(eth.provider)
+
+      const bridgeLib = new Contract(
+        vbtcAbi as AbiItem[],
+        contractAddresses.bridge[XDAI_NETWORK_ID],
+      )
       setBridge(bridgeLib)
     } else setBridge(undefined)
   }, [eth])

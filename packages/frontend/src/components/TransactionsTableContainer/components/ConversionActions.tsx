@@ -27,12 +27,8 @@ import { Vbtc } from '../../../tokens'
 import useETH from '../../../hooks/useETH'
 import { Vbch } from '../../../tokens/Vbch'
 import useVBCH from '../../../hooks/useVBCH'
-import { contractAddresses } from '../../../tokens/lib/constants'
-import Web3 from 'web3'
 import useBridge from '../../../hooks/useBridge'
-const Contract = require('web3-eth-contract')
-const vbtcAbi = require('../../../tokens/lib/abi/vbtc.json')
-const XDAI_NETWORK_ID = 100
+
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -239,49 +235,26 @@ const callProofOpReturnAndMintBCH = async (
   vbchContract: any,
   vbch: Vbch,
   blockHash: string,
-  tx_hex: string,
-  // !!! temp !!!
-  provider:any
-  // bridge: any
+  bridge: VbtcContract,
 ) => {
   let loadingStatus = { tx: tx.bchTxHash, status: true }
   handleLoading(loadingStatus)
   loadingStatus.status = false
   let proof
-    
-    // new this.web3.eth.Contract(VBTCAbi as AbiItem[])
   
-  // const providerWEB3 = new Web3.providers.HttpProvider(provider, {
-  //   timeout: 10000,
-  // });
-
-  ;(Contract as any).setProvider(provider)
-
-  // // const 
-
-  const bridge = new Contract(
-    // add ABI item as type
-    vbtcAbi as any[],
-    contractAddresses.vbchBridge[XDAI_NETWORK_ID],
-  ) as any
-  
-
   if (!tx.hasOwnProperty('proof')) {
     //TODO: add confirmations
 
     const rawTx = await getRawTx(tx.bchTxHash)
-    .then(handleErrors)
-    .then((response1) => response1.json())
-    .catch((e) => {
-      RollbarErrorTracking.logErrorInRollbar(
-        'proof fetching problem' + e.message,
-      )
-      showError('Problem fetching proof: ' + e.message)
-      return undefined
-    })
-
-    console.log(rawTx,'rawTxrawTx');
-    
+      .then(handleErrors)
+      .then((response1) => response1.json())
+      .catch((e) => {
+        RollbarErrorTracking.logErrorInRollbar(
+          'proof fetching problem' + e.message,
+        )
+        showError('Problem fetching proof: ' + e.message)
+        return undefined
+      })
 
     proof = await getProofBCH(rawTx, tx.bchTxHash, blockHash)
       .then(handleErrors)
@@ -308,7 +281,7 @@ const callProofOpReturnAndMintBCH = async (
     Number(tx.burnOutputIndex),
     account,
     vbchContract,
-    bridge
+    bridge,
   ).catch((e) => {
     RollbarErrorTracking.logErrorInRollbar(e.message)
     showError(e.message)
@@ -351,14 +324,11 @@ const ConversionActions: React.FC<Props> = ({
   const { eth } = useETH()
   const vbtc = useVBTC()
   const vbch = useVBCH()
-  const vbtcContract = getVbtcContract(vbtc)
+  const bridgeContract = useBridge()
   const vbchContract = getVbchContract(vbch)
+  const vbtcContract = getVbtcContract(vbtc)
   const pathName = useLocation().pathname
-  const bridge = useBridge()
-
-  console.log(bridge, 'bridgebridgebridge');
   
-
   const targetBtcConfs = 6
   let isConfirmed = false
   if (confirmation && confirmation.hasOwnProperty('confirmations')) {
@@ -409,25 +379,25 @@ const ConversionActions: React.FC<Props> = ({
                 <Button
                   size="xs"
                 onClick={() => {
-                  pathName === '/BTC' ?
-                    callProofOpReturnAndMint(
-                      tx,
-                      handleLoading,
-                      eth?.account,
-                      vbtcContract,
-                      vbtc,
-                      confirmation.blockHash,
-                      confirmation.tx_hex,
-                    ) : callProofOpReturnAndMintBCH(
-                      tx,
-                      handleLoading,
-                      eth?.account,
-                      vbchContract,
-                      vbch,
-                      confirmation.blockHash,
-                      confirmation.tx_hex,
-                      eth?.provider
-                    )
+                  pathName === '/BTC'
+                    ? callProofOpReturnAndMint(
+                        tx,
+                        handleLoading,
+                        eth?.account,
+                        vbtcContract,
+                        vbtc,
+                        confirmation.blockHash,
+                        confirmation.tx_hex,
+                      )
+                    : callProofOpReturnAndMintBCH(
+                        tx,
+                        handleLoading,
+                        eth?.account,
+                        vbchContract,
+                        vbch,
+                        confirmation.blockHash,
+                        bridgeContract,
+                      )
                   }}
                 >
                   Claim v{pathName.slice(1)} & $TRDL

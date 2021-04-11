@@ -52,7 +52,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   wallet,
 }) => {
   const POLL_DURATION_TXS = 1500
-  const BCH_ACCEPTANCE = 100
+  const BCH_ACCEPTANCE = 6
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
   const [checkedTxs, setCheckedTxs] = useState({})
@@ -229,11 +229,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             checkedTxs[transaction.bchTxHash] &&
             checkedTxs[transaction.bchTxHash].confirmations > BCH_ACCEPTANCE
           ) {
-            console.log(
-              checkedTxs[transaction.bchTxHash],
-              transaction.bchTxHash,
-              'checkedTxs[transaction.bchTxHash] ',
-            )
             // !!! do we need if statment to check for relay??? !!!
             newConfirmations[transaction.bchTxHash] = {
               ...checkedTxs[transaction.bchTxHash],
@@ -277,11 +272,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                 newConfirmations[bchTxHash].blockHash,
                 vbch,
               )
-
-              console.log(
-                newConfirmations[bchTxHash].isRelayed,
-                'newConfirmations[bchTxHash].isRelayednewConfirmations[bchTxHash].isRelayed',
-              )
             }
           } else {
             newConfirmations[bchTxHash].confirmed = false
@@ -300,7 +290,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar style={{ maxHeight: 250 }}>
+      <SimpleBar >
         <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
@@ -320,7 +310,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           <TableBody>
             {lastRequest && (
               <TableRow key="stub">
-                <TableCell align="left">
+                <TableCell align="left" style={{ width: 200 }}>
                   <ReddishTextTypography variant="caption">
                     {lastRequest.value} BCH → vBCH
                   </ReddishTextTypography>
@@ -338,8 +328,6 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               </TableRow>
             )}
             {transactions.map((tx, i) => {
-              console.log(JSON.stringify(checkedTxs), tx.bchTxHash, checkedTxs[tx.bchTxHash],'hahahah');
-              
               return (
                 <TableRow key={i}>
                   <TableCell align="left">
@@ -355,7 +343,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                       />
                     </Typography>
                   </TableCell>
-                  <TableCell >
+                  <TableCell>
                     <Grid container justify="flex-end">
                       <ConversionActions
                         tx={tx}

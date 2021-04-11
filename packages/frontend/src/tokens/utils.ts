@@ -65,6 +65,10 @@ export const getVbchContract = (vbch: Vbch): VbtcContract => {
   return vbch && vbch.contracts && vbch.contracts.vbch
 }
 
+export const getBridgeContract = (bridge: Vbch): VbtcContract => {
+  return bridge && bridge.contracts && bridge.contracts.bridge
+}
+
 export const getStrudelContract = (vbtc: Vbtc): StrudelContract => {
   return vbtc && vbtc.contracts && vbtc.contracts.strudel
 }
@@ -212,6 +216,11 @@ export const getTotalLPWethValue = async (
   vbtc: Vbtc,
   block: number,
 ) => {
+
+  console.log(tokenContract, 'tokenContracttokenContracttokenContract')
+  
+
+
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
     .balanceOf(lpContract.options.address)

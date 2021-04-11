@@ -12,9 +12,7 @@ interface Props {
 }
 
 const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
-  console.log(tx, confirmations, 'tx, confirmations')
-
-  const targetBtcConfs = 100
+  const targetBtcConfs = 6
   let isConfirmed = false
   let confirmation = undefined
   if (confirmations && confirmations.hasOwnProperty('confirmations')) {

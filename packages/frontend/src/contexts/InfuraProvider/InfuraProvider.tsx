@@ -51,25 +51,6 @@ const InfuraProvider: React.FC = ({ children }) => {
       ),
     }
 
-    contract.vBTC.methods
-      .totalSupply()
-      .call()
-      .then((a: any) => {
-        console.log(a, 'vBTC')
-      })
-    contract.vBCH.methods
-      .totalSupply()
-      .call()
-      .then((a: any) => {
-        console.log(a, 'vBCH')
-      })
-    contract.trdl.methods
-      .totalSupply()
-      .call()
-      .then((a: any) => {
-        console.log(a, 'trdl')
-      })
-
     setInfura(contract)
   }, [])
 
