@@ -42,13 +42,13 @@ const BalanceBCH: React.FC = () => {
   //   }
   // }
 
-  ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
+  // ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
 
-  const contract = new Contract(
-    // add ABI item as type
-    ERC20Abi as any[],
-    contractAddresses.vbch[XDAI_NETWORK_ID],
-  )
+  // const contract = new Contract(
+  //   // add ABI item as type
+  //   ERC20Abi as any[],
+  //   contractAddresses.vbch[XDAI_NETWORK_ID],
+  // )
 
   // useEffect(() => {
   //   if (vbch && eth?.account) {

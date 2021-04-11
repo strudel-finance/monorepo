@@ -31,6 +31,7 @@ import BTC from './views/BTC'
 import BCH from './views/BCH'
 import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
+import BridgeProvider from './contexts/BridgeProvider'
 
 declare global {
   interface Window {
@@ -129,7 +130,8 @@ const Providers: React.FC = ({ children }) => {
       >
         {/* pro */}
           <InfuraProvider>
-        <WalletProvider>
+          <WalletProvider>
+            <BridgeProvider>
           <VBTCProvider>
             <VBCHProvider>
               <TransactionProvider>
@@ -138,7 +140,8 @@ const Providers: React.FC = ({ children }) => {
                 </FarmsProvider>
               </TransactionProvider>
             </VBCHProvider>
-            </VBTCProvider>
+              </VBTCProvider>
+              </BridgeProvider>
           </WalletProvider>
             </InfuraProvider>
       </UseWalletProvider>

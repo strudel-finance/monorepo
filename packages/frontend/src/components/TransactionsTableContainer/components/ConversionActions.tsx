@@ -9,6 +9,7 @@ import {
   BTCTransaction,
   LoadingStatus,
   Confirmation,
+  BCHTransaction,
 } from '../../../types/types'
 import useModal from '../../../hooks/useModal'
 import { apiServer } from '../../../constants/backendAddresses'
@@ -17,13 +18,21 @@ import BurnModal from '../../../views/Home/components/BurnModal'
 import Button from '../../Button'
 
 import useVBTC from '../../../hooks/useVBTC'
-import { getVbtcContract, proofOpReturnAndMint } from '../../../tokens/utils'
+import { getVbchContract, getVbtcContract, proofOpReturnAndMint, proofOpReturnAndMintBCH } from '../../../tokens/utils'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 import { useLocation } from 'react-router'
 import { VbtcContract } from '../../../tokens/lib/contracts.types'
 import { Vbtc } from '../../../tokens'
 import useETH from '../../../hooks/useETH'
+import { Vbch } from '../../../tokens/Vbch'
+import useVBCH from '../../../hooks/useVBCH'
+import { contractAddresses } from '../../../tokens/lib/constants'
+import Web3 from 'web3'
+import useBridge from '../../../hooks/useBridge'
+const Contract = require('web3-eth-contract')
+const vbtcAbi = require('../../../tokens/lib/abi/vbtc.json')
+const XDAI_NETWORK_ID = 100
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -77,6 +86,28 @@ const getProof = async (
   return fetch(url, opts)
 }
 
+const getRawTx = (tx_hash: string): Promise<Response> => {
+  const url = `https://api.fullstack.cash/v4/rawtransactions/getRawTransaction/${tx_hash}?verbose=false`
+  return fetch(url)
+}
+
+const  getProofBCH = (
+  rawTx: string,
+  tx_hash: string,
+  block_hash: string,
+): Promise<Response> => {
+  const url = apiServer + '/production/bch/proof/' + tx_hash + '/' + block_hash
+  const opts: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      // 'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: JSON.stringify({ txData: rawTx }),
+  }
+  return fetch(url, opts)
+}
+
 const callProofHelper = async (
   proof: Proof,
   burnOutputIndex: number,
@@ -88,6 +119,24 @@ const callProofHelper = async (
     account,
     proof,
     burnOutputIndex,
+  )
+}
+
+const callProofHelperBCH = async (
+  proof: Proof,
+  burnOutputIndex: number,
+  account: string,
+  // !!! TODO: type
+  vbchContract: any,
+  //TYPE
+  xDaiBridgeContract: VbtcContract,
+): Promise<string> => {
+  return await proofOpReturnAndMintBCH(
+    vbchContract,
+    account,
+    proof,
+    burnOutputIndex,
+    xDaiBridgeContract
   )
 }
 
@@ -182,6 +231,110 @@ const callProofOpReturnAndMint = async (
   }
 }
 
+const callProofOpReturnAndMintBCH = async (
+  tx: BCHTransaction,
+  handleLoading: (ls: LoadingStatus) => void,
+  account: string,
+  // !!! TODO: type !!!
+  vbchContract: any,
+  vbch: Vbch,
+  blockHash: string,
+  tx_hex: string,
+  // !!! temp !!!
+  provider:any
+  // bridge: any
+) => {
+  let loadingStatus = { tx: tx.bchTxHash, status: true }
+  handleLoading(loadingStatus)
+  loadingStatus.status = false
+  let proof
+    
+    // new this.web3.eth.Contract(VBTCAbi as AbiItem[])
+  
+  // const providerWEB3 = new Web3.providers.HttpProvider(provider, {
+  //   timeout: 10000,
+  // });
+
+  ;(Contract as any).setProvider(provider)
+
+  // // const 
+
+  const bridge = new Contract(
+    // add ABI item as type
+    vbtcAbi as any[],
+    contractAddresses.vbchBridge[XDAI_NETWORK_ID],
+  ) as any
+  
+
+  if (!tx.hasOwnProperty('proof')) {
+    //TODO: add confirmations
+
+    const rawTx = await getRawTx(tx.bchTxHash)
+    .then(handleErrors)
+    .then((response1) => response1.json())
+    .catch((e) => {
+      RollbarErrorTracking.logErrorInRollbar(
+        'proof fetching problem' + e.message,
+      )
+      showError('Problem fetching proof: ' + e.message)
+      return undefined
+    })
+
+    console.log(rawTx,'rawTxrawTx');
+    
+
+    proof = await getProofBCH(rawTx, tx.bchTxHash, blockHash)
+      .then(handleErrors)
+      .then((response1) => response1.json())
+      .then((result: string) => JSON.parse(result))
+      .catch((e) => {
+        RollbarErrorTracking.logErrorInRollbar(
+          'proof fetching problem' + e.message,
+        )
+        showError('Problem fetching proof: ' + e.message)
+        return undefined
+      })
+    if (proof === undefined) {
+      handleLoading(loadingStatus)
+      return
+    }
+    tx.proof = proof
+  } else {
+    proof = tx.proof
+  }
+
+  let ethTxHash = await callProofHelperBCH(
+    proof,
+    Number(tx.burnOutputIndex),
+    account,
+    vbchContract,
+    bridge
+  ).catch((e) => {
+    RollbarErrorTracking.logErrorInRollbar(e.message)
+    showError(e.message)
+    return undefined
+  })
+
+  handleLoading(loadingStatus)
+  if (
+    (ethTxHash !== undefined &&
+      ethTxHash.transactionHash !== undefined &&
+      (await waitForTxReceipt(ethTxHash.transactionHash, vbch))) === 1
+  ) {
+    // do things
+    tx.ethTxHash = ethTxHash.transactionHash
+
+    await pushEthTxHash({ ethTxHash: ethTxHash }, tx)
+      .then(handleErrors)
+      .catch((e) => {
+        RollbarErrorTracking.logErrorInRollbar(
+          'Problem pushing ETH to DB: ' + e.message,
+        )
+        showError('Problem pushing ETH to DB: ' + e.message)
+      })
+  }
+}
+
 interface Props {
   tx: BTCTransaction
   confirmation?: Confirmation
@@ -197,8 +350,14 @@ const ConversionActions: React.FC<Props> = ({
 }) => {
   const { eth } = useETH()
   const vbtc = useVBTC()
+  const vbch = useVBCH()
   const vbtcContract = getVbtcContract(vbtc)
+  const vbchContract = getVbchContract(vbch)
   const pathName = useLocation().pathname
+  const bridge = useBridge()
+
+  console.log(bridge, 'bridgebridgebridge');
+  
 
   const targetBtcConfs = 6
   let isConfirmed = false
@@ -249,7 +408,8 @@ const ConversionActions: React.FC<Props> = ({
               {!isLoading[tx.btcTxHash] ? (
                 <Button
                   size="xs"
-                  onClick={() => {
+                onClick={() => {
+                  pathName === '/BTC' ?
                     callProofOpReturnAndMint(
                       tx,
                       handleLoading,
@@ -258,10 +418,19 @@ const ConversionActions: React.FC<Props> = ({
                       vbtc,
                       confirmation.blockHash,
                       confirmation.tx_hex,
+                    ) : callProofOpReturnAndMintBCH(
+                      tx,
+                      handleLoading,
+                      eth?.account,
+                      vbchContract,
+                      vbch,
+                      confirmation.blockHash,
+                      confirmation.tx_hex,
+                      eth?.provider
                     )
                   }}
                 >
-                  Claim vBTC & $TRDL
+                  Claim v{pathName.slice(1)} & $TRDL
                 </Button>
               ) : (
                 <a className={classes.viewLink} href="">
