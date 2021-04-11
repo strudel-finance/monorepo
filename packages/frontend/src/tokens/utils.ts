@@ -216,11 +216,6 @@ export const getTotalLPWethValue = async (
   vbtc: Vbtc,
   block: number,
 ) => {
-
-  console.log(tokenContract, 'tokenContracttokenContracttokenContract')
-  
-
-
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
     .balanceOf(lpContract.options.address)
