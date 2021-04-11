@@ -105,14 +105,14 @@ const Home: React.FC = () => {
             <Button
               icon={icons.fire}
               className="glow-btn orange"
-              text="Burn BTC"
+              text="GET vBTC"
               to="/BTC"
             />
             <Spacer size="lg" />
             <Button
               icon={icons.fire}
               className="glow-btn green"
-              text="Burn BCH"
+              text="GET vBCH"
               to="/BCH"
             />
           </div>

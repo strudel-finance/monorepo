@@ -30,11 +30,8 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
         )}
         {tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed ? (
           <span>
-            {coin} transaction confirming (
-            {confirmation === undefined || confirmation < 0
-              ? '...'
-              : confirmation}
-            /{targetBtcConfs} complete)
+            {coin} transaction confirming ({!confirmation ? '0' : confirmation}/
+            {targetBtcConfs} complete)
           </span>
         ) : null}
         {tx.hasOwnProperty('confirmed') &&

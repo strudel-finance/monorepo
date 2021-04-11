@@ -13,8 +13,8 @@ import Checkbox from '../../../components/Checkbox'
 import QRCode from 'qrcode.react'
 import StrudelIcon from '../../../components/StrudelIcon'
 import useVBTC from '../../../hooks/useVBTC'
-import BitcoinIcon from '../../../components/BitcoinIcon'
-import VBTCIcon from '../../../components/VBTCIcon'
+import OrgIcons from '../../../components/BitcoinIcon'
+import VIcons from '../../../components/VBTCIcon'
 import MuiGrid from '@material-ui/core/Grid'
 import { getVbchSupply, getVbtcSupply } from '../../../tokens/utils'
 import { BTCTransaction } from '../../../types/types'
@@ -58,6 +58,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   const [strudelAmount, setStrudelAmount] = useState(null)
   const vbtc = useVBTC()
   const vbch = useVBCH()
+  const coinAbrv = coin === 'bitcoincash' ? 'BCH' : 'BTC'
 
   const handleChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
@@ -84,6 +85,8 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }, [])
 
   const handleClick = (event: any) => {
+    console.log(event.target.firstElementChild, 'eventeventeventevent')
+
     event.target.firstElementChild.checked = !event.target.firstElementChild
       .checked
     setChecked(event.target.firstElementChild.checked)
@@ -103,20 +106,25 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }
 
   return (
-  
-    (<Modal className="modal-wrap" classNameChilderen="modal-child-wrap">
+    <Modal className="modal-wrap" classNameChilderen="modal-child-wrap">
       <div className="big-title">Confirm Transaction</div>
       <ModalContent className="modal-content">
         {!continued ? (
           <>
             <div className="burn-item">
               <div className="burn-item-img">
-                <VBTCIcon size={48} />
+              {
+                  coinAbrv === 'BTC' ? 
+                    <VIcons.VBTCIcon size={48} />
+                    :  <VIcons.VBCHIcon size={48} />
+                }
               </div>
               <div className="burn-item-content">
-                <div className="burn-item-title">vBTC Amount</div>
+                <div className="burn-item-title">
+                  v{coinAbrv} Amount
+                </div>
                 <div className="burn-item-amount">
-                  {value.toString() + ' vBTC'}
+                  {value.toString() + ` v${coinAbrv}`}
                 </div>
               </div>
             </div>
@@ -132,11 +140,15 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
             <div className="burn-divider"></div>
             <div className="burn-item">
               <div className="burn-item-img">
-                <BitcoinIcon size={48} />
+                {
+                  coinAbrv === 'BTC' ? 
+                    <OrgIcons.BitcoinIcon size={48} />
+                    :  <OrgIcons.BitcoinCashIcon size={48} />
+                }
               </div>
               <div className="burn-item-content">
-                <div className="burn-item-title">BTC Amount</div>
-                <div className="burn-item-amount">{value.toString()} BTC</div>
+                <div className="burn-item-title">{coinAbrv} Amount</div>
+                <div className="burn-item-amount">{value.toString()} {coinAbrv}</div>
               </div>
             </div>
             <div className="checkbox-wrap">
@@ -144,15 +156,23 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 className="danger-label"
                 color="rgba(229,147,16,1)"
                 checkbox={<Checkbox onChange={handleCheckboxChange} />}
-                text="Attention: You can only mint vBTC when burning BTC"
+                text={"Attention: You can only mint v" + coinAbrv + " when burning " + coinAbrv}
                 onClick={handleClick}
               />
             </div>
-            <div className='modal-btm'>
+            <div className="modal-btm">
               {!continued ? (
                 <ModalActions>
-                  <Button borderButton={true} onClick={onDismiss} text="Cancel" />
-                  <Button className='glow-btn orange' text='Confirm transaction' onClick={handleContinue} disabled={!checked} />
+                  <Button
+                    onClick={onDismiss}
+                    text="Cancel"
+                  />
+                  <Button
+                    className={'glow-btn' + (coinAbrv === 'BTC' ? ' orange' : ' green')}
+                    text="Confirm transaction"
+                    onClick={handleContinue}
+                    disabled={!checked}
+                  />
                 </ModalActions>
               ) : (
                 <ModalActions>
@@ -160,37 +180,35 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
                 </ModalActions>
               )}
             </div>
-            </>)
-        : (                   <>
-                      <StyledBalanceWrapper>
-                        <QRCode
-                          size={256}
-                          value={urlAssembler(coin, address, value)}
-                        />
-                      </StyledBalanceWrapper>
-                      <StyledBalanceWrapper>
-                        <StyledBalance>
-                          <p
-                            style={{ wordBreak: 'break-all', textAlign: 'center' }}
-                          >{urlAssembler(coin, address, value)}</p>
-                          <Label>Please scan the following QR code</Label>
-                          <Label style={{ fontWeight: 500 }}>
-                            Check compatible{' '}
-                            <a
-                              href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
-                              target="_blank"
-                            >
-                              wallets
-                            </a>
-                          </Label>
-                        </StyledBalance>
-                      </StyledBalanceWrapper>
-                    </>
-          )}
+          </>
+        ) : (
+          <>
+            <StyledBalanceWrapper>
+              <QRCode size={256} value={urlAssembler(coin, address, value)} />
+            </StyledBalanceWrapper>
+            <StyledBalanceWrapper>
+              <StyledBalance>
+                <p style={{ wordBreak: 'break-all', textAlign: 'center' }}>
+                  {urlAssembler(coin, address, value)}
+                </p>
+                <Label>Please scan the following QR code</Label>
+                <Label style={{ fontWeight: 500 }}>
+                  Check compatible{' '}
+                  <a
+                    href="https://medium.com/@strudelfinance/how-to-bridge-the-bridge-679891dd0ae8"
+                    target="_blank"
+                  >
+                    wallets
+                  </a>
+                </Label>
+              </StyledBalance>
+            </StyledBalanceWrapper>
+          </>
+        )}
         <Spacer size="sm" />
       </ModalContent>
     </Modal>
-  ))
+  )
 }
 
 const StyledBalance = styled.div`

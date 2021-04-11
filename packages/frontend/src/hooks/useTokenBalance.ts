@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-
 import BigNumber from 'bignumber.js'
 import { getBalance } from '../utils/erc20'
 import useBlock from './useBlock'

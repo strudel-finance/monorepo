@@ -57,14 +57,20 @@ const App: React.FC = () => {
       setAccount(accounts[0])
     }
   }
-  
+
+  ;(window as any).ethereum.on('networkChanged', function (networkId: string) {
+    console.log(networkId, 'ajajajajja')
+    window.location.reload()
+    // Time to reload your interface with the new networkId
+  })
+
   if ((window as any).ethereum) {
-    (window as any).ethereum.on('accountsChanged', accountChange)
+    ;(window as any).ethereum.on('accountsChanged', accountChange)
   } else {
-    (window as any).addEventListener(
+    ;(window as any).addEventListener(
       'ethereum#initialized',
-      () => { 
-        (window as any).ethereum.on('accountsChanged', accountChange)
+      () => {
+        ;(window as any).ethereum.on('accountsChanged', accountChange)
       },
       {
         once: true,

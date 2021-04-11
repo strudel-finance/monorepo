@@ -26,16 +26,18 @@ const VBTCProvider: React.FC = ({ children }) => {
   useEffect(() => {
     if (eth) {
       const chainId = Number(eth.provider.chainId)
-      const vbtcLib = new Vbtc(eth.provider, chainId, false, {
-        defaultAccount: eth.provider.selectedAddress,
-        defaultConfirmations: 1,
-        autoGasMultiplier: 1.5,
-        testing: false,
-        defaultGas: '6000000',
-        defaultGasPrice: '1000000000000',
-        accounts: [],
-        ethereumNodeTimeout: 10000,
-      })
+      const vbtcLib =
+        chainId === 1 &&
+        new Vbtc(eth.provider, chainId, false, {
+          defaultAccount: eth.provider.selectedAddress,
+          defaultConfirmations: 1,
+          autoGasMultiplier: 1.5,
+          testing: false,
+          defaultGas: '6000000',
+          defaultGasPrice: '1000000000000',
+          accounts: [],
+          ethereumNodeTimeout: 10000,
+        })
       setVbtc(vbtcLib)
 
       window.vbtcsauce = vbtcLib

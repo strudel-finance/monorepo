@@ -350,8 +350,6 @@ export const proofOpReturnAndMintBCH = async (
   //temp
   xDaiBridgeContract: VbtcContract,
 ) => {
-  console.log(proof, 'xDaiBridgeContract')
-
   return (
     ((await xDaiBridgeContract.methods.proofOpReturnAndMint(
       proof.header,

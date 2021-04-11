@@ -2,8 +2,7 @@ import { useContext } from 'react'
 import { Context } from '../contexts/BridgeProvider'
 
 const useBridge = () => {
-  const { bridge } = useContext(Context)
-  return bridge
+  return useContext(Context)
 }
 
 export default useBridge

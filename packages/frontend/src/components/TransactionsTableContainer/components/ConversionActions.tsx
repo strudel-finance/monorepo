@@ -2,7 +2,6 @@
 
 import { makeStyles } from '@material-ui/core'
 import React from 'react'
-
 import { ExternalLink } from './ExternalLink'
 import {
   Proof,
@@ -28,7 +27,10 @@ import useETH from '../../../hooks/useETH'
 import { Vbch } from '../../../tokens/Vbch'
 import useVBCH from '../../../hooks/useVBCH'
 import useBridge from '../../../hooks/useBridge'
-
+import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
+import { contractAddresses } from '../../../tokens/lib/constants'
+import Web3 from 'web3'
+const XDAI_NETWORK_ID = 100
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -48,13 +50,11 @@ const pushEthTxHash = async (
   tx: BTCTransaction | BCHTransaction,
   coin: 'BTC' | 'BCH'
 ): Promise<Response> => {
+  console.log(process.env.REACT_APP_API_URL, 'process.env.REACT_APP_API_URL');
+  
   const url =
-    apiServer +
-    '/production/payment/' +
-    coin === 'BTC' ? (tx as BTCTransaction).btcTxHash : (tx as BCHTransaction).bchTxHash +
-    '/output/' +
-    tx.burnOutputIndex +
-    '/addEthTx'
+    process.env.REACT_APP_API_URL + '/production/payment/' + coin === 'BTC' ? (tx as BTCTransaction).btcTxHash : (tx as BCHTransaction).bchTxHash +  '/output/' + tx.burnOutputIndex + '/addEthTx'
+  
   const opts: RequestInit = {
     method: 'POST',
     headers: {
@@ -63,6 +63,9 @@ const pushEthTxHash = async (
     },
     body: JSON.stringify(ethParam),
   }
+
+  console.log(url, 'urlurlurlurl');
+  
   return fetch(url, opts)
 }
 
@@ -143,13 +146,15 @@ const sleep = (milliseconds: number) => {
 
 const waitForTxReceipt = async (
   transactionHash: string,
-  vbtc: any,
+  vCoin: Vbtc | Vbch,
 ): Promise<number> => {
   const expectedBlockTime = 1000
   let transactionReceipt = null
   while (transactionReceipt == null) {
+    console.log(vCoin);
+    
     // Waiting expectedBlockTime until the transaction is mined
-    transactionReceipt = await vbtc.web3.eth
+    transactionReceipt = await vCoin.web3.eth
       .getTransactionReceipt(transactionHash)
       .catch((e: any) => {
         RollbarErrorTracking.logErrorInRollbar(e)
@@ -289,15 +294,18 @@ const callProofOpReturnAndMintBCH = async (
     return undefined
   })
 
+  const web3 = new Web3(process.env.REACT_APP_XDAI_PROVIDER)
+
+
   handleLoading(loadingStatus)
   if (
     (ethTxHash !== undefined &&
       ethTxHash.transactionHash !== undefined &&
-      (await waitForTxReceipt(ethTxHash.transactionHash, vbch))) === 1
+      (await waitForTxReceipt(ethTxHash.transactionHash, {web3} as any))) === 1
   ) {
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
-
+    
     await pushEthTxHash({ ethTxHash: ethTxHash }, tx, 'BCH')
       .then(handleErrors)
       .catch((e) => {
@@ -310,7 +318,9 @@ const callProofOpReturnAndMintBCH = async (
 }
 
 interface Props {
-  tx: BTCTransaction
+  // !! TODO
+  tx: any
+  // BTCTransaction | BCHTransaction
   confirmation?: Confirmation
   handleLoading?: (ls: LoadingStatus) => void
   isLoading?: any
@@ -321,14 +331,14 @@ const ConversionActions: React.FC<Props> = ({
   confirmation,
   handleLoading,
   isLoading,
-}) => {
+}) => {  
   const { eth } = useETH()
   const vbtc = useVBTC()
   const vbch = useVBCH()
   const bridgeContract = useBridge()
   const vbchContract = getVbchContract(vbch)
   const vbtcContract = getVbtcContract(vbtc)
-  const pathName = useLocation().pathname
+  const coin = useLocation().pathname.slice(1)
   
   const targetBtcConfs = 6
   let isConfirmed = false
@@ -341,33 +351,45 @@ const ConversionActions: React.FC<Props> = ({
       value={tx.value}
       address={tx.ethAddress}
       continueV={true}
-      coin="bitcoin"
+      coin={coin === 'BTC' ? 'bitcoin' : 'bitcoincash'}
     />,
   )
 
   return (
     <React.Fragment>
-      <div style={{ textAlign: 'center' }}>
+      <div style={{
+        textAlign: 'center',
+        display: 'flex',
+    justifyContent: 'center',
+    flexDirection: 'column',
+    alignItems: 'center', }}>
         {!tx.hasOwnProperty('confirmed') && (
           <React.Fragment>
-            <a className={classes.viewLink} href="" onClick={showModal}>
+            <a href="" onClick={showModal}>
               View Bridge Address
             </a>
           </React.Fragment>
         )}
-        {tx.btcTxHash && (
+        {(tx.btcTxHash || tx.bchTxHash) && (
           <ExternalLink
             className={classes.viewLink}
-            href={`https://sochain.com/tx/BTC/${tx.btcTxHash}`}
-
+            href={
+              coin === 'BTC'
+                    ? `https://sochain.com/tx/BTC/${tx.btcTxHash}`
+                : `https://explorer.bitcoin.com/bch/tx/${tx.bchTxHash}`
+            }
           >
-            View {pathName.slice(1)} TX
+            View {coin} TX
           </ExternalLink>
         )}
         {tx.ethTxHash && (
           <ExternalLink
             className={classes.viewLink}
-            href={'https://etherscan.io/tx/' + tx.ethTxHash}
+            href={
+              coin === 'BTC'
+                    ? `https://etherscan.io/tx/${tx.ethTxHash}`
+                : `https://blockscout.com/xdai/mainnet/tx/${tx.ethTxHash}`
+            }
           >
             View ETH TX
           </ExternalLink>
@@ -376,38 +398,60 @@ const ConversionActions: React.FC<Props> = ({
           !tx.ethTxHash &&
           confirmation.isRelayed && (
             <React.Fragment>
-              {!isLoading[tx.btcTxHash] ? (
-                <Button
+            {!isLoading[tx.btcTxHash] ?
+             (() => {
+            if(coin === 'BTC') {
+               return (<Button
                   size="xs"
-                onClick={() => {
-                  pathName === '/BTC'
-                    ? callProofOpReturnAndMint(
-                        tx,
-                        handleLoading,
-                        eth?.account,
-                        vbtcContract,
-                        vbtc,
-                        confirmation.blockHash,
-                        confirmation.tx_hex,
-                      )
-                    : callProofOpReturnAndMintBCH(
-                        tx,
-                        handleLoading,
-                        eth?.account,
-                        vbchContract,
-                        vbch,
-                        confirmation.blockHash,
-                        bridgeContract,
-                      )
+                  onClick={() => {
+                    callProofOpReturnAndMint(
+                          tx,
+                          handleLoading,
+                          eth?.account,
+                          vbtcContract,
+                          vbtc,
+                          confirmation.blockHash,
+                          confirmation.tx_hex,
+                        )
+                      
                   }}
+                > 
+                  Claim v{coin} & $TRDL
+                </Button>) }
+
+                if (coin === 'BCH') {
+                  if(eth.provider.networkVersion == 100) {
+                    return (<Button
+                      size="xs"
+                      onClick={() => {
+                            callProofOpReturnAndMintBCH(
+                              tx,
+                              handleLoading,
+                              eth?.account,
+                              vbchContract,
+                              vbch,
+                              confirmation.blockHash,
+                              bridgeContract.contract,
+                            )
+                      }}
+                    >
+                      Claim v{coin} & $TRDL
+                      </Button>)
+                }}
+
+                return (<Button
+                  size="xs"
+
                 >
-                  Claim v{pathName.slice(1)} & $TRDL
-                </Button>
-              ) : (
+                  GO TO xDai
+                  </Button>)
+
+            })()
+              : 
                 <a className={classes.viewLink} href="">
                   Loading
                 </a>
-              )}
+              }
             </React.Fragment>
           )}
       </div>

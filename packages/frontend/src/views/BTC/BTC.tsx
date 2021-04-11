@@ -80,69 +80,68 @@ const BTC: React.FC = () => {
 
   return (
     <>
-    {
-      account?(
-    <>
-        <PageHeader
-        title="Enter the Strudel"
-        subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
-      />
-        <div className="custom-container btc">
-          <Grid container spacing={2} className="txt-grid">
-            <Grid item xs={12} sm={12} md={4} className="main-box-grid">
-              <Container>
-                <AddressInput
-                  address={formatAddress(account)}
-                  value={formatAddress(account)}
-                />
-                <BurnAmountInput
-                  onChange={handleAmountChange}
-                  value={val}
-                  symbol="BTC"
-                />
-                <Button
-                  className="glow-btn orange"
-                  text="Buy now vBTC"
-                  onClick={onPresentBurn}
-                />
-              </Container>
-              <Spacer size="md" />
-
-              <StyledInfo className="styled-info">
-                <span>Degen Tip</span>: Strudel only spins in one direction!
-              </StyledInfo>
-            </Grid>
-            <Grid item xs={12} sm={12} md={7} className="main-table-grid">
-              <TransactionsTableContainer
-                account={account}
-                previousAccount={previousAccount}
-                lastRequest={lastRequest}
-                handleSetLastRequest={handleSetLastRequest}
-                checkAndRemoveLastRequest={checkAndRemoveLastRequest}
-                wallet={eth}
-              />
-            </Grid>
-          </Grid>
-        </div>
-        </>
-        ) :
-        (
-          <Page>
-        <div
-          style={{
-            alignItems: 'center',
-            display: 'flex',
-            flex: 1,
-            justifyContent: 'center',
-          }}
-        >
-            <Button
-            boxShadowGlow={true}
-            onClick={onPresentWalletProviderModal}
-            text="Unlock Wallet"
+      {account ? (
+        <>
+          <PageHeader
+            title="Enter the Strudel"
+            subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
           />
-            </div>
-            </Page>
+          <div className="custom-container btc">
+            <Grid container spacing={2} className="txt-grid">
+              <Grid item xs={12} sm={12} md={4} className="main-box-grid">
+                <Container>
+                  <AddressInput
+                    address={formatAddress(account)}
+                    value={formatAddress(account)}
+                  />
+                  <BurnAmountInput
+                    onChange={handleAmountChange}
+                    value={val}
+                    symbol="BTC"
+                  />
+                  <Button
+                    disabled={!Number(val) || eth?.provider.networkVersion != 1}
+                    className="glow-btn orange"
+                    text="Buy vBTC"
+                    onClick={onPresentBurn}
+                  />
+                </Container>
+                <Spacer size="md" />
+
+                <StyledInfo className="styled-info">
+                  <span>Degen Tip</span>: Strudel only spins in one direction!
+                </StyledInfo>
+              </Grid>
+              <Grid item xs={12} sm={12} md={7} className="main-table-grid">
+                <TransactionsTableContainer
+                  account={account}
+                  previousAccount={previousAccount}
+                  lastRequest={lastRequest}
+                  handleSetLastRequest={handleSetLastRequest}
+                  checkAndRemoveLastRequest={checkAndRemoveLastRequest}
+                  wallet={eth}
+                />
+              </Grid>
+            </Grid>
+          </div>
+        </>
+      ) : (
+        <Page>
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              boxShadowGlow={true}
+              onClick={onPresentWalletProviderModal}
+              text="Unlock Wallet"
+            />
+          </div>
+        </Page>
       )}
     </>
   )

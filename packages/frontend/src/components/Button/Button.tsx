@@ -229,10 +229,12 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   border-radius: 9px;
   background: transparent;
   background-color: ${(props) => {
-      return props.theme.color.primary.main
-      // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
-      // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
-    }};
+    if  (props.disabled) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    return props.theme.color.primary.main
+
+    // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
+    // return !props.disabled ? 'rgba(229, 147, 16, 1)' : 'rgba(229, 147, 16, 0.5)'
+  }};
   cursor: pointer;
   display: flex;
   font-size: ${(props) => props.fontSize}px;
@@ -287,6 +289,8 @@ const StyledXXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
+    if  (props.disabled) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+  
     return props.theme.color.primary.main
   }};
   border: 0;
@@ -343,10 +347,6 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
   padding-top: ${(props) => props.padding}px;
   padding-bottom: ${(props) => props.padding}px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
-  &:hover {
-    background-color: ${(props) => 'rgba(236, 175, 78, 1);'};
-    transition: all 0.4s ease;
-  }
 `
 
 const StyledLink = styled(Link)`

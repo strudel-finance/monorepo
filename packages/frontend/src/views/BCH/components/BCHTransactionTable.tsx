@@ -26,11 +26,12 @@ import ConversionStatus from '../../../components/TransactionsTableContainer/com
 import ConversionActions from '../../../components/TransactionsTableContainer/components/ConversionActions'
 import useVBCH from '../../../hooks/useVBCH'
 import { Vbch } from '../../../tokens/Vbch'
+import useBridge from '../../../hooks/useBridge'
 
 export interface TransactionTableProps {
   account: any
   previousAccount: any
-  lastRequest: BTCTransaction | undefined
+  lastRequest: BCHTransaction | undefined
   handleSetLastRequest: (tx: BCHTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
@@ -57,6 +58,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const [transactions, setTransactions] = useState([])
   const [checkedTxs, setCheckedTxs] = useState({})
   const vbch = useVBCH()
+  const bridgeContract = useBridge()
 
   const handleLoading = (ls: LoadingStatus) => {
     let tempLoading = isLoading
@@ -68,38 +70,24 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     blockHash: string,
     vbch: Vbch,
   ): Promise<boolean> => {
-    const relayContract = getRelayContract(vbch)
     const blockHashLittle = '0x' + changeEndian(blockHash)
-
-    // const bestKnownDigest = await relayContract.methods
-    //   .getBestKnownDigest()
-    //   .call()
-    // const heightTx = await relayContract.methods
-    //   .findHeight(blockHashLittle)
-    //   .call()
-    // const heightDigest = await relayContract.methods
-    //   .findHeight(bestKnownDigest)
-    //   .call()
-
-    // return true
+    
     try {
-      const bestKnownDigest = await relayContract.methods
+      const bestKnownDigest = await bridgeContract.relayer.methods
         .getBestKnownDigest()
         .call()
-      const heightTx = await relayContract.methods
+      const heightTx = await bridgeContract.relayer.methods
         .findHeight(blockHashLittle)
         .call()
-      const heightDigest = await relayContract.methods
+      const heightDigest = await bridgeContract.relayer.methods
         .findHeight(bestKnownDigest)
         .call()
 
-      console.log(Number(heightDigest), Number(heightTx), 'eee')
-
       const offset = Number(heightDigest) - Number(heightTx)
-      const GCD = await relayContract.methods
+      const GCD = await bridgeContract.relayer.methods
         .getLastReorgCommonAncestor()
         .call()
-      const isAncestor = await relayContract.methods
+      const isAncestor = await bridgeContract.relayer.methods
         .isAncestor(blockHashLittle, GCD, 2500)
         .call()
       return offset >= 5 && isAncestor
@@ -241,7 +229,8 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           const res = await fetch(
             `https://rest.bitcoin.com/v2/transaction/details/${transaction.bchTxHash}`,
           )
-            .then(handleErrors)
+            // !!! TODO put it back
+            // .then(handleErrors)
             .then((response) => response.json())
             .catch((e) => {
               showError('SoChain API error: ' + e.message)
@@ -343,7 +332,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                       />
                     </Typography>
                   </TableCell>
-                  <TableCell >
+                  <TableCell>
                     <Grid container justify="flex-end">
                       <ConversionActions
                         tx={tx}

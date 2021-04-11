@@ -114,7 +114,7 @@ const Multiplier: React.FC = () => {
 }
 
 const BalanceStrudel: React.FC = () => {
-  const [totalSupply, setTotalSupply] = useState<string>()
+  const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const { eth } = useETH()
@@ -122,41 +122,14 @@ const BalanceStrudel: React.FC = () => {
   const infura = useInfura()
   const [acc, setAcc] = useState<any>()
 
-
   useEffect(() => {
-
-    
     if (infura)
-    infura.trdl.methods
-      .totalSupply()
-      .call()
-      .then((a: any) => {
-        setTotalSupply(a)
-      })
-  }, [infura])
-
-  // useEffect(() => {
-  //   setAccount(acc)
-
-  //   if (!acc) setTotalSupply(undefined)
-  // }, [acc])
-
-  // useEffect(() => {
-  //   if (vbtc) {
-  //     fetchTotalSupply()
-  //   }
-  //   async function fetchTotalSupply() {
-  //     const supply = await getStrudelSupply(vbtc)
-  //     setTotalSupply(supply)
-  //   }
-  // }, [vbtc])
-
-  useEffect(() => {
-    if       (infura)
-      infura.vBCH.methods
-                    .totalSupply()
-                    .call()
-                    .then((s: any) => setTotalSupply((s)))
+        infura.trdl.methods
+          .totalSupply()
+          .call()
+          .then((balance: string) => {
+            setTotalSupply(new BigNumber(balance))
+          })
   }, [infura])
 
   return (
@@ -193,7 +166,7 @@ const BalanceStrudel: React.FC = () => {
         <CardContent>
           <Label text="Total $TRDL Supply" />
           <Value
-            value={totalSupply || 'Locked'}
+            value= {totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
         </CardContent>
         <Footnote>

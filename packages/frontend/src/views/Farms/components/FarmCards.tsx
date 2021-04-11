@@ -294,6 +294,7 @@ const StyledDetails = styled.div`
 `
 
 const StyledDetail = styled.div`
+  white-space: nowrap;
   color: ${(props) => props.theme.color.grey[500]};
 `
 

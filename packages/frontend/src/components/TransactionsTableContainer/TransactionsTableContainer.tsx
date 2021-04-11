@@ -319,35 +319,20 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           <TableBody>
             {lastRequest && (
               <TableRow key="stub">
-                <TableCell align="left">
-                  <ReddishTextTypography
-                    className="reddish-typo"
-                    variant="caption"
-                  >
-                    {lastRequest.value} BTC{' '}
-                    <span className="reddish-icon">
-                      <FontAwesomeIcon icon={icons.chevronRight} />{' '}
-                    </span>{' '}
-                    vBTC
+                <TableCell align="left" style={{ width: 200 }}>
+                  <ReddishTextTypography variant="caption">
+                    {lastRequest.value} BTC → vBTC
                   </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
                   {/* @TODO: Intergrate the colors there is green and orange ^^ */}
-                  <ReddishTextTypography
-                    className="reddish-chip green"
-                    variant="caption"
-                  >
+                  
                     <ConversionStatus tx={lastRequest} />
-                  </ReddishTextTypography>
                 </TableCell>
                 <TableCell>
                   <Grid container justify="flex-end">
-                    <ReddishTextTypography
-                      className="reddish-typo"
-                      variant="caption"
-                    >
+                    
                       <ConversionActions tx={lastRequest} />
-                    </ReddishTextTypography>
                   </Grid>
                 </TableCell>
               </TableRow>
@@ -355,12 +340,12 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             {transactions.map((tx, i) => {
               return (
                 <TableRow key={i}>
-                  <TableCell align="left">
+                  <TableCell align="left" style={{ width: 225 }}>
                     <ReddishTextTypography variant="caption">
                       {tx.value} BTC → vBTC
                     </ReddishTextTypography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{ width: 380 }}>
                     <Typography variant="caption">
                       <ConversionStatus
                         tx={tx}

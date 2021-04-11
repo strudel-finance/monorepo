@@ -6,23 +6,19 @@ import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
 import ValueBTC from '../../../components/ValueBTC'
-import VBTCIcon from '../../../components/VBTCIcon'
+import VIcons from '../../../components/VBTCIcon'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
 import useVBCH from '../../../hooks/useVBCH'
 import {
-  getVbchSupply,
   getVbtcAddress,
-  getVbtcSupply,
 } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
-import { Vbtc } from '../../../tokens'
-import { Vbch } from '../../../tokens/Vbch'
 import useInfura from '../../../hooks/useInfura'
 
 const Balances: React.FC = () => {
-  const [totalVBTCSupply, setTotalVBTCSupply] = useState<string>()
+  const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
   const vbtc = useVBTC()
 
   const infura = useInfura()
@@ -35,7 +31,7 @@ const Balances: React.FC = () => {
       infura.vBTC.methods
         .totalSupply()
         .call()
-        .then((s: any) => setTotalVBTCSupply(s))
+        .then((s: string) => setTotalVBTCSupply(new BigNumber(s)))
   }, [infura])
 
   return (
@@ -44,7 +40,7 @@ const Balances: React.FC = () => {
         <CardContent>
           <StyledBalances>
             <StyledBalance>
-              <VBTCIcon />
+              <VIcons.VBTCIcon />
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your vBTC Balance" />
@@ -63,7 +59,7 @@ const Balances: React.FC = () => {
       <Card>
         <CardContent>
           <Label text="Total vBTC Supply" />
-          <ValueBTC value={totalVBTCSupply || 'Locked'} />
+          <ValueBTC value={totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'} />
         </CardContent>
       </Card>
     </StyledWrapper>

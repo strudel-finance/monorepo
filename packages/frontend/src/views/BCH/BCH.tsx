@@ -9,7 +9,7 @@ import AddressInput from '../../components/AddressInput'
 import BurnAmountInput from '../../components/BurnAmountInput'
 import { formatAddress } from '../../utils'
 import BurnModal from '../Home/components/BurnModal'
-import { BTCTransaction } from '../../types/types'
+import { BCHTransaction } from '../../types/types'
 import BCHTransactionsTableContainer from './components/BCHTransactionTable'
 import useETH from '../../hooks/useETH'
 import Button from '../../components/Button'
@@ -25,7 +25,7 @@ const Container = withStyles({
 
 const BCH: React.FC = () => {
   const [val, setVal] = useState('0')
-  const [lastRequest, setLastRequest] = useState(undefined)
+  const [lastRequest, setLastRequest] = useState<BCHTransaction>(undefined)
 
   const { eth } = useETH()
   const account = eth?.account
@@ -47,11 +47,11 @@ const BCH: React.FC = () => {
 
   const previousAccount = usePrevious(account)
 
-  const handleSetLastRequest = (tx: BTCTransaction) => {
+  const handleSetLastRequest = (tx: BCHTransaction) => {
     setLastRequest(tx)
   }
 
-  const handleLastRequestChange = (tx: BTCTransaction) => {
+  const handleLastRequestChange = (tx: BCHTransaction) => {
     setLastRequest(tx)
     window.localStorage.setItem(account, JSON.stringify(tx))
   }
@@ -99,8 +99,9 @@ const BCH: React.FC = () => {
                     symbol="BCH"
                   />
                   <Button
+                    disabled={!Number(val) || eth?.provider.networkVersion != 1}
                     className="glow-btn green"
-                    text="Buy now vBCH"
+                    text="Buy vBCH"
                     onClick={onPresentBurn}
                   />
                 </Container>

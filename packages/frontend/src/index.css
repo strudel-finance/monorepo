@@ -18,7 +18,7 @@ code {
 }
 
 a {
-  color: rgba(229, 147, 16, 1);
+  color: rgb(141, 56, 56);
 }
 
 .txt-grid {
@@ -34,7 +34,6 @@ footer {
 
 .glow-btn {
   border: none !important;
-  text-transform: uppercase;
   letter-spacing: 0 !important;
   min-width: 200px;
 }
@@ -43,6 +42,12 @@ footer {
   background-color: #2fcf6d;
   box-shadow: 0px 0px 30px rgb(47 208 109 / 48%);
   color: #FFF;
+}
+
+.glow-btn.green:disabled {
+  background-color: rgba(47, 208, 109, 0.48);
+  color: #FFF;
+  box-shadow: none;
 }
 
 .glow-btn.orange {
@@ -133,6 +138,11 @@ footer {
 
 .main-table-grid .makeStyles-container-2 {
   border: none;
+}
+
+/* !!! TODO: fix dat */
+.makeStyles-container-2 > div {
+  max-height: 340px;
 }
 
 .main-table-grid .MuiTableCell-stickyHeader {

@@ -5,17 +5,22 @@ import { contractAddresses } from '../../tokens/lib/constants'
 import { VbtcContract } from '../../tokens/lib/contracts.types'
 import vbtcAbi from '../../tokens/lib/abi/vbtc.json'
 import RelayAbi from '../../tokens/lib/abi/relayBCH.json'
+import { Contract } from 'web3-eth-contract'
+
 const XDAI_NETWORK_ID = 100
-export interface VBTCProvider {
-  bridge?: VbtcContract
+
+export interface BridgeProvider {
+  contract: VbtcContract
+  relayer: Contract
 }
 
-export const Context = createContext<VBTCProvider>({
-  bridge: undefined,
+export const Context = createContext<BridgeProvider>({
+  contract: undefined,
+  relayer: undefined,
 })
 
 const BridgeProvider: React.FC = ({ children }) => {
-  const [bridge, setBridge] = useState<any>()
+  const [bridge, setBridge] = useState<BridgeProvider>()
   const { eth } = useETH()
 
   // @ts-ignore
@@ -23,26 +28,24 @@ const BridgeProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (eth) {
-      const Contract1 = require('web3-eth-contract')
-      Contract1.setProvider(eth.provider)
-
-      const bridgeLib = new Contract1(
+      const Contract = require('web3-eth-contract')
+      Contract.setProvider(eth.provider)
+      const bridgeC = new Contract(
         vbtcAbi as AbiItem[],
         contractAddresses.bridge[XDAI_NETWORK_ID],
       )
 
-      const Contract2 = require('web3-eth-contract')
-      Contract2.setProvider(eth.provider)
-      const relayerLib = new Contract2(
+      Contract.setProvider(process.env.REACT_APP_XDAI_PROVIDER)
+      const relayerC = new Contract(
         RelayAbi as AbiItem[],
-        contractAddresses.bridge[XDAI_NETWORK_ID],
+        contractAddresses.relay[XDAI_NETWORK_ID],
       )
 
-      setBridge({ bridge: bridgeLib, relayer: relayerLib })
+      setBridge({ contract: bridgeC, relayer: relayerC })
     } else setBridge(undefined)
   }, [eth])
 
-  return <Context.Provider value={{ bridge }}>{children}</Context.Provider>
+  return <Context.Provider value={bridge}>{children}</Context.Provider>
 }
 
 export default BridgeProvider
