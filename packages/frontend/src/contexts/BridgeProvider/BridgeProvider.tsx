@@ -3,8 +3,8 @@ import useETH from '../../hooks/useETH'
 import { AbiItem } from 'web3-utils'
 import { contractAddresses } from '../../tokens/lib/constants'
 import { VbtcContract } from '../../tokens/lib/contracts.types'
-const Contract = require('web3-eth-contract')
-const vbtcAbi = require('../../tokens/lib/abi/vbtc.json')
+import vbtcAbi from '../../tokens/lib/abi/vbtc.json'
+import RelayAbi from '../../tokens/lib/abi/relayBCH.json'
 const XDAI_NETWORK_ID = 100
 export interface VBTCProvider {
   bridge?: VbtcContract
@@ -23,13 +23,22 @@ const BridgeProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (eth) {
-      Contract.setProvider(eth.provider)
+      const Contract1 = require('web3-eth-contract')
+      Contract1.setProvider(eth.provider)
 
-      const bridgeLib = new Contract(
+      const bridgeLib = new Contract1(
         vbtcAbi as AbiItem[],
         contractAddresses.bridge[XDAI_NETWORK_ID],
       )
-      setBridge(bridgeLib)
+
+      const Contract2 = require('web3-eth-contract')
+      Contract2.setProvider(eth.provider)
+      const relayerLib = new Contract2(
+        RelayAbi as AbiItem[],
+        contractAddresses.bridge[XDAI_NETWORK_ID],
+      )
+
+      setBridge({ bridge: bridgeLib, relayer: relayerLib })
     } else setBridge(undefined)
   }, [eth])
 

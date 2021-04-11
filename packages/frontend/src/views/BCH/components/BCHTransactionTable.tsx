@@ -330,12 +330,12 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             {transactions.map((tx, i) => {
               return (
                 <TableRow key={i}>
-                  <TableCell align="left">
+                  <TableCell align="left" style={{ width: 225 }}>
                     <ReddishTextTypography variant="caption">
                       {tx.value} BCH → vBCH
                     </ReddishTextTypography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell style={{ width: 380 }}>
                     <Typography variant="caption">
                       <ConversionStatus
                         tx={tx}
@@ -343,7 +343,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                       />
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell >
                     <Grid container justify="flex-end">
                       <ConversionActions
                         tx={tx}
@@ -393,7 +393,7 @@ const useStyles = makeStyles((theme) => ({
   container: {
     borderColor: 'none',
     background: '#FFFFFF',
-    border: '1px solid #e2d6cfff',
+    // border: '1px solid #e2d6cfff',
     borderRadius: '12px',
     minHeight: 200,
     height: '100%',
@@ -402,6 +402,7 @@ const useStyles = makeStyles((theme) => ({
     paddingBottom: theme.spacing(2),
   },
 
+  //box-shadow: -3px 7px 17px 4px #00000014;
   actionsCell: {
     minWidth: 150,
   },

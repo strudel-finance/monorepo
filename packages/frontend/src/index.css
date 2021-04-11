@@ -68,7 +68,7 @@ footer {
 }
 
 .main-box-grid {
-  box-shadow: 0px 10px 18px #00000014;
+  box-shadow: -3px 7px 17px 4px #00000014;
   padding: 0 !important;
   border-radius: 12px;
 }
@@ -126,7 +126,7 @@ footer {
 }
 
 .main-table-grid {
-  box-shadow: 0px 10px 18px #00000014;
+  box-shadow: -3px 7px 17px 4px #00000014;
   padding: 0 !important;
   border-radius: 12px;
 }

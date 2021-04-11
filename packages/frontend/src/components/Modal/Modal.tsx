@@ -40,7 +40,7 @@ const StyledModal = styled.div`
   overflow-y: auto;
   background: ${(props) => '#FFFFFF'};
   border-radius: 12px;
-  box-shadow: 0px 10px 18px #00000014;
+  box-shadow: -3px 7px 17px 4px #00000014;
   display: flex;
   flex-direction: column;
   position: relative;

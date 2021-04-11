@@ -69,6 +69,7 @@ export const contractAddresses = {
   relay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
     5: '',
+    100: '0x3D4FFC1E924Ed1ee6ABDA7cb9c56Bbd1E26336D4',
   },
   vbch: {
     1: '0x4af6e819b7042f1d7055d5030ba001b2ea998912',

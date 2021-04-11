@@ -46,8 +46,8 @@ export const getStrudelAddress = (vbtc: Vbtc): string => {
   return vbtc && vbtc.strudelAddress
 }
 
-export const getRelayContract = (vortexCoins: Vbtc | Vbch): RelayContract => {
-  return vortexCoins && vortexCoins.contracts && vortexCoins.contracts.relay
+export const getRelayContract = (vCoins: Vbtc | Vbch): RelayContract => {
+  return vCoins && vCoins.contracts && vCoins.contracts.relay
 }
 
 export const getWethContract = (vbtc: Vbtc): WethContract => {

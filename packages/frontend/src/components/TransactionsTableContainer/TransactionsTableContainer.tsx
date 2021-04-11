@@ -418,7 +418,7 @@ const useStyles = makeStyles((theme) => ({
   container: {
     borderColor: 'none',
     background: '#FFFFFF',
-    border: '1px solid #e2d6cfff',
+    // border: '1px solid #e2d6cfff',
     borderRadius: '12px',
     minHeight: 200,
     height: '100%',

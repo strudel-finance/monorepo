@@ -45,12 +45,13 @@ interface pushEthParam {
 
 const pushEthTxHash = async (
   ethParam: pushEthParam,
-  tx: BTCTransaction,
+  tx: BTCTransaction | BCHTransaction,
+  coin: 'BTC' | 'BCH'
 ): Promise<Response> => {
   const url =
     apiServer +
     '/production/payment/' +
-    tx.btcTxHash +
+    coin === 'BTC' ? (tx as BTCTransaction).btcTxHash : (tx as BCHTransaction).bchTxHash +
     '/output/' +
     tx.burnOutputIndex +
     '/addEthTx'
@@ -216,7 +217,7 @@ const callProofOpReturnAndMint = async (
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
 
-    await pushEthTxHash({ ethTxHash: ethTxHash }, tx)
+    await pushEthTxHash({ ethTxHash }, tx, 'BTC')
       .then(handleErrors)
       .catch((e) => {
         RollbarErrorTracking.logErrorInRollbar(
@@ -297,7 +298,7 @@ const callProofOpReturnAndMintBCH = async (
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
 
-    await pushEthTxHash({ ethTxHash: ethTxHash }, tx)
+    await pushEthTxHash({ ethTxHash: ethTxHash }, tx, 'BCH')
       .then(handleErrors)
       .catch((e) => {
         RollbarErrorTracking.logErrorInRollbar(
