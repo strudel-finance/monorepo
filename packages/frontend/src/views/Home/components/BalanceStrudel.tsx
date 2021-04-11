@@ -16,6 +16,7 @@ import useVBTC from '../../../hooks/useVBTC'
 import { getStrudelAddress, getStrudelSupply } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
+import useInfura from '../../../hooks/useInfura'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -113,29 +114,50 @@ const Multiplier: React.FC = () => {
 }
 
 const BalanceStrudel: React.FC = () => {
-  const [totalSupply, setTotalSupply] = useState<BigNumber>()
+  const [totalSupply, setTotalSupply] = useState<string>()
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const { eth } = useETH()
-  const acc = eth?.account
+  const account = eth?.account
+  const infura = useInfura()
+  const [acc, setAcc] = useState<any>()
 
-  const [account, setAccount] = useState<any>()
-
-  useEffect(() => {
-    setAccount(acc)
-
-    if (!acc) setTotalSupply(undefined)
-  }, [acc])
 
   useEffect(() => {
-    if (vbtc) {
-      fetchTotalSupply()
-    }
-    async function fetchTotalSupply() {
-      const supply = await getStrudelSupply(vbtc)
-      setTotalSupply(supply)
-    }
-  }, [vbtc])
+
+    
+    if (infura)
+    infura.trdl.methods
+      .totalSupply()
+      .call()
+      .then((a: any) => {
+        setTotalSupply(a)
+      })
+  }, [infura])
+
+  // useEffect(() => {
+  //   setAccount(acc)
+
+  //   if (!acc) setTotalSupply(undefined)
+  // }, [acc])
+
+  // useEffect(() => {
+  //   if (vbtc) {
+  //     fetchTotalSupply()
+  //   }
+  //   async function fetchTotalSupply() {
+  //     const supply = await getStrudelSupply(vbtc)
+  //     setTotalSupply(supply)
+  //   }
+  // }, [vbtc])
+
+  useEffect(() => {
+    if       (infura)
+      infura.vBCH.methods
+                    .totalSupply()
+                    .call()
+                    .then((s: any) => setTotalSupply((s)))
+  }, [infura])
 
   return (
     <StyledWrapper>
@@ -149,7 +171,9 @@ const BalanceStrudel: React.FC = () => {
                 <Label text="Your $TRDL Balance" />
                 <Value
                   value={
-                    !!account ? getBalanceNumber(strudelBalance) : 'Locked'
+                    !!account && strudelBalance
+                      ? getBalanceNumber(strudelBalance)
+                      : 'Locked'
                   }
                 />
               </div>
@@ -169,7 +193,7 @@ const BalanceStrudel: React.FC = () => {
         <CardContent>
           <Label text="Total $TRDL Supply" />
           <Value
-            value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
+            value={totalSupply || 'Locked'}
           />
         </CardContent>
         <Footnote>

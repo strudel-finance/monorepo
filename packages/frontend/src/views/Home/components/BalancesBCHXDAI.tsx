@@ -23,19 +23,8 @@ const BalancesBCHXDAI: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
   const [xDaiVBCHSupply, setXDaiVBCHSupply] = useState<BigNumber>()
   const [xDaiVBCHBalance, setXDaiVBCHBalance] = useState<BigNumber>()
-  const vbch = useVBCH()
-
-  const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
 
   const { eth } = useETH()
-
-  const fetchTotalSupply = async (vbch: Vbch) => {
-    const vBCHSupply = await getVbchSupply(vbch)
-
-    if (vBCHSupply !== totalVBCHSupply && eth?.account) {
-      setTotalVBCHSupply(vBCHSupply)
-    }
-  }
 
   ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
 
@@ -45,30 +34,26 @@ const BalancesBCHXDAI: React.FC = () => {
     contractAddresses.vbch[XDAI_NETWORK_ID],
   )
 
-  useEffect(() => {
-    if (vbch && eth?.account) {
-      fetchTotalSupply(vbch)
+  // !!! TODO: FIX IT !!!
 
+  useEffect(() => {
+    if (eth?.account) {
       contract.methods
         .balanceOf(eth?.account)
         .call()
         .then((s: any) => {
-          console.log(s, 'sssss')
-
           setXDaiVBCHBalance(new BigNumber(s))
         })
     } else {
       setTotalVBCHSupply(undefined)
     }
-  }, [vbch, eth?.account])
+  }, [eth?.account])
 
   useEffect(() => {
     contract.methods
       .totalSupply()
       .call()
       .then((s: any) => setXDaiVBCHSupply(new BigNumber(s)))
-
-    console.log(eth?.account, 'eth?.accounteth?.accounteth?.account')
   }, [])
 
   return (
@@ -81,16 +66,9 @@ const BalancesBCHXDAI: React.FC = () => {
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your vBCH Balance on Binance Smart Chain" />
-                {/* <ValueBTC
-                  value={
-                    !!eth?.account
-                      ? getBalanceNumber(vbchBalanceMainnet)
-                      : 'Locked'
-                  }
-                /> */}
                 <ValueBTC
                   value={
-                    !!xDaiVBCHBalance
+                    !!eth?.account && xDaiVBCHBalance
                       ? getBalanceNumber(xDaiVBCHBalance)
                       : 'Locked'
                   }

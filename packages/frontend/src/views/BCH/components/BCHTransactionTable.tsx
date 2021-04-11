@@ -52,10 +52,10 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   wallet,
 }) => {
   const POLL_DURATION_TXS = 1500
-  const BCH_ACCEPTANCE = 60
+  const BCH_ACCEPTANCE = 6
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
-  const [confirmed, setConfirmed] = useState({})
+  const [checkedTxs, setCheckedTxs] = useState({})
   const vbch = useVBCH()
 
   const handleLoading = (ls: LoadingStatus) => {
@@ -71,41 +71,41 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     const relayContract = getRelayContract(vbch)
     const blockHashLittle = '0x' + changeEndian(blockHash)
 
-    const bestKnownDigest = await relayContract.methods
-      .getBestKnownDigest()
-      .call()
-    const heightTx = await relayContract.methods
-      .findHeight(blockHashLittle)
-      .call()
+    // const bestKnownDigest = await relayContract.methods
+    //   .getBestKnownDigest()
+    //   .call()
+    // const heightTx = await relayContract.methods
+    //   .findHeight(blockHashLittle)
+    //   .call()
     // const heightDigest = await relayContract.methods
     //   .findHeight(bestKnownDigest)
     //   .call()
 
-    return true
-    // try {
-    //   const bestKnownDigest = await relayContract.methods
-    //     .getBestKnownDigest()
-    //     .call()
-    //   const heightTx = await relayContract.methods
-    //     .findHeight(blockHashLittle)
-    //     .call()
-    //   const heightDigest = await relayContract.methods
-    //     .findHeight(bestKnownDigest)
-    //     .call()
+    // return true
+    try {
+      const bestKnownDigest = await relayContract.methods
+        .getBestKnownDigest()
+        .call()
+      const heightTx = await relayContract.methods
+        .findHeight(blockHashLittle)
+        .call()
+      const heightDigest = await relayContract.methods
+        .findHeight(bestKnownDigest)
+        .call()
 
-    //   console.log(Number(heightDigest), Number(heightTx), 'eee')
+      console.log(Number(heightDigest), Number(heightTx), 'eee')
 
-    //   const offset = Number(heightDigest) - Number(heightTx)
-    //   const GCD = await relayContract.methods
-    //     .getLastReorgCommonAncestor()
-    //     .call()
-    //   const isAncestor = await relayContract.methods
-    //     .isAncestor(blockHashLittle, GCD, 2500)
-    //     .call()
-    //   return offset >= 5 && isAncestor
-    // } catch (e) {
-    //   return false
-    // }
+      const offset = Number(heightDigest) - Number(heightTx)
+      const GCD = await relayContract.methods
+        .getLastReorgCommonAncestor()
+        .call()
+      const isAncestor = await relayContract.methods
+        .isAncestor(blockHashLittle, GCD, 2500)
+        .call()
+      return offset >= 5 && isAncestor
+    } catch (e) {
+      return false
+    }
   }
 
   const isAccountRequest = (
@@ -182,6 +182,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               txCreatedAt: new Date(tx.dateCreated),
               bchTxHash: tx.bchTxHash,
               burnOutputIndex: tx.burnOutputIndex,
+              confirmed: tx.status === 'paid' ? true : false,
             }
             if (tx.ethTxHash) {
               txNew.ethTxHash = tx.ethTxHash
@@ -191,7 +192,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           const sortedRes = resNew.sort((txa, txb) =>
             (txa.txCreatedAt ?? 0) < (txb?.txCreatedAt ?? 0) ? 1 : -1,
           )
-          if (!transactions.length) {
+          if (!transactions?.length && sortedRes.length) {
             if (
               lastRequest &&
               sortedRes[0].txCreatedAt > lastRequest.txCreatedAt
@@ -212,19 +213,31 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     if (account) {
       await handleTransactionUpdate()
       if (transactions.length) {
-        const transactionsWithLowConfirmations = transactions.filter(
-          (tx) => (
-            !confirmed[tx.bchTxHash] ||
-            confirmed[tx.bchTxHash]?.confirmations < BCH_ACCEPTANCE)
-        )
+        const newConfirmations:
+          | {
+              [txHash: string]: {
+                blockHash: string
+                confirmations: number
+                isRelayed: boolean
+                confirmed: boolean
+              }
+            }
+          | {} = {}
 
-        const newConfirmations: {
-          blockHash: string,
-          confirmations: number,
-          isRelayed: boolean
-        } | {} = {}
-        
-        for (const transaction of transactionsWithLowConfirmations) {
+        for (const transaction of transactions) {
+          if (
+            checkedTxs[transaction.bchTxHash] &&
+            checkedTxs[transaction.bchTxHash].confirmations > BCH_ACCEPTANCE
+          ) {
+            // !!! do we need if statment to check for relay??? !!!
+            newConfirmations[transaction.bchTxHash] = {
+              ...checkedTxs[transaction.bchTxHash],
+              confirmed: true,
+              isRelayed: true,
+            }
+            continue
+          }
+
           const res = await fetch(
             `https://rest.bitcoin.com/v2/transaction/details/${transaction.bchTxHash}`,
           )
@@ -240,31 +253,33 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
 
           if (!res || !res.confirmations) continue
 
-          const {confirmations, blockhash} = res
-          const {bchTxHash} = transaction
-          
+          const { confirmations, blockhash } = res
+          const { bchTxHash } = transaction
+
           newConfirmations[bchTxHash] = {
             confirmations,
           }
 
           if (res.confirmations >= BCH_ACCEPTANCE) {
-                
-                newConfirmations[bchTxHash].blockHash = blockhash
-                // newConfirmations[bchTxHash].tx_hex = txid
+            newConfirmations[bchTxHash].blockHash = blockhash
+            newConfirmations[bchTxHash].confirmed = true
+            // newConfirmations[bchTxHash].tx_hex = txid
             if (
               newConfirmations[bchTxHash].blockHash &&
               !newConfirmations[bchTxHash].isRelayed
             ) {
-              // highConfirmations[bchTxHash].isRelayed = await getInclusion(
-              //   highConfirmations[bchTxHash].blockHash,
-              //   vbch,
-              // )
+              newConfirmations[bchTxHash].isRelayed = await getInclusion(
+                newConfirmations[bchTxHash].blockHash,
+                vbch,
+              )
             }
+          } else {
+            newConfirmations[bchTxHash].confirmed = false
           }
+        }
 
-          if (passedAccount.current === account) {
-            setConfirmed(newConfirmations)
-          }
+        if (passedAccount.current === account) {
+          setCheckedTxs(newConfirmations)
         }
       }
     }
@@ -275,7 +290,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar style={{ maxHeight: 250 }}>
+      <SimpleBar >
         <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
@@ -295,7 +310,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           <TableBody>
             {lastRequest && (
               <TableRow key="stub">
-                <TableCell align="left">
+                <TableCell align="left" style={{ width: 200 }}>
                   <ReddishTextTypography variant="caption">
                     {lastRequest.value} BCH → vBCH
                   </ReddishTextTypography>
@@ -324,7 +339,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                     <Typography variant="caption">
                       <ConversionStatus
                         tx={tx}
-                        confirmations={confirmed[tx.bchTxHash]}
+                        confirmations={checkedTxs[tx.bchTxHash]}
                       />
                     </Typography>
                   </TableCell>
@@ -332,7 +347,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                     <Grid container justify="flex-end">
                       <ConversionActions
                         tx={tx}
-                        confirmation={confirmed[tx.bchTxHash]}
+                        confirmation={checkedTxs[tx.bchTxHash]}
                         handleLoading={handleLoading}
                         isLoading={isLoading}
                       />

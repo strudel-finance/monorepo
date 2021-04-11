@@ -61,6 +61,14 @@ export const getVbtcContract = (vbtc: Vbtc): VbtcContract => {
   return vbtc && vbtc.contracts && vbtc.contracts.vbtc
 }
 
+export const getVbchContract = (vbch: Vbch): VbtcContract => {
+  return vbch && vbch.contracts && vbch.contracts.vbch
+}
+
+export const getBridgeContract = (bridge: Vbch): VbtcContract => {
+  return bridge && bridge.contracts && bridge.contracts.bridge
+}
+
 export const getStrudelContract = (vbtc: Vbtc): StrudelContract => {
   return vbtc && vbtc.contracts && vbtc.contracts.strudel
 }
@@ -208,6 +216,11 @@ export const getTotalLPWethValue = async (
   vbtc: Vbtc,
   block: number,
 ) => {
+
+  console.log(tokenContract, 'tokenContracttokenContracttokenContract')
+  
+
+
   // Get balance of the token address
   const tokenAmountWholeLP = await tokenContract.methods
     .balanceOf(lpContract.options.address)
@@ -316,6 +329,36 @@ export const proofOpReturnAndMint = async (
 ) => {
   return (
     ((await vbtcContract.proofOpReturnAndMint(
+      proof.header,
+      proof.proof,
+      proof.version,
+      proof.locktime,
+      Number(proof.index),
+      Number(burnOutputIndex),
+      proof.vin,
+      proof.vout,
+    )) as any)
+      .send({ from: account })
+      // TODO
+      .on('transactionHash', (tx: any) => {
+        return tx.transactionHash
+      })
+  )
+}
+
+export const proofOpReturnAndMintBCH = async (
+  // !!! TODO: add type !!!
+  vbchContract: any,
+  account: string,
+  proof: Proof,
+  burnOutputIndex: number,
+  //temp
+  xDaiBridgeContract: VbtcContract,
+) => {
+  console.log(proof, 'xDaiBridgeContract')
+
+  return (
+    ((await xDaiBridgeContract.methods.proofOpReturnAndMint(
       proof.header,
       proof.proof,
       proof.version,

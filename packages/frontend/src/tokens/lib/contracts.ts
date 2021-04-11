@@ -46,6 +46,7 @@ export class Contracts {
   ethereumNodeTimeout: number
 
   vbtc: VbtcContract
+  bridge: VbtcContract
   strudel: StrudelContract
   masterChef: MasterChefContract
   weth: WethContract
@@ -127,8 +128,6 @@ export class Contracts {
   setDefaultAccount(account: string) {
     this.vbtc.options.from = account
     this.strudel.options.from = account
-    // !!!
-    // this.vbch.options.from = account
     this.masterChef.options.from = account
   }
 }

@@ -214,16 +214,16 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
       if (transactions.length > 0) {
         let transactionsT: BTCTransaction[] = transactions
         let transactionsWithLowConfirmations = transactionsT.filter(
-          (tx) => !tx.confirmed && (
-                !confirmations[tx.btcTxHash] ||
-                confirmations[tx.btcTxHash]?.confirmations < BTC_ACCEPTANCE)
+          (tx) =>
+            !tx.confirmed &&
+            (!confirmations[tx.btcTxHash] ||
+              confirmations[tx.btcTxHash]?.confirmations < BTC_ACCEPTANCE),
         )
 
         let highConfirmations = {}
 
         await Object.keys(confirmations).forEach(async (key) => {
           if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
-            
             highConfirmations[key] = confirmations[key]
             if (!highConfirmations[key].blockHash) {
               let res = await fetch(
@@ -239,7 +239,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                   showError('SoChain API Error: ' + e.message)
                   return undefined
                 })
-              
+
               if (res !== undefined) {
                 highConfirmations[key].blockHash = res.data.blockhash
                 highConfirmations[key].tx_hex = res.data.tx_hex
@@ -256,9 +256,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             }
           }
         })
-        
-        
-        
+
         let newConfirmations: Record<string, Confirmation> = {}
         for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
           let res = await fetch(
@@ -286,14 +284,13 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           newConfirmations[
             transactionsWithLowConfirmations[i].btcTxHash
           ] = confirmation
-
         }
 
         const confirmationsRecombined = {
           ...highConfirmations,
           ...newConfirmations,
         }
-        
+
         if (passedAccount.current === account) {
           setConfirmations(confirmationsRecombined)
         }

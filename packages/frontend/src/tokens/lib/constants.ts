@@ -75,6 +75,10 @@ export const contractAddresses = {
     5: '',
     100: '0x2fB16a262c868889D8f7Dd30c9738687efeca971',
   },
+  bridge: {
+    5: '',
+    100: '0x9840d0417f89182CE4a6e60f4445B8e5dC4F273e',
+  },
 }
 
 /*

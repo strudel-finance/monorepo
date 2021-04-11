@@ -15,6 +15,7 @@ import ModalsProvider from './contexts/Modals'
 import TransactionProvider from './contexts/Transactions'
 import VBCHProvider from './contexts/VBCHProvider'
 import VBTCProvider from './contexts/VBTCProvider'
+import InfuraProvider from './contexts/InfuraProvider'
 import BTCtheme from './theme/BTC.theme'
 import BCHtheme from './theme/BCH.theme'
 import Farms from './views/Farms'
@@ -30,6 +31,7 @@ import BTC from './views/BTC'
 import BCH from './views/BCH'
 import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
+import BridgeProvider from './contexts/BridgeProvider'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -121,7 +123,9 @@ const Providers: React.FC = ({ children }) => {
         }}
       >
         {/* pro */}
-        <WalletProvider>
+          <InfuraProvider>
+          <WalletProvider>
+            <BridgeProvider>
           <VBTCProvider>
             <VBCHProvider>
               <TransactionProvider>
@@ -130,8 +134,10 @@ const Providers: React.FC = ({ children }) => {
                 </FarmsProvider>
               </TransactionProvider>
             </VBCHProvider>
-          </VBTCProvider>
+              </VBTCProvider>
+              </BridgeProvider>
           </WalletProvider>
+            </InfuraProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>

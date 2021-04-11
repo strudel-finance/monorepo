@@ -16,9 +16,10 @@ import useVBTC from '../../../hooks/useVBTC'
 import BitcoinIcon from '../../../components/BitcoinIcon'
 import VBTCIcon from '../../../components/VBTCIcon'
 import MuiGrid from '@material-ui/core/Grid'
-import { getVbtcSupply } from '../../../tokens/utils'
+import { getVbchSupply, getVbtcSupply } from '../../../tokens/utils'
 import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
+import useVBCH from '../../../hooks/useVBCH'
 
 interface BurnModalProps extends ModalProps {
   value: number | string
@@ -56,6 +57,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   const [continued, setContinued] = useState(continueV)
   const [strudelAmount, setStrudelAmount] = useState(null)
   const vbtc = useVBTC()
+  const vbch = useVBCH()
 
   const handleChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
@@ -68,7 +70,8 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }
 
   const calculateStrudel = async () => {
-    const supply = await getVbtcSupply(vbtc)
+    const supply =
+      coin === 'bitcoin' ? await getVbtcSupply(vbtc) : await getVbchSupply(vbch)
     let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
     let calculatedStrudel =
       getInStrudelCurve(dividedSupply + Number(value)) -
