@@ -10,9 +10,10 @@ const PROTOCOL_ID = Buffer.from("07ffff", "hex"); // 2^19-1
 
 module.exports = class StrudelHandler {
 
-  constructor(db, provider, bclient, cert, chain, priv) {
+  constructor(db, provider, bclient, cert, chain, priv, bscProvider) {
     this.db = db;
     this.provider = provider;
+    this.bscProvider = bscProvider;
     this.bclient = bclient;
     this.cert = cert;
     this.chain = chain;
@@ -100,14 +101,24 @@ module.exports = class StrudelHandler {
     //   - same output index
     //   - same amount
     //   - same account
-    const receipt = await this.provider.getTransactionReceipt(ethTxHash);
-    let parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+    let receipt;
+    let parsedTxHash;
+    let log;
+    if (entry.bchTxHash) {
+      receipt = await this.bscProvider.getTransactionReceipt(ethTxHash);
+      parsedTxHash = receipt.logs[1].topics[1].replace('0x', '');
+      log = receipt.logs[1];
+    } else {
+      receipt = await this.provider.getTransactionReceipt(ethTxHash);
+      parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+      log = receipt.logs[3];
+    }
     // reverse 
     parsedTxHash = parsedTxHash.match(/.{2}/g).reverse().join("");
     if (parsedTxHash !== btcTxHash) {
       throw new Errors.BadRequest(`parsed txHash ${parsedTxHash} doesn't match.`);
     }
-    const dataBuf = Buffer.from(receipt.logs[3].data.replace('0x', ''), 'hex');
+    const dataBuf = Buffer.from(log.data.replace('0x', ''), 'hex');
     const parsedOutputIndex = dataBuf.readUInt8(dataBuf.length - 1);
     if (parsedOutputIndex !== parseInt(outputIndex)) {
       throw new Errors.BadRequest(`parsed outIndex ${parsedOutputIndex} doesn't match.`);
@@ -116,7 +127,7 @@ module.exports = class StrudelHandler {
     if (parsedValue.eq(ethers.utils.bigNumberify(entry.amount))) {
       throw new Errors.BadRequest(`parsed value ${parsedValue} doesn't match.`);
     }
-    const parsedAccount = receipt.logs[3].topics[2].replace('000000000000000000000000', '');
+    const parsedAccount = log.topics[2].replace('000000000000000000000000', '');
     if (parsedAccount.toLowerCase() !== entry.account) {
       throw new Errors.BadRequest(`parsed accountAddr ${parsedAccount} doesn't match.`);
     }

@@ -172,6 +172,7 @@ describe('StrudelHandler', () => {
       expect(rsp).to.eql({
         "account": ADDR.toLowerCase(),
         "burns": [],
+        "bchBurns": [],
         "created": DATE,
         "r": SIG.r,
         "s": SIG.s,
@@ -200,6 +201,7 @@ describe('StrudelHandler', () => {
       // check
       expect(rsp).to.eql({
         "account": ADDR2,
+        "bchBurns": [],
         "burns": [{
           "amount": "497480",
           "btcTxHash": OP_RETURN_TX_ID_LE,

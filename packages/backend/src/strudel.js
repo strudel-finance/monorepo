@@ -7,12 +7,14 @@ const request = require('request');
 const { PoorManRpc } = require('./utils/poorManRpc');
 
 let provider;
+let bscProvider;
 const CERT = 'fill in';
 const CHAIN = 'fill in';
 const PRIV = 'fill in';
 
 exports.handler = async (event, context, callback) => {
   const providerUrl = process.env.PROVIDER_URL;
+  const bscProviderUrl = process.env.BSC_PROVIDER_URL;
   let body;
   try {
     body = JSON.parse(event.body);
@@ -32,6 +34,10 @@ exports.handler = async (event, context, callback) => {
     provider = new ethers.providers.JsonRpcProvider(providerUrl);
   }
 
+  if (!bscProvider) {
+    bscProvider = new ethers.providers.JsonRpcProvider(bscProviderUrl);
+  }
+
   const isBch = (path.indexOf('bch') > -1) ? true : false;
 
   const bclient = new PoorManRpc(
@@ -48,6 +54,7 @@ exports.handler = async (event, context, callback) => {
     Buffer.from(CERT, 'hex'),
     Buffer.from(CHAIN, 'hex'),
     Buffer.from(PRIV, 'hex'),
+    bscProvider,
   );
 
   if (path.indexOf('account') > -1 && method === 'GET') {
