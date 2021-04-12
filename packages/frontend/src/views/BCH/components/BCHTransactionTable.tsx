@@ -38,12 +38,6 @@ export interface TransactionTableProps {
   wallet: any
   closeModal: () => void
 }
-interface SoChainConfirmed {
-  status: string
-  data: {
-    confirmations: number
-  }
-}
 
 
 const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
@@ -239,9 +233,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             // .then(handleErrors)
             .then((response) => response.json())
             .catch((e) => {
-              showError('SoChain API error: ' + e.message)
+              showError('BCH API error: ' + e.message)
               RollbarErrorTracking.logErrorInRollbar(
-                'SoChain confirmations: ' + e.message,
+                'BCH confirmations: ' + e.message,
               )
               return undefined
             })
@@ -289,11 +283,11 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
       <SimpleBar>
         <TableContainer style={{ height: 360 }}>
           <Table color="white" stickyHeader={true}>
-          <colgroup>
-      <col style={{width:'25%'}}/>
-      <col style={{width:'50%'}}/>
-      <col style={{width:'25%'}}/>
-   </colgroup>
+            <colgroup>
+              <col style={{ width: '27%' }} />
+              <col style={{ width: '48%' }} />
+              <col style={{ width: '25%' }} />
+            </colgroup>
             <TableHead>
               <TableRow>
                 <TableCell align="left">
@@ -305,7 +299,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                   <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
                 </TableCell>
                 <TableCell>
-                    <ReddishBoldTextTypography style={{textAlign:'center'}}>Actions</ReddishBoldTextTypography>
+                  <ReddishBoldTextTypography style={{ textAlign: 'center' }}>
+                    Actions
+                  </ReddishBoldTextTypography>
                 </TableCell>
                 {/* <TableCell>
                 <div className={classes.actionsCell}></div>
@@ -338,15 +334,12 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               {transactions.map((tx, i) => {
                 return (
                   <TableRow key={i}>
-                    <TableCell
-                      align="left"
-                    >
+                    <TableCell align="left">
                       <ReddishTextTypography variant="caption">
                         {tx.value} BCH → vBCH
                       </ReddishTextTypography>
                     </TableCell>
-                    <TableCell
-                    >
+                    <TableCell>
                       <Typography variant="caption">
                         <ConversionStatus
                           tx={tx}
@@ -392,6 +385,9 @@ const ReddishBoldTextTypography = withStyles({
 const TableCell = withStyles({
   stickyHeader: {
     background: 'white',
+  },
+  root: {
+    // height: 10,
   },
 })(MuiTableCell)
 

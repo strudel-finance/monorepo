@@ -150,7 +150,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
         `${apiServer}/production/account/${account}`,
         abortProps,
       )
-        .then(handleErrors)
+        // .then(handleErrors)
         .then((response) => response.json())
         .then((res: AccountRequest) => res)
         .catch((e) => {
@@ -229,7 +229,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               let res = await fetch(
                 `https://sochain.com/api/v2/get_tx/BTC/${key}`,
               )
-                .then(handleErrors)
+                // .then(handleErrors)
                 .then((response) => response.json())
                 .then((res: SoChainConfirmedGetTx) => res)
                 .catch((e) => {
@@ -262,7 +262,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           let res = await fetch(
             `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
           )
-            .then(handleErrors)
+            // .then(handleErrors)
             .then((response) => response.json())
             .then((res: SoChainConfirmed) => res)
             .catch((e) => {

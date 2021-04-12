@@ -344,7 +344,7 @@ const ConversionActions: React.FC<Props> = ({
   confirmation,
   handleLoading,
   isLoading,
-}) => {  
+}) => {
   const { eth } = useETH()
   const vbtc = useVBTC()
   const vbch = useVBCH()
@@ -352,8 +352,8 @@ const ConversionActions: React.FC<Props> = ({
   const vbchContract = getVbchContract(vbch)
   const vbtcContract = getVbtcContract(vbtc)
   const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
-  
   const targetConfs = coin === 'BTC' ? 6 : 3
+
   let isConfirmed = false
   if (confirmation && confirmation.hasOwnProperty('confirmations')) {
     isConfirmed = confirmation.confirmations >= targetConfs
@@ -460,7 +460,7 @@ const ConversionActions: React.FC<Props> = ({
                     }
 
                     return <Button size="xs">Claim vBCH on xDai</Button>
-                  }  
+                  }
                 })()
               ) : (
                 <a className={classes.viewLink} href="">

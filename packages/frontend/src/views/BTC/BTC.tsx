@@ -100,7 +100,7 @@ const BTC: React.FC = () => {
                     symbol="BTC"
                   />
                   <Button
-                    disabled={!Number(val) || eth?.provider.networkVersion != 1}
+                    disabled={!Number(val)}
                     className="glow-btn orange"
                     text="Buy vBTC"
                     onClick={onPresentBurn}

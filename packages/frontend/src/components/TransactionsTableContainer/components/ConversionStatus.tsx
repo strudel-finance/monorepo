@@ -12,15 +12,14 @@ interface Props {
 }
 
 const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
-  const targetBtcConfs = 6
+  const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
+  const targetConfs = coin === 'BTC' ? 6 : 3
   let isConfirmed = false
   let confirmation = undefined
   if (confirmations && confirmations.hasOwnProperty('confirmations')) {
-    isConfirmed = confirmations.confirmations >= targetBtcConfs
+    isConfirmed = confirmations.confirmations >= targetConfs
     confirmation = confirmations.confirmations
   }
-
-  const coin = useLocation().pathname.slice(1)
 
   return (
     <React.Fragment>
@@ -31,7 +30,7 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
         {tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed ? (
           <span>
             {coin} transaction confirming ({!confirmation ? '0' : confirmation}/
-            {targetBtcConfs} complete)
+            {targetConfs} complete)
           </span>
         ) : null}
         {tx.hasOwnProperty('confirmed') &&

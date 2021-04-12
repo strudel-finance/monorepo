@@ -52,10 +52,6 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
               <ValueBTC value={getBalanceNumber(vbtcBalance)} />
               <Label text="vBTC Balance" />
             </StyledBalance>
-            <StyledBalance>
-              <ValueBTC value={getBalanceNumber(vbchBalance)} />
-              <Label text="vBCH Balance" />
-            </StyledBalance>
           </StyledBalanceWrapper>
         </div>
 
