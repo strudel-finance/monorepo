@@ -39,7 +39,7 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
         <Spacer />
         <StyledBalanceWrapper>
           <b>Network Name:</b> Binance Smart Chain Mainnet {'  '}
-          <CopyToClipboard text="Binance Smart Chain Mainnet!">
+          <CopyToClipboard text="Binance Smart Chain Mainnet">
             <FontAwesomeIcon icon={icons.copy} />
           </CopyToClipboard>
         </StyledBalanceWrapper>

@@ -56,7 +56,7 @@ const useAllStakedValue = () => {
             vbtcContract,
             vbtc,
             block,
-          )
+          ),
       ),
     )
     setBalance(balances)

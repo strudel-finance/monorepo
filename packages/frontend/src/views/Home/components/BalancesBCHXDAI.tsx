@@ -12,7 +12,8 @@ import { getBalanceNumber } from '../../../utils/formatBalance'
 import { contractAddresses } from '../../../tokens/lib/constants'
 import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
 const Contract = require('web3-eth-contract')
-const XDAI_NETWORK_ID = 100
+// const XDAI_NETWORK_ID = 100
+const BSC_NETWORK_ID = 56
 
 const BalancesBCHXDAI: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
@@ -21,12 +22,13 @@ const BalancesBCHXDAI: React.FC = () => {
 
   const { eth } = useETH()
 
-  ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
+  // ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
+  ;(Contract as any).setProvider(process.env.REACT_APP_BSC_PROVIDER)
 
   const contract = new Contract(
     // add ABI item as type
     ERC20Abi as any[],
-    contractAddresses.vbch[XDAI_NETWORK_ID],
+    contractAddresses.vbch[BSC_NETWORK_ID],
   )
 
   // !!! TODO: FIX IT !!!

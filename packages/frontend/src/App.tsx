@@ -32,6 +32,7 @@ import BCH from './views/BCH'
 import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
 import BridgeProvider from './contexts/BridgeProvider'
+import Note from './views/Note'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -50,6 +51,7 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
   const { setStatus, setAccount } = useETH()
+  const networkId = (window as any).ethereum.networkVersion;
   const accountChange = (accounts: string[]) => {
     if (!accounts.length) setStatus('inactive')
     else {
@@ -96,12 +98,13 @@ const App: React.FC = () => {
         <Route path="/" exact>
           <Home />
         </Route>
+          <Route path="/farms" >
         {
-          (window as any).ethereum.networkVersion == 1 &&
-        <Route path="/farms" >
-          <Farms />
-        </Route>
+           networkId == 1 ?
+                <Farms /> :
+              <Note/>
         }
+        </Route>
         <Route path="/BTC">
           <BTC />
         </Route>

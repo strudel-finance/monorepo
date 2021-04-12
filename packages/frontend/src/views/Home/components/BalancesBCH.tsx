@@ -11,9 +11,6 @@ import VBTHIcon from '../../../components/VBTHIcon'
 import useETH from '../../../hooks/useETH'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useInfura from '../../../hooks/useInfura'
-import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
-const Contract = require('web3-eth-contract')
-const XDAI_NETWORK_ID = 100
 
 const BalanceBCH: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
@@ -21,32 +18,6 @@ const BalanceBCH: React.FC = () => {
   // !!! TODO: type
   const infura = useInfura()
   const { eth } = useETH()
-
-  // const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
-
-  // const fetchTotalSupply = async (vbch: Vbch) => {
-  //   const vBCHSupply = await getVbchSupply(vbch)
-
-  //   if (vBCHSupply !== totalVBCHSupply && eth?.account) {
-  //     setTotalVBCHSupply(vBCHSupply)
-  //   }
-  // }
-
-  // ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER)
-
-  // const contract = new Contract(
-  //   // add ABI item as type
-  //   ERC20Abi as any[],
-  //   contractAddresses.vbch[XDAI_NETWORK_ID],
-  // )
-
-  // useEffect(() => {
-  //   if (vbch && eth?.account) {
-  //     fetchTotalSupply(vbch)
-  //   } else {
-  //     setTotalVBCHSupply(undefined)
-  //   }
-  // }, [vbch, eth?.account])
 
   useEffect(() => {
     if (infura) {

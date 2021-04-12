@@ -29,7 +29,7 @@ const PageHeader: React.FC<PageHeaderProps> = ({
     width: ${iconSize}px;
   `
   return (
-    <Container size="sm">
+    <Container size="md">
       <StyledPageHeader className={className}>
         {icon && <StyledIcon>{icon}</StyledIcon>}
         <StyledTitle>{title}</StyledTitle>

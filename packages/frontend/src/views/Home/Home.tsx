@@ -78,7 +78,7 @@ const Home: React.FC = () => {
           <PageHeader
             className="page-header"
             title="Enter the Strudel"
-            subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
+            subtitle="Turn your BTC into vBTC or BCH into vBCH, and earn $TRDL rewards."
           />
           <div
             className="main-head"

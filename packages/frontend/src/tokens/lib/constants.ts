@@ -69,15 +69,18 @@ export const contractAddresses = {
   relay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
     5: '',
+    56: '0x3D4FFC1E924Ed1ee6ABDA7cb9c56Bbd1E26336D4',
     100: '0x9cb9CF602B09e6c8c8B4A9Abd688d1cEe3F1c7a7',
   },
   vbch: {
-    1: '0x4af6e819b7042f1d7055d5030ba001b2ea998912',
+    1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
     5: '',
+    56: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
     100: '0x2fB16a262c868889D8f7Dd30c9738687efeca971',
   },
   bridge: {
     5: '',
+    56: '0x5672e77eb1483c5b2762961ac5ea23b865086dea',
     100: '0x9840d0417f89182CE4a6e60f4445B8e5dC4F273e',
   },
 }

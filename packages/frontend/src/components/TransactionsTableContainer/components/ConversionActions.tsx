@@ -33,7 +33,8 @@ import Web3 from 'web3'
 import Modal from '../../Modal'
 import AccountModal from '../../TopBar/components/AccountModal'
 import NetworkModal from './NetworkModal'
-const XDAI_NETWORK_ID = 100
+// const XDAI_NETWORK_ID = 100
+const BSC_NETWORK_ID = 56
 
 const useStyles = makeStyles((theme) => ({
   viewLink: {
@@ -261,7 +262,7 @@ const callProofOpReturnAndMintBCH = async (
   handleLoading(loadingStatus)
   loadingStatus.status = false
   let proof
-  
+
   if (!tx.hasOwnProperty('proof')) {
     //TODO: add confirmations
 
@@ -308,14 +309,15 @@ const callProofOpReturnAndMintBCH = async (
     return undefined
   })
 
-  const web3 = new Web3(process.env.REACT_APP_XDAI_PROVIDER)
-
+  // const web3 = new Web3(process.env.REACT_APP_XDAI_PROVIDER)
+  const web3 = new Web3(process.env.REACT_APP_BSC_PROVIDER)
 
   handleLoading(loadingStatus)
   if (
     (ethTxHash !== undefined &&
       ethTxHash.transactionHash !== undefined &&
-      (await waitForTxReceipt(ethTxHash.transactionHash, {web3} as any))) === 1
+      (await waitForTxReceipt(ethTxHash.transactionHash, { web3 } as any))) ===
+    1
   ) {
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
@@ -355,7 +357,8 @@ const ConversionActions: React.FC<Props> = ({
   const vbchContract = getVbchContract(vbch)
   const vbtcContract = getVbtcContract(vbtc)
   const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
-  const targetConfs = 6 
+  const targetConfs = 6
+  const BSC_NETWORK_ID = 56
 
   const [onPresentBurn, onDismiss] = useModal(<NetworkModal />)
 
@@ -412,7 +415,7 @@ const ConversionActions: React.FC<Props> = ({
                 : `https://blockscout.com/xdai/mainnet/tx/${tx.ethTxHash}`
             }
           >
-            View ETH TX
+            View {coin === 'BTC' ? 'ETH' : 'BSC'} TX
           </ExternalLink>
         )}
         {(tx.confirmed || isConfirmed) &&
@@ -421,8 +424,8 @@ const ConversionActions: React.FC<Props> = ({
             <React.Fragment>
               {!isLoading[tx.btcTxHash] ? (
                 (() => {
-                if (coin === 'BTC') {
-                  if (eth.provider.networkVersion == 1) {
+                  if (coin === 'BTC') {
+                    if (eth.provider.networkVersion == 1) {
                       return (
                         <Button
                           size="xs"
@@ -447,7 +450,7 @@ const ConversionActions: React.FC<Props> = ({
                   }
 
                   if (coin === 'BCH') {
-                    if (eth.provider.networkVersion == 100) {
+                    if (eth.provider.networkVersion == BSC_NETWORK_ID) {
                       return (
                         <Button
                           size="xs"

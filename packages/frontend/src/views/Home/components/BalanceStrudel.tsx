@@ -122,6 +122,8 @@ const BalanceStrudel: React.FC = () => {
   const account = eth?.account
   const infura = useInfura()
   const [acc, setAcc] = useState<any>()
+  // !!! TODO: put that into provider
+  const networkId = (window as any).ethereum.networkVersion
 
   useEffect(() => {
     if (infura)
@@ -163,12 +165,14 @@ const BalanceStrudel: React.FC = () => {
             </StyledBalance>
           </StyledBalances>
         </CardContent>
+       { 
+          networkId == 1 &&
         <Footnote>
           Pending harvest
           <FootnoteValue>
             <PendingRewards /> $TRDL
           </FootnoteValue>
-        </Footnote>
+        </Footnote>}
       </Card>
       <Spacer />
 
@@ -180,9 +184,11 @@ const BalanceStrudel: React.FC = () => {
           />
         </CardContent>
         <Footnote>
+          {
+          networkId == 1 &&
           <FootnoteValue>
             <Multiplier /> $TRDL / block
-          </FootnoteValue>
+          </FootnoteValue>}
         </Footnote>
       </Card>
     </StyledWrapper>

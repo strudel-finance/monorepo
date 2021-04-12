@@ -49,7 +49,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   wallet,
   closeModal,
 }) => {
-  const POLL_DURATION_TXS = 2500
+  const POLL_DURATION_TXS = 1500
   // !!! TODO: set as environment varaible
   const BCH_ACCEPTANCE = 3
   const [isLoading, setLoading] = useState({})
@@ -310,7 +310,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             </TableHead>
             <TableBody>
               {lastRequest && (
-                <TableRow key="stub">
+                <TableRow style={{ height: 95 }}>
                   <TableCell
                     align="left"
                     // style={{ width: 200 }}
@@ -333,7 +333,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               )}
               {transactions.map((tx, i) => {
                 return (
-                  <TableRow key={i}>
+                  <TableRow key={i} style={{ height: 95 }}>
                     <TableCell align="left" style={{ width: 225 }}>
                       <ReddishTextTypography variant="caption">
                         {tx.value} BCH → vBCH
