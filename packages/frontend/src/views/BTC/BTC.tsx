@@ -56,7 +56,7 @@ const BTC: React.FC = () => {
     window.localStorage.setItem(account, JSON.stringify(tx))
   }
 
-  const [onPresentBurn] = useModal(
+  const [onPresentBurn, onDismiss] = useModal(
     <BurnModal
       onAddition={handleLastRequestChange}
       value={val}
@@ -119,6 +119,7 @@ const BTC: React.FC = () => {
                   lastRequest={lastRequest}
                   handleSetLastRequest={handleSetLastRequest}
                   checkAndRemoveLastRequest={checkAndRemoveLastRequest}
+                  closeModal={onDismiss}
                   wallet={eth}
                 />
               </Grid>

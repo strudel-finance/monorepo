@@ -59,7 +59,7 @@ const App: React.FC = () => {
   }
 
   ;(window as any).ethereum.on('networkChanged', function (networkId: string) {
-    console.log(networkId, 'ajajajajja')
+    console.log(networkId, 'networkId')
     window.location.reload()
     // Time to reload your interface with the new networkId
   })
@@ -96,15 +96,18 @@ const App: React.FC = () => {
         <Route path="/" exact>
           <Home />
         </Route>
-        <Route path="/farms">
+        {
+          (window as any).ethereum.networkVersion == 1 &&
+        <Route path="/farms" >
           <Farms />
         </Route>
+        }
         <Route path="/BTC">
           <BTC />
         </Route>
-        <Route path="/BCH">
-          <BCH />
-        </Route>
+          <Route path="/BCH">
+            <BCH />
+          </Route>
         {false && (
           <Route path="/staking">
             <Stake />

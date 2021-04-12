@@ -56,22 +56,7 @@ const MyStyledLink = styled(StyledLink)`
   font-size: 50px;
 `
 const Home: React.FC = () => {
-  const [val, setVal] = useState('0')
-  const [lastRequest, setLastRequest] = useState(undefined)
-
   const [isCountComplete, setCountComplete] = useState(false)
-
-  const { eth } = useETH()
-  const account = eth?.account
-  const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
-
-  const usePrevious = (value: any) => {
-    const ref = useRef()
-    useEffect(() => {
-      ref.current = value
-    })
-    return ref.current
-  }
 
   const handleCountEnd = () => {
     setCountComplete(true)

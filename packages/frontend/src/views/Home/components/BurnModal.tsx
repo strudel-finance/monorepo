@@ -20,6 +20,8 @@ import { getVbchSupply, getVbtcSupply } from '../../../tokens/utils'
 import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
 import useVBCH from '../../../hooks/useVBCH'
+import useInfura from '../../../hooks/useInfura'
+import useETH from '../../../hooks/useETH'
 
 interface BurnModalProps extends ModalProps {
   value: number | string
@@ -58,26 +60,32 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   const vbtc = useVBTC()
   const vbch = useVBCH()
   const coinAbrv = coin === 'bitcoincash' ? 'BCH' : 'BTC'
+  const infura = useInfura()
+  const { eth } = useETH()
 
   const handleChange = useCallback(
     (e: React.FormEvent<HTMLInputElement>) => {
       setVal(e.currentTarget.value)
     },
     [setVal],
-  )
-  const getInStrudelCurve = (x: number): number => {
-    return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21)) / 3
-  }
+    )
+    const getInStrudelCurve = (x: number): number => {
+      return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21)) / 3
+    }
+    
+    const calculateStrudel = async () => {
+      // more ugly stuff
+      const supply =
+        coin === 'bitcoin'
+          ? new BigNumber(await infura.vBTC.methods.totalSupply().call())
+            : new BigNumber(await infura.vBCH.methods.totalSupply().call())
 
-  const calculateStrudel = async () => {
-    const supply =
-      coin === 'bitcoin' ? await getVbtcSupply(vbtc) : await getVbchSupply(vbch)
-    let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
-    let calculatedStrudel =
-      getInStrudelCurve(dividedSupply + Number(value)) -
-      getInStrudelCurve(dividedSupply)
-    setStrudelAmount(calculatedStrudel.toFixed(0).toString())
-  }
+      let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
+      let calculatedStrudel =
+        getInStrudelCurve(dividedSupply + Number(value)) -
+        getInStrudelCurve(dividedSupply)
+      setStrudelAmount(calculatedStrudel.toFixed(0).toString())
+    }
 
   useEffect(() => {
     calculateStrudel()

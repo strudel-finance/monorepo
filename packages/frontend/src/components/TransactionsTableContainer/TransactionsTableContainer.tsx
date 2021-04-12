@@ -36,6 +36,7 @@ export interface TransactionTableProps {
   handleSetLastRequest: (tx: BTCTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
+  closeModal: () => void
 }
 interface SoChainConfirmed {
   status: string
@@ -64,6 +65,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   handleSetLastRequest,
   checkAndRemoveLastRequest,
   wallet,
+  closeModal,
 }) => {
   const POLL_DURATION_TXS = 1500
   const BTC_ACCEPTANCE = 6
@@ -202,6 +204,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           } else if (resNew.length > transactions.length) {
             setTransactions(resNew)
             checkAndRemoveLastRequest()
+            closeModal()
           }
         }
       }
@@ -313,7 +316,11 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               <TableCell>
                 <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
               </TableCell>
-              
+              <TableCell>
+                <ReddishBoldTextTypography style={{ textAlign: 'center' }}>
+                  Actions
+                </ReddishBoldTextTypography>
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -326,13 +333,12 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                 </TableCell>
                 <TableCell>
                   {/* @TODO: Intergrate the colors there is green and orange ^^ */}
-                  
-                    <ConversionStatus tx={lastRequest} />
+
+                  <ConversionStatus tx={lastRequest} />
                 </TableCell>
                 <TableCell>
                   <Grid container justify="flex-end">
-                    
-                      <ConversionActions tx={lastRequest} />
+                    <ConversionActions tx={lastRequest} />
                   </Grid>
                 </TableCell>
               </TableRow>
