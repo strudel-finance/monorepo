@@ -30,6 +30,9 @@ import useBridge from '../../../hooks/useBridge'
 import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
 import { contractAddresses } from '../../../tokens/lib/constants'
 import Web3 from 'web3'
+import Modal from '../../Modal'
+import AccountModal from '../../TopBar/components/AccountModal'
+import NetworkModal from './NetworkModal'
 const XDAI_NETWORK_ID = 100
 
 const useStyles = makeStyles((theme) => ({
@@ -354,6 +357,8 @@ const ConversionActions: React.FC<Props> = ({
   const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
   const targetConfs = 6 
 
+  const [onPresentBurn, onDismiss] = useModal(<NetworkModal />)
+
   let isConfirmed = false
   if (confirmation && confirmation.hasOwnProperty('confirmations')) {
     isConfirmed = confirmation.confirmations >= targetConfs
@@ -463,7 +468,11 @@ const ConversionActions: React.FC<Props> = ({
                       )
                     }
 
-                    return <Button size="xs">Claim vBCH on xDai</Button>
+                    return (
+                      <Button size="xs" onClick={onPresentBurn}>
+                        Claim vBCH on xDai
+                      </Button>
+                    )
                   }
                 })()
               ) : (

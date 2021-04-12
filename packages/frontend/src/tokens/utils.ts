@@ -323,7 +323,7 @@ export const proofOpReturnAndMint = async (
   burnOutputIndex: number,
 ) => {
   return (
-    ((await vbtcContract.proofOpReturnAndMint(
+    ((await vbtcContract.methods.proofOpReturnAndMint(
       proof.header,
       proof.proof,
       proof.version,

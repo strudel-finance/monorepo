@@ -334,7 +334,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               {transactions.map((tx, i) => {
                 return (
                   <TableRow key={i}>
-                    <TableCell align="left">
+                    <TableCell align="left" style={{ width: 225 }}>
                       <ReddishTextTypography variant="caption">
                         {tx.value} BCH → vBCH
                       </ReddishTextTypography>

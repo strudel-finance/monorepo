@@ -54,7 +54,18 @@ const Farms: React.FC = () => {
   return (
     <Switch>
       <Page>
-        {!!account ? (
+        {!!account && eth.provider.networkVersion != 1 ? (
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            To se Terra-Farms, please go to Ethereum mainnet.
+          </div>
+        ) : !!account ? (
           <>
             <Route exact path={path}>
               <PageHeader
