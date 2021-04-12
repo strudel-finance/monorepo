@@ -29,10 +29,9 @@ const BalanceBCH: React.FC = () => {
   const [VBCHBalanceMainnet, setVCHBalanceMainnet] = useState<BigNumber>()
   // !!! TODO: type
   const infura = useInfura()
+  const { eth } = useETH()
 
   // const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
-
-  const { eth } = useETH()
 
   // const fetchTotalSupply = async (vbch: Vbch) => {
   //   const vBCHSupply = await getVbchSupply(vbch)
@@ -59,21 +58,21 @@ const BalanceBCH: React.FC = () => {
   // }, [vbch, eth?.account])
 
   useEffect(() => {
-    if(infura) {
+    if (infura) {
       infura.vBCH.methods
-      .totalSupply()
-      .call()
-      .then((s: any) => {
-        setTotalVBCHSupply(new BigNumber(s))
-      })
-      
-      if (eth?.account) {
-        infura.vBCH.methods
-        .balanceOf(eth.account)
+        .totalSupply()
         .call()
         .then((s: any) => {
-          setVCHBalanceMainnet(new BigNumber(s))
+          setTotalVBCHSupply(new BigNumber(s))
         })
+
+      if (eth?.account) {
+        infura.vBCH.methods
+          .balanceOf(eth.account)
+          .call()
+          .then((s: any) => {
+            setVCHBalanceMainnet(new BigNumber(s))
+          })
       }
     }
   }, [infura, eth?.account])
@@ -90,7 +89,7 @@ const BalanceBCH: React.FC = () => {
                 <Label text="Your vBCH Balance on ETH mainnet" />
                 <ValueBTC
                   value={
-                    (!!eth?.account && !!VBCHBalanceMainnet)
+                    !!eth?.account && !!VBCHBalanceMainnet
                       ? getBalanceNumber(VBCHBalanceMainnet)
                       : 'Locked'
                   }

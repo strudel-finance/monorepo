@@ -13,7 +13,7 @@ interface Props {
 
 const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
   const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
-  const targetConfs = coin === 'BTC' ? 6 : 4
+  const targetConfs = 6
   let isConfirmed = false
   let confirmation = undefined
   if (confirmations && confirmations.hasOwnProperty('confirmations')) {
