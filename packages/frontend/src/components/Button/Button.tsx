@@ -326,7 +326,7 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
   background-color: ${(props) => {
     return props.theme.color.primary.main
   }};
-   
+
   border: 0;
   border-radius: 9px;
   color: ${(props) =>
@@ -337,15 +337,17 @@ const StyledSmallButton = styled.button<StyledButtonProps>`
   justify-content: center;
   outline: none;
   box-shadow: ${(props) => {
-    if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
-    if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
-    if (props.hideBoxShadow) return 'none'
-    return !props.disabled
-      ? '0px 0px 30px rgba(229, 147, 16, 0.48)'
-      : '0px 0px 30px rgba(229, 147, 16, 0.48)'
-  }}
-  padding-top: ${(props) => props.padding}px;
-  padding-bottom: ${(props) => props.padding}px;
+    // if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
+    return props.theme.color.shadow.light
+    // if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    // if (props.hideBoxShadow) return 'none'
+    // return !props.disabled
+    //   ? '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    //   : '0px 0px 30px rgba(229, 147, 16, 0.48)'
+  }};
+  padding: ${(props) => props.padding}px;
+  // padding-bottom: ${(props) => props.padding}px;
+  margin-top: 5px;
   pointer-events: ${(props) => (!props.disabled ? undefined : 'none')};
 `
 

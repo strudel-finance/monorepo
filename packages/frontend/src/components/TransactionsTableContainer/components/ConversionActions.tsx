@@ -35,7 +35,6 @@ const XDAI_NETWORK_ID = 100
 const useStyles = makeStyles((theme) => ({
   viewLink: {
     fontSize: 14,
-    marginRight: theme.spacing(1),
     textDecoration: 'underline',
     cursor: 'pointer',
   },
@@ -352,12 +351,12 @@ const ConversionActions: React.FC<Props> = ({
   const bridgeContract = useBridge()
   const vbchContract = getVbchContract(vbch)
   const vbtcContract = getVbtcContract(vbtc)
-  const coin = useLocation().pathname.slice(1)
+  const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
   
-  const targetBtcConfs = 6
+  const targetConfs = coin === 'BTC' ? 6 : 3
   let isConfirmed = false
   if (confirmation && confirmation.hasOwnProperty('confirmations')) {
-    isConfirmed = confirmation.confirmations >= targetBtcConfs
+    isConfirmed = confirmation.confirmations >= targetConfs
   }
   const classes = useStyles()
   const [showModal] = useModal(
@@ -460,7 +459,7 @@ const ConversionActions: React.FC<Props> = ({
                       )
                     }
 
-                    return <Button size="xs">GO TO xDai</Button>
+                    return <Button size="xs">Claim vBCH on xDai</Button>
                   }  
                 })()
               ) : (

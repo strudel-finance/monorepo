@@ -56,7 +56,8 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   closeModal,
 }) => {
   const POLL_DURATION_TXS = 2500
-  const BCH_ACCEPTANCE = 6
+  // !!! TODO: set as environment varaible
+  const BCH_ACCEPTANCE = 3
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
   const [checkedTxs, setCheckedTxs] = useState({})
@@ -286,84 +287,89 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   return (
     <div className={classes.container}>
       <SimpleBar>
-        <TableContainer style={{ height: 340 }}>
-        <Table color="white" stickyHeader={true}>
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">
-                <ReddishBoldTextTypography>
-                  Transaction
-                </ReddishBoldTextTypography>
-              </TableCell>
-              <TableCell>
-                <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
-              </TableCell>
-              <TableCell>
-                <ReddishBoldTextTypography>Actions</ReddishBoldTextTypography>
-              </TableCell>
-              {/* <TableCell>
+        <TableContainer style={{ height: 360 }}>
+          <Table color="white" stickyHeader={true}>
+          <colgroup>
+      <col style={{width:'25%'}}/>
+      <col style={{width:'50%'}}/>
+      <col style={{width:'25%'}}/>
+   </colgroup>
+            <TableHead>
+              <TableRow>
+                <TableCell align="left">
+                  <ReddishBoldTextTypography>
+                    Transaction
+                  </ReddishBoldTextTypography>
+                </TableCell>
+                <TableCell>
+                  <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
+                </TableCell>
+                <TableCell>
+                    <ReddishBoldTextTypography style={{textAlign:'center'}}>Actions</ReddishBoldTextTypography>
+                </TableCell>
+                {/* <TableCell>
                 <div className={classes.actionsCell}></div>
               </TableCell> */}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {lastRequest && (
-              <TableRow key="stub">
-                  <TableCell align="left"
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {lastRequest && (
+                <TableRow key="stub">
+                  <TableCell
+                    align="left"
                     // style={{ width: 200 }}
                   >
-                  <ReddishTextTypography variant="caption">
-                    {lastRequest.value} BCH → vBCH
-                  </ReddishTextTypography>
-                </TableCell>
-                <TableCell>
-                  <Typography variant="caption">
-                    <ConversionStatus tx={lastRequest} />
-                  </Typography>
-                </TableCell>
-                <TableCell>
-                  <Grid container justify="flex-end">
-                    <ConversionActions tx={lastRequest} />
-                  </Grid>
-                </TableCell>
-              </TableRow>
-            )}
-            {transactions.map((tx, i) => {
-              return (
-                <TableRow key={i}>
-                  <TableCell align="left"
-                    // style={{ width: 225 }}
-                  >
                     <ReddishTextTypography variant="caption">
-                      {tx.value} BCH → vBCH
+                      {lastRequest.value} BCH → vBCH
                     </ReddishTextTypography>
                   </TableCell>
-                  <TableCell
-                    // style={{ width: 380 }}
-                  >
+                  <TableCell>
                     <Typography variant="caption">
-                      <ConversionStatus
-                        tx={tx}
-                        confirmations={checkedTxs[tx.bchTxHash]}
-                      />
+                      <ConversionStatus tx={lastRequest} />
                     </Typography>
                   </TableCell>
                   <TableCell>
-                    <Grid container justify="flex-end">
-                      <ConversionActions
-                        tx={tx}
-                        confirmation={checkedTxs[tx.bchTxHash]}
-                        handleLoading={handleLoading}
-                        isLoading={isLoading}
-                      />
+                    <Grid container justify="center">
+                      <ConversionActions tx={lastRequest} />
                     </Grid>
                   </TableCell>
                 </TableRow>
-              )
-            })}
-          </TableBody>
+              )}
+              {transactions.map((tx, i) => {
+                return (
+                  <TableRow key={i}>
+                    <TableCell
+                      align="left"
+                    >
+                      <ReddishTextTypography variant="caption">
+                        {tx.value} BCH → vBCH
+                      </ReddishTextTypography>
+                    </TableCell>
+                    <TableCell
+                    >
+                      <Typography variant="caption">
+                        <ConversionStatus
+                          tx={tx}
+                          confirmations={checkedTxs[tx.bchTxHash]}
+                        />
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Grid container justify="center">
+                        <ConversionActions
+                          tx={tx}
+                          confirmation={checkedTxs[tx.bchTxHash]}
+                          handleLoading={handleLoading}
+                          isLoading={isLoading}
+                        />
+                      </Grid>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
           </Table>
-          </TableContainer>
+        </TableContainer>
       </SimpleBar>
     </div>
   )

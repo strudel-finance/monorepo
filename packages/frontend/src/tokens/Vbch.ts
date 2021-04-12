@@ -61,9 +61,9 @@ export class Vbch {
     }
     this.contracts = new Contracts(realProvider, networkId, this.web3, options)
     this.vbchAddress = contractAddresses.vbch[networkId]
-    this.masterChefAddress = contractAddresses.masterChef[networkId]
-    this.wethAddress = contractAddresses.weth[networkId]
-    this.strudelAddress = contractAddresses.strudel[networkId]
+    // this.masterChefAddress = contractAddresses.masterChef[networkId]
+    // this.wethAddress = contractAddresses.weth[networkId]
+    // this.strudelAddress = contractAddresses.strudel[networkId]
   }
 
   async resetEVM() {

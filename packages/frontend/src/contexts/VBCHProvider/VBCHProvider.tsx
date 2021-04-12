@@ -28,18 +28,16 @@ const VBCHProvider: React.FC = ({ children }) => {
 
       console.log(chainId, 'chainIdchainIdchainId')
 
-      const vbchLib =
-        chainId === 1 &&
-        new Vbch(eth.provider, chainId, false, {
-          defaultAccount: eth.provider.selectedAddress,
-          defaultConfirmations: 1,
-          autoGasMultiplier: 1.5,
-          testing: false,
-          defaultGas: '6000000',
-          defaultGasPrice: '1000000000000',
-          accounts: [],
-          ethereumNodeTimeout: 10000,
-        })
+      const vbchLib = new Vbch(eth.provider, chainId, false, {
+        defaultAccount: eth.provider.selectedAddress,
+        defaultConfirmations: 1,
+        autoGasMultiplier: 1.5,
+        testing: false,
+        defaultGas: '6000000',
+        defaultGasPrice: '1000000000000',
+        accounts: [],
+        ethereumNodeTimeout: 10000,
+      })
       setVbch(vbchLib)
       window.vbchsauce = vbchLib
     } else setVbch(undefined)

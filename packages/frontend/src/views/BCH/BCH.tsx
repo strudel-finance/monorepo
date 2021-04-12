@@ -99,7 +99,7 @@ const BCH: React.FC = () => {
                     symbol="BCH"
                   />
                   <Button
-                    disabled={!Number(val) || eth?.provider.networkVersion != 1}
+                    disabled={!Number(val)}
                     className="glow-btn green"
                     text="Buy vBCH"
                     onClick={onPresentBurn}
