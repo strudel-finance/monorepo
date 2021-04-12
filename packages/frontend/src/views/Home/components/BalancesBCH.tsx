@@ -26,11 +26,11 @@ const XDAI_NETWORK_ID = 100
 
 const BalanceBCH: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
-  const vbch = useVBCH()
+  const [VBCHBalanceMainnet, setVCHBalanceMainnet] = useState<BigNumber>()
   // !!! TODO: type
   const infura = useInfura()
 
-  const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
+  // const vbchBalanceMainnet = useTokenBalance(getVbchAddress(vbch))
 
   const { eth } = useETH()
 
@@ -59,12 +59,24 @@ const BalanceBCH: React.FC = () => {
   // }, [vbch, eth?.account])
 
   useEffect(() => {
-    if       (infura)
+    if(infura) {
       infura.vBCH.methods
-                    .totalSupply()
-                    .call()
-                    .then((s: any) => setTotalVBCHSupply(new BigNumber(s)))
-  }, [infura])
+      .totalSupply()
+      .call()
+      .then((s: any) => {
+        setTotalVBCHSupply(new BigNumber(s))
+      })
+      
+      if (eth?.account) {
+        infura.vBCH.methods
+        .balanceOf(eth.account)
+        .call()
+        .then((s: any) => {
+          setVCHBalanceMainnet(new BigNumber(s))
+        })
+      }
+    }
+  }, [infura, eth?.account])
 
   return (
     <StyledWrapper>
@@ -78,8 +90,8 @@ const BalanceBCH: React.FC = () => {
                 <Label text="Your vBCH Balance on ETH mainnet" />
                 <ValueBTC
                   value={
-                    !!eth?.account
-                      ? getBalanceNumber(vbchBalanceMainnet)
+                    (!!eth?.account && !!VBCHBalanceMainnet)
+                      ? getBalanceNumber(VBCHBalanceMainnet)
                       : 'Locked'
                   }
                 />

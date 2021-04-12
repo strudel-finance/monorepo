@@ -352,7 +352,7 @@ const ConversionActions: React.FC<Props> = ({
   const vbchContract = getVbchContract(vbch)
   const vbtcContract = getVbtcContract(vbtc)
   const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
-  const targetConfs = coin === 'BTC' ? 6 : 3
+  const targetConfs = coin === 'BTC' ? 6 : 4
 
   let isConfirmed = false
   if (confirmation && confirmation.hasOwnProperty('confirmations')) {

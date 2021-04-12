@@ -19,20 +19,51 @@ import useInfura from '../../../hooks/useInfura'
 
 const Balances: React.FC = () => {
   const [totalVBTCSupply, setTotalVBTCSupply] = useState<BigNumber>()
-  const vbtc = useVBTC()
+  const [VBTCBalance, setVBTCBalance] = useState<BigNumber>()
 
   const infura = useInfura()
 
-  const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
+  // const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
   const { eth } = useETH()
 
   useEffect(() => {
     if (infura)
       infura.vBTC.methods
-        .totalSupply()
-        .call()
-        .then((s: string) => setTotalVBTCSupply(new BigNumber(s)))
-  }, [infura])
+      .totalSupply()
+      .call()
+      .then((s: string) => {
+        setTotalVBTCSupply(new BigNumber(s))
+      })
+    
+    if (eth?.account) {
+      infura.vBTC.methods
+      .balanceOf(eth.account)
+      .call()
+      .then((s: any) => {
+        setVBTCBalance(new BigNumber(s))
+      })
+    }
+  }, [infura, eth?.account])
+
+  // useEffect(() => {
+  //   if(infura) {
+  //     infura.vBCH.methods
+  //     .totalSupply()
+  //     .call()
+  //     .then((s: any) => {
+  //       setTotalVBCHSupply(new BigNumber(s))
+  //     })
+      
+  //     if (eth?.account) {
+  //       infura.vBCH.methods
+  //       .balanceOf(eth.account)
+  //       .call()
+  //       .then((s: any) => {
+  //         setVbchBalanceMainnet(new BigNumber(s))
+  //       })
+  //     }
+  //   }
+  // }, [infura, eth?.account])
 
   return (
     <StyledWrapper>
@@ -46,7 +77,7 @@ const Balances: React.FC = () => {
                 <Label text="Your vBTC Balance" />
                 <ValueBTC
                   value={
-                    !!eth?.account ? getBalanceNumber(vbtcBalance) : 'Locked'
+                    (!!eth?.account && !!VBTCBalance) ? getBalanceNumber(VBTCBalance) : 'Locked'
                   }
                 />
               </div>

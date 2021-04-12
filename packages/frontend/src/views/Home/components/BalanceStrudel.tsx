@@ -115,8 +115,9 @@ const Multiplier: React.FC = () => {
 
 const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
+  const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
   const vbtc = useVBTC()
-  const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
+  // const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const { eth } = useETH()
   const account = eth?.account
   const infura = useInfura()
@@ -130,7 +131,16 @@ const BalanceStrudel: React.FC = () => {
           .then((balance: string) => {
             setTotalSupply(new BigNumber(balance))
           })
-  }, [infura])
+    
+          if (eth?.account) {
+            infura.trdl.methods
+            .balanceOf(eth.account)
+            .call()
+            .then((balance: string) => {
+              setStrudelBalance(new BigNumber(balance))
+            })
+          }
+        }, [infura, eth?.account])
 
   return (
     <StyledWrapper>
@@ -144,7 +154,7 @@ const BalanceStrudel: React.FC = () => {
                 <Label text="Your $TRDL Balance" />
                 <Value
                   value={
-                    !!account && strudelBalance
+                    (!!account && !!strudelBalance)
                       ? getBalanceNumber(strudelBalance)
                       : 'Locked'
                   }
