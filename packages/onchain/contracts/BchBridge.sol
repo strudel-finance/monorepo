@@ -180,8 +180,9 @@ contract BchBridge is OwnableUpgradeSafe {
 
     uint256 sqrtVbtcBefore = Babylonian.sqrt(mintedSupply);
     bch.mint(account, amount);
+    mintedSupply = mintedSupply.add(amount);
     //bch.transfer(account, amount);
-    uint256 sqrtVbtcAfter = Babylonian.sqrt(mintedSupply.add(amount));
+    uint256 sqrtVbtcAfter = Babylonian.sqrt(mintedSupply);
 
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
