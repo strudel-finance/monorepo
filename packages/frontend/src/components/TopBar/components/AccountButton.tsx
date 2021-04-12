@@ -25,15 +25,18 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
     onPresentWalletProviderModal,
   ])
 
-  useEffect(() => {
-      if(account)
-       setShortAdd(
-        account.substring(0, 6) +
+  const fancyAdd = (account: string) => {
+    return account.substring(0, 6) +
         '...' +
         account.substring(
           account.length - 4,
           account.length,
-        ))
+        )
+  }
+  
+  useEffect(() => {
+      if(account)
+       setShortAdd(fancyAdd(account))
     }, [account])
 
   return (

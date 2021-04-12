@@ -48,13 +48,25 @@ interface pushEthParam {
 const pushEthTxHash = async (
   ethParam: pushEthParam,
   tx: BTCTransaction | BCHTransaction,
-  coin: 'BTC' | 'BCH'
+  coin: 'BTC' | 'BCH',
 ): Promise<Response> => {
-  console.log(process.env.REACT_APP_API_URL, 'process.env.REACT_APP_API_URL');
-  
   const url =
-    process.env.REACT_APP_API_URL + '/production/payment/' + coin === 'BTC' ? (tx as BTCTransaction).btcTxHash : (tx as BCHTransaction).bchTxHash +  '/output/' + tx.burnOutputIndex + '/addEthTx'
-  
+    process.env.REACT_APP_API_URL +
+    '/payment/' +
+    (coin === 'BTC'
+      ? (tx as BTCTransaction).btcTxHash
+      : (tx as BCHTransaction).bchTxHash) +
+    '/output/' +
+    tx.burnOutputIndex +
+    '/addEthTx'
+
+  console.log(url, 'urlurlurlurl')
+
+  console.log(
+    JSON.stringify(ethParam),
+    'JSON.stringify(ethParam)JSON.stringify(ethParam)',
+  )
+
   const opts: RequestInit = {
     method: 'POST',
     headers: {
@@ -64,8 +76,8 @@ const pushEthTxHash = async (
     body: JSON.stringify(ethParam),
   }
 
-  console.log(url, 'urlurlurlurl');
-  
+  console.log(url, 'urlurlurlurl')
+
   return fetch(url, opts)
 }
 
@@ -305,8 +317,10 @@ const callProofOpReturnAndMintBCH = async (
   ) {
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
-    
-    await pushEthTxHash({ ethTxHash: ethTxHash }, tx, 'BCH')
+
+    console.log(ethTxHash, 'ethTxHashethTxHashethTxHashethTxHash')
+
+    await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash }, tx, 'BCH')
       .then(handleErrors)
       .catch((e) => {
         RollbarErrorTracking.logErrorInRollbar(

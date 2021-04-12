@@ -27,6 +27,7 @@ const BridgeProvider: React.FC = ({ children }) => {
   window.vbtc = bridge
 
   useEffect(() => {
+    // !!! TODO: fix dat - make it pretty
     if (eth) {
       const Contract = require('web3-eth-contract')
       Contract.setProvider(eth.provider)

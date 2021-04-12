@@ -20,9 +20,9 @@ import useVBCH from '../../../hooks/useVBCH'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import { contractAddresses } from '../../../tokens/lib/constants'
 import useInfura from '../../../hooks/useInfura'
+import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
 const Contract = require('web3-eth-contract')
 const XDAI_NETWORK_ID = 100
-const ERC20Abi = require('../../../tokens/lib/abi/erc20.json')
 
 const BalanceBCH: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()

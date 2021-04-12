@@ -1,8 +1,6 @@
 import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { getVbchAddress, getVbchSupply } from '../../../tokens/utils'
-import { Vbch } from '../../../tokens/Vbch'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
@@ -10,14 +8,11 @@ import Spacer from '../../../components/Spacer'
 import ValueBTC from '../../../components/ValueBTC'
 import VBTHIcon from '../../../components/VBTHIcon'
 import useETH from '../../../hooks/useETH'
-
-import useTokenBalance from '../../../hooks/useTokenBalance'
-import useVBCH from '../../../hooks/useVBCH'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import { contractAddresses } from '../../../tokens/lib/constants'
+import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
 const Contract = require('web3-eth-contract')
 const XDAI_NETWORK_ID = 100
-const ERC20Abi = require('../../../tokens/lib/abi/erc20.json')
 
 const BalancesBCHXDAI: React.FC = () => {
   const [totalVBCHSupply, setTotalVBCHSupply] = useState<BigNumber>()
