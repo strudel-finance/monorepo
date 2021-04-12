@@ -416,25 +416,29 @@ const ConversionActions: React.FC<Props> = ({
             <React.Fragment>
               {!isLoading[tx.btcTxHash] ? (
                 (() => {
-                  if (coin === 'BTC') {
-                    return (
-                      <Button
-                        size="xs"
-                        onClick={() => {
-                          callProofOpReturnAndMint(
-                            tx,
-                            handleLoading,
-                            eth?.account,
-                            vbtcContract,
-                            vbtc,
-                            confirmation.blockHash,
-                            confirmation.tx_hex,
-                          )
-                        }}
-                      >
-                        Claim v{coin} & $TRDL
-                      </Button>
-                    )
+                if (coin === 'BTC') {
+                  if (eth.provider.networkVersion == 1) {
+                      return (
+                        <Button
+                          size="xs"
+                          onClick={() => {
+                            callProofOpReturnAndMint(
+                              tx,
+                              handleLoading,
+                              eth?.account,
+                              vbtcContract,
+                              vbtc,
+                              confirmation.blockHash,
+                              confirmation.tx_hex,
+                            )
+                          }}
+                        >
+                          Claim v{coin} & $TRDL
+                        </Button>
+                      )
+                    }
+
+                    return <Button size="xs">Claim vBTC on ETH mainnet</Button>
                   }
 
                   if (coin === 'BCH') {
