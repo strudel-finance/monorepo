@@ -99,7 +99,7 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IPriceOracle {
   }
 
   // note this will always return 0 before update has been called successfully for the first time.
-  function consult(uint256 amountIn) external override view returns (uint256 amountOut) {
+  function consult(uint256 amountIn) external view override returns (uint256 amountOut) {
     require(referenceTokens.length > 0, "nothing to track");
     return priceAverage.mul(amountIn / 10**10).decode144();
   }

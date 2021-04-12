@@ -76,7 +76,7 @@ contract SpotPriceOracle is IPriceOracle {
   }
 
   // note this will always return 0 before update has been called successfully for the first time.
-  function consult(uint256 amountIn) external override view returns (uint256 amountOut) {
+  function consult(uint256 amountIn) external view override returns (uint256 amountOut) {
     return priceAverage.mul(amountIn).decode144();
   }
 }

@@ -123,9 +123,8 @@ contract V1TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
     uint256 lpSupply = pool.lpToken.balanceOf(address(this));
     if (block.number > pool.lastRewardBlock && lpSupply != 0) {
       uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-      uint256 strudelReward = multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(
-        totalAllocPoint
-      );
+      uint256 strudelReward =
+        multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
       accStrudelPerShare = accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));
     }
     return user.amount.mul(accStrudelPerShare).div(1e12).sub(user.rewardDebt);
@@ -151,9 +150,8 @@ contract V1TorchShip is Initializable, ContextUpgradeSafe, OwnableUpgradeSafe {
       return;
     }
     uint256 multiplier = getMultiplier(pool.lastRewardBlock, block.number);
-    uint256 strudelReward = multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(
-      totalAllocPoint
-    );
+    uint256 strudelReward =
+      multiplier.mul(strudelPerBlock).mul(pool.allocPoint).div(totalAllocPoint);
     strudel.mint(owner(), strudelReward.div(devFundDivRate));
     strudel.mint(address(this), strudelReward);
     pool.accStrudelPerShare = pool.accStrudelPerShare.add(strudelReward.mul(1e12).div(lpSupply));

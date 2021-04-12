@@ -37,8 +37,8 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   // immutable
   StrudelToken private strudel;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-  bytes32
-    public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+  bytes32 public constant PERMIT_TYPEHASH =
+    0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
 
   // gov params
   IRelay public relay;
@@ -210,14 +210,15 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BTC_CAP
-    uint256 rewardAmount = BTC_CAP
-      .mul(3)
-      .mul(sqrtVbtcAfter)
-      .add(sqrtVbtcBefore**3)
-      .sub(BTC_CAP.mul(3).mul(sqrtVbtcBefore))
-      .sub(sqrtVbtcAfter**3)
-      .div(3)
-      .div(BTC_CAP_SQRT);
+    uint256 rewardAmount =
+      BTC_CAP
+        .mul(3)
+        .mul(sqrtVbtcAfter)
+        .add(sqrtVbtcBefore**3)
+        .sub(BTC_CAP.mul(3).mul(sqrtVbtcBefore))
+        .sub(sqrtVbtcAfter**3)
+        .div(3)
+        .div(BTC_CAP_SQRT);
     strudel.mint(account, rewardAmount);
     strudel.mint(owner(), rewardAmount.div(devFundDivRate));
   }
@@ -242,10 +243,8 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
-      _amount,
-      "ERC20: burn amount exceeds allowance"
-    );
+    uint256 decreasedAllowance =
+      allowance(_account, _msgSender()).sub(_amount, "ERC20: burn amount exceeds allowance");
 
     _approve(_account, _msgSender(), decreasedAllowance);
     _burn(_account, _amount);
@@ -292,13 +291,14 @@ contract VbtcToken is FlashERC20, ERC20CappedUpgradeSafe {
     bytes32 s
   ) external {
     require(deadline >= block.timestamp, "vBTC: EXPIRED");
-    bytes32 digest = keccak256(
-      abi.encodePacked(
-        "\x19\x01",
-        DOMAIN_SEPARATOR,
-        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-      )
-    );
+    bytes32 digest =
+      keccak256(
+        abi.encodePacked(
+          "\x19\x01",
+          DOMAIN_SEPARATOR,
+          keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+        )
+      );
     address recoveredAddress = ecrecover(digest, v, r, s);
     require(recoveredAddress != address(0) && recoveredAddress == owner, "VBTC: INVALID_SIGNATURE");
     _approve(owner, spender, value);

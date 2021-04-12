@@ -67,7 +67,7 @@ contract AuctionManager is OwnableUpgradeSafe {
   function rotateAuctions() external {
     if (address(currentAuction) != address(0)) {
       require(currentAuction.auctionEnded(), "previous auction hasn't ended");
-      try currentAuction.finaliseAuction()  {
+      try currentAuction.finaliseAuction() {
         // do nothing
       } catch Error(string memory) {
         // do nothing
