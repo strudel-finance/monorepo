@@ -1,6 +1,7 @@
 import { makeStyles, withStyles } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import Table from '@material-ui/core/Table'
+import TableContainer from '@material-ui/core/TableContainer'
 import TableBody from '@material-ui/core/TableBody'
 import MuiTableCell from '@material-ui/core/TableCell'
 import MuiTableHead from '@material-ui/core/TableHead'
@@ -35,6 +36,7 @@ export interface TransactionTableProps {
   handleSetLastRequest: (tx: BCHTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
+  closeModal: () => void
 }
 interface SoChainConfirmed {
   status: string
@@ -51,8 +53,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   handleSetLastRequest,
   checkAndRemoveLastRequest,
   wallet,
+  closeModal,
 }) => {
-  const POLL_DURATION_TXS = 1500
+  const POLL_DURATION_TXS = 2500
   const BCH_ACCEPTANCE = 6
   const [isLoading, setLoading] = useState({})
   const [transactions, setTransactions] = useState([])
@@ -71,7 +74,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
     vbch: Vbch,
   ): Promise<boolean> => {
     const blockHashLittle = '0x' + changeEndian(blockHash)
-    
+
     try {
       const bestKnownDigest = await bridgeContract.relayer.methods
         .getBestKnownDigest()
@@ -191,6 +194,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           } else if (sortedRes.length > transactions.length) {
             setTransactions(sortedRes)
             checkAndRemoveLastRequest()
+            closeModal()
           }
         }
       }
@@ -226,6 +230,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             continue
           }
 
+          //https://api.fullstack.cash/v4/electrumx/tx/data/
           const res = await fetch(
             `https://rest.bitcoin.com/v2/transaction/details/${transaction.bchTxHash}`,
           )
@@ -241,6 +246,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             })
 
           if (!res || !res.confirmations) continue
+          // const { details: { confirmations, blockhash }} = res
 
           const { confirmations, blockhash } = res
           const { bchTxHash } = transaction
@@ -279,7 +285,8 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar >
+      <SimpleBar>
+        <TableContainer style={{ height: 340 }}>
         <Table color="white" stickyHeader={true}>
           <TableHead>
             <TableRow>
@@ -291,6 +298,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               <TableCell>
                 <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
               </TableCell>
+              <TableCell>
+                <ReddishBoldTextTypography>Actions</ReddishBoldTextTypography>
+              </TableCell>
               {/* <TableCell>
                 <div className={classes.actionsCell}></div>
               </TableCell> */}
@@ -299,7 +309,9 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
           <TableBody>
             {lastRequest && (
               <TableRow key="stub">
-                <TableCell align="left" style={{ width: 200 }}>
+                  <TableCell align="left"
+                    // style={{ width: 200 }}
+                  >
                   <ReddishTextTypography variant="caption">
                     {lastRequest.value} BCH → vBCH
                   </ReddishTextTypography>
@@ -319,12 +331,16 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
             {transactions.map((tx, i) => {
               return (
                 <TableRow key={i}>
-                  <TableCell align="left" style={{ width: 225 }}>
+                  <TableCell align="left"
+                    // style={{ width: 225 }}
+                  >
                     <ReddishTextTypography variant="caption">
                       {tx.value} BCH → vBCH
                     </ReddishTextTypography>
                   </TableCell>
-                  <TableCell style={{ width: 380 }}>
+                  <TableCell
+                    // style={{ width: 380 }}
+                  >
                     <Typography variant="caption">
                       <ConversionStatus
                         tx={tx}
@@ -346,7 +362,8 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               )
             })}
           </TableBody>
-        </Table>
+          </Table>
+          </TableContainer>
       </SimpleBar>
     </div>
   )
@@ -368,14 +385,18 @@ const ReddishBoldTextTypography = withStyles({
 
 const TableCell = withStyles({
   stickyHeader: {
-    background: 'transparent',
+    background: 'white',
   },
 })(MuiTableCell)
 
+// const TableContainer = withStyles({
+//   root: { height: 240 }
+// })(MuiTableCell)
+
 const TableHead = withStyles({
-  root: {
-    background: 'transparent',
-  },
+  // root: {
+  //   background: 'transparent',
+  // },
 })(MuiTableHead)
 
 const useStyles = makeStyles((theme) => ({

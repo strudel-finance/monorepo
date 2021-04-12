@@ -52,7 +52,6 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   coin
 }) => {
   const [val, setVal] = useState('')
-  const [pendingTx, setPendingTx] = useState(false)
   const [checked, setChecked] = useState(false)
   const [continued, setContinued] = useState(continueV)
   const [strudelAmount, setStrudelAmount] = useState(null)

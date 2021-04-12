@@ -371,12 +371,15 @@ const ConversionActions: React.FC<Props> = ({
 
   return (
     <React.Fragment>
-      <div style={{
-        textAlign: 'center',
-        display: 'flex',
-    justifyContent: 'center',
-    flexDirection: 'column',
-    alignItems: 'center', }}>
+      <div
+        style={{
+          textAlign: 'center',
+          display: 'flex',
+          justifyContent: 'center',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
         {!tx.hasOwnProperty('confirmed') && (
           <React.Fragment>
             <a href="" onClick={showModal}>
@@ -389,7 +392,7 @@ const ConversionActions: React.FC<Props> = ({
             className={classes.viewLink}
             href={
               coin === 'BTC'
-                    ? `https://sochain.com/tx/BTC/${tx.btcTxHash}`
+                ? `https://sochain.com/tx/BTC/${tx.btcTxHash}`
                 : `https://explorer.bitcoin.com/bch/tx/${tx.bchTxHash}`
             }
           >
@@ -401,7 +404,7 @@ const ConversionActions: React.FC<Props> = ({
             className={classes.viewLink}
             href={
               coin === 'BTC'
-                    ? `https://etherscan.io/tx/${tx.ethTxHash}`
+                ? `https://etherscan.io/tx/${tx.ethTxHash}`
                 : `https://blockscout.com/xdai/mainnet/tx/${tx.ethTxHash}`
             }
           >
@@ -412,32 +415,35 @@ const ConversionActions: React.FC<Props> = ({
           !tx.ethTxHash &&
           confirmation.isRelayed && (
             <React.Fragment>
-            {!isLoading[tx.btcTxHash] ?
-             (() => {
-            if(coin === 'BTC') {
-               return (<Button
-                  size="xs"
-                  onClick={() => {
-                    callProofOpReturnAndMint(
-                          tx,
-                          handleLoading,
-                          eth?.account,
-                          vbtcContract,
-                          vbtc,
-                          confirmation.blockHash,
-                          confirmation.tx_hex,
-                        )
-                      
-                  }}
-                > 
-                  Claim v{coin} & $TRDL
-                </Button>) }
+              {!isLoading[tx.btcTxHash] ? (
+                (() => {
+                  if (coin === 'BTC') {
+                    return (
+                      <Button
+                        size="xs"
+                        onClick={() => {
+                          callProofOpReturnAndMint(
+                            tx,
+                            handleLoading,
+                            eth?.account,
+                            vbtcContract,
+                            vbtc,
+                            confirmation.blockHash,
+                            confirmation.tx_hex,
+                          )
+                        }}
+                      >
+                        Claim v{coin} & $TRDL
+                      </Button>
+                    )
+                  }
 
-                if (coin === 'BCH') {
-                  if(eth.provider.networkVersion == 100) {
-                    return (<Button
-                      size="xs"
-                      onClick={() => {
+                  if (coin === 'BCH') {
+                    if (eth.provider.networkVersion == 100) {
+                      return (
+                        <Button
+                          size="xs"
+                          onClick={() => {
                             callProofOpReturnAndMintBCH(
                               tx,
                               handleLoading,
@@ -447,25 +453,21 @@ const ConversionActions: React.FC<Props> = ({
                               confirmation.blockHash,
                               bridgeContract.contract,
                             )
-                      }}
-                    >
-                      Claim v{coin} & $TRDL
-                      </Button>)
-                }}
+                          }}
+                        >
+                          Claim v{coin} & $TRDL
+                        </Button>
+                      )
+                    }
 
-                return (<Button
-                  size="xs"
-
-                >
-                  GO TO xDai
-                  </Button>)
-
-            })()
-              : 
+                    return <Button size="xs">GO TO xDai</Button>
+                  }  
+                })()
+              ) : (
                 <a className={classes.viewLink} href="">
                   Loading
                 </a>
-              }
+              )}
             </React.Fragment>
           )}
       </div>
