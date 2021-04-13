@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js'
 import React, {useState, useEffect} from 'react'
 import CountUp from 'react-countup'
 
@@ -12,9 +13,14 @@ const ValueBTC: React.FC<ValueProps> = ({value, decimals}) => {
   const [start, updateStart] = useState(0)
   const [end, updateEnd] = useState(0)
 
+  const trimNum = (num: number) => {
+    const a = [...(String(num).split('.').pop() as any)].findIndex(a => Number(a));
+    return a === -1 ? 2 : a + 2
+  }
+
   useEffect(() => {
     if (typeof value === 'number') {
-      updateStart(end)
+      updateStart(0)
       updateEnd(value)
     }
   }, [value])
@@ -27,8 +33,9 @@ const ValueBTC: React.FC<ValueProps> = ({value, decimals}) => {
         <CountUp
           start={start}
           end={end}
-          decimals={
-            decimals !== undefined ? decimals : end < 0 ? 4 : end > 1e5 ? 0 : 6
+            decimals={
+              // decimals !== undefined ? decimals : end < 0 ? 4 : end > 1e5 ? 0 : 6
+              (value < 1) ? trimNum(value) : 2
           }
           duration={1}
           separator=","

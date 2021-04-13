@@ -412,7 +412,7 @@ const ConversionActions: React.FC<Props> = ({
             href={
               coin === 'BTC'
                 ? `https://etherscan.io/tx/${tx.ethTxHash}`
-                : `https://blockscout.com/xdai/mainnet/tx/${tx.ethTxHash}`
+                : `https://bscscan.com/tx/${tx.ethTxHash}`
             }
           >
             View {coin === 'BTC' ? 'ETH' : 'BSC'} TX
@@ -473,7 +473,7 @@ const ConversionActions: React.FC<Props> = ({
 
                     return (
                       <Button size="xs" onClick={onPresentBurn}>
-                        Claim vBCH on xDai
+                        Claim vBCH on BSC
                       </Button>
                     )
                   }

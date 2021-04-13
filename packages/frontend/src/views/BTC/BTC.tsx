@@ -72,7 +72,7 @@ const BTC: React.FC = () => {
     },
     [setVal],
   )
-  
+
   const [onPresentWalletProviderModal] = useModal(
     <WalletProviderModal />,
     'provider',

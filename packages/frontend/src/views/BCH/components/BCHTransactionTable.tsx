@@ -376,6 +376,8 @@ export const ReddishTextTypography = withStyles({
   },
 })(Typography)
 
+
+
 const ReddishBoldTextTypography = withStyles({
   root: {
     fontWeight: 700,

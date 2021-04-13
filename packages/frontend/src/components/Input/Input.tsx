@@ -25,12 +25,10 @@ const Input: React.FC<InputProps> = ({
         min="0"
         type="number"
         placeholder={placeholder}
-        value={value}
+        value={value || ''}
         onChange={onChange}
         disabled={disabled}
-        onKeyDown={(evt) =>
-          evt.key == '.' || (evt.key === 'e' && evt.preventDefault())
-        }
+        onKeyDown={(evt) => evt.key === 'e' && evt.preventDefault()}
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>

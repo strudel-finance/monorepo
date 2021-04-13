@@ -12,16 +12,12 @@ import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
 import QRCode from 'qrcode.react'
 import StrudelIcon from '../../../components/StrudelIcon'
-import useVBTC from '../../../hooks/useVBTC'
 import OrgIcons from '../../../components/BitcoinIcon'
 import VIcons from '../../../components/VBTCIcon'
-import MuiGrid from '@material-ui/core/Grid'
-import { getVbchSupply, getVbtcSupply } from '../../../tokens/utils'
 import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
 import useVBCH from '../../../hooks/useVBCH'
 import useInfura from '../../../hooks/useInfura'
-import useETH from '../../../hooks/useETH'
 
 interface BurnModalProps extends ModalProps {
   value: number | string
@@ -38,12 +34,6 @@ const Label = styled.div`
   font-size: 20px;
 `
 
-const Grid = withStyles({
-  item: {
-    margin: 'auto',
-  },
-})(MuiGrid)
-
 const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   value,
   address,
@@ -53,50 +43,36 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   onDismiss,
   coin
 }) => {
-  const [val, setVal] = useState('')
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState<boolean>(false)
   const [continued, setContinued] = useState(continueV)
   const [strudelAmount, setStrudelAmount] = useState(null)
-  const vbtc = useVBTC()
-  const vbch = useVBCH()
   const coinAbrv = coin === 'bitcoincash' ? 'BCH' : 'BTC'
   const infura = useInfura()
-  const { eth } = useETH()
 
-  const handleChange = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
-      setVal(e.currentTarget.value)
-    },
-    [setVal],
-    )
-    const getInStrudelCurve = (x: number): number => {
-      return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21)) / 3
-    }
-    
-    const calculateStrudel = async () => {
-      // more ugly stuff
-      const supply =
-        coin === 'bitcoin'
-          ? new BigNumber(await infura.vBTC.methods.totalSupply().call())
-            : new BigNumber(await infura.vBCH.methods.totalSupply().call())
+  const getInStrudelCurve = (x: number): number => {
+    return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21)) / 3
+  }
 
-      let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
-      let calculatedStrudel =
-        getInStrudelCurve(dividedSupply + Number(value)) -
-        getInStrudelCurve(dividedSupply)
-      setStrudelAmount(calculatedStrudel.toFixed(0).toString())
-    }
+  const calculateStrudel = async () => {
+    // more ugly stuff
+    const supply =
+      coin === 'bitcoin'
+        ? new BigNumber(await infura.vBTC.methods.totalSupply().call())
+        : new BigNumber(await infura.vBCH.methods.totalSupply().call())
+
+    let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
+    let calculatedStrudel =
+      getInStrudelCurve(dividedSupply + Number(value)) -
+      getInStrudelCurve(dividedSupply)
+    setStrudelAmount(calculatedStrudel.toFixed(0).toString())
+  }
 
   useEffect(() => {
     calculateStrudel()
   }, [])
 
   const handleClick = (event: any) => {
-    console.log(event.target.firstElementChild, 'eventeventeventevent')
-
-    event.target.firstElementChild.checked = !event.target.firstElementChild
-      .checked
-    setChecked(event.target.firstElementChild.checked)
+    setChecked(!checked)
     onAddition({
       txCreatedAt: new Date(),
       value: String(value),
@@ -120,16 +96,14 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
           <>
             <div className="burn-item">
               <div className="burn-item-img">
-              {
-                  coinAbrv === 'BTC' ? 
-                    <VIcons.VBTCIcon size={48} />
-                    :  <VIcons.VBCHIcon size={48} />
-                }
+                {coinAbrv === 'BTC' ? (
+                  <VIcons.VBTCIcon size={48} />
+                ) : (
+                  <VIcons.VBCHIcon size={48} />
+                )}
               </div>
               <div className="burn-item-content">
-                <div className="burn-item-title">
-                  v{coinAbrv} Amount
-                </div>
+                <div className="burn-item-title">v{coinAbrv} Amount</div>
                 <div className="burn-item-amount">
                   {value.toString() + ` v${coinAbrv}`}
                 </div>
@@ -147,35 +121,41 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
             <div className="burn-divider"></div>
             <div className="burn-item">
               <div className="burn-item-img">
-                {
-                  coinAbrv === 'BTC' ? 
-                    <OrgIcons.BitcoinIcon size={48} />
-                    :  <OrgIcons.BitcoinCashIcon size={48} />
-                }
+                {coinAbrv === 'BTC' ? (
+                  <OrgIcons.BitcoinIcon size={48} />
+                ) : (
+                  <OrgIcons.BitcoinCashIcon size={48} />
+                )}
               </div>
               <div className="burn-item-content">
                 <div className="burn-item-title">{coinAbrv} Amount</div>
-                <div className="burn-item-amount">{value.toString()} {coinAbrv}</div>
+                <div className="burn-item-amount">
+                  {value.toString()} {coinAbrv}
+                </div>
               </div>
             </div>
             <div className="checkbox-wrap">
               <DangerLabel
                 className="danger-label"
                 color="rgba(229,147,16,1)"
-                checkbox={<Checkbox onChange={handleCheckboxChange} />}
-                text={"Attention: You can only mint v" + coinAbrv + " when burning " + coinAbrv}
+                checkbox={<Checkbox onChange={handleCheckboxChange} checked={checked } />}
+                text={
+                  'Attention: You can only mint v' +
+                  coinAbrv +
+                  ' when burning ' +
+                  coinAbrv
+                }
                 onClick={handleClick}
               />
             </div>
             <div className="modal-btm">
               {!continued ? (
                 <ModalActions>
+                  <Button onClick={onDismiss} text="Cancel" />
                   <Button
-                    onClick={onDismiss}
-                    text="Cancel"
-                  />
-                  <Button
-                    className={'glow-btn' + (coinAbrv === 'BTC' ? ' orange' : ' green')}
+                    className={
+                      'glow-btn' + (coinAbrv === 'BTC' ? ' orange' : ' green')
+                    }
                     text="Confirm transaction"
                     onClick={handleContinue}
                     disabled={!checked}

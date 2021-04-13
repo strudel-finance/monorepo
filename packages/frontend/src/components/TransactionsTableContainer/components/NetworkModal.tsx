@@ -39,37 +39,39 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
         <Spacer />
         <StyledBalanceWrapper>
           <b>Network Name:</b> Binance Smart Chain Mainnet {'  '}
-          <CopyToClipboard text="Binance Smart Chain Mainnet">
+          <CCB
+            text="Binance Smart Chain Mainnet"
+          >
             <FontAwesomeIcon icon={icons.copy} />
-          </CopyToClipboard>
+          </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>RPC URL:</b> https://bsc-dataseed1.binance.org {'  '}
-          <CopyToClipboard text="https://bsc-dataseed1.binance.org">
+          <CCB text="https://bsc-dataseed1.binance.org">
             <FontAwesomeIcon icon={icons.copy} />
-          </CopyToClipboard>
+          </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>Chain ID:</b> 56 {'  '}
-          <CopyToClipboard text="56">
+          <CCB text="56">
             <FontAwesomeIcon icon={icons.copy} />
-          </CopyToClipboard>
+          </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>Symbol:</b> BNB{'  '}
-          <CopyToClipboard text="BNB">
+          <CCB text="BNB">
             <FontAwesomeIcon icon={icons.copy} />
-          </CopyToClipboard>
+          </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>Explorer URL:</b> https://bscscan.com {'  '}
-          <CopyToClipboard text="https://bscscan.com">
+          <CCB text="https://bscscan.com">
             <FontAwesomeIcon icon={icons.copy} />
-          </CopyToClipboard>
+          </CCB>
         </StyledBalanceWrapper>
       </ModalContent>
       <ModalActions>
@@ -83,6 +85,10 @@ const StyledBalance = styled.div`
   align-items: center;
   display: flex;
   flex-direction: column;
+`
+
+const CCB = styled(CopyToClipboard)`
+cursor: pointer;
 `
 
 const StyledBalanceWrapper = styled.div`

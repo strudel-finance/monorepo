@@ -3,10 +3,11 @@ import styled from 'styled-components'
 
 interface CheckboxProps {
   onChange?: (e: React.FormEvent<HTMLInputElement>) => void
+  onClick?: (e: React.FormEvent<HTMLInputElement>) => void
+  checked: boolean
 }
 
 const Checkbox: React.FC<CheckboxProps> = (props) => {
-  const disabled = 'disabled'
   return <input type="checkbox" {...props} />
 }
 

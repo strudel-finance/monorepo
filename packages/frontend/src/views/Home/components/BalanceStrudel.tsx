@@ -11,12 +11,11 @@ import StrudelIcon from '../../../components/StrudelIcon'
 import useAllEarnings from '../../../hooks/useAllEarnings'
 import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
-import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import { getStrudelAddress, getStrudelSupply } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
+import ValueBTC from '../../../components/ValueBTC'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -154,7 +153,7 @@ const BalanceStrudel: React.FC = () => {
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your $TRDL Balance" />
-                <Value
+                <ValueBTC
                   value={
                     (!!account && !!strudelBalance)
                       ? getBalanceNumber(strudelBalance)
@@ -166,30 +165,30 @@ const BalanceStrudel: React.FC = () => {
           </StyledBalances>
         </CardContent>
        { 
-          networkId == 1 &&
-        <Footnote>
-          Pending harvest
-          <FootnoteValue>
-            <PendingRewards /> $TRDL
-          </FootnoteValue>
-        </Footnote>}
+        networkId == 1 &&
+          <Footnote>
+            Pending harvest
+            <FootnoteValue>
+              <PendingRewards /> $TRDL
+            </FootnoteValue>
+          </Footnote>
+        }
       </Card>
-      <Spacer />
-
+      <Spacer/>
       <Card>
         <CardContent>
           <Label text="Total $TRDL Supply" />
-          <Value
+          <ValueBTC
             value= {totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
         </CardContent>
-        <Footnote>
-          {
+        {
           networkId == 1 &&
-          <FootnoteValue>
-            <Multiplier /> $TRDL / block
-          </FootnoteValue>}
-        </Footnote>
+          <Footnote>
+            <FootnoteValue>
+              <Multiplier /> $TRDL / block
+          </FootnoteValue>
+          </Footnote>}
       </Card>
     </StyledWrapper>
   )

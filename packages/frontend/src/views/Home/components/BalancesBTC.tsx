@@ -31,8 +31,8 @@ const Balances: React.FC = () => {
       infura.vBTC.methods
       .totalSupply()
       .call()
-      .then((s: string) => {
-        setTotalVBTCSupply(new BigNumber(s))
+      .then((s: string) => {  
+          setTotalVBTCSupply(new BigNumber(s))
       })
     
     if (eth?.account) {
@@ -77,7 +77,9 @@ const Balances: React.FC = () => {
                 <Label text="Your vBTC Balance" />
                 <ValueBTC
                   value={
-                    (!!eth?.account && !!VBTCBalance) ? getBalanceNumber(VBTCBalance) : 'Locked'
+                    !!eth?.account && !!VBTCBalance
+                      ? getBalanceNumber(VBTCBalance)
+                      : 'Locked'
                   }
                 />
               </div>
@@ -90,7 +92,17 @@ const Balances: React.FC = () => {
       <Card>
         <CardContent>
           <Label text="Total vBTC Supply" />
-          <ValueBTC value={totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'} />
+          <ValueBTC
+            value={
+              totalVBTCSupply
+
+
+                                              ? getBalanceNumber(totalVBTCSupply)
+               
+               
+                : 'Locked'
+            }
+          />
         </CardContent>
       </Card>
     </StyledWrapper>

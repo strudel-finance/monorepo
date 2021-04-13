@@ -1,10 +1,7 @@
-import Typography from '@material-ui/core/Typography'
+import { ReddishTextTypography } from '../TransactionsTableContainer'
 import React from 'react'
 import { useLocation } from 'react-router'
-
 import { BTCTransaction, Confirmation } from '../../../types/types'
-
-import { ReddishTextTypography } from '../TransactionsTableContainer'
 
 interface Props {
   tx: BTCTransaction
@@ -27,18 +24,21 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
         {!tx.hasOwnProperty('confirmed') && (
           <span>{`Waiting for ${coin} to be sent`}</span>
         )}
-        {tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed ? (
+        {(tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed && confirmations) && (
           <span>
             {coin} transaction confirming ({!confirmation ? '0' : confirmation}/
             {targetConfs} complete)
           </span>
-        ) : null}
-        {tx.hasOwnProperty('confirmed') &&
+        )}
+        { (tx.hasOwnProperty('confirmed') && !confirmations) && (
+          <div className="loading">Fetching data</div>
+        )}
+        {(tx.hasOwnProperty('confirmed') &&
         isConfirmed &&
         !tx.ethTxHash &&
-        confirmations.isRelayed ? (
-          <span>Submit to Ethereum</span>
-        ) : null}
+          confirmations.isRelayed) && (
+            <span>Submit to Ethereum</span>
+        )}
         {tx.hasOwnProperty('confirmed') &&
         isConfirmed &&
         !tx.ethTxHash &&
