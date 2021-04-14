@@ -1,16 +1,16 @@
-import {ethers, upgrades} from 'hardhat';
-import {Signer, Contract} from 'ethers';
-import {getAdminAddress} from '@openzeppelin/upgrades-core';
+import { ethers, upgrades } from 'hardhat';
+import { Signer, Contract } from 'ethers';
+import { getAdminAddress } from '@openzeppelin/upgrades-core';
 import chai from 'chai';
-import {expandTo18Decimals, advanceBlock} from './shared/utilities';
-import {StrudelToken} from '../typechain/StrudelToken';
+import { expandTo18Decimals, advanceBlock } from './shared/utilities';
+import { StrudelToken } from '../typechain/StrudelToken';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxy from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
-import {V1TorchShip} from '../typechain/V1TorchShip';
-import {TorchShip} from '../typechain/TorchShip';
-import {MockERC20} from '../typechain/MockERC20';
+import { V1TorchShip } from '../typechain/V1TorchShip';
+import { TorchShip } from '../typechain/TorchShip';
+import { MockERC20 } from '../typechain/MockERC20';
 
-const {expect} = chai;
+const { expect } = chai;
 const PERIOD_SIZE = 9;
 let refToken: MockERC20;
 

@@ -1,13 +1,13 @@
-import {ethers, upgrades} from 'hardhat';
-import {BigNumber, Signer} from 'ethers';
+import { ethers, upgrades } from 'hardhat';
+import { BigNumber, Signer } from 'ethers';
 import chai from 'chai';
 import vector from './testVector.json';
-import {expandTo18Decimals, advanceBlock} from './shared/utilities';
-import {GovernanceToken} from '../typechain/GovernanceToken';
-import {MockERC20} from '../typechain/MockErc20';
-import {MockGovBridge} from '../typechain/MockGovBridge';
+import { expandTo18Decimals, advanceBlock } from './shared/utilities';
+import { GovernanceToken } from '../typechain/GovernanceToken';
+import { MockERC20 } from '../typechain/MockErc20';
+import { MockGovBridge } from '../typechain/MockGovBridge';
 
-const {expect} = chai;
+const { expect } = chai;
 const minInterval = 6;
 const maxInterval = minInterval * 52;
 
