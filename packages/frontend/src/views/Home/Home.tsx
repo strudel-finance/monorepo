@@ -73,8 +73,8 @@ const Home: React.FC = () => {
   const isPast = startDate < new Date()
   return (
     <Page>
-      {isCountComplete || isPast ? (
-        <>
+      {/* {isCountComplete || isPast ? ( */}
+        {/* <> */}
           <PageHeader
             className="page-header"
             title="Enter the Strudel"
@@ -102,7 +102,6 @@ const Home: React.FC = () => {
             />
           </div>
           <Spacer size="md" />
-          <>
             <Grid container spacing={1} className="txt-grid">
               <AstroGrid item lg={4} xs={1}></AstroGrid>
               <AstroGrid item lg={4} xs={8}>
@@ -123,18 +122,19 @@ const Home: React.FC = () => {
             <Spacer size="lg" />
             <Container>
               <BalanceBCH />
-              <Spacer size="lg" />
             </Container>
+              <Spacer size="lg" />
             <Container>
               <BalancesBCHXDAI />
-              <Spacer size="lg" />
             </Container>
+              <Spacer size="lg" />
             <Container>
               <BalanceStrudel />
             </Container>
-          </>
-        </>
-      ) : (
+            <Spacer size="lg" />
+
+        {/* </> */}
+      {/* ) : (
         <>
           <Countdown
             date={startDate}
@@ -145,7 +145,7 @@ const Home: React.FC = () => {
             Join the Discord
           </MyStyledLink>
         </>
-      )}
+      )} */}
     </Page>
   )
 }

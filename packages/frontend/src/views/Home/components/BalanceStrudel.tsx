@@ -122,7 +122,7 @@ const BalanceStrudel: React.FC = () => {
   const infura = useInfura()
   const [acc, setAcc] = useState<any>()
   // !!! TODO: put that into provider
-  const networkId = (window as any).ethereum.networkVersion
+  const networkId = (window as any).ethereum?.networkVersion
 
   useEffect(() => {
     if (infura)

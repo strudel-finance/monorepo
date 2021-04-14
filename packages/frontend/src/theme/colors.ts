@@ -31,7 +31,8 @@ export const purple = {
 }
 export const grey = {
   100: '#d6e4ff',
-  200: '#d0e0fe',
+  // quick fix to raplec mobile menu bg-color
+  200: 'white',
   300: '#7b97c7',
   400: '#51473f',
   500: '#3b2c22',

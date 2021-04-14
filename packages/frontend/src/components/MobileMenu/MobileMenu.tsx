@@ -20,6 +20,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
           <StyledLink
             exact
             activeClassName="active"
+            to="/BTC"
+            onClick={onDismiss}
+          >
+            Bitcoin
+          </StyledLink>
+          <StyledLink
+            exact
+            activeClassName="active"
+            to="/BCH"
+            onClick={onDismiss}
+          >
+            Bitcoin Cash
+          </StyledLink>
+          <StyledLink
+            exact
+            activeClassName="active"
             to="/farms"
             onClick={onDismiss}
           >

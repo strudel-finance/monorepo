@@ -51,7 +51,7 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
   const { setStatus, setAccount } = useETH()
-  const networkId = (window as any).ethereum.networkVersion;
+  const networkId = (window as any).ethereum?.networkVersion
   const accountChange = (accounts: string[]) => {
     if (!accounts.length) setStatus('inactive')
     else {
@@ -60,14 +60,14 @@ const App: React.FC = () => {
     }
   }
 
-  ;(window as any).ethereum.on('networkChanged', function (networkId: string) {
-    console.log(networkId, 'networkId')
-    window.location.reload()
-    // Time to reload your interface with the new networkId
-  })
-
   if ((window as any).ethereum) {
-    ;(window as any).ethereum.on('accountsChanged', accountChange)
+    (window as any).ethereum?.on('accountsChanged', accountChange)
+    (window as any).ethereum.on('networkChanged',
+      (networkId: string) => {
+          console.log(networkId, 'networkId')
+          window.location.reload()
+        },
+    )
   } else {
     ;(window as any).addEventListener(
       'ethereum#initialized',
