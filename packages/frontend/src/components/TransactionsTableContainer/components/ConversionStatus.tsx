@@ -14,8 +14,6 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
   let isConfirmed = false
   let confirmation = undefined
 
-  console.log(tx, confirmations, 'tx, confirmations')
-  
   if (confirmations && confirmations.hasOwnProperty('confirmations')) {
     isConfirmed = confirmations.confirmations >= targetConfs
     confirmation = confirmations.confirmations

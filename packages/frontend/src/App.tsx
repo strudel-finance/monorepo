@@ -63,12 +63,13 @@ const App: React.FC = () => {
 
   if ((window as any).ethereum) {
     (window as any).ethereum.on('networkChanged',
-      (networkId: string) => {
-        localStorage.setItem('networkId', networkId);
-        window.location.reload();
-      },
+    (networkId: string) => {
+      localStorage.setItem('networkId', networkId);
+      window.location.reload();
+    },
     );
     (window as any).ethereum.on('accountsChanged', accountChange);
+    localStorage.setItem('networkId', (window as any).ethereum.networkVersion)
   } else {
     ;(window as any).addEventListener(
       'ethereum#initialized',
