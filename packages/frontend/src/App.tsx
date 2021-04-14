@@ -33,6 +33,7 @@ import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
 import BridgeProvider from './contexts/BridgeProvider'
 import Note from './views/Note'
+import { faLessThan } from '@fortawesome/pro-regular-svg-icons'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -51,7 +52,7 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
   const { setStatus, setAccount } = useETH()
-  const networkId = (window as any).ethereum?.networkVersion
+
   const accountChange = (accounts: string[]) => {
     if (!accounts.length) setStatus('inactive')
     else {
@@ -61,18 +62,19 @@ const App: React.FC = () => {
   }
 
   if ((window as any).ethereum) {
-    (window as any).ethereum?.on('accountsChanged', accountChange)
     (window as any).ethereum.on('networkChanged',
       (networkId: string) => {
-          console.log(networkId, 'networkId')
-          window.location.reload()
-        },
-    )
+        localStorage.setItem('networkId', networkId);
+        window.location.reload();
+      },
+    );
+    (window as any).ethereum.on('accountsChanged', accountChange);
   } else {
     ;(window as any).addEventListener(
       'ethereum#initialized',
       () => {
-        ;(window as any).ethereum.on('accountsChanged', accountChange)
+        localStorage.setItem('networkId', (window as any).ethereum.networkVersion);
+        (window as any).ethereum.on('accountsChanged', accountChange)
       },
       {
         once: true,
@@ -100,7 +102,7 @@ const App: React.FC = () => {
         </Route>
           <Route path="/farms" >
         {
-           networkId == 1 ?
+           localStorage.getItem('networkId') == '1' ?
                 <Farms /> :
               <Note/>
         }
