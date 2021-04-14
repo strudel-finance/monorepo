@@ -25,7 +25,7 @@ const Container = withStyles({
 })(MuiContainer)
 
 const BCH: React.FC = () => {
-  const [val, setVal] = useState('0')
+  const [val, setVal] = useState<undefined | string>(undefined)
   const [lastRequest, setLastRequest] = useState<BCHTransaction>(undefined)
 
   const { eth } = useETH()

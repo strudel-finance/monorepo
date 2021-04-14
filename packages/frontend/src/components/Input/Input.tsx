@@ -18,6 +18,10 @@ const Input: React.FC<InputProps> = ({
   value,
   disabled,
 }) => {
+  // !!! TODO: combine those 2 into
+  // const regex1 = new RegExp(/(^[0-9]{1})+(\.+)*$/)
+  // const regex2 = new RegExp(/(^[0-9]{1})+(\.[0-9]+)*$/)
+
   return (
     <StyledInputWrapper>
       {!!startAdornment && startAdornment}
@@ -28,7 +32,9 @@ const Input: React.FC<InputProps> = ({
         value={value || ''}
         onChange={onChange}
         disabled={disabled}
-        onKeyDown={(evt) => evt.key === 'e' && evt.preventDefault()}
+        onKeyDown={(evt) =>
+          (evt.key === 'e' || evt.key === '-') && evt.preventDefault()
+        }
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>

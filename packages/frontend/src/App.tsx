@@ -101,19 +101,20 @@ const App: React.FC = () => {
         <Route path="/" exact>
           <Home />
         </Route>
-          <Route path="/farms" >
-        {
-           localStorage.getItem('networkId') == '1' ?
-                <Farms /> :
-              <Note/>
-        }
+        <Route path="/farms">
+          {localStorage.getItem('networkId') == '1' ||
+          !localStorage.getItem('networkId') ? (
+            <Farms />
+          ) : (
+            <Note />
+          )}
         </Route>
         <Route path="/BTC">
           <BTC />
         </Route>
-          <Route path="/BCH">
-            <BCH />
-          </Route>
+        <Route path="/BCH">
+          <BCH />
+        </Route>
         {false && (
           <Route path="/staking">
             <Stake />

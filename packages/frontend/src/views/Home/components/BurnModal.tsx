@@ -64,7 +64,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     let calculatedStrudel =
       getInStrudelCurve(dividedSupply + Number(value)) -
       getInStrudelCurve(dividedSupply)
-    setStrudelAmount(calculatedStrudel.toFixed(0).toString())
+      setStrudelAmount(calculatedStrudel.toFixed(2).toString())
   }
 
   useEffect(() => {

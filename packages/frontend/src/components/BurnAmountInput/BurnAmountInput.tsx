@@ -1,8 +1,8 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import Button from '../Button'
-import Input, {InputProps} from '../Input'
+import Input, { InputProps } from '../Input'
 
 interface BurnAmountInputProps extends InputProps {
   symbol: string
@@ -30,7 +30,7 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
         }
         onChange={onChange}
         placeholder="Enter the amount here"
-        value={value == '0' ? undefined : value}
+        value={value}
       />
     </StyledTokenInput>
   )
@@ -52,7 +52,7 @@ const StyledTokenAdornmentWrapper = styled.div`
 `
 
 const StyledTokenSymbol = styled.span`
-  color: rgba(37,37,44,0.48);
+  color: rgba(37, 37, 44, 0.48);
   font-weight: 700;
 `
 
