@@ -40,7 +40,9 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
         {tx.hasOwnProperty('confirmed') &&
           isConfirmed &&
           !tx.ethTxHash &&
-          confirmations.isRelayed && <span>Submit to Ethereum</span>}
+          confirmations.isRelayed && (
+            <span>Submit to {coin === 'BTC' ? 'Ethereum' : 'BSC'}</span>
+          )}
         {tx.hasOwnProperty('confirmed') &&
         isConfirmed &&
         !tx.ethTxHash &&
