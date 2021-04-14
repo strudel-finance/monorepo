@@ -1,0 +1,16 @@
+.DS_*
+*.log
+logs
+**/*.backup.*
+**/*.back.*
+node_modules
+worker
+.env
+
+# production
+/build
+
+# misc
+.DS_Store
+.env
+npm-debug.log
