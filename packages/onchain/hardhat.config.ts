@@ -1,27 +1,26 @@
-import { usePlugin } from '@nomiclabs/buidler/config';
-
-usePlugin('@nomiclabs/buidler-ganache');
-usePlugin('@nomiclabs/buidler-waffle');
-usePlugin('@nomiclabs/buidler-ethers');
-usePlugin('buidler-typechain');
-usePlugin('buidler-gas-reporter');
-usePlugin('@openzeppelin/buidler-upgrades');
-usePlugin('buidler-deploy');
-usePlugin('@nomiclabs/buidler-etherscan');
+import '@nomiclabs/hardhat-waffle';
+import '@nomiclabs/hardhat-ganache';
+import '@nomiclabs/hardhat-ethers';
+import '@openzeppelin/hardhat-upgrades';
+import 'hardhat-typechain';
+import 'hardhat-gas-reporter';
+import 'hardhat-deploy';
+import '@nomiclabs/hardhat-etherscan';
 
 const INFURA_API_KEY = process.env.INFURA_API_KEY || '';
-const GOERLI_PRIVATE_KEY = process.env.GOERLI_PRIVATE_KEY || '';
 
 const COINMARKETCAP_API_KEY = process.env.COINMARKETCAP_API_KEY;
 const config = {
-  defaultNetwork: 'buidlerevm',
-  solc: {
+  defaultNetwork: 'hardhat',
+  solidity: {
     version: '0.6.6',
     optimizer: { enabled: true, runs: 500 },
   },
   paths: {
     sources: './contracts',
     tests: './test',
+    cache: './cache',
+    artifacts: './artifacts',
   },
   typechain: {
     outDir: 'typechain',
@@ -32,7 +31,7 @@ const config = {
     relayer: '0x1531b6e3d51bf80f634957df81a990b92da4b154', // suma relayer
   },
   networks: {
-    buidlerevm: {
+    hardhat: {
       accounts: [
         {
           privateKey: '0x043a569345b08ead19d1d4ba3462b30632feba623a2a85a3b000eb97f709f09f',
@@ -62,10 +61,6 @@ const config = {
       hdPath: "m/44'/60'/0'/0",
       networkId: 3,
       timeout: 0,
-    },
-    goerli: {
-      url: `https://goerli.infura.io/v3/${INFURA_API_KEY}`,
-      accounts: [GOERLI_PRIVATE_KEY],
     },
     mainnet: {
       url: `https://mainnet.infura.io/v3/blabla`,

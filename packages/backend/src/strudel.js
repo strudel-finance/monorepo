@@ -7,12 +7,14 @@ const request = require('request');
 const { PoorManRpc } = require('./utils/poorManRpc');
 
 let provider;
-const CERT = 'stripped_from_github';
-const CHAIN = 'stripped_from_github';
-const PRIV = 'stripped_from_github';
+let bscProvider;
+const CERT = 'fill in';
+const CHAIN = 'fill in';
+const PRIV = 'fill in';
 
 exports.handler = async (event, context, callback) => {
   const providerUrl = process.env.PROVIDER_URL;
+  const bscProviderUrl = process.env.BSC_PROVIDER_URL;
   let body;
   try {
     body = JSON.parse(event.body);
@@ -26,17 +28,24 @@ exports.handler = async (event, context, callback) => {
     path = event.path;
     method = event.httpMethod;
   };
-  
+
 
   if (!provider) {
     provider = new ethers.providers.JsonRpcProvider(providerUrl);
   }
+
+  if (!bscProvider) {
+    bscProvider = new ethers.providers.JsonRpcProvider(bscProviderUrl);
+  }
+
+  const isBch = (path.indexOf('bch') > -1) ? true : false;
+
   const bclient = new PoorManRpc(
     request,
     process.env.BCD_USERNAME,
     process.env.BCD_PASSWORD,
-    process.env.BCD_RPC,
-    process.env.BCD_PORT,
+    (isBch) ? process.env.BCHD_RPC : process.env.BCD_RPC,
+    (isBch) ? process.env.BCD_PORT : process.env.BCD_PORT,
   );
   const service = new StrudelHandler(
     new DB(process.env.TABLE_NAME),
@@ -45,6 +54,7 @@ exports.handler = async (event, context, callback) => {
     Buffer.from(CERT, 'hex'),
     Buffer.from(CHAIN, 'hex'),
     Buffer.from(PRIV, 'hex'),
+    bscProvider,
   );
 
   if (path.indexOf('account') > -1 && method === 'GET') {
@@ -57,6 +67,7 @@ exports.handler = async (event, context, callback) => {
         v: body.v
       });
   }
+
   if (path.indexOf('output') > -1 && method === 'POST') {
       return await service.addEthTx(
         event.path.txHash,
@@ -65,14 +76,14 @@ exports.handler = async (event, context, callback) => {
       );
   }
   if (path.indexOf('payment') > -1 && method === 'POST') {
-      return await service.addBtcTx(event.path.txHash, body.txData);
+      return await service.addBtcTx(event.path.txHash, body.txData, isBch);
   }
   if (path.indexOf('syn') > -1 && method === 'GET') {
-      const res = await service.paySyn(event.path.destination, event.path.amount);
+      const res = await service.paySyn(event.path.destination, event.path.amount, isBch);
       return res.toString('base64');
   }
   if (path.indexOf('ack') > -1 && method === 'POST') {
-      const res = await service.payAck(body);
+      const res = await service.payAck(body, isBch);
       const response = {
         statusCode: 200,
         headers: {

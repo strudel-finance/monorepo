@@ -10,9 +10,10 @@ const PROTOCOL_ID = Buffer.from("07ffff", "hex"); // 2^19-1
 
 module.exports = class StrudelHandler {
 
-  constructor(db, provider, bclient, cert, chain, priv) {
+  constructor(db, provider, bclient, cert, chain, priv, bscProvider) {
     this.db = db;
     this.provider = provider;
+    this.bscProvider = bscProvider;
     this.bclient = bclient;
     this.cert = cert;
     this.chain = chain;
@@ -53,7 +54,7 @@ module.exports = class StrudelHandler {
     return 'Created';
   }
 
-  async addBtcTx(txHash, txData) {
+  async addBtcTx(txHash, txData, isBch = false) {
     // parse tx
     const tx = Transaction.fromBuffer(Buffer.from(txData.replace('0x', ''), 'hex'));
     const txId = tx.getId();
@@ -87,7 +88,7 @@ module.exports = class StrudelHandler {
       throw new Errors.ServerError(`output has 0 value.`);
     }
     const walletAddress = `0x${tx.outs[index].script.slice(5, 25).toString('hex')}`;
-    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`);
+    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`, isBch);
     return 'Created';
   }
 
@@ -100,14 +101,24 @@ module.exports = class StrudelHandler {
     //   - same output index
     //   - same amount
     //   - same account
-    const receipt = await this.provider.getTransactionReceipt(ethTxHash);
-    let parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+    let receipt;
+    let parsedTxHash;
+    let log;
+    if (entry.bchTxHash) {
+      receipt = await this.bscProvider.getTransactionReceipt(ethTxHash);
+      parsedTxHash = receipt.logs[1].topics[1].replace('0x', '');
+      log = receipt.logs[1];
+    } else {
+      receipt = await this.provider.getTransactionReceipt(ethTxHash);
+      parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
+      log = receipt.logs[3];
+    }
     // reverse 
     parsedTxHash = parsedTxHash.match(/.{2}/g).reverse().join("");
     if (parsedTxHash !== btcTxHash) {
       throw new Errors.BadRequest(`parsed txHash ${parsedTxHash} doesn't match.`);
     }
-    const dataBuf = Buffer.from(receipt.logs[3].data.replace('0x', ''), 'hex');
+    const dataBuf = Buffer.from(log.data.replace('0x', ''), 'hex');
     const parsedOutputIndex = dataBuf.readUInt8(dataBuf.length - 1);
     if (parsedOutputIndex !== parseInt(outputIndex)) {
       throw new Errors.BadRequest(`parsed outIndex ${parsedOutputIndex} doesn't match.`);
@@ -116,7 +127,7 @@ module.exports = class StrudelHandler {
     if (parsedValue.eq(ethers.utils.bigNumberify(entry.amount))) {
       throw new Errors.BadRequest(`parsed value ${parsedValue} doesn't match.`);
     }
-    const parsedAccount = receipt.logs[3].topics[2].replace('000000000000000000000000', '');
+    const parsedAccount = log.topics[2].replace('000000000000000000000000', '');
     if (parsedAccount.toLowerCase() !== entry.account) {
       throw new Errors.BadRequest(`parsed accountAddr ${parsedAccount} doesn't match.`);
     }
@@ -135,7 +146,7 @@ module.exports = class StrudelHandler {
     return JSON.stringify(proof);
   }
 
-  async paySyn(destinationAddress, amount) {
+  async paySyn(destinationAddress, amount, isBch = false) {
     if (!ADDR_REGEX.test(destinationAddress)) {
       throw new Errors.BadRequest(`${destinationAddress} invalid ethereum address.`);
     }
@@ -153,20 +164,22 @@ module.exports = class StrudelHandler {
     output.set("script", script);
 
     const now = (Date.now() / 1000) | 0;
-    const details = new PaymentProtocol("BTC").makePaymentDetails();
+    const details = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentDetails();
     details.set("network", "main");
     details.set("outputs", output.message);
     details.set("time", now);
     details.set("expires", now + 60 * 60 * 24);
     details.set("memo", "A request to enter the strudel.");
-    details.set("payment_url", "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack");
+    details.set("payment_url", (isBch)
+      ? "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/ack"
+      : "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack");
     details.set("merchant_data", Buffer.from(JSON.stringify({ foo: "bar" })));
     const certificates = new PaymentProtocol().makeX509Certificates();
     certificates.set("certificate", [
       this.cert,
       this.chain,
     ]);
-    const request = new PaymentProtocol().makePaymentRequest();
+    const request = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentRequest();
     request.set("payment_details_version", 1);
     request.set("pki_type", "x509+sha256");
     request.set("pki_data", certificates.serialize());
@@ -178,10 +191,10 @@ module.exports = class StrudelHandler {
     return rawBody;
   }
 
-  async payAck(bodyRaw) {
+  async payAck(bodyRaw, isBch = false) {
     // Decode payment
     const body = PaymentProtocol.Payment.decode(bodyRaw);
-    const payment = new PaymentProtocol().makePayment(body);
+    const payment = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePayment(body);
     const merchantData = payment.get("merchant_data");
     const transactions = payment.get("transactions");
     const txData = transactions[0].toString("hex");
@@ -190,10 +203,10 @@ module.exports = class StrudelHandler {
     const txHash = await this.bclient.sendRawTransaction(txData);
     console.log("txHash:", txHash);
 
-    await this.addBtcTx(txHash, txData);
+    await this.addBtcTx(txHash, txData, isBch);
 
     // Make a payment acknowledgement
-    const ack = new PaymentProtocol().makePaymentACK();
+    const ack = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentACK();
     ack.set("payment", payment.message);
     ack.set("memo", "You have entered the strudel!");
     const rawBody = ack.serialize();

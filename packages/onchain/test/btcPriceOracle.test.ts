@@ -1,21 +1,17 @@
-import { ethers } from '@nomiclabs/buidler';
-import { Signer, Contract, Wallet, BigNumber } from 'ethers';
+import {ethers} from 'hardhat';
+import {Signer, Contract, Wallet, BigNumber} from 'ethers';
 import chai from 'chai';
-import { deployContract, solidity } from 'ethereum-waffle';
 import UniswapV2FactoryArtifact from '@uniswap/v2-core/build/UniswapV2Factory.json';
 import IUniswapV2PairArtifact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 import UniswapV2Router02Artifact from '@uniswap/v2-periphery/build/UniswapV2Router02.json';
-import { expandTo18Decimals, encodePrice, round, normalize } from './shared/utilities';
-import { BtcPriceOracle } from '../typechain/BtcPriceOracle';
-import { BtcPriceOracleFactory } from '../typechain/BtcPriceOracleFactory';
-import { MockErc20 } from '../typechain/MockErc20';
-import { MockErc20Factory } from '../typechain/MockErc20Factory';
-import { IUniswapV2Router02 } from '../typechain/IUniswapV2Router02';
-import { IUniswapV2Factory } from '../typechain/IUniswapV2Factory';
-import { IUniswapV2Pair } from '../typechain/IUniswapV2Pair';
+import {expandTo18Decimals, encodePrice, round, normalize} from './shared/utilities';
+import {BtcPriceOracle} from '../typechain/BtcPriceOracle';
+import {MockERC20} from '../typechain/MockERC20';
+import {IUniswapV2Router02} from '../typechain/IUniswapV2Router02';
+import {IUniswapV2Factory} from '../typechain/IUniswapV2Factory';
+import {IUniswapV2Pair} from '../typechain/IUniswapV2Pair';
 
-chai.use(solidity);
-const { expect } = chai;
+const {expect} = chai;
 
 const wEthAmount = expandTo18Decimals(400);
 
@@ -26,9 +22,9 @@ const DEC_FAC = BigNumber.from('10000000000'); // 10 ^ 10
 describe('BtcPriceOracle', () => {
   let signers: Signer[];
   let oracle: BtcPriceOracle;
-  let tBtc0: MockErc20;
-  let tBtc1: MockErc20;
-  let wEth: MockErc20;
+  let tBtc0: MockERC20;
+  let tBtc1: MockERC20;
+  let wEth: MockERC20;
   let pair0: IUniswapV2Pair;
   let pair1: IUniswapV2Pair;
   let factoryV2: IUniswapV2Factory;
@@ -37,36 +33,35 @@ describe('BtcPriceOracle', () => {
   before(async () => {
     signers = await ethers.getSigners();
     const devAddr = await signers[0].getAddress();
-    tBtc0 = await new MockErc20Factory(signers[0]).deploy(
+    const MockERC20Factory = await ethers.getContractFactory('MockERC20');
+    tBtc0 = (await MockERC20Factory.deploy(
       'WBTC',
       'WBTC',
       8,
       expandTo18Decimals(10000)
-    );
-    tBtc1 = await new MockErc20Factory(signers[0]).deploy(
+    )) as MockERC20;
+    tBtc1 = (await MockERC20Factory.deploy(
       'TBTC',
       'TBTC',
       8,
       expandTo18Decimals(10000)
-    );
-    wEth = await new MockErc20Factory(signers[0]).deploy(
+    )) as MockERC20;
+    wEth = (await MockERC20Factory.deploy(
       'wEth',
       'WETH',
       18,
       expandTo18Decimals(10000)
-    );
+    )) as MockERC20;
 
     // deploy V2
-    factoryV2 = (await deployContract(<Wallet>signers[0], UniswapV2FactoryArtifact, [
-      devAddr,
-    ])) as IUniswapV2Factory;
+    const IUniswapV2FactoryFactory = await ethers.getContractFactory('IUniswapV2Factory');
+    factoryV2 = (await IUniswapV2FactoryFactory.deploy(devAddr)) as IUniswapV2Factory;
 
     // deploy router
-    router = (await deployContract(
-      <Wallet>signers[0],
-      UniswapV2Router02Artifact,
-      [factoryV2.address, wEth.address],
-      { gasLimit: 5000000 }
+    const IUniswapV2Router02Factory = await ethers.getContractFactory('IUniswapV2Router02');
+    router = (await IUniswapV2Router02Factory.deploy(
+      factoryV2.address,
+      wEth.address
     )) as IUniswapV2Router02;
 
     // create pair
@@ -84,9 +79,10 @@ describe('BtcPriceOracle', () => {
     await pair0.mint(devAddr);
 
     // deploy oracle
-    oracle = await new BtcPriceOracleFactory(signers[0]).deploy(factoryV2.address, wEth.address, [
+    const BtcPriceOracleFactory = await ethers.getContractFactory('BtcPriceOracle');
+    oracle = (await BtcPriceOracleFactory.deploy(factoryV2.address, wEth.address, [
       tBtc0.address,
-    ]);
+    ])) as BtcPriceOracle;
   });
 
   it('update', async () => {

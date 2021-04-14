@@ -1,27 +1,20 @@
-import { ethers, upgrades } from '@nomiclabs/buidler';
-import { Signer, Contract } from 'ethers';
-import { getAdminAddress } from '@openzeppelin/upgrades-core';
+import {ethers, upgrades} from 'hardhat';
+import {Signer, Contract} from 'ethers';
+import {getAdminAddress} from '@openzeppelin/upgrades-core';
 import chai from 'chai';
-import { solidity } from 'ethereum-waffle';
 import vector from './testVector.json';
 import REGULAR_CHAIN from './headers.json';
 import { expandTo18Decimals, concatenateHexStrings } from './shared/utilities';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxyArtifact from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
-import { VbtcToken } from '../typechain/VbtcToken';
-import { StrudelToken } from '../typechain/StrudelToken';
-import { StrudelTokenFactory } from '../typechain/StrudelTokenFactory';
-import { MockRelay } from '../typechain/MockRelay';
-import { MockRelayFactory } from '../typechain/MockRelayFactory';
-import { MockBorrower } from '../typechain/MockBorrower';
-import { MockBorrowerFactory } from '../typechain/MockBorrowerFactory';
-import { MockVbtcUpgraded } from '../typechain/MockVbtcUpgraded';
-import { MockVbtcUpgradedFactory } from '../typechain/MockVbtcUpgradedFactory';
-import { Timelock } from '../typechain/Timelock';
-import { TimelockFactory } from '../typechain/TimelockFactory';
+import {VbtcToken} from '../typechain/VbtcToken';
+import {StrudelToken} from '../typechain/StrudelToken';
+import {MockRelay} from '../typechain/MockRelay';
+import {MockBorrower} from '../typechain/MockBorrower';
+import {MockVbtcUpgraded} from '../typechain/MockVbtcUpgraded';
+import {Timelock} from '../typechain/Timelock';
 
-chai.use(solidity);
-const { expect } = chai;
+const {expect} = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -48,10 +41,13 @@ describe('VBTC', async () => {
     [bob, owner, admin] = await ethers.getSigners();
 
     // deploy infrastructure
-    relay = await new MockRelayFactory(owner).deploy(BYTES32_0, 210, BYTES32_0, 211);
-    strudel = await new StrudelTokenFactory(owner).deploy();
+    const MockRelayFactory = await ethers.getContractFactory('MockRelay');
+    relay = (await MockRelayFactory.deploy(BYTES32_0, 210, BYTES32_0, 211)) as MockRelay;
+    const StrudelTokenFactory = await ethers.getContractFactory('StrudelToken');
+    strudel = (await StrudelTokenFactory.deploy()) as StrudelToken;
     const ownerAddr = await owner.getAddress();
-    ownerLock = await new TimelockFactory(owner).deploy(ownerAddr, 60 * 60 * 24);
+    const TimelockFactory = await ethers.getContractFactory('Timelock');
+    ownerLock = (await TimelockFactory.deploy(ownerAddr, 60 * 60 * 24)) as Timelock;
 
     // proxy deploy vBtc
     const VbtcToken = await ethers.getContractFactory('VbtcToken');
@@ -188,7 +184,8 @@ describe('VBTC', async () => {
       );
 
       // upgarde
-      const newImpl = await new MockVbtcUpgradedFactory(owner).deploy();
+      const MockVbtcUpgradedFactory = await ethers.getContractFactory('MockVbtcUpgraded');
+      const newImpl = (await MockVbtcUpgradedFactory.deploy()) as MockVbtcUpgraded;
       const proxy = new Contract(
         vBtc.address,
         JSON.stringify(AdminUpgradeabilityProxyArtifact.abi),

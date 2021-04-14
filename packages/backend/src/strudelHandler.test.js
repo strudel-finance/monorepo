@@ -172,6 +172,7 @@ describe('StrudelHandler', () => {
       expect(rsp).to.eql({
         "account": ADDR.toLowerCase(),
         "burns": [],
+        "bchBurns": [],
         "created": DATE,
         "r": SIG.r,
         "s": SIG.s,
@@ -200,6 +201,7 @@ describe('StrudelHandler', () => {
       // check
       expect(rsp).to.eql({
         "account": ADDR2,
+        "bchBurns": [],
         "burns": [{
           "amount": "497480",
           "btcTxHash": OP_RETURN_TX_ID_LE,
@@ -238,7 +240,7 @@ describe('StrudelHandler', () => {
     it('ack', async () => {
       sinon.stub(sdb, 'putAttributes').yields(null, {});
       const bclient = new PoorManRpc();
-      sinon.stub(bclient, 'sendRawTransaction').resolves('{\"result\":\"0x137c5db62c12be3b03b4d897a87ce1db37ed2033963d77f882484a40da487e98\"}');
+      sinon.stub(bclient, 'sendRawTransaction').resolves('0x137c5db62c12be3b03b4d897a87ce1db37ed2033963d77f882484a40da487e98');
       const reqData = Buffer.from('0a0d7b22666f6f223a22626172227d12f5020200000002002db36291f1d40452d40acbc132f183f9760619b1a0082170a6e16de8be0575010000006a47304402207515be530c4da8d91ccaae0517cbbd9975419d6ba4e51f7bd8d868a9d2a9402502205d70724b87480954ae3285f9ed98aefcb922d0ac09eac321fab3053edb9bf50c012102bcf6e76d4c2a45e289ccc3f0425357d13072f9162289583ca5e6c2b29f71b31effffffff737f4a8a93c2d778e712fe50bef93ee5c00941468b59107006347e4ecea255fe000000006b483045022100e9b478bf5a5754af839d61d367a057142d9e2f3b0c4990f3583eb768f0d9c4c9022045b6a10ba93fd175e0068cd9f1ba0fdcfb9e3ec3fae38aa1d57101328a82a0e1012102db95a091990d6d0e5d0d076924efdc9a4133490b567a340d1733e307d18f1408ffffffff021027000000000000196a1707ffff8db6b632d743aef641146dc943acb64957155388c1a90100000000001976a914d1b1780cd6b9e1e959e2f3eee459c47e7955595f88ac000000001a1e08904e121976a9140fc192b8b798b9e32aebdb631ea773a07586c76488ac', 'hex');
       const rsp = await new StrudelHandler(db, null, bclient, Buffer.from(cert, 'hex'), Buffer.from(chain, 'hex'), Buffer.from(priv, 'hex')).payAck(reqData);
       console.log(rsp);

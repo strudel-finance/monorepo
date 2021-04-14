@@ -16,19 +16,24 @@ exports.DB = class DB extends SimpleDb {
     });
   }
 
-  setPaymentOutput(txHash, outputIndex, walletAddress, amount) {
+  setPaymentOutput(txHash, outputIndex, walletAddress, amount, isBch = false) {
     const pad = "00";
     const oi = (pad + outputIndex).slice(-pad.length);
     if (typeof amount == 'number') {
       throw new Error(`Error: amount should not be number.`);
     }
-    return this.setAttrs(`${txHash}-${oi}`, {
+    const entry = {
       account: walletAddress,
       created: new Date().toString(),
       outputIndex: `${outputIndex}`,
       amount,
       btcTxHash: txHash
-    });
+    };
+    if (isBch) {
+      delete entry.btcTxHash;
+      entry.bchTxHash = txHash;
+    }
+    return this.setAttrs(`${txHash}-${oi}`, entry);
   }
 
   async getPaymentOutput(txHash, outputIndex) {
@@ -53,7 +58,8 @@ exports.DB = class DB extends SimpleDb {
     // get sig, if any
     const rsp = await this.getAttr(walletAddress, {
       account: walletAddress,
-      burns: []
+      burns: [],
+      bchBurns: [],
     });
     if (rsp.v) {
       rsp.v = parseInt(rsp.v);
@@ -64,16 +70,29 @@ exports.DB = class DB extends SimpleDb {
       throw new Error(`Not Found: account ${walletAddress} not found in db.`);
     }
     payments.forEach((payment) => {
-      const burn = {
-        btcTxHash: payment.Attributes.btcTxHash,
-        amount: payment.Attributes.amount,
-        burnOutputIndex: payment.Attributes.outputIndex,
-        dateCreated: payment.Attributes.created
-      };
-      if (payment.Attributes.ethTxHash) {
-        burn.ethTxHash = payment.Attributes.ethTxHash;
-      } 
-      rsp.burns.push(burn);
+      if (payment.Attributes.btcTxHash) {
+        const burn = {
+          btcTxHash: payment.Attributes.btcTxHash,
+          amount: payment.Attributes.amount,
+          burnOutputIndex: payment.Attributes.outputIndex,
+          dateCreated: payment.Attributes.created
+        };
+        if (payment.Attributes.ethTxHash) {
+          burn.ethTxHash = payment.Attributes.ethTxHash;
+        } 
+        rsp.burns.push(burn);
+      } else {
+        const bchBurn = {
+          bchTxHash: payment.Attributes.bchTxHash,
+          amount: payment.Attributes.amount,
+          burnOutputIndex: payment.Attributes.outputIndex,
+          dateCreated: payment.Attributes.created
+        };
+        if (payment.Attributes.ethTxHash) {
+          bchBurn.ethTxHash = payment.Attributes.ethTxHash;
+        } 
+        rsp.bchBurns.push(bchBurn);
+      }
     });
     return rsp;
   }
