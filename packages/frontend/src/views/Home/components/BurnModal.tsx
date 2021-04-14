@@ -18,8 +18,10 @@ import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
 import useVBCH from '../../../hooks/useVBCH'
 import useInfura from '../../../hooks/useInfura'
+
 import { contractAddresses } from '../../../tokens/lib/constants'
 import BridgeAbi from '../../../tokens/lib/abi/bridge.json'
+
 interface BurnModalProps extends ModalProps {
   value: number | string
   address: string
