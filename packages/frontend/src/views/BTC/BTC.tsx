@@ -125,7 +125,13 @@ const BTC: React.FC = () => {
               </Grid>
             </Grid>
           </div>
+          <Spacer size="lg"/>
+          <CenteringDiv>
+            <Button text="See Terra Farms" to="/farms" size='xl'/>
+          </CenteringDiv>
+          <Spacer size="lg" />
         </>
+        
       ) : (
         <Page>
           <div
@@ -159,6 +165,15 @@ const StyledInfo = styled.h3`
   > b {
     color: ${(props) => props.theme.color.grey[600]};
   }
+`
+
+// !!! TODO: create styled component that will replace all flex divs and place it in some top level component
+export const CenteringDiv = styled.div`
+  align-items: center;
+  display: flex;
+  flex: 1;
+  text-align: center;
+  justify-content: center;
 `
 
 export default BTC

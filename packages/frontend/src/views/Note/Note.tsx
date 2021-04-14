@@ -2,7 +2,8 @@ import React from 'react'
 import Page from '../../components/Page'
 import { Switch } from 'react-router-dom'
 import { ReddishTextTypography } from '../../components/TransactionsTableContainer/TransactionsTableContainer'
-import styled from 'styled-components'
+import { CenteringDiv } from '../BTC/BTC'
+
 const Note: React.FC = () => {
   return (
     <Switch>
@@ -18,14 +19,5 @@ const Note: React.FC = () => {
     </Switch>
   )
 }
-
-// !!! TODO: create styled component that will replace all flex divs
-const CenteringDiv = styled.div`
-align-items: center;
-display: flex;
-flex: 1;
-margin: 50px;
-text-align: center;
-`
 
 export default Note

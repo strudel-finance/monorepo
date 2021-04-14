@@ -15,6 +15,7 @@ import useETH from '../../hooks/useETH'
 import Button from '../../components/Button'
 import Page from '../../components/Page'
 import WalletProviderModal from '../../components/WalletProviderModal'
+import { CenteringDiv } from '../BTC/BTC'
 
 const Container = withStyles({
   root: {
@@ -124,6 +125,11 @@ const BCH: React.FC = () => {
               </Grid>
             </Grid>
           </div>
+          <Spacer size="lg" />
+          <CenteringDiv>
+            <Button text="See Terra Farms" to="/farms" size="xl" />
+          </CenteringDiv>
+          <Spacer size="lg" />
         </>
       ) : (
         <Page>
