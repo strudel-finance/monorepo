@@ -14,7 +14,7 @@ const config = {
   defaultNetwork: 'hardhat',
   solidity: {
     version: '0.6.6',
-    optimizer: {enabled: true, runs: 500},
+    optimizer: { enabled: true, runs: 500 },
   },
   paths: {
     sources: './contracts',

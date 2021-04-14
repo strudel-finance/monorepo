@@ -1,6 +1,6 @@
-import {BigNumber, Contract, utils} from 'ethers';
-import {ethers} from 'hardhat';
-const {keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack} = utils;
+import { BigNumber, Contract, utils } from 'ethers';
+import { ethers } from 'hardhat';
+const { keccak256, defaultAbiCoder, toUtf8Bytes, solidityPack } = utils;
 
 export function expandTo18Decimals(n: number): BigNumber {
   return BigNumber.from(n).mul(BigNumber.from(10).pow(18));

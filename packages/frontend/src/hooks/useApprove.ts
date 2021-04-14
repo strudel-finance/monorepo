@@ -1,14 +1,14 @@
-import {useCallback} from 'react'
-
+import { useCallback } from 'react'
 import useVBTC from './useVBTC'
-import {useWallet} from 'use-wallet'
-import {provider} from 'web3-core'
-import {Contract} from 'web3-eth-contract'
+import { provider } from 'web3-core'
+import { Contract } from 'web3-eth-contract'
 
-import {approve, getMasterChefContract} from '../vbtc/utils'
+import { approve, getMasterChefContract } from '../tokens/utils'
+import useETH from './useETH'
 
 const useApprove = (lpContract: Contract) => {
-  const {account}: {account: string; ethereum: provider} = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
   const masterChefContract = getMasterChefContract(vbtc)
 
@@ -21,7 +21,7 @@ const useApprove = (lpContract: Contract) => {
     }
   }, [account, lpContract, masterChefContract])
 
-  return {onApprove: handleApprove}
+  return { onApprove: handleApprove }
 }
 
 export default useApprove

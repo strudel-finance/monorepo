@@ -1,45 +1,48 @@
-import Typography from '@material-ui/core/Typography'
-import React from 'react'
-
-import { Transaction, Confirmation } from '../../../types/types'
-
 import { ReddishTextTypography } from '../TransactionsTableContainer'
+import React from 'react'
+import { useLocation } from 'react-router'
+import { BTCTransaction, Confirmation } from '../../../types/types'
 
 interface Props {
-  tx: Transaction
+  tx: BTCTransaction
   confirmations?: Confirmation
 }
 
 const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
-  const targetBtcConfs = 6
+  const coin: 'BTC' | 'BCH' = useLocation().pathname.slice(1) as 'BTC' | 'BCH'
+  const targetConfs = 6
   let isConfirmed = false
   let confirmation = undefined
+
   if (confirmations && confirmations.hasOwnProperty('confirmations')) {
-    isConfirmed = confirmations.confirmations >= targetBtcConfs
+    isConfirmed = confirmations.confirmations >= targetConfs
     confirmation = confirmations.confirmations
   }
 
   return (
     <React.Fragment>
       <ReddishTextTypography variant="caption">
-        {!tx.hasOwnProperty('confirmed') ? (
-          <span>{`Waiting for BTC to be sent`}</span>
-        ) : null}
-        {tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed ? (
-          <span>
-            BTC transaction confirming (
-            {confirmation === undefined || confirmation < 0
-              ? '...'
-              : confirmation}
-            /{targetBtcConfs} complete)
-          </span>
-        ) : null}
+        {!tx.hasOwnProperty('confirmed') && (
+          <span>{`Waiting for ${coin} to be sent`}</span>
+        )}
         {tx.hasOwnProperty('confirmed') &&
-        isConfirmed &&
-        !tx.ethTxHash &&
-        confirmations.isRelayed ? (
-          <span>Submit to Ethereum</span>
-        ) : null}
+          !tx.confirmed &&
+          !isConfirmed &&
+          confirmations && (
+            <span>
+              {coin} transaction confirming (
+              {!confirmation ? '0' : confirmation}/{targetConfs} complete)
+            </span>
+          )}
+        {tx.hasOwnProperty('confirmed') && confirmations == null && (
+          <div className="loading">Fetching data</div>
+        )}
+        {tx.hasOwnProperty('confirmed') &&
+          isConfirmed &&
+          !tx.ethTxHash &&
+          confirmations.isRelayed && (
+            <span>Submit to {coin === 'BTC' ? 'Ethereum' : 'BSC'}</span>
+          )}
         {tx.hasOwnProperty('confirmed') &&
         isConfirmed &&
         !tx.ethTxHash &&

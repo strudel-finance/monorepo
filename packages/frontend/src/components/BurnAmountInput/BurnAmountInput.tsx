@@ -1,16 +1,22 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 
 import Button from '../Button'
-import Input, {InputProps} from '../Input'
+import Input, { InputProps } from '../Input'
 
 interface BurnAmountInputProps extends InputProps {
   symbol: string
 }
 
-const BurnAmountInput: React.FC<BurnAmountInputProps> = ({onChange, value}) => {
+const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
+  onChange,
+  value,
+  symbol,
+}) => {
   return (
-    <StyledTokenInput>
+    <StyledTokenInput
+      className={`styled-token-input ${symbol === 'BTC' ? 'btc' : 'bch'}`}
+    >
       <Input
         startAdornment={
           <StyledTokenAdornmentWrapper>
@@ -18,12 +24,12 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({onChange, value}) => {
           </StyledTokenAdornmentWrapper>
         }
         endAdornment={
-          <StyledTokenAdornmentWrapper>
-            <StyledTokenSymbol>BTC</StyledTokenSymbol>
+          <StyledTokenAdornmentWrapper className="styled-token-wrapper">
+            <StyledTokenSymbol>{symbol}</StyledTokenSymbol>
           </StyledTokenAdornmentWrapper>
         }
         onChange={onChange}
-        placeholder="0"
+        placeholder="Enter the amount here"
         value={value}
       />
     </StyledTokenInput>
@@ -46,7 +52,7 @@ const StyledTokenAdornmentWrapper = styled.div`
 `
 
 const StyledTokenSymbol = styled.span`
-  color: ${(props) => props.theme.color.grey[600]};
+  color: rgba(37, 37, 44, 0.48);
   font-weight: 700;
 `
 

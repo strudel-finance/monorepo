@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import Countdown, { CountdownRenderProps } from 'react-countdown'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
@@ -15,12 +14,12 @@ import useAllStakedValue, {
 } from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
 import useVBTC from '../../../hooks/useVBTC'
-import { getEarned, getMasterChefContract } from '../../../vbtc/utils'
+import { getEarned, getMasterChefContract } from '../../../tokens/utils'
 import { bnToDec } from '../../../utils'
-import { StrudelMoving, VBTCSpin } from '../../../components/Lottie'
 import StrudelImg from '../../../assets/img/Strudel-logo-Icon.png'
 import BTCImg from '../../../assets/img/Strudel-Bitcoin-Icon.png'
 import OneBTCImg from '../../../assets/img/onevBTC.png'
+import useETH from '../../../hooks/useETH'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
@@ -31,7 +30,6 @@ interface FarmWithStakedValue extends Farm, StakedValue {
 
 const FarmCards: React.FC = () => {
   const [farms] = useFarms()
-  const { account } = useWallet()
   const stakedValue = useAllStakedValue()
 
   const strudelIndex = farms.findIndex(
@@ -42,7 +40,6 @@ const FarmCards: React.FC = () => {
     strudelIndex >= 0 && stakedValue[strudelIndex]
       ? stakedValue[strudelIndex].tokenPriceInWeth
       : new BigNumber(0)
-  //console.log(strudelPrice.toString())
   const BLOCKS_PER_YEAR = new BigNumber(2336000)
   const STRUDEL_PER_BLOCK = new BigNumber(1)
 
@@ -107,7 +104,8 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
-  const { account } = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const { lpTokenAddress } = farm
   const vbtc = useVBTC()
 
@@ -183,6 +181,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
             </StyledDetails>
             <Spacer />
             <Button
+              hideBoxShadow={true}
               disabled={!poolActive}
               text={poolActive ? 'Select' : undefined}
               to={`/farms/${farm.id}`}
@@ -295,6 +294,7 @@ const StyledDetails = styled.div`
 `
 
 const StyledDetail = styled.div`
+  white-space: nowrap;
   color: ${(props) => props.theme.color.grey[500]};
 `
 

@@ -1,11 +1,11 @@
-import {ethers, upgrades} from 'hardhat';
-import {Signer, Contract} from 'ethers';
-import {getAdminAddress} from '@openzeppelin/upgrades-core';
+import { ethers, upgrades } from 'hardhat';
+import { Signer, Contract } from 'ethers';
+import { getAdminAddress } from '@openzeppelin/upgrades-core';
 import chai from 'chai';
-import {expandTo18Decimals, concatenateHexStrings} from './shared/utilities';
-import {BchMainnetToken} from '../typechain/BchMainnetToken';
+import { expandTo18Decimals, concatenateHexStrings } from './shared/utilities';
+import { BchMainnetToken } from '../typechain/BchMainnetToken';
 
-const {expect} = chai;
+const { expect } = chai;
 const MAX_SUPPLY = expandTo18Decimals(21000000);
 
 describe('VBCH', async () => {
@@ -24,14 +24,16 @@ describe('VBCH', async () => {
 
   describe('#totalSupply', async () => {
     it('should allow to report new supply', async () => {
-      //#check supply 
+      //#check supply
       let totalSupply = await bchToken.totalSupply();
       expect(totalSupply).to.eq(0);
-      const balance = await bchToken.balanceOf((await (await ethers.getSigners())[0].getAddress()));
+      const balance = await bchToken.balanceOf(await (await ethers.getSigners())[0].getAddress());
       expect(balance).to.eq(MAX_SUPPLY);
 
       // try to report supply from non-owner account
-      await expect(bchToken.connect((await ethers.getSigners())[1]).reportSupply(100000)).to.be.revertedWith("caller is not the owner");
+      await expect(
+        bchToken.connect((await ethers.getSigners())[1]).reportSupply(100000)
+      ).to.be.revertedWith('caller is not the owner');
 
       //report new supply
       await bchToken.reportSupply(100000);
@@ -40,17 +42,17 @@ describe('VBCH', async () => {
     });
 
     it('should allow to burn', async () => {
-      let balance = await bchToken.balanceOf((await (await ethers.getSigners())[0].getAddress()));
+      let balance = await bchToken.balanceOf(await (await ethers.getSigners())[0].getAddress());
       expect(balance).to.eq(MAX_SUPPLY);
 
-      await expect(bchToken.burn(MAX_SUPPLY)).to.be.revertedWith("subtraction overflow");
+      await expect(bchToken.burn(MAX_SUPPLY)).to.be.revertedWith('subtraction overflow');
 
       await bchToken.burn(100000);
 
       let totalSupply = await bchToken.totalSupply();
       expect(totalSupply).to.eq(0);
 
-      balance = await bchToken.balanceOf((await (await ethers.getSigners())[0].getAddress()));
+      balance = await bchToken.balanceOf(await (await ethers.getSigners())[0].getAddress());
       expect(balance).to.eq(MAX_SUPPLY.sub('100000'));
     });
   });

@@ -1,39 +1,31 @@
 import BigNumber from 'bignumber.js'
 import { withStyles } from '@material-ui/core'
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react'
+import React, { useCallback, useState, useEffect } from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
-import CardIcon from '../../../components/CardIcon'
 import Modal, { ModalProps } from '../../../components/Modal'
 import ModalActions from '../../../components/ModalActions'
-import ModalTitle from '../../../components/ModalTitle'
 import ModalContent from '../../../components/ModalContent'
-import TokenInput from '../../../components/TokenInput'
-import { getFullDisplayBalance } from '../../../utils/formatBalance'
-import Value from '../../../components/Value'
 import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
-import { Transaction } from '../../../types/types'
 import QRCode from 'qrcode.react'
 import StrudelIcon from '../../../components/StrudelIcon'
-import useVBTC from '../../../hooks/useVBTC'
-import { getVbtcSupply } from '../../../vbtc/utils'
-import BitcoinIcon from '../../../components/BitcoinIcon'
-import VBTCIcon from '../../../components/VBTCIcon'
-import vortex from '../../../assets/img/vortex.png'
-
-import MuiGrid from '@material-ui/core/Grid'
-
-import sb from 'satoshi-bitcoin'
+import OrgIcons from '../../../components/BitcoinIcon'
+import VIcons from '../../../components/VBTCIcon'
+import { BTCTransaction } from '../../../types/types'
+import { urlAssembler } from '../../../utils/urlAssembler'
+import useVBCH from '../../../hooks/useVBCH'
+import useInfura from '../../../hooks/useInfura'
 
 interface BurnModalProps extends ModalProps {
   value: number | string
   address: string
   onConfirm?: (amount: string) => void
-  onAddition?: (tx: Transaction) => void
+  onAddition?: (tx: BTCTransaction) => void
   continueV?: boolean
+  coin: 'bitcoin' | 'bitcoincash'
 }
 
 const Label = styled.div`
@@ -42,12 +34,6 @@ const Label = styled.div`
   font-size: 20px;
 `
 
-const Grid = withStyles({
-  item: {
-    margin: 'auto',
-  },
-})(MuiGrid)
-
 const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   value,
   address,
@@ -55,31 +41,30 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   onAddition,
   continueV = false,
   onDismiss,
+  coin
 }) => {
-  const [val, setVal] = useState('')
-  const [pendingTx, setPendingTx] = useState(false)
-  const [checked, setChecked] = useState(false)
+  const [checked, setChecked] = useState<boolean>(false)
   const [continued, setContinued] = useState(continueV)
   const [strudelAmount, setStrudelAmount] = useState(null)
-  const vbtc = useVBTC()
+  const coinAbrv = coin === 'bitcoincash' ? 'BCH' : 'BTC'
+  const infura = useInfura()
 
-  const handleChange = useCallback(
-    (e: React.FormEvent<HTMLInputElement>) => {
-      setVal(e.currentTarget.value)
-    },
-    [setVal],
-  )
   const getInStrudelCurve = (x: number): number => {
     return (-1 * ((x - 63000000) * Math.sqrt(x))) / (3000 * Math.sqrt(21)) / 3
   }
 
   const calculateStrudel = async () => {
-    const supply = await getVbtcSupply(vbtc)
+    // more ugly stuff
+    const supply =
+      coin === 'bitcoin'
+        ? new BigNumber(await infura.vBTC.methods.totalSupply().call())
+        : new BigNumber(await infura.vBCH.methods.totalSupply().call())
+
     let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
     let calculatedStrudel =
       getInStrudelCurve(dividedSupply + Number(value)) -
       getInStrudelCurve(dividedSupply)
-    setStrudelAmount(calculatedStrudel.toFixed(0).toString())
+      setStrudelAmount(calculatedStrudel.toFixed(2).toString())
   }
 
   useEffect(() => {
@@ -87,9 +72,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }, [])
 
   const handleClick = (event: any) => {
-    event.target.firstElementChild.checked = !event.target.firstElementChild
-      .checked
-    setChecked(event.target.firstElementChild.checked)
+    setChecked(!checked)
     onAddition({
       txCreatedAt: new Date(),
       value: String(value),
@@ -106,76 +89,95 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }
 
   return (
-    <Modal>
-      <ModalTitle text={`Confirm Transaction`} />
-      <ModalContent>
-        <Spacer size="sm" />
+    <Modal className="modal-wrap" classNameChilderen="modal-child-wrap">
+      <div className="big-title">Confirm Transaction</div>
+      <ModalContent className="modal-content">
         {!continued ? (
           <>
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <BitcoinIcon size={60} />
-                  <Label>{value.toString() + 'BTC'} </Label>
-                </StyledBalance>
-              </StyledBalanceWrapper>
+            <div className="burn-item">
+              <div className="burn-item-img">
+                {coinAbrv === 'BTC' ? (
+                  <VIcons.VBTCIcon size={48} />
+                ) : (
+                  <VIcons.VBCHIcon size={48} />
+                )}
+              </div>
+              <div className="burn-item-content">
+                <div className="burn-item-title">v{coinAbrv} Amount</div>
+                <div className="burn-item-amount">
+                  {value.toString() + ` v${coinAbrv}`}
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <img src={vortex} height="120" />
-                </StyledBalance>
-              </StyledBalanceWrapper>
+            <div className="burn-item">
+              <div className="burn-item-img">
+                <StrudelIcon size={48} />
+              </div>
+              <div className="burn-item-content">
+                <div className="burn-item-title">$TRDL Amount</div>
+                <div className="burn-item-amount">{strudelAmount} $TRDL</div>
+              </div>
             </div>
-            <Grid container spacing={1}>
-              <Grid item xs={5}>
-                <StyledBalance>
-                  <VBTCIcon size={60} />
-                  <Label>{value.toString() + ' vBTC'} </Label>
-                </StyledBalance>
-              </Grid>
-
-              <Grid item xs={2}>
-                <Label style={{ textAlign: 'center' }}>+</Label>
-              </Grid>
-
-              <Grid item xs={5}>
-                <StyledBalance>
-                  <StrudelIcon size={60} />
-                  <Label>{'~ ' + strudelAmount + ' $TRDL'} </Label>
-                </StyledBalance>
-              </Grid>
-            </Grid>
-            <Spacer size="sm" />
-            <div style={{ display: 'flex' }}>
-              <StyledBalanceWrapper>
-                <StyledBalance>
-                  <DangerLabel
-                    checkbox={<Checkbox onChange={handleCheckboxChange} />}
-                    text="❗️Attention: You can only mint vBTC when burning BTC ❗️"
-                    onClick={handleClick}
+            <div className="burn-divider"></div>
+            <div className="burn-item">
+              <div className="burn-item-img">
+                {coinAbrv === 'BTC' ? (
+                  <OrgIcons.BitcoinIcon size={48} />
+                ) : (
+                  <OrgIcons.BitcoinCashIcon size={48} />
+                )}
+              </div>
+              <div className="burn-item-content">
+                <div className="burn-item-title">{coinAbrv} Amount</div>
+                <div className="burn-item-amount">
+                  {value.toString()} {coinAbrv}
+                </div>
+              </div>
+            </div>
+            <div className="checkbox-wrap">
+              <DangerLabel
+                className="danger-label"
+                color="rgba(229,147,16,1)"
+                checkbox={<Checkbox onChange={handleCheckboxChange} checked={checked } />}
+                text={
+                  'Attention: You can only mint v' +
+                  coinAbrv +
+                  ' when burning ' +
+                  coinAbrv
+                }
+                onClick={handleClick}
+              />
+            </div>
+            <div className="modal-btm">
+              {!continued ? (
+                <ModalActions>
+                  <Button onClick={onDismiss} text="Cancel" />
+                  <Button
+                    className={
+                      'glow-btn' + (coinAbrv === 'BTC' ? ' orange' : ' green')
+                    }
+                    text="Confirm transaction"
+                    onClick={handleContinue}
+                    disabled={!checked}
                   />
-                </StyledBalance>
-              </StyledBalanceWrapper>
+                </ModalActions>
+              ) : (
+                <ModalActions>
+                  <Button onClick={onDismiss} text="Close" />
+                </ModalActions>
+              )}
             </div>
           </>
         ) : (
           <>
             <StyledBalanceWrapper>
-              <QRCode
-                size={256}
-                value={`bitcoin:?r=https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/${address}/${sb
-                  .toSatoshi(value)
-                  .toString()}`}
-              />
+              <QRCode size={256} value={urlAssembler(coin, address, value)} />
             </StyledBalanceWrapper>
             <StyledBalanceWrapper>
               <StyledBalance>
-                <p
-                  style={{ wordBreak: 'break-all', textAlign: 'center' }}
-                >{`bitcoin:?r=https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/${address}/${sb
-                  .toSatoshi(value)
-                  .toString()}`}</p>
+                <p style={{ wordBreak: 'break-all', textAlign: 'center' }}>
+                  {urlAssembler(coin, address, value)}
+                </p>
                 <Label>Please scan the following QR code</Label>
                 <Label style={{ fontWeight: 500 }}>
                   Check compatible{' '}
@@ -192,20 +194,6 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
         )}
         <Spacer size="sm" />
       </ModalContent>
-      {!continued ? (
-        <ModalActions>
-          <Button
-            onClick={handleContinue}
-            text="Continue"
-            disabled={!checked}
-          />
-          <Button onClick={onDismiss} text="Cancel" />
-        </ModalActions>
-      ) : (
-        <ModalActions>
-          <Button onClick={onDismiss} text="Close" />
-        </ModalActions>
-      )}
     </Modal>
   )
 }

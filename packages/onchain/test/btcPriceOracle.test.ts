@@ -1,17 +1,17 @@
-import {ethers} from 'hardhat';
-import {Signer, Contract, Wallet, BigNumber} from 'ethers';
+import { ethers } from 'hardhat';
+import { Signer, Contract, Wallet, BigNumber } from 'ethers';
 import chai from 'chai';
 import UniswapV2FactoryArtifact from '@uniswap/v2-core/build/UniswapV2Factory.json';
 import IUniswapV2PairArtifact from '@uniswap/v2-core/build/IUniswapV2Pair.json';
 import UniswapV2Router02Artifact from '@uniswap/v2-periphery/build/UniswapV2Router02.json';
-import {expandTo18Decimals, encodePrice, round, normalize} from './shared/utilities';
-import {BtcPriceOracle} from '../typechain/BtcPriceOracle';
-import {MockERC20} from '../typechain/MockERC20';
-import {IUniswapV2Router02} from '../typechain/IUniswapV2Router02';
-import {IUniswapV2Factory} from '../typechain/IUniswapV2Factory';
-import {IUniswapV2Pair} from '../typechain/IUniswapV2Pair';
+import { expandTo18Decimals, encodePrice, round, normalize } from './shared/utilities';
+import { BtcPriceOracle } from '../typechain/BtcPriceOracle';
+import { MockERC20 } from '../typechain/MockERC20';
+import { IUniswapV2Router02 } from '../typechain/IUniswapV2Router02';
+import { IUniswapV2Factory } from '../typechain/IUniswapV2Factory';
+import { IUniswapV2Pair } from '../typechain/IUniswapV2Pair';
 
-const {expect} = chai;
+const { expect } = chai;
 
 const wEthAmount = expandTo18Decimals(400);
 

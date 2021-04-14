@@ -24,13 +24,41 @@ export interface Confirmation {
   confirmations?: number
   tx_hex?: string
 }
-export interface Transaction {
+
+interface Transaction  {
   txCreatedAt: Date
   value: string //in BTC not satoshi
   confirmed?: boolean
-  btcTxHash?: string
   burnOutputIndex?: string
   ethTxHash?: string
   ethAddress?: string
   proof?: Proof
+}
+export interface BTCTransaction extends Transaction {
+  btcTxHash?: string
+}
+
+export interface BCHTransaction extends Transaction{
+  bchTxHash?: string
+}
+
+interface Burns {
+  amount: string // satoshis
+  dateCreated: Date
+  status: string
+  burnOutputIndex: string
+  ethTxHash?: string
+}
+
+interface BCHBurns extends Burns {
+  bchTxHash: string
+}
+
+interface BTCBurns extends Burns {
+  btcTxHash: string
+}
+export interface AccountRequest {
+  account: string
+  burns: BTCBurns[]
+  bchBurns: BCHBurns[]
 }

@@ -1,15 +1,15 @@
-import {ethers, upgrades} from 'hardhat';
-import {Signer} from 'ethers';
+import { ethers, upgrades } from 'hardhat';
+import { Signer } from 'ethers';
 import chai from 'chai';
 import vector from './testVector.json';
-import {expandTo18Decimals, advanceTime} from './shared/utilities';
-import {MockERC20} from '../typechain/MockERC20';
-import {MockPriceOracle} from '../typechain/MockPriceOracle';
-import {DutchSwapAuction} from '../typechain/DutchSwapAuction';
-import {DutchSwapFactory} from '../typechain/DutchSwapFactory';
-import {AuctionManager} from '../typechain/AuctionManager';
+import { expandTo18Decimals, advanceTime } from './shared/utilities';
+import { MockERC20 } from '../typechain/MockERC20';
+import { MockPriceOracle } from '../typechain/MockPriceOracle';
+import { DutchSwapAuction } from '../typechain/DutchSwapAuction';
+import { DutchSwapFactory } from '../typechain/DutchSwapFactory';
+import { AuctionManager } from '../typechain/AuctionManager';
 
-const {expect} = chai;
+const { expect } = chai;
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 describe('AuctionManager', () => {

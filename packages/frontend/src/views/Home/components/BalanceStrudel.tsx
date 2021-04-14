@@ -2,7 +2,6 @@ import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import CountUp from 'react-countup'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
@@ -12,10 +11,11 @@ import StrudelIcon from '../../../components/StrudelIcon'
 import useAllEarnings from '../../../hooks/useAllEarnings'
 import useAllStakedValue from '../../../hooks/useAllStakedValue'
 import useFarms from '../../../hooks/useFarms'
-import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import { getStrudelAddress, getStrudelSupply } from '../../../vbtc/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
+import useETH from '../../../hooks/useETH'
+import useInfura from '../../../hooks/useInfura'
+import ValueBTC from '../../../components/ValueBTC'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -114,19 +114,34 @@ const Multiplier: React.FC = () => {
 
 const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
+  const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
   const vbtc = useVBTC()
-  const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
-  const { account, ethereum }: { account: any; ethereum: any } = useWallet()
+  // const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
+  const { eth } = useETH()
+  const account = eth?.account
+  const infura = useInfura()
+  const [acc, setAcc] = useState<any>()
+  // !!! TODO: put that into provider
+  const networkId = (window as any).ethereum?.networkVersion
 
   useEffect(() => {
-    async function fetchTotalSupply() {
-      const supply = await getStrudelSupply(vbtc)
-      setTotalSupply(supply)
-    }
-    if (vbtc) {
-      fetchTotalSupply()
-    }
-  }, [vbtc, setTotalSupply])
+    if (infura)
+        infura.trdl.methods
+          .totalSupply()
+          .call()
+          .then((balance: string) => {
+            setTotalSupply(new BigNumber(balance))
+          })
+    
+          if (eth?.account) {
+            infura.trdl.methods
+            .balanceOf(eth.account)
+            .call()
+            .then((balance: string) => {
+              setStrudelBalance(new BigNumber(balance))
+            })
+          }
+        }, [infura, eth?.account])
 
   return (
     <StyledWrapper>
@@ -135,37 +150,45 @@ const BalanceStrudel: React.FC = () => {
           <StyledBalances>
             <StyledBalance>
               <StrudelIcon />
-              <Spacer size='xs' />
+              <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your $TRDL Balance" />
-                <Value
+                <ValueBTC
                   value={
-                    !!account ? getBalanceNumber(strudelBalance) : 'Locked'
+                    (!!account && !!strudelBalance)
+                      ? getBalanceNumber(strudelBalance)
+                      : 'Locked'
                   }
                 />
               </div>
             </StyledBalance>
           </StyledBalances>
         </CardContent>
-        <Footnote>
-          Pending harvest
-          <FootnoteValue>
-            <PendingRewards /> $TRDL
-          </FootnoteValue>
-        </Footnote>
+       { 
+        networkId == 1 &&
+          <Footnote>
+            Pending harvest
+            <FootnoteValue>
+              <PendingRewards /> $TRDL
+            </FootnoteValue>
+          </Footnote>
+        }
       </Card>
-      <Spacer />
-
+      <Spacer/>
       <Card>
         <CardContent>
           <Label text="Total $TRDL Supply" />
-          <Value
-            value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
+          <ValueBTC
+            value= {totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
         </CardContent>
-        <Footnote>
-        <FootnoteValue><Multiplier /> $TRDL / block</FootnoteValue>
-        </Footnote>
+        {
+          networkId == 1 &&
+          <Footnote>
+            <FootnoteValue>
+              <Multiplier /> $TRDL / block
+          </FootnoteValue>
+          </Footnote>}
       </Card>
     </StyledWrapper>
   )

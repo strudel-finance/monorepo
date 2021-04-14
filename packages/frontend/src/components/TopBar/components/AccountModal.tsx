@@ -1,12 +1,14 @@
 import React, { useCallback } from 'react'
 import styled from 'styled-components'
-import { useWallet } from 'use-wallet'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
-import { getStrudelAddress, getVbtcAddress } from '../../../vbtc/utils'
+import {
+  getStrudelAddress,
+  getVbtcAddress,
+  getVbchAddress,
+} from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import Button from '../../Button'
-import CardIcon from '../../CardIcon'
 import Label from '../../Label'
 import Modal, { ModalProps } from '../../Modal'
 import ModalActions from '../../ModalActions'
@@ -16,18 +18,24 @@ import Spacer from '../../Spacer'
 import Value from '../../Value'
 import ValueBTC from '../../ValueBTC'
 import StrudelIcon from '../../StrudelIcon'
+import useETH from '../../../hooks/useETH'
+import useVBCH from '../../../hooks/useVBCH'
 
 const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
-  const { account, reset } = useWallet()
+  const { eth, setStatus } = useETH()
+  const account = eth?.account
 
   const handleSignOutClick = useCallback(() => {
     onDismiss!()
-    reset()
-  }, [onDismiss, reset])
+    setStatus('inactive')
+  }, [onDismiss])
 
   const vbtc = useVBTC()
+  const vbch = useVBCH()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
+  // !!! TODO: do it for xDaiTotal vBTC Supply
+  const vbchBalance = useTokenBalance(getVbchAddress(vbch))
   return (
     <Modal>
       <ModalTitle text="My Account" />
@@ -52,6 +60,7 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
           href={`https://etherscan.io/address/${account}`}
           text="View on Etherscan"
           variant="secondary"
+          BCH={true}
         />
         <Spacer />
         <Button

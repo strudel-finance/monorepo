@@ -1,19 +1,16 @@
 import { useCallback, useEffect, useState } from 'react'
-import { provider } from 'web3-core'
-
 import BigNumber from 'bignumber.js'
-import { useWallet } from 'use-wallet'
-import { Contract } from 'web3-eth-contract'
-
 import {
   getMasterChefContract,
   getWethContract,
   getVbtcContract,
   getFarms,
   getTotalLPWethValue,
-} from '../vbtc/utils'
+} from '../tokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
+import { ERC20Contract, UniContract } from '../tokens/lib/contracts.types'
+import useETH from './useETH'
 
 export interface StakedValue {
   tokenAmount: BigNumber
@@ -26,7 +23,8 @@ export interface StakedValue {
 
 const useAllStakedValue = () => {
   const [balances, setBalance] = useState([] as Array<StakedValue>)
-  const { account }: { account: string; ethereum: provider } = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
   const farms = getFarms(vbtc)
   const masterChefContract = getMasterChefContract(vbtc)
@@ -42,27 +40,22 @@ const useAllStakedValue = () => {
           pid,
           lpContract,
           tokenContract,
-          balancerPoolContract,
-          multiplier
         }: {
           isBalancer: boolean
           pid: number
-          lpContract: Contract
-          tokenContract: Contract
-          balancerPoolContract: Contract
-          multiplier: number
+          lpContract: any
+          tokenContract: any
         }) =>
           getTotalLPWethValue(
             isBalancer,
-            masterChefContract,
+            pid,
             wethContact,
             lpContract,
             tokenContract,
-            pid,
+            masterChefContract,
             vbtcContract,
-            balancerPoolContract,
             vbtc,
-            block
+            block,
           ),
       ),
     )

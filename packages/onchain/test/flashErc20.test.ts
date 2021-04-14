@@ -1,12 +1,12 @@
-import {ethers, upgrades} from 'hardhat';
-import {Signer} from 'ethers';
+import { ethers, upgrades } from 'hardhat';
+import { Signer } from 'ethers';
 import chai from 'chai';
 import vector from './testVector.json';
-import {expandTo18Decimals} from './shared/utilities';
-import {MockFlashERC20} from '../typechain/MockFlashErc20';
-import {MockBorrower} from '../typechain/MockBorrower';
+import { expandTo18Decimals } from './shared/utilities';
+import { MockFlashERC20 } from '../typechain/MockFlashErc20';
+import { MockBorrower } from '../typechain/MockBorrower';
 
-const {expect} = chai;
+const { expect } = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 

@@ -2,15 +2,16 @@ import {useCallback, useEffect, useState} from 'react'
 import {provider} from 'web3-core'
 
 import BigNumber from 'bignumber.js'
-import {useWallet} from 'use-wallet'
 
-import {getEarned, getMasterChefContract, getFarms} from '../vbtc/utils'
+import { getEarned, getMasterChefContract, getFarms } from '../tokens/utils'
 import useVBTC from './useVBTC'
 import useBlock from './useBlock'
+import useETH from './useETH'
 
 const useAllEarnings = () => {
   const [balances, setBalance] = useState([] as Array<BigNumber>)
-  const {account}: {account: string; ethereum: provider} = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
   const vbtc = useVBTC()
   const farms = getFarms(vbtc)
   const masterChefContract = getMasterChefContract(vbtc)

@@ -1,4 +1,4 @@
-import { makeStyles, withStyles } from '@material-ui/core'
+import { makeStyles, TableContainer, withStyles } from '@material-ui/core'
 import Grid from '@material-ui/core/Grid'
 import Table from '@material-ui/core/Table'
 import TableBody from '@material-ui/core/TableBody'
@@ -9,7 +9,7 @@ import Typography from '@material-ui/core/Typography'
 import ConversionStatus from './components/ConversionStatus'
 import ConversionActions from './components/ConversionActions'
 import {
-  Transaction,
+  BTCTransaction,
   LoadingStatus,
   SoChainConfirmedGetTx,
   Confirmation,
@@ -24,16 +24,19 @@ import useInterval from '../../hooks/useInterval'
 import sb from 'satoshi-bitcoin'
 import { changeEndian } from '../../utils/changeEndian'
 import { Contract } from 'web3-eth-contract'
-import { getRelayContract } from '../../vbtc/utils'
+import { getRelayContract } from '../../tokens/utils'
 import useVBTC from '../../hooks/useVBTC'
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { icons } from '../../helpers/icon'
 
 export interface TransactionTableProps {
   account: any
   previousAccount: any
-  lastRequest: Transaction | undefined
-  handleSetLastRequest: (tx: Transaction) => void
+  lastRequest: BTCTransaction | undefined
+  handleSetLastRequest: (tx: BTCTransaction) => void
   checkAndRemoveLastRequest: () => void
   wallet: any
+  closeModal: () => void
 }
 interface SoChainConfirmed {
   status: string
@@ -55,13 +58,14 @@ interface AccountRequest {
   ]
 }
 
-const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
+const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   account,
   previousAccount,
   lastRequest,
   handleSetLastRequest,
   checkAndRemoveLastRequest,
   wallet,
+  closeModal,
 }) => {
   const POLL_DURATION_TXS = 1500
   const BTC_ACCEPTANCE = 6
@@ -143,12 +147,12 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           signal: abortController.signal,
         }
       : {}
-    if (wallet.status === 'connected') {
+    if (account) {
       let res = await fetch(
         `${apiServer}/production/account/${account}`,
         abortProps,
       )
-        .then(handleErrors)
+        // .then(handleErrors)
         .then((response) => response.json())
         .then((res: AccountRequest) => res)
         .catch((e) => {
@@ -170,10 +174,10 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
         return
       }
       if (passedAccount.current === account) {
-        let resNew: Transaction[] = []
+        let resNew: BTCTransaction[] = []
         if (isAccountRequest(res)) {
           res.burns.map((tx, i) => {
-            let txNew: Transaction = {
+            let txNew: BTCTransaction = {
               ethAddress: account,
               value: sb.toBitcoin(tx.amount),
               txCreatedAt: new Date(tx.dateCreated),
@@ -200,6 +204,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           } else if (resNew.length > transactions.length) {
             setTransactions(resNew)
             checkAndRemoveLastRequest()
+            closeModal()
           }
         }
       }
@@ -210,15 +215,16 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
     if (account != null) {
       await handleTransactionUpdate()
       if (transactions.length > 0) {
-        let transactionsT: Transaction[] = transactions
+        let transactionsT: BTCTransaction[] = transactions
         let transactionsWithLowConfirmations = transactionsT.filter(
           (tx) =>
             !tx.confirmed &&
-            (confirmations[tx.btcTxHash] < BTC_ACCEPTANCE ||
-              confirmations[tx.btcTxHash] === undefined),
+            (!confirmations[tx.btcTxHash] ||
+              confirmations[tx.btcTxHash]?.confirmations < BTC_ACCEPTANCE),
         )
 
         let highConfirmations = {}
+
         await Object.keys(confirmations).forEach(async (key) => {
           if (confirmations[key].confirmations >= BTC_ACCEPTANCE) {
             highConfirmations[key] = confirmations[key]
@@ -226,7 +232,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
               let res = await fetch(
                 `https://sochain.com/api/v2/get_tx/BTC/${key}`,
               )
-                .then(handleErrors)
+                // .then(handleErrors)
                 .then((response) => response.json())
                 .then((res: SoChainConfirmedGetTx) => res)
                 .catch((e) => {
@@ -236,6 +242,7 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
                   showError('SoChain API Error: ' + e.message)
                   return undefined
                 })
+
               if (res !== undefined) {
                 highConfirmations[key].blockHash = res.data.blockhash
                 highConfirmations[key].tx_hex = res.data.tx_hex
@@ -252,12 +259,13 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
             }
           }
         })
+
         let newConfirmations: Record<string, Confirmation> = {}
         for (let i = 0; i < transactionsWithLowConfirmations.length; i++) {
           let res = await fetch(
             `https://sochain.com/api/v2/is_tx_confirmed/BTC/${transactionsWithLowConfirmations[i].btcTxHash}`,
           )
-            .then(handleErrors)
+            // .then(handleErrors)
             .then((response) => response.json())
             .then((res: SoChainConfirmed) => res)
             .catch((e) => {
@@ -271,17 +279,21 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
           if (res === undefined || res.data.confirmations === undefined) {
             continue
           }
+
           let confirmation: Confirmation = {
             confirmations: res.data.confirmations,
           }
+
           newConfirmations[
             transactionsWithLowConfirmations[i].btcTxHash
           ] = confirmation
         }
+
         const confirmationsRecombined = {
           ...highConfirmations,
           ...newConfirmations,
         }
+
         if (passedAccount.current === account) {
           setConfirmations(confirmationsRecombined)
         }
@@ -289,77 +301,87 @@ const TransactionsTableContainer: React.FC<TransactionTableProps> = ({
     }
   }, POLL_DURATION_TXS)
 
+  // !!! TODO: inline styles to styled components
   const classes = useStyles()
   return (
     <div className={classes.container}>
-      <SimpleBar style={{ maxHeight: 250 }}>
-        <Table color="white" stickyHeader={true}>
-          <TableHead>
-            <TableRow>
-              <TableCell align="left">
-                <ReddishBoldTextTypography>
-                  Transaction
-                </ReddishBoldTextTypography>
-              </TableCell>
-              <TableCell>
-                <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
-              </TableCell>
-              <TableCell>
-                <div className={classes.actionsCell}></div>
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {lastRequest !== undefined && (
-              <TableRow key="stub">
+      <SimpleBar>
+        <TableContainer style={{ height: 360 }}>
+          <Table color="white" stickyHeader={true}>
+            <colgroup>
+              <col style={{ width: '27%' }} />
+              <col style={{ width: '48%' }} />
+              <col style={{ width: '25%' }} />
+            </colgroup>
+            <TableHead>
+              <TableRow>
                 <TableCell align="left">
-                  <ReddishTextTypography variant="caption">
-                    {lastRequest.value} BTC → vBTC
-                  </ReddishTextTypography>
+                  <ReddishBoldTextTypography>
+                    Transaction
+                  </ReddishBoldTextTypography>
                 </TableCell>
                 <TableCell>
-                  <Typography variant="caption">
-                    <ConversionStatus tx={lastRequest} />
-                  </Typography>
+                  <ReddishBoldTextTypography>Status</ReddishBoldTextTypography>
                 </TableCell>
                 <TableCell>
-                  <Grid container justify="flex-end">
-                    <ConversionActions tx={lastRequest} />
-                  </Grid>
+                  <ReddishBoldTextTypography style={{ textAlign: 'center' }}>
+                    Actions
+                  </ReddishBoldTextTypography>
                 </TableCell>
               </TableRow>
-            )}
-            {transactions.map((tx, i) => {
-              return (
-                <TableRow key={i}>
+            </TableHead>
+            <TableBody>
+              {lastRequest && (
+                <TableRow style={{ height: 95 }}>
                   <TableCell align="left">
                     <ReddishTextTypography variant="caption">
-                      {tx.value} BTC → vBTC
+                      {lastRequest.value} BTC → vBTC
                     </ReddishTextTypography>
                   </TableCell>
                   <TableCell>
-                    <Typography variant="caption">
-                      <ConversionStatus
-                        tx={tx}
-                        confirmations={confirmations[tx.btcTxHash]}
-                      />
-                    </Typography>
+                    {/* @TODO: Intergrate the colors there is green and orange ^^ */}
+
+                    <ConversionStatus tx={lastRequest} />
                   </TableCell>
                   <TableCell>
-                    <Grid container justify="flex-end">
-                      <ConversionActions
-                        tx={tx}
-                        confirmation={confirmations[tx.btcTxHash]}
-                        handleLoading={handleLoading}
-                        isLoading={isLoading}
-                      />
+                    <Grid container justify="center">
+                      <ConversionActions tx={lastRequest} />
                     </Grid>
                   </TableCell>
                 </TableRow>
-              )
-            })}
-          </TableBody>
-        </Table>
+              )}
+              {transactions.map((tx, i) => {
+                return (
+                  <TableRow key={i} style={{ height: 95 }}>
+                    <TableCell align="left" style={{ width: 225 }}>
+                      <ReddishTextTypography variant="caption">
+                        {tx.value} BTC → vBTC
+                      </ReddishTextTypography>
+                    </TableCell>
+                    <TableCell>
+                      <Typography variant="caption">
+                        <ConversionStatus
+                          tx={tx}
+                          confirmations={confirmations[tx.btcTxHash]}
+                        />
+                      </Typography>
+                    </TableCell>
+                    <TableCell>
+                      <Grid container justify="center">
+                        <ConversionActions
+                          tx={tx}
+                          confirmation={confirmations[tx.btcTxHash]}
+                          handleLoading={handleLoading}
+                          isLoading={isLoading}
+                        />
+                      </Grid>
+                    </TableCell>
+                  </TableRow>
+                )
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </SimpleBar>
     </div>
   )
@@ -381,7 +403,7 @@ const ReddishBoldTextTypography = withStyles({
 
 const TableCell = withStyles({
   stickyHeader: {
-    background: 'transparent',
+    background: 'white',
   },
 })(MuiTableCell)
 
@@ -395,7 +417,7 @@ const useStyles = makeStyles((theme) => ({
   container: {
     borderColor: 'none',
     background: '#FFFFFF',
-    border: '1px solid #e2d6cfff',
+    // border: '1px solid #e2d6cfff',
     borderRadius: '12px',
     minHeight: 200,
     height: '100%',
@@ -415,4 +437,4 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
-export default TransactionsTableContainer
+export default BTCTransactionsTableContainer

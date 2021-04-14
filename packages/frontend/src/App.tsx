@@ -1,5 +1,10 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import {
+  BrowserRouter,
+  Route,
+  Switch,
+  useLocation,
+} from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { UseWalletProvider } from 'use-wallet'
 import DisclaimerModal from './components/DisclaimerModal'
@@ -8,9 +13,11 @@ import TopBar from './components/TopBar'
 import FarmsProvider from './contexts/Farms'
 import ModalsProvider from './contexts/Modals'
 import TransactionProvider from './contexts/Transactions'
+import VBCHProvider from './contexts/VBCHProvider'
 import VBTCProvider from './contexts/VBTCProvider'
-import useModal from './hooks/useModal'
-import theme from './theme'
+import InfuraProvider from './contexts/InfuraProvider'
+import BTCtheme from './theme/BTC.theme'
+import BCHtheme from './theme/BCH.theme'
 import Farms from './views/Farms'
 import Home from './views/Home'
 import Stake from './views/Stake'
@@ -20,6 +27,13 @@ import { ErrorBoundary } from 'react-error-boundary'
 
 import 'react-toastify/dist/ReactToastify.css'
 import RollbarErrorTracking from './errorTracking/rollbar'
+import BTC from './views/BTC'
+import BCH from './views/BCH'
+import useETH from './hooks/useETH'
+import WalletProvider from './contexts/WalletProvider'
+import BridgeProvider from './contexts/BridgeProvider'
+import Note from './views/Note'
+import { faLessThan } from '@fortawesome/pro-regular-svg-icons'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -37,6 +51,37 @@ const myErrorHandler = (error: Error, info: { componentStack: string }) => {
 
 const App: React.FC = () => {
   const [mobileMenu, setMobileMenu] = useState(false)
+  const { setStatus, setAccount } = useETH()
+
+  const accountChange = (accounts: string[]) => {
+    if (!accounts.length) setStatus('inactive')
+    else {
+      setStatus('active')
+      setAccount(accounts[0])
+    }
+  }
+
+  if ((window as any).ethereum) {
+    (window as any).ethereum.on('networkChanged',
+    (networkId: string) => {
+      localStorage.setItem('networkId', networkId);
+      window.location.reload();
+    },
+    );
+    (window as any).ethereum.on('accountsChanged', accountChange);
+    localStorage.setItem('networkId', (window as any).ethereum.networkVersion)
+  } else {
+    ;(window as any).addEventListener(
+      'ethereum#initialized',
+      () => {
+        localStorage.setItem('networkId', (window as any).ethereum.networkVersion);
+        (window as any).ethereum.on('accountsChanged', accountChange)
+      },
+      {
+        once: true,
+      },
+    )
+  }
 
   const handleDismissMobileMenu = useCallback(() => {
     setMobileMenu(false)
@@ -45,6 +90,7 @@ const App: React.FC = () => {
   const handlePresentMobileMenu = useCallback(() => {
     setMobileMenu(true)
   }, [setMobileMenu])
+
   useTracking('UA-179869676-1')
 
   return (
@@ -56,7 +102,18 @@ const App: React.FC = () => {
           <Home />
         </Route>
         <Route path="/farms">
-          <Farms />
+          {localStorage.getItem('networkId') == '1' ||
+          !localStorage.getItem('networkId') ? (
+            <Farms />
+          ) : (
+            <Note />
+          )}
+        </Route>
+        <Route path="/BTC">
+          <BTC />
+        </Route>
+        <Route path="/BCH">
+          <BCH />
         </Route>
         {false && (
           <Route path="/staking">
@@ -70,8 +127,10 @@ const App: React.FC = () => {
 
 const Providers: React.FC = ({ children }) => {
   return (
-    <ThemeProvider theme={theme}>
-      <UseWalletProvider
+    <ThemeProvider
+           theme={useLocation().pathname.includes('/BCH') ? BCHtheme : BTCtheme}
+    >
+    <UseWalletProvider
         chainId={1}
         connectors={{
           walletconnect: {
@@ -79,45 +138,34 @@ const Providers: React.FC = ({ children }) => {
           },
         }}
       >
-        <VBTCProvider>
-          <TransactionProvider>
-            <FarmsProvider>
-              <ModalsProvider>{children}</ModalsProvider>
-            </FarmsProvider>
-          </TransactionProvider>
-        </VBTCProvider>
+        {/* pro */}
+          <InfuraProvider>
+          <WalletProvider>
+            <BridgeProvider>
+          <VBTCProvider>
+            <VBCHProvider>
+              <TransactionProvider>
+                <FarmsProvider>
+                  <ModalsProvider>{children}</ModalsProvider>
+                </FarmsProvider>
+              </TransactionProvider>
+            </VBCHProvider>
+              </VBTCProvider>
+              </BridgeProvider>
+          </WalletProvider>
+            </InfuraProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>
   )
 }
 
-const Disclaimer: React.FC = () => {
-  const markSeen = useCallback(() => {
-    localStorage.setItem('disclaimer', 'seen')
-  }, [])
-
-  const [onPresentDisclaimerModal] = useModal(
-    <DisclaimerModal onConfirm={markSeen} />,
-  )
-
-  useEffect(() => {
-    //const seenDisclaimer = true
-    const seenDisclaimer = localStorage.getItem('disclaimer')
-    if (!seenDisclaimer) {
-      onPresentDisclaimerModal()
-    }
-  }, [])
-
-  return <div />
-}
-
 export default () => (
-  <Providers>
-    <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
-      <Router>
-        <App />
-      </Router>
-    </ErrorBoundary>
-  </Providers>
+      <BrowserRouter>
+        <Providers >
+          <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
+              <App />
+          </ErrorBoundary>
+        </Providers>
+      </BrowserRouter>
 )

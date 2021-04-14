@@ -1,6 +1,5 @@
 import React, { useState } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
-import { useWallet } from 'use-wallet'
 
 import StrudelIcon from '../../components/StrudelIcon'
 import AstroWave from '../../assets/img/astroWave.png'
@@ -23,6 +22,7 @@ import MuiContainer from '@material-ui/core/Container'
 import { TerraFarm } from '../../components/Lottie'
 import Spacer from '../../components/Spacer'
 import MuiPaper from '@material-ui/core/Paper'
+import useETH from '../../hooks/useETH'
 
 const Paper = withStyles({
   rounded: {
@@ -47,12 +47,25 @@ const Container = withStyles({
 
 const Farms: React.FC = () => {
   const { path } = useRouteMatch()
-  const { account } = useWallet()
+  const { eth } = useETH()
+  const account = eth?.account
+
   const [onPresentWalletProviderModal] = useModal(<WalletProviderModal />)
   return (
     <Switch>
       <Page>
-        {!!account ? (
+        {!!account && eth.provider.networkVersion != 1 ? (
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            To se Terra-Farms, please go to Ethereum mainnet.
+          </div>
+        ) : !!account ? (
           <>
             <Route exact path={path}>
               <PageHeader
@@ -60,14 +73,15 @@ const Farms: React.FC = () => {
                 subtitle="Earn $TRDL by staking LP Tokens."
                 title="Terra-Farms to Explore"
               />
-              <Container maxWidth="md" className='farm-container'>
+              <Container maxWidth="md" className="farm-container">
                 <StyledP>
-                  The Terra-Farms strengthen the protocol and the peg of
-                  vBTC to BTC.
-                    </StyledP>
+                  The Terra-Farms strengthen the protocol and the peg of vBTC to
+                  BTC.
+                </StyledP>
                 <StyledP>
-                    $TRDL is the crypto-economical incentive to stake and earn rewards.
-                  </StyledP>
+                  $TRDL is the crypto-economical incentive to stake and earn
+                  rewards.
+                </StyledP>
               </Container>
               <Spacer size="sm" />
               <FarmCards />
@@ -77,22 +91,21 @@ const Farms: React.FC = () => {
             </Route>
           </>
         ) : (
-            <div
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                flex: 1,
-                justifyContent: 'center',
-              }}
-            >
-              <Button
-                boxShadowGlow={true}
-                onClick={onPresentWalletProviderModal}
-                text="Unlock Wallet"
-              />
-            </div>
-          )}
-
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              boxShadowGlow={true}
+              onClick={onPresentWalletProviderModal}
+              text="Unlock Wallet"
+            />
+          </div>
+        )}
       </Page>
     </Switch>
   )

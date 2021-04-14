@@ -1,20 +1,20 @@
-import {ethers, upgrades} from 'hardhat';
-import {Signer, Contract} from 'ethers';
-import {getAdminAddress} from '@openzeppelin/upgrades-core';
+import { ethers, upgrades } from 'hardhat';
+import { Signer, Contract } from 'ethers';
+import { getAdminAddress } from '@openzeppelin/upgrades-core';
 import chai from 'chai';
 import vector from './testVector.json';
 import REGULAR_CHAIN from './headers.json';
-import {expandTo18Decimals, concatenateHexStrings} from './shared/utilities';
+import { expandTo18Decimals, concatenateHexStrings } from './shared/utilities';
 import ProxyAdminArtifact from '@openzeppelin/upgrades-core/artifacts/ProxyAdmin.json';
 import AdminUpgradeabilityProxyArtifact from '@openzeppelin/upgrades-core/artifacts/AdminUpgradeabilityProxy.json';
-import {VbtcToken} from '../typechain/VbtcToken';
-import {StrudelToken} from '../typechain/StrudelToken';
-import {MockRelay} from '../typechain/MockRelay';
-import {MockBorrower} from '../typechain/MockBorrower';
-import {MockVbtcUpgraded} from '../typechain/MockVbtcUpgraded';
-import {Timelock} from '../typechain/Timelock';
+import { VbtcToken } from '../typechain/VbtcToken';
+import { StrudelToken } from '../typechain/StrudelToken';
+import { MockRelay } from '../typechain/MockRelay';
+import { MockBorrower } from '../typechain/MockBorrower';
+import { MockVbtcUpgraded } from '../typechain/MockVbtcUpgraded';
+import { Timelock } from '../typechain/Timelock';
 
-const {expect} = chai;
+const { expect } = chai;
 
 const BYTES32_0 = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
