@@ -63,11 +63,6 @@ const pushEthTxHash = async (
     tx.burnOutputIndex +
     '/addEthTx'
 
-  console.log(
-    JSON.stringify(ethParam),
-    'JSON.stringify(ethParam)JSON.stringify(ethParam)',
-  )
-
   const opts: RequestInit = {
     method: 'POST',
     headers: {
@@ -368,6 +363,11 @@ const ConversionActions: React.FC<Props> = ({
     />,
   )
 
+  const showQR = (e: any) => {
+    e.preventDefault()
+    showModal()
+  }
+
   return (
     <React.Fragment>
       <div
@@ -381,7 +381,12 @@ const ConversionActions: React.FC<Props> = ({
       >
         {!tx.hasOwnProperty('confirmed') && (
           <React.Fragment>
-            <a href="" onClick={showModal}>
+            <a
+              href=""
+              onClick={(e) => {
+                showQR(e)
+              }}
+            >
               View Bridge Address
             </a>
           </React.Fragment>

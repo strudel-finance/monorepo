@@ -12,7 +12,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { icons } from '../../../helpers/icon'
 // import * as fab from '@fortawesome/'
 
-const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
+const NetworkModal: React.FC<ModalProps> = ({ onDismiss }) => {
   const handleSignOutClick = useCallback(() => {
     onDismiss!()
   }, [onDismiss])
@@ -39,9 +39,7 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
         <Spacer />
         <StyledBalanceWrapper>
           <b>Network Name:</b> Binance Smart Chain Mainnet {'  '}
-          <CCB
-            text="Binance Smart Chain Mainnet"
-          >
+          <CCB text="Binance Smart Chain Mainnet">
             <FontAwesomeIcon icon={icons.copy} />
           </CCB>
         </StyledBalanceWrapper>
@@ -95,4 +93,4 @@ const StyledBalanceWrapper = styled.div`
   align-items: center;
 `
 
-export default AccountModal
+export default NetworkModal
