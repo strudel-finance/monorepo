@@ -240,8 +240,7 @@ const BCHTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               return undefined
             })
 
-          if (!res || !res.confirmations) continue
-          // const { details: { confirmations, blockhash }} = res
+          if (!res) continue
 
           const { confirmations, blockhash } = res
           const { bchTxHash } = transaction

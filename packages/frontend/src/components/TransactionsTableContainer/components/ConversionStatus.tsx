@@ -13,6 +13,9 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
   const targetConfs = 6
   let isConfirmed = false
   let confirmation = undefined
+
+  console.log(tx, confirmations, 'tx, confirmations')
+  
   if (confirmations && confirmations.hasOwnProperty('confirmations')) {
     isConfirmed = confirmations.confirmations >= targetConfs
     confirmation = confirmations.confirmations
@@ -24,21 +27,22 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
         {!tx.hasOwnProperty('confirmed') && (
           <span>{`Waiting for ${coin} to be sent`}</span>
         )}
-        {(tx.hasOwnProperty('confirmed') && !tx.confirmed && !isConfirmed && confirmations) && (
-          <span>
-            {coin} transaction confirming ({!confirmation ? '0' : confirmation}/
-            {targetConfs} complete)
-          </span>
-        )}
-        { (tx.hasOwnProperty('confirmed') && !confirmations) && (
+        {tx.hasOwnProperty('confirmed') &&
+          !tx.confirmed &&
+          !isConfirmed &&
+          confirmations && (
+            <span>
+              {coin} transaction confirming (
+              {!confirmation ? '0' : confirmation}/{targetConfs} complete)
+            </span>
+          )}
+        {tx.hasOwnProperty('confirmed') && confirmations == null && (
           <div className="loading">Fetching data</div>
         )}
-        {(tx.hasOwnProperty('confirmed') &&
-        isConfirmed &&
-        !tx.ethTxHash &&
-          confirmations.isRelayed) && (
-            <span>Submit to Ethereum</span>
-        )}
+        {tx.hasOwnProperty('confirmed') &&
+          isConfirmed &&
+          !tx.ethTxHash &&
+          confirmations.isRelayed && <span>Submit to Ethereum</span>}
         {tx.hasOwnProperty('confirmed') &&
         isConfirmed &&
         !tx.ethTxHash &&
