@@ -18,8 +18,10 @@ import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
 import useVBCH from '../../../hooks/useVBCH'
 import useInfura from '../../../hooks/useInfura'
-import ERC20Abi from '../../../tokens/lib/abi/erc20.json'
+
 import { contractAddresses } from '../../../tokens/lib/constants'
+import BridgeAbi from '../../../tokens/lib/abi/bridge.json'
+
 interface BurnModalProps extends ModalProps {
   value: number | string
   address: string
@@ -62,14 +64,14 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
 
     const sideContract = new Contract(
       // add ABI item as type
-      ERC20Abi as any[],
-      contractAddresses.vbch[56],
+      BridgeAbi as any[],
+      contractAddresses.bridge[56],
     )
-
+    
     const supply =
       coin === 'bitcoin'
         ? new BigNumber(await infura.vBTC.methods.totalSupply().call())
-        : new BigNumber(await sideContract.methods.totalSupply().call())
+        : new BigNumber(await sideContract.methods.mintedSupply().call())
 
     let dividedSupply = supply.div(new BigNumber(10e18)).toNumber()
     let calculatedStrudel =
