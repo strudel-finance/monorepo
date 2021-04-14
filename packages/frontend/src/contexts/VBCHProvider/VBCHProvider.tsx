@@ -26,8 +26,6 @@ const VBCHProvider: React.FC = ({ children }) => {
     if (eth) {
       const chainId = Number(eth.provider.chainId)
 
-      console.log(chainId, 'chainIdchainIdchainId')
-
       const vbchLib = new Vbch(eth.provider, chainId, false, {
         defaultAccount: eth.provider.selectedAddress,
         defaultConfirmations: 1,

@@ -63,8 +63,6 @@ const pushEthTxHash = async (
     tx.burnOutputIndex +
     '/addEthTx'
 
-  console.log(url, 'urlurlurlurl')
-
   console.log(
     JSON.stringify(ethParam),
     'JSON.stringify(ethParam)JSON.stringify(ethParam)',
@@ -78,8 +76,6 @@ const pushEthTxHash = async (
     },
     body: JSON.stringify(ethParam),
   }
-
-  console.log(url, 'urlurlurlurl')
 
   return fetch(url, opts)
 }
@@ -166,8 +162,6 @@ const waitForTxReceipt = async (
   const expectedBlockTime = 1000
   let transactionReceipt = null
   while (transactionReceipt == null) {
-    console.log(vCoin);
-    
     // Waiting expectedBlockTime until the transaction is mined
     transactionReceipt = await vCoin.web3.eth
       .getTransactionReceipt(transactionHash)
@@ -321,8 +315,6 @@ const callProofOpReturnAndMintBCH = async (
   ) {
     // do things
     tx.ethTxHash = ethTxHash.transactionHash
-
-    console.log(ethTxHash, 'ethTxHashethTxHashethTxHashethTxHash')
 
     await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash }, tx, 'BCH')
       .then(handleErrors)

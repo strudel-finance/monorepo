@@ -259,7 +259,7 @@ const StyledXLButton = styled.button<StyledButtonProps>`
   align-items: center;
   border: 0;
   border-radius: 9px;
-  color: #FFF;
+  color: #fff;
   cursor: pointer;
   display: flex;
   font-size: ${(props) => props.fontSize}px;
@@ -268,9 +268,7 @@ const StyledXLButton = styled.button<StyledButtonProps>`
   font-weight: 700;
   letter-spacing: 1px;
   box-shadow: ${(props) => {
-  console.log(props.theme.color.primary.main,'asadada');
-  
-  return props.theme.color.shadow.light;
+    return props.theme.color.shadow.light
     // if (props.BCH) return '0px 0px 30px rgb(47 208 109 / 48%);'
     // if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
     // if (props.hideBoxShadow) return 'none'

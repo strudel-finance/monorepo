@@ -441,7 +441,6 @@ export const redeem = async (
       .exit()
       .send({ from: account })
       .on('transactionHash', (tx: any) => {
-        console.log(tx)
         return tx.transactionHash
       })
   } else {
