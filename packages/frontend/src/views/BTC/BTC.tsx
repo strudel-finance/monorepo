@@ -102,7 +102,7 @@ const BTC: React.FC = () => {
                   <Button
                     disabled={!Number(val)}
                     className="glow-btn orange"
-                    text="Buy vBTC"
+                    text="Get vBTC"
                     onClick={onPresentBurn}
                   />
                 </Container>

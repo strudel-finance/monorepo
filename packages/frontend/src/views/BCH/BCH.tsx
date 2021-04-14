@@ -101,7 +101,7 @@ const BCH: React.FC = () => {
                   <Button
                     disabled={!Number(val)}
                     className="glow-btn green"
-                    text="Buy vBCH"
+                    text="Get vBCH"
                     onClick={onPresentBurn}
                   />
                 </Container>
