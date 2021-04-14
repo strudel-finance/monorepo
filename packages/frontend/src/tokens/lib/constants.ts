@@ -80,7 +80,7 @@ export const contractAddresses = {
   },
   bridge: {
     5: '',
-    56: '0x5672e77eb1483c5b2762961ac5ea23b865086dea',
+    56: '0x8425cfcc0155208fe1178d446d15a079d4d309f7',
     100: '0x9840d0417f89182CE4a6e60f4445B8e5dC4F273e',
   },
 }
