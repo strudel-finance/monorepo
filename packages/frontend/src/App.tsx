@@ -34,6 +34,7 @@ import WalletProvider from './contexts/WalletProvider'
 import BridgeProvider from './contexts/BridgeProvider'
 import Note from './views/Note'
 import { faLessThan } from '@fortawesome/pro-regular-svg-icons'
+import Governance from './views/Governance'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -114,6 +115,9 @@ const App: React.FC = () => {
         </Route>
         <Route path="/BCH">
           <BCH />
+        </Route>
+        <Route path="/governance">
+          <Governance />
         </Route>
         {false && (
           <Route path="/staking">

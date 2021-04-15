@@ -11,7 +11,7 @@ interface AddressInputProps extends InputProps {
 const AddressInput: React.FC<AddressInputProps> = ({ value, onChange }) => {
   return (
     <StyledTokenInput className="styled-token-input">
-      <Input
+      <InlineInput
         startAdornment={
           <StyledTokenAdornmentWrapper>
             <StyledInfo>Address</StyledInfo>
@@ -28,6 +28,11 @@ const AddressInput: React.FC<AddressInputProps> = ({ value, onChange }) => {
 const StyledTokenInput = styled.div`
   margin: 5px 0;
 `
+
+const InlineInput = styled(Input)`
+  display: inline-block;
+`
+
 
 const StyledSpacer = styled.div`
   width: ${(props) => props.theme.spacing[3]}px;

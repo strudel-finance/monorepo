@@ -8,6 +8,8 @@ export interface InputProps {
   startAdornment?: React.ReactNode
   value: string
   disabled?: boolean
+  inline?: boolean
+  step?: number
 }
 
 const Input: React.FC<InputProps> = ({
@@ -17,13 +19,15 @@ const Input: React.FC<InputProps> = ({
   startAdornment,
   value,
   disabled,
+  step,
+  inline
 }) => {
   // !!! TODO: combine those 2 into
   // const regex1 = new RegExp(/(^[0-9]{1})+(\.+)*$/)
   // const regex2 = new RegExp(/(^[0-9]{1})+(\.[0-9]+)*$/)
 
   return (
-    <StyledInputWrapper>
+    <StyledInputWrapper inline={inline}>
       {!!startAdornment && startAdornment}
       <StyledInput
         min="0"
@@ -33,19 +37,28 @@ const Input: React.FC<InputProps> = ({
         onChange={onChange}
         disabled={disabled}
         onKeyDown={(evt) =>
-          (evt.key === 'e' || evt.key === '-') && evt.preventDefault()
+          ( step === 1 ? evt.key === '.' || evt.key === 'e'  ||evt.key === '-' : evt.key === 'e'  ||evt.key === '-') && evt.preventDefault()
         }
+        step={step}
+        // pattern="[0-9]*"
       />
       {!!endAdornment && endAdornment}
     </StyledInputWrapper>
   )
 }
 
-const StyledInputWrapper = styled.div`
+interface StyledButtonProps {
+  inline: boolean
+}
+
+const StyledInputWrapper = styled.div<StyledButtonProps>`
   align-items: center;
   border-radius: ${(props) => props.theme.borderRadius}px;
-  display: flex;
+  display:  ${(props) => {
+    return props.inline ? 'inline-block' : 'flex'
+  }};
   padding: 0 ${(props) => props.theme.spacing[3]}px;
+
 `
 
 const StyledInput = styled.input`
