@@ -106,8 +106,8 @@ module.exports = class StrudelHandler {
     let log;
     if (entry.bchTxHash) {
       receipt = await this.bscProvider.getTransactionReceipt(ethTxHash);
-      parsedTxHash = receipt.logs[1].topics[1].replace('0x', '');
-      log = receipt.logs[1];
+      parsedTxHash = receipt.logs[2].topics[1].replace('0x', '');
+      log = receipt.logs[2];
     } else {
       receipt = await this.provider.getTransactionReceipt(ethTxHash);
       parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
