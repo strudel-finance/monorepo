@@ -126,22 +126,22 @@ const BalanceStrudel: React.FC = () => {
 
   useEffect(() => {
     if (infura)
-        infura.trdl.methods
-          .totalSupply()
-          .call()
-          .then((balance: string) => {
-            setTotalSupply(new BigNumber(balance))
-          })
-    
-          if (eth?.account) {
-            infura.trdl.methods
-            .balanceOf(eth.account)
-            .call()
-            .then((balance: string) => {
-              setStrudelBalance(new BigNumber(balance))
-            })
-          }
-        }, [infura, eth?.account])
+      infura.trdl.methods
+        .totalSupply()
+        .call()
+        .then((balance: string) => {
+          setTotalSupply(new BigNumber(balance))
+        })
+
+    if (eth?.account) {
+      infura.trdl.methods
+        .balanceOf(eth.account)
+        .call()
+        .then((balance: string) => {
+          setStrudelBalance(new BigNumber(balance))
+        })
+    }
+  }, [infura, eth?.account])
 
   return (
     <StyledWrapper>
@@ -155,7 +155,7 @@ const BalanceStrudel: React.FC = () => {
                 <Label text="Your $TRDL Balance" />
                 <ValueBTC
                   value={
-                    (!!account && !!strudelBalance)
+                    !!account && !!strudelBalance
                       ? getBalanceNumber(strudelBalance)
                       : 'Locked'
                   }
@@ -164,31 +164,30 @@ const BalanceStrudel: React.FC = () => {
             </StyledBalance>
           </StyledBalances>
         </CardContent>
-       { 
-        networkId == 1 &&
+        {networkId == 1 && (
           <Footnote>
             Pending harvest
             <FootnoteValue>
               <PendingRewards /> $TRDL
             </FootnoteValue>
           </Footnote>
-        }
+        )}
       </Card>
-      <Spacer/>
+      <Spacer />
       <Card>
         <CardContent>
           <Label text="Total $TRDL Supply" />
           <ValueBTC
-            value= {totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
+            value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
         </CardContent>
-        {
-          networkId == 1 &&
+        {networkId == 1 && (
           <Footnote>
             <FootnoteValue>
               <Multiplier /> $TRDL / block
-          </FootnoteValue>
-          </Footnote>}
+            </FootnoteValue>
+          </Footnote>
+        )}
       </Card>
     </StyledWrapper>
   )
