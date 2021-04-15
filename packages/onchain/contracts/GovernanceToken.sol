@@ -116,6 +116,9 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     uint256 mintTotal;
     (endBlock, lockTotal, mintTotal) = _parse(lockData[owner]);
 
+    // TODO: this is sketch cus msg.sender not necesserally owner
+    // if there is an existing lock for owner, that has matured,
+    // _lock will fail if called from an address not owner
     // return previous lock, if matured
     if (lockTotal > 0 && block.number >= endBlock) {
       unlock();

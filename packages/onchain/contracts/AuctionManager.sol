@@ -33,13 +33,20 @@ contract AuctionManager is OwnableUpgradeSafe {
   IDutchSwapFactory private auctionFactory;
   IDutchAuction public currentAuction;
 
+  // Upgradability -> is this layout OK?
+  mapping(address => bool) public isOurAuction;
+  mapping(address => uint256) public lockTimeForAuction;
+  IERC20 private auctionToken;
+
+
   constructor(
     address _strudelAddr,
     address _vBtcAddr,
     address _btcPriceOracle,
     address _vBtcPriceOracle,
     address _strudelPriceOracle,
-    address _auctionFactory
+    address _auctionFactory,
+    address _auctionTokenAddr
   ) public {
     __Ownable_init();
     strudel = MockERC20(_strudelAddr);
@@ -53,6 +60,7 @@ contract AuctionManager is OwnableUpgradeSafe {
     dustThreshold = 10; // 0.1% of $TRDL total supply
     priceSpan = 2500; // 25%
     auctionDuration = 84600; // ~23,5h
+    auctionToken = IERC20(_auctionTokenAddr);
   }
 
   function _getDiff(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -67,7 +75,7 @@ contract AuctionManager is OwnableUpgradeSafe {
   function rotateAuctions() external {
     if (address(currentAuction) != address(0)) {
       require(currentAuction.auctionEnded(), "previous auction hasn't ended");
-      try currentAuction.finaliseAuction() {
+      try currentAuction.finaliseAuction() {      
         // do nothing
       } catch Error(string memory) {
         // do nothing
@@ -131,14 +139,18 @@ contract AuctionManager is OwnableUpgradeSafe {
     } else {
       // calculate imbalance in $TRDL
       imbalance = imbalance.div(strudelPriceInEth);
-      strudel.mint(address(this), imbalance);
-      strudel.approve(address(auctionFactory), imbalance);
+
+      // PROXY: this can go away, replace with a$TRDL
+      /* strudel.mint(address(this), imbalance); */
+      /* strudel.approve(address(auctionFactory), imbalance); */
+
+      
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
       // auction off some $TRDL
       currentAuction = IDutchAuction(
         auctionFactory.deployDutchAuction(
-          address(strudel),
+          address(auctionToken),
           imbalance,
           now,
           now + auctionDuration,
@@ -148,6 +160,9 @@ contract AuctionManager is OwnableUpgradeSafe {
           address(this)
         )
       );
+
+      isOurAuction[address(currentAuction)] = true;
+      lockTimeForAuction[address(currentAuction)] = 5; // TODO: What should this be?
     }
   }
 
