@@ -38,7 +38,6 @@ contract AuctionManager is OwnableUpgradeSafe {
   mapping(address => uint256) public lockTimeForAuction;
   IERC20 private auctionToken;
 
-
   constructor(
     address _strudelAddr,
     address _vBtcAddr,
@@ -75,7 +74,7 @@ contract AuctionManager is OwnableUpgradeSafe {
   function rotateAuctions() external {
     if (address(currentAuction) != address(0)) {
       require(currentAuction.auctionEnded(), "previous auction hasn't ended");
-      try currentAuction.finaliseAuction() {      
+      try currentAuction.finaliseAuction() {
         // do nothing
       } catch Error(string memory) {
         // do nothing
@@ -144,7 +143,6 @@ contract AuctionManager is OwnableUpgradeSafe {
       /* strudel.mint(address(this), imbalance); */
       /* strudel.approve(address(auctionFactory), imbalance); */
 
-      
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
       // auction off some $TRDL

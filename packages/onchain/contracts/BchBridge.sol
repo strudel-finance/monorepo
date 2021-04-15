@@ -187,14 +187,15 @@ contract BchBridge is OwnableUpgradeSafe {
     // calculate the reward as area h(x) = f(x) - g(x), where f(x) = x^2 and g(x) = |minted|
     // pay out only the delta to the previous claim: H(after) - H(before)
     // this caps all minting rewards to 2/3 of BCH_CAP
-    uint256 rewardAmount = BCH_CAP
-      .mul(3)
-      .mul(sqrtVbtcAfter)
-      .add(sqrtVbtcBefore**3)
-      .sub(BCH_CAP.mul(3).mul(sqrtVbtcBefore))
-      .sub(sqrtVbtcAfter**3)
-      .div(3)
-      .div(BCH_CAP_SQRT);
+    uint256 rewardAmount =
+      BCH_CAP
+        .mul(3)
+        .mul(sqrtVbtcAfter)
+        .add(sqrtVbtcBefore**3)
+        .sub(BCH_CAP.mul(3).mul(sqrtVbtcBefore))
+        .sub(sqrtVbtcAfter**3)
+        .div(3)
+        .div(BCH_CAP_SQRT);
     strudel.mint(account, rewardAmount);
   }
 

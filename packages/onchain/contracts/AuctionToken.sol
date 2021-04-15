@@ -19,12 +19,12 @@ contract AuctionToken is ERC20UpgradeSafe {
   AuctionManager private auctionManager;
 
   function initialize(
-                      address _gStrudel,
-                      address _strudel,
-                      address _auctionManager
-                      ) external initializer {
+    address _gStrudel,
+    address _strudel,
+    address _auctionManager
+  ) external initializer {
     __ERC20_init("Strudel Auction Token", "a$TRDL");
-    
+
     gStrudel = GovernanceToken(_gStrudel);
     strudel = MockERC20(_strudel);
     auctionManager = AuctionManager(_auctionManager);
@@ -34,14 +34,18 @@ contract AuctionToken is ERC20UpgradeSafe {
   // In initDutchAuction, transferFrom is called again
   // In DutchAuction, transfer is called to either payout, or return money to AuctionManager
 
-  function transferFrom(address _from, address _to, uint256 _value) public override returns (bool success) {
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public override returns (bool success) {
     return true;
   }
 
   function approve(address _spender, uint256 _value) public override returns (bool success) {
     return true;
   }
-  
+
   function transfer(address to, uint256 amount) public override returns (bool success) {
     // require sender is our Auction
     address auction = _msgSender();
@@ -49,7 +53,7 @@ contract AuctionToken is ERC20UpgradeSafe {
 
     // if recipient is AuctionManager, it means we are doing a refund -> do nothing
     if (to == address(auctionManager)) return true;
-    
+
     uint256 blocks = auctionManager.lockTimeForAuction(auction);
     strudel.mint(address(this), amount);
     strudel.approve(address(gStrudel), amount);
