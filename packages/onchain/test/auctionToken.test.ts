@@ -53,11 +53,9 @@ describe('AuctionToken', () => {
     auctionToken = (await upgrades.deployProxy(AuctionTokenFactory, [
       govToken.address,
       strudel.address,
-      auctionManager.address
+      auctionManager.address,
     ])) as AuctionToken;
   });
 
-  it('should fail if not called from auctionManager', async () => {
-
-  });
+  it('should fail if not called from auctionManager', async () => {});
 });
