@@ -16,8 +16,8 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
 
   bytes32 public DOMAIN_SEPARATOR;
   // keccak256("Permit(address owner,address spender,uint256 value,uint256 nonce,uint256 deadline)");
-  bytes32 public constant PERMIT_TYPEHASH =
-    0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
+  bytes32
+    public constant PERMIT_TYPEHASH = 0x6e71edae12b1b97f4d1f60370fef10105fa2faae0126114a169c64845d6126c9;
   mapping(address => uint256) public nonces;
 
   StrudelToken private strudel;
@@ -104,6 +104,9 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     require(lockDuration <= maxInterval, "lock too long");
     strudel.transferFrom(_msgSender(), address(this), amount);
 
+    // (45850 * 52 * 2 - lockDuration) * lockDuration * amount
+    // -------------------------------------------------------
+    //                  45850 * 52 * 45850 * 52    
     mintAmount = maxInterval.mul(2).sub(lockDuration).mul(lockDuration).mul(amount).div(
       maxInterval.mul(maxInterval)
     );
@@ -123,8 +126,9 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
 
     uint256 remainingLock = endBlock - block.number;
     // TODO: arithmetic mean here is not apropriate. should follow mintAmount formula
-    uint256 averageDuration =
-      remainingLock.mul(lockTotal).add(amount.mul(lockDuration)).div(amount.add(lockTotal));
+    uint256 averageDuration = remainingLock.mul(lockTotal).add(amount.mul(lockDuration)).div(
+      amount.add(lockTotal)
+    );
 
     lockData[owner] = _compact(
       block.number + averageDuration,
@@ -145,8 +149,45 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
       uint256 mintAmount = _lock(recipient, address(this), amount, blocks);
       bridge.deposit(address(this), mintAmount, recipient);
     } else {
+      if (msg.sender != recipient) {
+        require(lockData[recipient] == 0, "recipient has a lock already");
+      }
       _lock(recipient, recipient, amount, blocks);
     }
+    return true;
+  }
+
+
+  function transfer(address recipient, uint256 amount) public override returns (bool) {
+    address msgSender = _msgSender();
+    uint256 lock = lockData[msgSender];
+    uint256 mintTotal;
+    (,, mintTotal) = _parse(lock);
+    if (mintTotal > 0) {
+      require(amount >= mintTotal, "not enough g$TRDL to transfer lock");
+      require(lockData[recipient] == 0, "recipient has a lock already");
+      // transfer lock & g$TRDL together
+      lockData[recipient] = lock;
+      lockData[msgSender] = 0;
+    }
+    _transfer(msgSender, recipient, amount);
+    return true;
+  }
+
+  function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+    uint256 lock = lockData[sender];
+    uint256 mintTotal;
+    (,, mintTotal) = _parse(lock);
+    if (mintTotal > 0) {
+      require(amount >= mintTotal, "not enough g$TRDL to transfer lock");
+      require(lockData[recipient] == 0, "recipient has a lock already");
+      // transfer g$TRDL and lock together
+      lockData[recipient] = lock;
+      lockData[sender] = 0;
+    }
+    _transfer(sender, recipient, amount);
+    address msgSender = _msgSender();
+    _approve(sender, msgSender, allowance(sender, msgSender).sub(amount, "ERC20: transfer amount exceeds allowance"));
     return true;
   }
 
@@ -209,14 +250,13 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     bytes32 s
   ) external {
     require(deadline >= block.timestamp, "Strudel Gov: EXPIRED");
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01",
-          DOMAIN_SEPARATOR,
-          keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-        )
-      );
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+      )
+    );
     address recoveredAddress = ecrecover(digest, v, r, s);
     require(
       recoveredAddress != address(0) && recoveredAddress == owner,
