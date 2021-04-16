@@ -48,7 +48,8 @@ describe('Strudel Wrapper', async () => {
     it('should swap out in 1 tx', async () => {
       const tsBefore = await strudel.totalSupply();
       const signerAddr = await signers[0].getAddress();
-      await strudel.approveAndCall(wrapper.address, expandTo18Decimals(100), signerAddr);
+      const tx = await strudel.approveAndCall(wrapper.address, expandTo18Decimals(100), signerAddr);
+      expect((await tx.wait()).logs[3].topics[1]).to.eq(`0x000000000000000000000000${signerAddr.toLowerCase().replace('0x', '')}`);
       const tsAfter = await strudel.totalSupply();
       expect(tsBefore.sub(expandTo18Decimals(100))).to.eq(tsAfter);
     });
