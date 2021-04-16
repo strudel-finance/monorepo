@@ -17,16 +17,14 @@ interface IStrudel {
 /// @notice This is the Strudel ERC20 contract.
 contract StrudelWrapper is ITokenRecipient, MinterRole {
 
-  event LogSwapin(bytes32 indexed txhash, address indexed account, uint amount);
-  event LogSwapout(address indexed account, address indexed bindaddr, uint amount);
+	event LogSwapin(bytes32 indexed txhash, address indexed account, uint amount);
+	event LogSwapout(address indexed account, address indexed bindaddr, uint amount);
 
-	address public mpcAddr;
 	address public strdlAddr;
 
-	constructor(address _strdlAddr, address _mpcAddr) public {
+	constructor(address _strdlAddr) public {
 		__Ownable_init();
 		strdlAddr = _strdlAddr;
-		mpcAddr = _mpcAddr;
 	}
 
 	function mint(address to, uint256 amount) external onlyMinter returns (bool) {
@@ -54,23 +52,23 @@ contract StrudelWrapper is ITokenRecipient, MinterRole {
 	}
 
 	function getAddr(bytes memory _extraData) internal returns (address){
-    address addr;
-    assembly {
-      addr := mload(add(_extraData,20))
-    }
-    return addr;
-  }
+		address addr;
+		assembly {
+			addr := mload(add(_extraData,20))
+		}
+		return addr;
+	}
 
 	function receiveApproval(
-			address _from,
-			uint256 _value,
-			address _token,
-			bytes calldata _extraData
+		address _from,
+		uint256 _value,
+		address _token,
+		bytes calldata _extraData
 	) external override {
 		require(msg.sender == strdlAddr, "StrudelWrapper: onlyAuth");
 		require(_token == strdlAddr, "StrudelWrapper: onlyAuth");
 		address bindaddr = getAddr(_extraData);
-    require(bindaddr != address(0), "StrudelWrapper: address(0x0)");
+		require(bindaddr != address(0), "StrudelWrapper: address(0x0)");
 		IStrudel(strdlAddr).burnFrom(_from, _value);
 		emit LogSwapout(_from, bindaddr, _value);
 	}
