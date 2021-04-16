@@ -1,8 +1,7 @@
-import { ethers, upgrades } from 'hardhat';
-import { BigNumber, Signer } from 'ethers';
+import { ethers } from 'hardhat';
+import { Signer } from 'ethers';
 import chai from 'chai';
-import vector from './testVector.json';
-import { expandTo18Decimals, advanceBlock } from './shared/utilities';
+import { expandTo18Decimals } from './shared/utilities';
 import { StrudelToken } from '../typechain/StrudelToken';
 import { StrudelWrapper } from '../typechain/StrudelWrapper';
 
