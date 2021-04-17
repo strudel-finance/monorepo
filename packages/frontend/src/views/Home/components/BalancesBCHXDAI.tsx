@@ -59,7 +59,7 @@ const BalancesBCHXDAI: React.FC = () => {
         <CardContent>
           <StyledBalances>
             <StyledBalance>
-              <VBTHIcon />
+              <VBTHIcon fromBinance={true} />
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your vBCH Balance on Binance Smart Chain" />

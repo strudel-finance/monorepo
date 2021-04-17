@@ -45,7 +45,7 @@ const BalanceBCH: React.FC = () => {
         <CardContent>
           <StyledBalances>
             <StyledBalance>
-              <VBTHIcon />
+              <VBTHIcon fromEthereum={true} />
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your vBCH Balance on ETH mainnet" />
