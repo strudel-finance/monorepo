@@ -4,13 +4,17 @@ import chai from 'chai';
 import vector from './testVector.json';
 import { expandTo18Decimals, advanceTime } from './shared/utilities';
 import { MockERC20 } from '../typechain/MockERC20';
+import { StrudelToken } from '../typechain/StrudelToken';
 import { MockPriceOracle } from '../typechain/MockPriceOracle';
+import { MockAuctionManager } from '../typechain/MockAuctionManager';
+import { GovernanceToken } from '../typechain/GovernanceToken';
 import { DutchSwapAuction } from '../typechain/DutchSwapAuction';
 import { DutchSwapFactory } from '../typechain/DutchSwapFactory';
 import { AuctionManager } from '../typechain/AuctionManager';
 
 const { expect } = chai;
 const ZERO_ADDRESS = '0x0000000000000000000000000000000000000000';
+const minInterval = 6;
 
 describe('AuctionManager', () => {
   let alice: Signer;
@@ -18,6 +22,7 @@ describe('AuctionManager', () => {
   let auctionTemplate: DutchSwapAuction;
   let factory: DutchSwapFactory;
   let strudel: MockERC20;
+  let govToken: GovernanceToken;
   let vBtc: MockERC20;
   let btcPriceOracle: MockPriceOracle;
   let vBtcPriceOracle: MockPriceOracle;
@@ -26,13 +31,16 @@ describe('AuctionManager', () => {
 
   before(async () => {
     [alice, bob] = await ethers.getSigners();
+    const StrudelTokenFactory = await ethers.getContractFactory('StrudelToken');
+    strudel = (await StrudelTokenFactory.deploy()) as StrudelToken;
+    const GovernanceTokenFactory = await ethers.getContractFactory('GovernanceToken');
+    govToken = (await upgrades.deployProxy(GovernanceTokenFactory, [
+      strudel.address,
+      strudel.address,
+      minInterval,
+    ])) as GovernanceToken;
+    await govToken.deployed();
     const MockErc20Factory = await ethers.getContractFactory('MockERC20');
-    strudel = (await MockErc20Factory.deploy(
-      'Strudel',
-      '$TRDL',
-      18,
-      expandTo18Decimals(200000)
-    )) as MockERC20;
     vBtc = (await MockErc20Factory.deploy('VBTC', 'VBTC', 18, expandTo18Decimals(8))) as MockERC20;
     const bobAddr = await bob.getAddress();
     await vBtc.transfer(bobAddr, expandTo18Decimals(8));
@@ -48,12 +56,14 @@ describe('AuctionManager', () => {
     const AuctionManagerFactory = await ethers.getContractFactory('AuctionManager');
     auctionManager = (await AuctionManagerFactory.deploy(
       strudel.address,
+      govToken.address,
       vBtc.address,
       btcPriceOracle.address,
       vBtcPriceOracle.address,
       strudelPriceOracle.address,
       factory.address
     )) as AuctionManager;
+    await strudel.addMinter(auctionManager.address);
   });
 
   it('should allow to start auction', async () => {
@@ -63,6 +73,7 @@ describe('AuctionManager', () => {
     await vBtcPriceOracle.update('20000000');
     await strudelPriceOracle.update('200');
     await auctionManager.rotateAuctions();
+    console.log('here1');
     let currentAuctionAddr = await auctionManager.currentAuction();
     const DutchSwapAuctionFactory = await ethers.getContractFactory('DutchSwapAuction');
     const auction = DutchSwapAuctionFactory.attach(currentAuctionAddr);
@@ -70,7 +81,9 @@ describe('AuctionManager', () => {
     // participate in vBTC buy auction
     await advanceTime(60 * 60 * 11 + 60 * 45);
     await vBtc.connect(bob).approve(auction.address, expandTo18Decimals(100));
+    console.log('here11');
     await auction.connect(bob).commitTokens('7000000000000000');
+    console.log('here12');
 
     // try to ratate before finished:
     await expect(auctionManager.rotateAuctions()).to.be.revertedWith(
@@ -89,12 +102,16 @@ describe('AuctionManager', () => {
     // at about half the time, the price should be ~0.014
     let bal = await vBtc.balanceOf(auction.address);
     expect(bal.div('100000000000000').toString()).to.eq('139');
+    console.log('here2');
     await auctionManager.rotateAuctions();
+    console.log('here3');
     currentAuctionAddr = await auctionManager.currentAuction();
     const auction2 = DutchSwapAuctionFactory.attach(currentAuctionAddr);
 
+    console.log('here');
     // check results of buy auction
     await auction.connect(bob).withdrawTokens();
+    console.log('here1');
     // outstanding supply: 10 vBTC
     // imbalance in ETH: (32 - 20) * 10 = 120 ETH
     // imbalance in $TRDL: 120 ETH / 0.0002 = 600,000 $TRDL
@@ -148,4 +165,6 @@ describe('AuctionManager', () => {
     await expect(auctionManager.connect(bob).renounceMinter()).to.be.reverted;
     await auctionManager.renounceMinter();
   });
+
+  it('should fail if not called from auctionManager', async () => {});
 });

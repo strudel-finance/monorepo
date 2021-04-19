@@ -1,15 +1,17 @@
 pragma solidity 0.6.6;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
 import "./mocks/MockERC20.sol";
+import "./GovernanceToken.sol";
 import "./dutchSwap/IDutchAuction.sol";
 import "./dutchSwap/IDutchSwapFactory.sol";
 import "./IPriceOracle.sol";
 
-contract AuctionManager is OwnableUpgradeSafe {
+contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   using SafeMath for uint256;
 
   // used as factor when dealing with %
@@ -27,29 +29,28 @@ contract AuctionManager is OwnableUpgradeSafe {
 
   MockERC20 private strudel;
   IERC20 private vBtc;
+  GovernanceToken private gStrudel;
   IPriceOracle private btcPriceOracle;
   IPriceOracle private vBtcPriceOracle;
   IPriceOracle private strudelPriceOracle;
   IDutchSwapFactory private auctionFactory;
   IDutchAuction public currentAuction;
-
-  // Upgradability -> is this layout OK?
-  mapping(address => bool) public isOurAuction;
   mapping(address => uint256) public lockTimeForAuction;
-  IERC20 private auctionToken;
 
   constructor(
     address _strudelAddr,
+    address _gStrudel,
     address _vBtcAddr,
     address _btcPriceOracle,
     address _vBtcPriceOracle,
     address _strudelPriceOracle,
-    address _auctionFactory,
-    address _auctionTokenAddr
+    address _auctionFactory
   ) public {
     __Ownable_init();
+    __ERC20_init("Strudel Auction Token", "a$TRDL");
     strudel = MockERC20(_strudelAddr);
     vBtc = IERC20(_vBtcAddr);
+    gStrudel = GovernanceToken(_gStrudel);
     btcPriceOracle = IPriceOracle(_btcPriceOracle);
     vBtcPriceOracle = IPriceOracle(_vBtcPriceOracle);
     strudelPriceOracle = IPriceOracle(_strudelPriceOracle);
@@ -59,7 +60,6 @@ contract AuctionManager is OwnableUpgradeSafe {
     dustThreshold = 10; // 0.1% of $TRDL total supply
     priceSpan = 2500; // 25%
     auctionDuration = 84600; // ~23,5h
-    auctionToken = IERC20(_auctionTokenAddr);
   }
 
   function _getDiff(uint256 a, uint256 b) internal pure returns (uint256) {
@@ -148,7 +148,7 @@ contract AuctionManager is OwnableUpgradeSafe {
       // auction off some $TRDL
       currentAuction = IDutchAuction(
         auctionFactory.deployDutchAuction(
-          address(auctionToken),
+          address(this),
           imbalance,
           now,
           now + auctionDuration,
@@ -159,7 +159,6 @@ contract AuctionManager is OwnableUpgradeSafe {
         )
       );
 
-      isOurAuction[address(currentAuction)] = true;
       lockTimeForAuction[address(currentAuction)] = 5; // TODO: What should this be?
     }
   }
@@ -201,5 +200,36 @@ contract AuctionManager is OwnableUpgradeSafe {
   function swipe(address tokenAddr) external onlyOwner {
     IERC20 token = IERC20(tokenAddr);
     token.transfer(owner(), token.balanceOf(address(this)));
+  }
+
+  // In deployDutchAuction, approve and transferFrom are called
+  // In initDutchAuction, transferFrom is called again
+  // In DutchAuction, transfer is called to either payout, or return money to AuctionManager
+
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public override returns (bool success) {
+    return true;
+  }
+
+  function approve(address _spender, uint256 _value) public override returns (bool success) {
+    return true;
+  }
+
+  function transfer(address to, uint256 amount) public override returns (bool success) {
+    // require sender is our Auction
+    address auction = _msgSender();
+    require(lockTimeForAuction[auction] > 0, "Caller is not our auction");
+
+    // if recipient is AuctionManager, it means we are doing a refund -> do nothing
+    if (to == address(this)) return true;
+
+    uint256 blocks = lockTimeForAuction[auction];
+    strudel.mint(address(this), amount);
+    strudel.approve(address(gStrudel), amount);
+    gStrudel.lock(to, amount, blocks, false);
+    return true;
   }
 }

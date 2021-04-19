@@ -328,7 +328,7 @@ contract DutchSwapAuction {
     // solium-disable-next-line security/no-low-level-calls
     (bool success, bytes memory data) =
       token.call(
-        // 0xa9059cbb = bytes4(keccak256("transferFrom(address,address,uint256)"))
+        // 0xa9059cbb = bytes4(keccak256("transfer(address,uint256)"))
         abi.encodeWithSelector(0xa9059cbb, to, amount)
       );
     require(success && (data.length == 0 || abi.decode(data, (bool))), "strans"); // ERC20 Transfer failed
