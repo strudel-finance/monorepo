@@ -21,7 +21,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   // cap auctions at certain amount of $TRDL minted
   uint256 public dilutionBound;
   // stop selling when volume small
-  uint256 public dustThreshold;
+  // uint256 public dustThreshold; set at dilutionBound / 52
   // % start_price above estimate, and % min_price below estimate
   uint256 public priceSpan;
   // auction duration
@@ -60,7 +60,6 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     auctionFactory = IDutchSwapFactory(_auctionFactory);
     sellThreshold = 9500; // vBTC @ 95% of BTC price or above
     dilutionBound = 70; // 0.7% of $TRDL total supply
-    dustThreshold = 10; // 0.1% of $TRDL total supply
     priceSpan = 2500; // 25%
     auctionDuration = 84600; // ~23,5h
   }
@@ -70,32 +69,6 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
       return a - b;
     }
     return b - a;
-  }
-
-  event Data(uint256 indexed data, uint256 indexed dataB);
-
-  function getImbalance() public view returns (uint256) {
-    // get prices
-    uint256 btcPriceInEth = btcPriceOracle.consult(1e18);
-    uint256 vBtcPriceInEth = vBtcPriceOracle.consult(1e18);
-    uint256 strudelPriceInEth = strudelPriceOracle.consult(1e18);
-
-    // measure outstanding supply
-    uint256 vBtcOutstandingSupply = vBtc.totalSupply();
-    uint256 strudelSupply = strudel.totalSupply();
-    uint256 vBtcAmount = vBtc.balanceOf(address(this));
-    vBtcOutstandingSupply -= vBtcAmount;
-    return vBtcOutstandingSupply;
-
-    // calculate vBTC supply imbalance in ETH
-    uint256 imbalance = _getDiff(btcPriceInEth, vBtcPriceInEth).mul(vBtcOutstandingSupply);
-
-    // // cap by dillution bound
-    // imbalance = Math.min(
-    //   strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY),
-    //   imbalance
-    // );
-    return imbalance.div(10**18);
   }
 
   function rotateAuctions() external {
@@ -136,7 +109,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     );
 
     // pause if imbalance below dust threshold
-    if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(dustThreshold).div(ACCURACY)) {
+    if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(dilutionBound).div(52).div(ACCURACY)) {
       // pause auctions
       currentAuction = IDutchAuction(address(0));
       return;
@@ -164,12 +137,6 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
         )
       );
     } else {
-      // calculate imbalance in $TRDL
-      imbalance = imbalance.div(strudelPriceInEth);
-
-      // PROXY: this can go away, replace with a$TRDL
-      /* strudel.mint(address(this), imbalance); */
-      /* strudel.approve(address(auctionFactory), imbalance); */
 
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
@@ -177,7 +144,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
       currentAuction = IDutchAuction(
         auctionFactory.deployDutchAuction(
           address(this),
-          imbalance,
+          imbalance.div(strudelPriceInEth), // calculate imbalance in $TRDL
           now,
           now + auctionDuration,
           address(vBtc),
@@ -189,7 +156,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
 
       // if imbalance >= dillution bound, use max lock (52 weeks)
       // if imbalance < dillution bound, lock shorter
-      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance.mul(strudelPriceInEth)).div(cap); // TODO: What should this be?
+      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance).div(cap);
     }
   }
 
@@ -200,15 +167,8 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   }
 
   function setDulutionBound(uint256 _dilutionBound) external onlyOwner {
-    require(_dilutionBound > dustThreshold, "dilution bound below dustThreshold");
     require(_dilutionBound <= 1000, "dilution bound above 10% max value");
     dilutionBound = _dilutionBound;
-  }
-
-  function setDustThreshold(uint256 _dustThreshold) external onlyOwner {
-    require(_dustThreshold > 0, "dust threshold can not be 0");
-    require(_dustThreshold < dilutionBound, "dust threshold above dilution bound");
-    dustThreshold = _dustThreshold;
   }
 
   function setPriceSpan(uint256 _priceSpan) external onlyOwner {
