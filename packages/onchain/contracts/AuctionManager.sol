@@ -34,6 +34,8 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   IPriceOracle private vBtcPriceOracle;
   IPriceOracle private strudelPriceOracle;
   IDutchSwapFactory private auctionFactory;
+  uint256 private govIntervalLength;
+
   IDutchAuction public currentAuction;
   mapping(address => uint256) public lockTimeForAuction;
 
@@ -49,8 +51,9 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     __Ownable_init();
     __ERC20_init("Strudel Auction Token", "a$TRDL");
     strudel = MockERC20(_strudelAddr);
-    vBtc = IERC20(_vBtcAddr);
     gStrudel = GovernanceToken(_gStrudel);
+    govIntervalLength = gStrudel.intervalLength();
+    vBtc = IERC20(_vBtcAddr);
     btcPriceOracle = IPriceOracle(_btcPriceOracle);
     vBtcPriceOracle = IPriceOracle(_vBtcPriceOracle);
     strudelPriceOracle = IPriceOracle(_strudelPriceOracle);
@@ -70,6 +73,30 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   }
 
   event Data(uint256 indexed data, uint256 indexed dataB);
+
+  function getImbalance() public view returns (uint256) {
+    // get prices
+    uint256 btcPriceInEth = btcPriceOracle.consult(1e18);
+    uint256 vBtcPriceInEth = vBtcPriceOracle.consult(1e18);
+    uint256 strudelPriceInEth = strudelPriceOracle.consult(1e18);
+
+    // measure outstanding supply
+    uint256 vBtcOutstandingSupply = vBtc.totalSupply();
+    uint256 strudelSupply = strudel.totalSupply();
+    uint256 vBtcAmount = vBtc.balanceOf(address(this));
+    vBtcOutstandingSupply -= vBtcAmount;
+    return vBtcOutstandingSupply;
+
+    // calculate vBTC supply imbalance in ETH
+    uint256 imbalance = _getDiff(btcPriceInEth, vBtcPriceInEth).mul(vBtcOutstandingSupply);
+
+    // // cap by dillution bound
+    // imbalance = Math.min(
+    //   strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY),
+    //   imbalance
+    // );
+    return imbalance.div(10**18);
+  }
 
   function rotateAuctions() external {
     if (address(currentAuction) != address(0)) {
@@ -101,9 +128,10 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     // calculate vBTC supply imbalance in ETH
     uint256 imbalance = _getDiff(btcPriceInEth, vBtcPriceInEth).mul(vBtcOutstandingSupply);
 
+    uint256 cap = strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY);
     // cap by dillution bound
     imbalance = Math.min(
-      strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY),
+      cap,
       imbalance
     );
 
@@ -159,7 +187,9 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
         )
       );
 
-      lockTimeForAuction[address(currentAuction)] = 5; // TODO: What should this be?
+      // if imbalance >= dillution bound, use max lock (52 weeks)
+      // if imbalance < dillution bound, lock shorter
+      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance.mul(strudelPriceInEth)).div(cap); // TODO: What should this be?
     }
   }
 
