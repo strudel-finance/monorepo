@@ -83,6 +83,9 @@ export const contractAddresses = {
     56: '0x8425cfcc0155208fe1178d446d15a079d4d309f7',
     100: '0x9840d0417f89182CE4a6e60f4445B8e5dC4F273e',
   },
+  governance: {
+    1: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
+  },
 }
 
 /*

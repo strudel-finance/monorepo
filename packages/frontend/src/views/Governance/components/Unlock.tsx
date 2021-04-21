@@ -9,22 +9,24 @@ import Container from '../../../components/Container'
 import Input from '../../../components/Input'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import StrudelIcon from '../../../components/StrudelIcon'
+import { TimerIcon, GStrudelIcon } from '../../../components/StrudelIcon'
 import ValueBTC from '../../../components/ValueBTC'
+import useBlock from '../../../hooks/useBlock'
 import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
-import { ReddishTextTypography } from '../../BCH/components/BCHTransactionTable'
-import BalanceStrudel from '../../Home/components/BalanceStrudel'
+import dayjs from 'dayjs'
 
 const Lock: React.FC = () => {
   const { eth } = useETH()
   const account = eth?.account
   const infura = useInfura()
-  const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
+  const [gTrdlBalance, setGTrdlBalance] = useState<BigNumber>()
   const [value, setValue] = useState<number | number[]>(0)
+  const [endBlock, setEndBlock] = useState<number>(0)
   // !!! TODO: put that into provider
   const networkId = (window as any).ethereum?.networkVersion
+  const block = useBlock()
 
   const handleValueChange = (event: any, newValue: number | number[]) => {
     setValue(newValue)
@@ -32,14 +34,35 @@ const Lock: React.FC = () => {
 
   useEffect(() => {
     if (eth?.account) {
-      infura.trdl.methods
-        .balanceOf(eth.account)
+      infura.gTrdl.methods
+        .balanceOf('0x8db6b632d743aef641146dc943acb64957155388')
         .call()
         .then((balance: string) => {
-          setStrudelBalance(new BigNumber(balance))
+          setGTrdlBalance(new BigNumber(balance))
+        })
+
+      infura.gTrdl.methods
+        .getLock('0x8db6b632d743aef641146dc943acb64957155388')
+        .call()
+        .then(({ endBlock }: { endBlock: string }) => {
+          setEndBlock(+endBlock)
         })
     }
   }, [eth?.account])
+
+  const formatTime = (blocks: number) => {
+    return dayjs()
+      .add(blocks * 11.36, 'seconds')
+      .format('MMMM DD, YYYY plit HH:mm:ss')
+      .replace('plit', 'at')
+  }
+
+  const blockMargin = (endBlock: number, block: number) => {
+    console.log(endBlock - block, 'endBlock - block')
+
+    return endBlock - block
+  }
+
   return (
     <>
       <Container>
@@ -48,14 +71,14 @@ const Lock: React.FC = () => {
             <CardContent>
               <StyledBalances>
                 <StyledBalance>
-                  <StrudelIcon />
+                  <GStrudelIcon />
                   <Spacer size="xs" />
                   <div>
                     <Label text="g$TRDL Available for voting" />
                     <ValueBTC
                       value={
-                        !!account && !!strudelBalance
-                          ? getBalanceNumber(strudelBalance)
+                        !!account && !!gTrdlBalance
+                          ? getBalanceNumber(gTrdlBalance)
                           : 'Locked'
                       }
                     />
@@ -64,7 +87,6 @@ const Lock: React.FC = () => {
               </StyledBalances>
             </CardContent>
           </Card>
-          <Spacer />
         </StyledWrapper>
       </Container>
 
@@ -76,17 +98,25 @@ const Lock: React.FC = () => {
             <CardContent>
               <StyledBalances>
                 <StyledBalance>
-                  <StrudelIcon />
+                  <TimerIcon />
                   <Spacer size="xs" />
                   <div>
-                    <Label text="Lock duration:  " />
-                    <StyledValue>24:00:00</StyledValue>
+                    <Label text="You can expect your unlock on:  " />
+                    <StyledValue>
+                      {formatTime(blockMargin(endBlock, block))}
+                    </StyledValue>
                   </div>
+                  <Spacer size="xs" />
+                  <InlineBtn
+                    className="glow-btn orange"
+                    disabled={blockMargin(endBlock, block) > 0}
+                    width={200}
+                    text="Unlock $TRDL"
+                  />
                 </StyledBalance>
               </StyledBalances>
             </CardContent>
           </Card>
-          <Spacer />
         </StyledWrapper>
       </Container>
     </>
@@ -100,49 +130,13 @@ const StyledValue = styled.div`
   font-weight: 700;
 `
 
-const StyledTokenSymbol = styled.span`
-  color: rgba(37, 37, 44, 0.48);
-  font-weight: 700;
-`
-
 export const FlexContainer = styled.div`
   display: flex;
 `
-
-export const InlineBtn = styled(Button)`
+// !!! TODO: remove - ugly
+export const InlineBtn = styled(Button)<{ width: number }>`
   display: inline-block;
-`
-
-const StyledInfo = styled(StyledTokenSymbol)`
-  margin-right: 10px;
-`
-
-const StyledTokenAdornmentWrapper = styled.div`
-  align-items: center;
-  display: flex;
-  position: relative;
-  top: -1px;
-`
-
-const Footnote = styled.div`
-  font-size: 14px;
-  padding: 16px 20px;
-  color: ${(props) => 'rgba(37,37,44,0.48);'};
-  position: relative;
-  :after {
-    content: ' ';
-    position: absolute;
-    display: flex;
-    width: calc(100% - 40px);
-    height: 1px;
-    border-top: solid 1px #e9e9e9;
-    top: 0;
-    border-top: solid 1px ${(props) => '#E9E9E9'};
-  }
-`
-const FootnoteValue = styled.div`
-  font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
-  float: right;
+  width: ${(props) => props.width + 'px'};
 `
 
 const StyledWrapper = styled.div`

@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Route, Switch, useRouteMatch } from 'react-router-dom'
 
-import StrudelIcon from '../../components/StrudelIcon'
+import { StrudelIcon } from '../../components/StrudelIcon'
 import AstroWave from '../../assets/img/astroWave.png'
 import ThumbsUp from '../../assets/img/thumbs_up_astronaut.png'
 

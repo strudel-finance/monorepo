@@ -1,4 +1,4 @@
-import { Slider } from '@material-ui/core'
+import { Slider, withStyles } from '@material-ui/core'
 import BigNumber from 'bignumber.js'
 import { value } from 'numeral'
 import React, { useEffect, useState } from 'react'
@@ -10,26 +10,28 @@ import Container from '../../../components/Container'
 import Input from '../../../components/Input'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import StrudelIcon from '../../../components/StrudelIcon'
+import { StrudelIcon } from '../../../components/StrudelIcon'
 import ValueBTC from '../../../components/ValueBTC'
 import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import { ReddishTextTypography } from '../../BCH/components/BCHTransactionTable'
 import BalanceStrudel from '../../Home/components/BalanceStrudel'
+import showError, { closeError } from '../../../utils/showError'
+import BurnAmountInput from '../../../components/BurnAmountInput'
 
 const Lock: React.FC = () => {
   const { eth } = useETH()
   const account = eth?.account
   const infura = useInfura()
   const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
-  const [duration, setDuration] = useState<number | number[]>()
+  const [weeks, setWeeks] = useState<number | number[]>(0)
   const [amount, setAmonut] = useState<string>('0')
   // !!! TODO: put that into provider
   const networkId = (window as any).ethereum?.networkVersion
 
   const handleValueChange = (event: any, newValue: number | number[]) => {
-    setDuration(newValue)
+    setWeeks(newValue)
   }
 
   const isGrOrEqBigNum = (
@@ -42,16 +44,15 @@ const Lock: React.FC = () => {
   const onAmountChange = (event: any) => {
     const value = event.target.value.replace(/^0+/, '')
     const regex = /^[0-9\b]+$/
-    if (
-      (value === '' || regex.test(value)) &&
-      getBalanceNumber(strudelBalance) > +event.target.value
-    ) {
-      //  this.setState({ value })
-      setAmonut(String(value))
-    }
 
-    // if (getBalanceNumber(strudelBalance) > +event.target.value)
-    //   setAmonut(String(event.target.value) || '0')
+    if (value === '') {
+      setAmonut('')
+    } else if (getBalanceNumber(strudelBalance) >= +event.target.value) {
+      setAmonut(value)
+    } else {
+      closeError()
+      showError('Insufficient amount')
+    }
   }
 
   useEffect(() => {
@@ -60,10 +61,24 @@ const Lock: React.FC = () => {
         .balanceOf(eth.account)
         .call()
         .then((balance: string) => {
-          setStrudelBalance(new BigNumber(19500000000000000000))
+          setStrudelBalance(new BigNumber(195000000000000000000000))
         })
     }
   }, [eth?.account])
+
+  const marks = [
+    {
+      value: 1,
+      label: '1 week',
+    },
+    {
+      value: 52,
+      label: '52 weeks',
+    },
+  ]
+
+  const calculateGStrudel = (weeks: number, amount: number) =>
+    (52 * 2 - weeks) * weeks * amount
 
   return (
     <>
@@ -89,73 +104,102 @@ const Lock: React.FC = () => {
               </StyledBalances>
             </CardContent>
           </Card>
-          <Spacer />
         </StyledWrapper>
       </Container>
       <Spacer size="lg" />
-      <FlexContainer>
-        <Input
-          onChange={onAmountChange}
-          placeholder="Enter the amount here"
-          value={amount}
-          step={1}
-          inline={true}
-        />
-        <Slider
-          defaultValue={1}
-          // value={duration}
-          // getAriaValueText={() => {
-          //   setValue()
-          // }}
-          onChange={handleValueChange}
-          aria-labelledby="discrete-slider-small-steps"
-          step={1}
-          marks
-          min={1}
-          max={52}
-          valueLabelDisplay="auto"
-          style={{ width: '360px', marginLeft: '20px' }}
-        />
-      </FlexContainer>
-      <Spacer size="lg" />
-      <FlexContainer>
-        <StyledSubtitle
-          style={{
-            display: 'inline-block',
-            minWidth: '300px',
-          }}
-        >
-          Locking {amount} for {duration || '1'} weeks will <br /> return{' '}
-          {(+amount * 1.01 ** (+duration || 1)).toFixed(2)} g$TRDL
-        </StyledSubtitle>
-        <InlineBtn size="xl" text="Lock $TRDL for $TRDL"></InlineBtn>
-      </FlexContainer>
 
-      {/* <Spacer size="lg"> */}
+      <Container>
+        <Card>
+          <CardContentRow>
+            <FlexContainer align={'flex-start'}>
+              <div style={{ width: '100%', maxWidth: '300px' }}>
+                <StyledTokenAdornmentWrapper>
+                  <StyledInfo>Duration</StyledInfo>
+                </StyledTokenAdornmentWrapper>
+                <StyledSlider
+                  defaultValue={1}
+                  marks={marks}
+                  onChange={handleValueChange}
+                  aria-labelledby="discrete-slider-small-steps"
+                  step={1}
+                  min={1}
+                  max={52}
+                  valueLabelDisplay="auto"
+                />
+              </div>
+              <BurnAmountInput
+                onChange={onAmountChange}
+                value={amount}
+                symbol="TRDL"
+              />
+            </FlexContainer>
+            <hr style={{ margin: '0 15px' }} />
+            <FlexContainer align="flex-start">
+              <StyledTokenAdornmentWrapper>
+                <StyledTokenSymbol>
+                  {' '}
+                  Locking {Number(amount).toFixed(2)} $TRDL for{' '}
+                  {weeks != 1 ? weeks + ' weeks ' : weeks + ' week '} will{' '}
+                  return{' '}
+                  {calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '}
+                  g$TRDL
+                </StyledTokenSymbol>
+              </StyledTokenAdornmentWrapper>
+              <Spacer size="lg" />
+              <InlineBtn
+                text="Lock $TRDL for g$TRDL"
+                className="glow-btn orange"
+                disabled={!Number(amount)}
+              ></InlineBtn>
+            </FlexContainer>
+          </CardContentRow>
+        </Card>
+      </Container>
     </>
   )
 }
-
-const StyledSubtitle = styled.h3`
-  margin: 0px;
-  color: rgba(37, 37, 44, 0.48);
-  font-size: 18px;
-  font-weight: 300;
-  padding: 0;
-  text-align: center;
-`
 
 const StyledTokenSymbol = styled.span`
   color: rgba(37, 37, 44, 0.48);
   font-weight: 700;
 `
 
-export const FlexContainer = styled.div`
+const CardContentRow = styled.div`
   display: flex;
+  flex: 1;
+  flex-direction: row;
+  justify-content: space-between;
+  padding: ${(props) => props.theme.spacing[5]}px;
 `
 
-export const InlineBtn = styled(Button)`
+export const FlexContainer = styled.div<{ align: string }>`
+  box-sizing: border-box;
+  max-width: 400px;
+  word-wrap: break-word;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: ${(props) => props.align};
+`
+
+const StyledSlider = withStyles({
+  root: {
+    boxShadow: '#FFF',
+    color: 'black',
+    margin: '13px 0 20px 23px',
+    width: '268px',
+  },
+  thumb: {
+    '&:hover': { boxShadow: 'none' },
+  },
+  focusVisible: {
+    '&:focus': { boxShadow: 'none' },
+  },
+})(Slider)
+
+export const InlineBtn = styled(Button)<{ width?: number }>`
   display: inline-block;
+  width: ${(props) => props.width + 'px'};
 `
 
 const StyledInfo = styled(StyledTokenSymbol)`
@@ -167,27 +211,6 @@ const StyledTokenAdornmentWrapper = styled.div`
   display: flex;
   position: relative;
   top: -1px;
-`
-
-const Footnote = styled.div`
-  font-size: 14px;
-  padding: 16px 20px;
-  color: ${(props) => 'rgba(37,37,44,0.48);'};
-  position: relative;
-  :after {
-    content: ' ';
-    position: absolute;
-    display: flex;
-    width: calc(100% - 40px);
-    height: 1px;
-    border-top: solid 1px #e9e9e9;
-    top: 0;
-    border-top: solid 1px ${(props) => '#E9E9E9'};
-  }
-`
-const FootnoteValue = styled.div`
-  font-family: 'azo-sans-web', Arial, Helvetica, sans-serif;
-  float: right;
 `
 
 const StyledWrapper = styled.div`

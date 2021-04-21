@@ -22,9 +22,6 @@ const Input: React.FC<InputProps> = ({
   step,
   inline
 }) => {
-  // !!! TODO: combine those 2 into
-  // const regex1 = new RegExp(/(^[0-9]{1})+(\.+)*$/)
-  // const regex2 = new RegExp(/(^[0-9]{1})+(\.[0-9]+)*$/)
 
   return (
     <StyledInputWrapper inline={inline}>
@@ -37,9 +34,11 @@ const Input: React.FC<InputProps> = ({
         onChange={onChange}
         disabled={disabled}
         onKeyDown={(evt) =>
-          ( step === 1 ? evt.key === '.' || evt.key === 'e'  ||evt.key === '-' : evt.key === 'e'  ||evt.key === '-') && evt.preventDefault()
+          (step === 1
+            ?  evt.key === 'e' || evt.key === '-'
+            : evt.key === 'e' || evt.key === '-') && evt.preventDefault()
         }
-        step={step}
+        // step={step}
         // pattern="[0-9]*"
       />
       {!!endAdornment && endAdornment}
@@ -57,7 +56,7 @@ const StyledInputWrapper = styled.div<StyledButtonProps>`
   display:  ${(props) => {
     return props.inline ? 'inline-block' : 'flex'
   }};
-  padding: 0 ${(props) => props.theme.spacing[3]}px;
+  // padding: 0 ${(props) => props.theme.spacing[3]}px;
 
 `
 
