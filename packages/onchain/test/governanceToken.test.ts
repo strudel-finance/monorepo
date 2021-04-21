@@ -4,7 +4,7 @@ import chai from 'chai';
 import vector from './testVector.json';
 import { expandTo18Decimals, advanceBlock } from './shared/utilities';
 import { GovernanceToken } from '../typechain/GovernanceToken';
-import { MockERC20 } from '../typechain/MockErc20';
+import { StrudelToken } from '../typechain/StrudelToken';
 import { MockGovBridge } from '../typechain/MockGovBridge';
 
 const { expect } = chai;
@@ -13,19 +13,17 @@ const maxInterval = minInterval * 52;
 
 describe('GovernanceToken', async () => {
   let signers: Signer[];
-  let strudel: MockERC20;
+  let strudel: StrudelToken;
   let gov: GovernanceToken;
   let bridge: MockGovBridge;
 
   beforeEach(async () => {
     signers = await ethers.getSigners();
-    const MockErc20Factory = await ethers.getContractFactory('MockERC20');
-    strudel = (await MockErc20Factory.deploy(
-      'strudel',
-      '$TRDL',
-      18,
-      expandTo18Decimals(100000)
-    )) as MockERC20;
+    const StrudelTokenFactory = await ethers.getContractFactory('StrudelToken');
+    strudel = (await StrudelTokenFactory.deploy()) as StrudelToken;
+    const minterAddr = await signers[0].getAddress();
+    await strudel.addMinter(minterAddr);
+    await strudel.mint(minterAddr, expandTo18Decimals(100000));
     const MockGovBridgeFactory = await ethers.getContractFactory('MockGovBridge');
     bridge = (await MockGovBridgeFactory.deploy()) as MockGovBridge;
 
@@ -46,6 +44,17 @@ describe('GovernanceToken', async () => {
       const signerAddr = await signers[0].getAddress();
       await strudel.approve(gov.address, expandTo18Decimals(100000));
       await gov.lock(signerAddr, expandTo18Decimals(26), maxInterval, false);
+
+      const bal = await gov.balanceOf(signerAddr);
+      expect(bal).to.eq(expandTo18Decimals(26));
+    });
+
+    it('should lock with approve', async () => {
+      const signerAddr = await signers[0].getAddress();
+      await strudel.approveAndCall(
+        gov.address,
+        expandTo18Decimals(26), 
+        `0x0000000000000000000000000000000000000000000000000000000000000${maxInterval.toString(16)}`);
 
       const bal = await gov.balanceOf(signerAddr);
       expect(bal).to.eq(expandTo18Decimals(26));
@@ -87,20 +96,6 @@ describe('GovernanceToken', async () => {
       let lock = await gov.getLock(alice);
       expect(lock.mintTotal).to.eq(0);
       lock = await gov.getLock(bob);
-      expect(lock.mintTotal).to.eq(expandTo18Decimals(26));
-    });
-
-    it('should deposit into bridge', async () => {
-      const alice = await signers[0].getAddress();
-      await strudel.approve(gov.address, expandTo18Decimals(100000));
-      const tx = await gov.lock(alice, expandTo18Decimals(26), maxInterval, true);
-      const events = (await tx.wait(1)).events!;
-      expect(`0x${events[5].topics[1].slice(26, 66)}`).to.eq(alice.toLowerCase());
-
-      let bal = await gov.balanceOf(bridge.address);
-      expect(bal).to.eq(expandTo18Decimals(26));
-
-      let lock = await gov.getLock(alice);
       expect(lock.mintTotal).to.eq(expandTo18Decimals(26));
     });
 
@@ -174,12 +169,5 @@ describe('GovernanceToken', async () => {
     expect((await gov.owner()).valueOf()).to.eq(bob);
     await gov.connect(signers[1]).functions.transferOwnership(alice);
     expect((await gov.owner()).valueOf()).to.eq(alice);
-
-    // also check other admin functions
-    await expect(gov.connect(signers[1]).updateBridge(bob)).to.be.revertedWith(
-      'caller is not the owner'
-    );
-    await gov.connect(signers[0]).functions.updateBridge(alice);
-    expect((await gov.bridge()).valueOf()).to.eq(alice);
   });
 });

@@ -11,7 +11,7 @@ import "./IGovBridge.sol";
 
 /// @title  Strudel Governance Token.
 /// @notice This is an ERC20 contract that mints by locking another token.
-contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
+contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipient {
   using SafeMath for uint256;
 
   bytes32 public DOMAIN_SEPARATOR;
@@ -91,18 +91,19 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
   }
 
   function _lock(
-    address owner,
-    address recipient,
+    address sender,
+    address lockOwner,
+    address tokenRecipient,
     uint256 amount,
     uint256 lockDuration
   ) internal returns (uint256 mintAmount) {
-    require(owner != address(0), "owner 0");
-    require(recipient != address(0), "recipient 0");
+    require(lockOwner != address(0), "owner 0");
+    require(tokenRecipient != address(0), "recipient 0");
     require(amount >= 1e15, "small deposit");
     require(lockDuration >= intervalLength, "lock too short");
     uint256 maxInterval = intervalLength * 52;
     require(lockDuration <= maxInterval, "lock too long");
-    strudel.transferFrom(_msgSender(), address(this), amount);
+    strudel.transferFrom(sender, address(this), amount);
 
     // (45850 * 52 * 2 - lockDuration) * lockDuration * amount
     // -------------------------------------------------------
@@ -114,7 +115,7 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     uint256 endBlock;
     uint256 lockTotal;
     uint256 mintTotal;
-    (endBlock, lockTotal, mintTotal) = _parse(lockData[owner]);
+    (endBlock, lockTotal, mintTotal) = _parse(lockData[lockOwner]);
 
     // return previous lock, if matured
     if (lockTotal > 0 && block.number >= endBlock) {
@@ -130,13 +131,13 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
       amount.add(lockTotal)
     );
 
-    lockData[owner] = _compact(
+    lockData[lockOwner] = _compact(
       block.number + averageDuration,
       lockTotal + amount,
       mintAmount + mintTotal
     );
 
-    _mint(recipient, mintAmount);
+    _mint(tokenRecipient, mintAmount);
   }
 
   function lock(
@@ -145,49 +146,11 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     uint256 blocks,
     bool deposit
   ) public returns (bool) {
-    if (deposit) {
-      uint256 mintAmount = _lock(recipient, address(this), amount, blocks);
-      bridge.deposit(address(this), mintAmount, recipient);
-    } else {
-      if (msg.sender != recipient) {
-        require(lockData[recipient] == 0, "recipient has a lock already");
-      }
-      _lock(recipient, recipient, amount, blocks);
-    }
-    return true;
-  }
-
-
-  function transfer(address recipient, uint256 amount) public override returns (bool) {
-    address msgSender = _msgSender();
-    uint256 lock = lockData[msgSender];
-    uint256 mintTotal;
-    (,, mintTotal) = _parse(lock);
-    if (mintTotal > 0) {
-      require(amount >= mintTotal, "not enough g$TRDL to transfer lock");
+    require(!deposit, "deposit not supported");
+    if (msg.sender != recipient) {
       require(lockData[recipient] == 0, "recipient has a lock already");
-      // transfer lock & g$TRDL together
-      lockData[recipient] = lock;
-      lockData[msgSender] = 0;
     }
-    _transfer(msgSender, recipient, amount);
-    return true;
-  }
-
-  function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
-    uint256 lock = lockData[sender];
-    uint256 mintTotal;
-    (,, mintTotal) = _parse(lock);
-    if (mintTotal > 0) {
-      require(amount >= mintTotal, "not enough g$TRDL to transfer lock");
-      require(lockData[recipient] == 0, "recipient has a lock already");
-      // transfer g$TRDL and lock together
-      lockData[recipient] = lock;
-      lockData[sender] = 0;
-    }
-    _transfer(sender, recipient, amount);
-    address msgSender = _msgSender();
-    _approve(sender, msgSender, allowance(sender, msgSender).sub(amount, "ERC20: transfer amount exceeds allowance"));
+    _lock(_msgSender(), recipient, recipient, amount, blocks);
     return true;
   }
 
@@ -202,6 +165,53 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
   ) external returns (bool) {
     strudel.permit(_msgSender(), address(this), value, deadline, v, r, s);
     return lock(_msgSender(), value, blocks, deposit);
+  }
+
+  function getBlocks(bytes memory _extraData) internal pure returns (uint256){
+    uint256 blocks;
+    assembly {
+      blocks := mload(add(_extraData,32))
+    }
+    return blocks;
+  }
+
+  function receiveApproval(
+    address _from,
+    uint256 _value,
+    address _token,
+    bytes calldata _extraData
+  ) external override {
+    require(msg.sender == address(strudel), "only $TRDL lockable");
+    require(_token == address(strudel), "only accepting $TRDL");
+    _lock(_from, _from, _from, _value, getBlocks(_extraData));
+  }
+
+  function _transferLock(address sender, address recipient, uint256 amount) internal {
+    uint256 lock = lockData[sender];
+    uint256 mintTotal;
+    (,, mintTotal) = _parse(lock);
+    if (mintTotal > 0) {
+      require(amount >= mintTotal, "not enough g$TRDL to transfer lock");
+      require(lockData[recipient] == 0, "recipient has a lock already");
+      // transfer g$TRDL and lock together
+      lockData[recipient] = lock;
+      lockData[sender] = 0;
+    }
+  }
+
+  function transfer(address recipient, uint256 amount) public override returns (bool) {
+    address msgSender = _msgSender();
+    _transferLock(msgSender, recipient, amount);
+    _transfer(msgSender, recipient, amount);
+    return true;
+  }
+
+  function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+    _transferLock(sender, recipient, amount);
+    _transfer(sender, recipient, amount);
+    address msgSender = _msgSender();
+    _approve(sender, msgSender, allowance(sender, msgSender).sub(amount, "ERC20: transfer amount exceeds allowance"));
+    return true;
   }
 
   function unlock() public returns (bool) {
@@ -265,9 +275,4 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe {
     _approve(owner, spender, value);
   }
 
-  function updateBridge(address _bridgeAddr) external onlyOwner {
-    require(_bridgeAddr != address(0), "zero bridge");
-    _approve(address(this), _bridgeAddr, uint256(-1));
-    bridge = IGovBridge(_bridgeAddr);
-  }
 }
