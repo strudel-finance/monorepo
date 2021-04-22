@@ -16,8 +16,13 @@ import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import dayjs from 'dayjs'
-import { getGStrudelContract } from '../../../tokens/utils'
+import {
+  getGStrudelAddress,
+  getGStrudelContract,
+  getStrudelAddress,
+} from '../../../tokens/utils'
 import useVBTC from '../../../hooks/useVBTC'
+import useTokenBalance from '../../../hooks/useTokenBalance'
 const BLOCKS_PER_WEEK = 45850
 const SECONDS_PER_BLOCK = 13.1908
 
@@ -25,34 +30,31 @@ const Lock: React.FC = () => {
   const { eth } = useETH()
   const account = eth?.account
   const infura = useInfura()
-  const [gTrdlBalance, setGTrdlBalance] = useState<BigNumber>()
-  const [value, setValue] = useState<number | number[]>(0)
+  // const [gTrdlBalance, setGTrdlBalance] = useState<BigNumber>()
   const [endBlock, setEndBlock] = useState<number>(0)
   // !!! TODO: put that into provider
-  const networkId = (window as any).ethereum?.networkVersion
   const block = useBlock()
   const vbtc = useVBTC()
-  const handleValueChange = (event: any, newValue: number | number[]) => {
-    setValue(newValue)
-  }
+  const gStrudelContract = getGStrudelContract(vbtc)
+  const gTrdlBalance = useTokenBalance(getGStrudelAddress(vbtc))
 
   useEffect(() => {
-    if (eth?.account) {
-      infura.gTrdl.methods
-        .balanceOf('0x8db6b632d743aef641146dc943acb64957155388')
-        .call()
-        .then((balance: string) => {
-          setGTrdlBalance(new BigNumber(balance))
-        })
+    if (eth?.account && gStrudelContract) {
+      // gStrudelContract.methods
+      //   .balanceOf(account)
+      //   .call()
+      //   .then((balance: string) => {
+      //     setGTrdlBalance(new BigNumber(balance))
+      //   })
 
-      infura.gTrdl.methods
-        .getLock('0x8db6b632d743aef641146dc943acb64957155388')
+      gStrudelContract.methods
+        .getLock(account)
         .call()
         .then(({ endBlock }: { endBlock: string }) => {
           setEndBlock(+endBlock)
         })
     }
-  }, [eth?.account])
+  }, [eth?.account, gStrudelContract, gTrdlBalance])
 
   const formatTime = (blocks: number) => {
     return dayjs()
@@ -111,7 +113,9 @@ const Lock: React.FC = () => {
                   <div>
                     <Label text="You can expect your unlock on:  " />
                     <StyledValue>
-                      {endBlock && blockMargin(endBlock, block) > 0
+                      {!endBlock || !block
+                        ? 'You have no $TRDL locked'
+                        : blockMargin(endBlock, block) > 0
                         ? formatTime(blockMargin(endBlock, block))
                         : 'You can unlock you $TRDL now'}
                     </StyledValue>
@@ -119,7 +123,9 @@ const Lock: React.FC = () => {
                   <Spacer size="xs" />
                   <InlineBtn
                     className="glow-btn orange"
-                    disabled={blockMargin(endBlock, block) > 0}
+                    disabled={
+                      !endBlock || !block || blockMargin(endBlock, block) >= 0
+                    }
                     width={200}
                     text="Unlock $TRDL"
                     onClick={unlockStrudel}

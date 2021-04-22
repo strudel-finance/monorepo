@@ -47,6 +47,10 @@ export const getStrudelAddress = (vbtc: Vbtc): string => {
   return vbtc && vbtc.strudelAddress
 }
 
+export const getGStrudelAddress = (vbtc: Vbtc): string => {
+  return vbtc && vbtc.gStrudelAddress
+}
+
 export const getRelayContract = (vCoins: Vbtc | Vbch): RelayContract => {
   return vCoins && vCoins.contracts && vCoins.contracts.relay
 }
@@ -454,48 +458,55 @@ export const redeem = async (
   }
 }
 
-// ;(function approveContract(web3: Web3) {
-// const ETH_MAINNET = 1
-// const EIP712Domain = [
-//   { name: 'name', type: 'string' },
-//   { name: 'version', type: 'string' },
-//   { name: 'chainId', type: 'uint256' },
-//   { name: 'verifyingContract', type: 'address' },
-// ]
+const EIP712Domain = [
+  { name: 'name', type: 'string' },
+  { name: 'version', type: 'string' },
+  { name: 'chainId', type: 'uint256' },
+  { name: 'verifyingContract', type: 'address' },
+]
 
-// const domain = {
-//   name: 'Uniswap V2',
-//   version: '1',
-//   // HARDCODED
-//   chainId: ETH_MAINNET,
-//   verifyingContract: contractAddresses.gStrudel[ETH_MAINNET],
-// }
+const Permit = [
+  { name: 'owner', type: 'address' },
+  { name: 'spender', type: 'address' },
+  { name: 'value', type: 'uint256' },
+  { name: 'nonce', type: 'uint256' },
+  { name: 'deadline', type: 'uint256' },
+]
 
-// const Permit = [
-//   { name: 'owner', type: 'address' },
-//   { name: 'spender', type: 'address' },
-//   { name: 'value', type: 'uint256' },
-//   { name: 'nonce', type: 'uint256' },
-//   { name: 'deadline', type: 'uint256' },
-// ]
+export const getPermitData = async (
+  token: any,
+  approve: {
+    owner: string
+    spender: string
+    value: BigNumber
+  },
+  nonce: BigNumber,
+  deadline: BigNumber,
+  chainId: number,
+): Promise<string> => {
+  const name = await token.methods.name().call()
 
-// const message = {
-//   owner: account,
-//   spender: ROUTER_ADDRESS,
-//   value: liquidityAmount.raw.toString(),
-//   nonce: nonce.toHexString(),
-//   deadline: deadline.toNumber(),
-// }
-
-// const data = JSON.stringify({
-//   types: {
-//     EIP712Domain,
-//     Permit,
-//   },
-//   domain,
-//   primaryType: 'Permit',
-//   message,
-// })
-
-// console.log(web3.currentProvider as any, 'dadadada')
-// })()
+  const domain = {
+    name: name,
+    version: '1',
+    chainId: chainId,
+    verifyingContract: token.options.address,
+  }
+  nonce = new BigNumber(nonce)
+  const message = {
+    owner: approve.owner,
+    spender: approve.spender,
+    value: approve.value.toString(),
+    nonce: nonce.toString(16),
+    deadline: deadline.toNumber(),
+  }
+  return JSON.stringify({
+    types: {
+      EIP712Domain,
+      Permit,
+    },
+    domain,
+    primaryType: 'Permit',
+    message,
+  })
+}

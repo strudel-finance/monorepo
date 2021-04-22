@@ -1,10 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  BrowserRouter,
-  Route,
-  Switch,
-  useLocation,
-} from 'react-router-dom'
+import { BrowserRouter, Route, Switch, useLocation } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { UseWalletProvider } from 'use-wallet'
 import DisclaimerModal from './components/DisclaimerModal'
@@ -63,20 +58,21 @@ const App: React.FC = () => {
   }
 
   if ((window as any).ethereum) {
-    (window as any).ethereum.on('networkChanged',
-    (networkId: string) => {
-      localStorage.setItem('networkId', networkId);
-      window.location.reload();
-    },
-    );
-    (window as any).ethereum.on('accountsChanged', accountChange);
+    ;(window as any).ethereum.on('networkChanged', (networkId: string) => {
+      localStorage.setItem('networkId', networkId)
+      window.location.reload()
+    })
+    ;(window as any).ethereum.on('accountsChanged', accountChange)
     localStorage.setItem('networkId', (window as any).ethereum.networkVersion)
   } else {
     ;(window as any).addEventListener(
       'ethereum#initialized',
       () => {
-        localStorage.setItem('networkId', (window as any).ethereum.networkVersion);
-        (window as any).ethereum.on('accountsChanged', accountChange)
+        localStorage.setItem(
+          'networkId',
+          (window as any).ethereum.networkVersion,
+        )
+        ;(window as any).ethereum.on('accountsChanged', accountChange)
       },
       {
         once: true,
@@ -107,7 +103,7 @@ const App: React.FC = () => {
           !localStorage.getItem('networkId') ? (
             <Farms />
           ) : (
-            <Note />
+            <Note affair={'Terra-farms'} />
           )}
         </Route>
         <Route path="/BTC">
@@ -117,7 +113,12 @@ const App: React.FC = () => {
           <BCH />
         </Route>
         <Route path="/governance">
-          <Governance />
+          {localStorage.getItem('networkId') == '1' ||
+          !localStorage.getItem('networkId') ? (
+            <Governance />
+          ) : (
+            <Note affair={'Governance'} />
+          )}
         </Route>
         {false && (
           <Route path="/staking">
@@ -132,9 +133,9 @@ const App: React.FC = () => {
 const Providers: React.FC = ({ children }) => {
   return (
     <ThemeProvider
-           theme={useLocation().pathname.includes('/BCH') ? BCHtheme : BTCtheme}
+      theme={useLocation().pathname.includes('/BCH') ? BCHtheme : BTCtheme}
     >
-    <UseWalletProvider
+      <UseWalletProvider
         chainId={1}
         connectors={{
           walletconnect: {
@@ -143,21 +144,21 @@ const Providers: React.FC = ({ children }) => {
         }}
       >
         {/* pro */}
-          <InfuraProvider>
+        <InfuraProvider>
           <WalletProvider>
             <BridgeProvider>
-          <VBTCProvider>
-            <VBCHProvider>
-              <TransactionProvider>
-                <FarmsProvider>
-                  <ModalsProvider>{children}</ModalsProvider>
-                </FarmsProvider>
-              </TransactionProvider>
-            </VBCHProvider>
+              <VBTCProvider>
+                <VBCHProvider>
+                  <TransactionProvider>
+                    <FarmsProvider>
+                      <ModalsProvider>{children}</ModalsProvider>
+                    </FarmsProvider>
+                  </TransactionProvider>
+                </VBCHProvider>
               </VBTCProvider>
-              </BridgeProvider>
+            </BridgeProvider>
           </WalletProvider>
-            </InfuraProvider>
+        </InfuraProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>
@@ -165,11 +166,11 @@ const Providers: React.FC = ({ children }) => {
 }
 
 export default () => (
-      <BrowserRouter>
-        <Providers >
-          <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
-              <App />
-          </ErrorBoundary>
-        </Providers>
-      </BrowserRouter>
+  <BrowserRouter>
+    <Providers>
+      <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
+        <App />
+      </ErrorBoundary>
+    </Providers>
+  </BrowserRouter>
 )
