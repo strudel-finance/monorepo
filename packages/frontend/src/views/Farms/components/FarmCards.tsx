@@ -235,7 +235,7 @@ const StyledCardAccent = styled.div`
   z-index: -1;
 `
 
-const StyledCards = styled.div`
+export const StyledCards = styled.div`
   width: 1240px;
   @media (max-width: 1240px) {
     width: 100%;

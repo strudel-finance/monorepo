@@ -15,7 +15,7 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
 }) => {
   return (
     <StyledTokenInput
-      className={`styled-token-input ${symbol === 'BTC' ? 'btc' : 'bch'}`}
+      className={`styled-token-input ${symbol === 'BCH' ? 'bch' : 'btc'}`}
     >
       <Input
         startAdornment={

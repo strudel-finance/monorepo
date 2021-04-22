@@ -9,7 +9,8 @@ body {
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
 }
 
 .farm-container {
@@ -35,30 +36,30 @@ footer {
 .glow-btn {
   border: none !important;
   letter-spacing: 0 !important;
-  min-width: 200px;
+  min-width: 100px;
 }
 
 .glow-btn.green {
   background-color: #2fcf6d;
   box-shadow: 0px 0px 30px rgb(47 208 109 / 48%);
-  color: #FFF;
+  color: #fff;
 }
 
 .glow-btn.green:disabled {
   background-color: rgba(47, 208, 109, 0.48);
-  color: #FFF;
+  color: #fff;
   box-shadow: none;
 }
 
 .glow-btn.orange {
   background-color: rgba(229, 147, 16, 1);
-  color: #FFF;
+  color: #fff;
   box-shadow: 0px 0px 30px rgb(229 147 16 / 48%);
 }
 
 .glow-btn.orange:disabled {
   background-color: rgba(229, 147, 16, 0.48);
-  color: #FFF;
+  color: #fff;
   box-shadow: none;
 }
 
@@ -100,23 +101,25 @@ footer {
   font-weight: 700;
 }
 
-.styled-token-input.bch input, .styled-token-input.bch input::placeholder {
+.styled-token-input.bch input,
+.styled-token-input.bch input::placeholder {
   color: #2fcf6d;
   padding-right: 4px;
 }
 
-.styled-token-input.btc input, .styled-token-input.btc input::placeholder {
+.styled-token-input.btc input,
+.styled-token-input.btc input::placeholder {
   color: rgba(229, 147, 16, 1);
   padding-right: 4px;
 }
 
-.styled-token-input.btc {
+/* .styled-token-input.btc {
   margin-bottom: 24px;
-}
+} */
 
-.styled-token-input.bch {
+/* .styled-token-input.bch {
   margin-bottom: 24px;
-}
+} */
 
 .styled-token-wrapper span {
   color: #322015;
@@ -345,7 +348,7 @@ max-height: 340px;
     flex-direction: column;
     width: 70%;
   }
-  .main-head>div {
+  .main-head > div {
     display: none;
   }
   .main-head button:first-child {
@@ -356,30 +359,30 @@ max-height: 340px;
   }
 }
 
-input[type=number]::-webkit-inner-spin-button, 
-input[type=number]::-webkit-outer-spin-button { 
-  -webkit-appearance: none; 
-  margin: 0; 
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 
 .loading:after {
   overflow: hidden;
   display: inline-block;
   vertical-align: bottom;
-  -webkit-animation: ellipsis steps(4,end) 900ms infinite;      
-  animation: ellipsis steps(4,end) 900ms infinite;
-  content: "\2026"; /* ascii code for the ellipsis character */
+  -webkit-animation: ellipsis steps(4, end) 900ms infinite;
+  animation: ellipsis steps(4, end) 900ms infinite;
+  content: '\2026'; /* ascii code for the ellipsis character */
   width: 0px;
 }
 
 @keyframes ellipsis {
   to {
-    width: 20px;    
+    width: 20px;
   }
 }
 
 @-webkit-keyframes ellipsis {
   to {
-    width: 20px;    
+    width: 20px;
   }
 }

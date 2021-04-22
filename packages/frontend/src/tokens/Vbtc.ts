@@ -18,7 +18,8 @@ interface Options {
 }
 
 export class Vbtc {
-  web3: Web3
+  // !!!  TODO: add correct web3 type
+  web3: any
   testing: EVM
   snapshot: Promise<string>
   contracts: Contracts
@@ -26,6 +27,7 @@ export class Vbtc {
   masterChefAddress: string
   wethAddress: string
   strudelAddress: string
+  gStrudelAddress: string
   accounts: Account[]
 
   constructor(
@@ -64,6 +66,7 @@ export class Vbtc {
     this.masterChefAddress = contractAddresses.masterChef[networkId]
     this.wethAddress = contractAddresses.weth[networkId]
     this.strudelAddress = contractAddresses.strudel[networkId]
+    this.gStrudelAddress = contractAddresses.gStrudel[networkId]
   }
 
   async resetEVM() {
