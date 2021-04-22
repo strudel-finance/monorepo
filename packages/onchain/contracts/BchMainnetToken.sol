@@ -45,7 +45,7 @@ contract BchMainnetToken is ERC20, Ownable {
   /**
    * @dev See {IERC20-totalSupply}.
    */
-  function totalSupply() public override view returns (uint256) {
+  function totalSupply() public view override returns (uint256) {
     return _reportedSupply;
   }
 

@@ -278,10 +278,9 @@ contract DutchSwapAuction {
       /// @dev Successful auction
       /// @dev Transfer contributed tokens to wallet.
       _tokenPayment(paymentCurrency, wallet, commitmentsTotal);
-    } else if (commitmentsTotal == 0) {
+    } else if ( commitmentsTotal == 0 && block.timestamp < startDate ) {
       /// @dev Cancelled Auction
       /// @dev You can cancel the auction before it starts
-      require(block.timestamp <= startDate, "startDate"); // Auction already started
       _tokenPayment(auctionToken, wallet, totalTokens);
     } else {
       /// @dev Failed auction
@@ -328,10 +327,10 @@ contract DutchSwapAuction {
     // solium-disable-next-line security/no-low-level-calls
     (bool success, bytes memory data) =
       token.call(
-        // 0xa9059cbb = bytes4(keccak256("transferFrom(address,address,uint256)"))
+        // 0xa9059cbb = bytes4(keccak256("transfer(address,uint256)"))
         abi.encodeWithSelector(0xa9059cbb, to, amount)
       );
-    require(success && (data.length == 0 || abi.decode(data, (bool))), "strans"); // ERC20 Transfer failed
+    require(success && (data.length == 0 || abi.decode(data, (bool))), "stransfer failed"); // ERC20 Transfer failed
   }
 
   function _safeTransferFrom(
