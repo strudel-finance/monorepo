@@ -16,6 +16,10 @@ import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import dayjs from 'dayjs'
+import { getGStrudelContract } from '../../../tokens/utils'
+import useVBTC from '../../../hooks/useVBTC'
+const BLOCKS_PER_WEEK = 45850
+const SECONDS_PER_BLOCK = 13.1908
 
 const Lock: React.FC = () => {
   const { eth } = useETH()
@@ -27,7 +31,7 @@ const Lock: React.FC = () => {
   // !!! TODO: put that into provider
   const networkId = (window as any).ethereum?.networkVersion
   const block = useBlock()
-
+  const vbtc = useVBTC()
   const handleValueChange = (event: any, newValue: number | number[]) => {
     setValue(newValue)
   }
@@ -52,15 +56,19 @@ const Lock: React.FC = () => {
 
   const formatTime = (blocks: number) => {
     return dayjs()
-      .add(blocks * 11.36, 'seconds')
+      .add(blocks * SECONDS_PER_BLOCK, 'seconds')
       .format('MMMM DD, YYYY plit HH:mm:ss')
       .replace('plit', 'at')
   }
 
   const blockMargin = (endBlock: number, block: number) => {
-    console.log(endBlock - block, 'endBlock - block')
-
     return endBlock - block
+  }
+
+  const unlockStrudel = async () => {
+    const gStrdudelContract = getGStrudelContract(vbtc)
+    console.log(gStrdudelContract.methods, 'locklock')
+    await gStrdudelContract.methods.unlock().send()
   }
 
   return (
@@ -103,7 +111,9 @@ const Lock: React.FC = () => {
                   <div>
                     <Label text="You can expect your unlock on:  " />
                     <StyledValue>
-                      {formatTime(blockMargin(endBlock, block))}
+                      {endBlock && blockMargin(endBlock, block) > 0
+                        ? formatTime(blockMargin(endBlock, block))
+                        : 'You can unlock you $TRDL now'}
                     </StyledValue>
                   </div>
                   <Spacer size="xs" />
@@ -112,6 +122,7 @@ const Lock: React.FC = () => {
                     disabled={blockMargin(endBlock, block) > 0}
                     width={200}
                     text="Unlock $TRDL"
+                    onClick={unlockStrudel}
                   />
                 </StyledBalance>
               </StyledBalances>

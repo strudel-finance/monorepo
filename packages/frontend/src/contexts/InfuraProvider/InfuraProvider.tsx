@@ -55,7 +55,7 @@ const InfuraProvider: React.FC = ({ children }) => {
       gTrdl: new Contract(
         // add ABI item as type
         GStrudelAbi as any[],
-        contractAddresses.governance[ETH_MAINNET],
+        contractAddresses.gStrudel[ETH_MAINNET],
       ),
     }
 

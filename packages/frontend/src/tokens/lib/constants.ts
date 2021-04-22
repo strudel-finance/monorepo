@@ -41,50 +41,60 @@ export const addressMap = {
 export const contractAddresses = {
   tbtc: {
     1: '0x8daebade922df735c38c80c7ebd708af50815faa',
+    1337: '0x8daebade922df735c38c80c7ebd708af50815faa',
     5: '',
   },
   trdlPool: {
     1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
+    1337: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
   },
   tbtcPool: {
     1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
     5: '',
+    1337: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
   },
   vbtc: {
     1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
     5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
+    1337: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
   },
   strudel: {
     1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
     5: '0x611f48792751271328f5192d83343f0bfad8b78f',
+    1337: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
   },
   masterChef: {
     1: '0x517b091FdB87A42c879BbB849444E76A324D53c8',
     5: '0xc80a91101adb246c286de0200bbb25f644aa1f56',
+    1337: '0x517b091FdB87A42c879BbB849444E76A324D53c8',
   },
   weth: {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     5: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
+    1337: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
   },
   relay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
     5: '',
     56: '0x3D4FFC1E924Ed1ee6ABDA7cb9c56Bbd1E26336D4',
     100: '0x9cb9CF602B09e6c8c8B4A9Abd688d1cEe3F1c7a7',
+    1337: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
   },
   vbch: {
     1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
     5: '',
     56: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
     100: '0x2fB16a262c868889D8f7Dd30c9738687efeca971',
+    1337: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
   },
   bridge: {
     5: '',
     56: '0x8425cfcc0155208fe1178d446d15a079d4d309f7',
     100: '0x9840d0417f89182CE4a6e60f4445B8e5dC4F273e',
   },
-  governance: {
+  gStrudel: {
     1: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
+    1337: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
   },
 }
 

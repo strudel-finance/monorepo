@@ -1,4 +1,4 @@
-import { Slider, withStyles } from '@material-ui/core'
+import { CircularProgress, Slider, withStyles } from '@material-ui/core'
 import BigNumber from 'bignumber.js'
 import { value } from 'numeral'
 import React, { useEffect, useState } from 'react'
@@ -19,31 +19,34 @@ import { ReddishTextTypography } from '../../BCH/components/BCHTransactionTable'
 import BalanceStrudel from '../../Home/components/BalanceStrudel'
 import showError, { closeError } from '../../../utils/showError'
 import BurnAmountInput from '../../../components/BurnAmountInput'
+import useTokenBalance from '../../../hooks/useTokenBalance'
+import { getGStrudelContract, getStrudelAddress } from '../../../tokens/utils'
+import useVBTC from '../../../hooks/useVBTC'
+import { decToBn } from '../../../utils/index'
+import { getAllowance } from '../../../utils/erc20'
+import { ethers } from 'ethers'
+const MAX_LOCK_DURATION = 52
 
 const Lock: React.FC = () => {
   const { eth } = useETH()
   const account = eth?.account
-  const infura = useInfura()
-  const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
-  const [weeks, setWeeks] = useState<number | number[]>(0)
+  // const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
+  const [weeks, setWeeks] = useState<number | number[]>(1)
   const [amount, setAmonut] = useState<string>('0')
+  const [inProgress, setInProgress] = useState<boolean>(false)
   // !!! TODO: put that into provider
-  const networkId = (window as any).ethereum?.networkVersion
+  const vbtc = useVBTC()
+
+  const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
+
+  const gStrdudelContract = getGStrudelContract(vbtc)
 
   const handleValueChange = (event: any, newValue: number | number[]) => {
     setWeeks(newValue)
   }
 
-  const isGrOrEqBigNum = (
-    balance: BigNumber,
-    lockAmount: BigNumber,
-  ): boolean => {
-    return balance.comparedTo(lockAmount) !== -1
-  }
-
   const onAmountChange = (event: any) => {
     const value = event.target.value.replace(/^0+/, '')
-    const regex = /^[0-9\b]+$/
 
     if (value === '') {
       setAmonut('')
@@ -55,16 +58,45 @@ const Lock: React.FC = () => {
     }
   }
 
-  useEffect(() => {
-    if (eth?.account) {
-      infura.trdl.methods
-        .balanceOf(eth.account)
-        .call()
-        .then((balance: string) => {
-          setStrudelBalance(new BigNumber(195000000000000000000000))
-        })
-    }
-  }, [eth?.account])
+  // !!! TODO: add types for lp contract
+  // const approve = async () => {
+  //   await gStrdudelContract.methods
+  //     .approve(gStrdudelContract.options.address, ethers.constants.MaxUint256)
+  //     .send({ from: account })
+  // }
+
+  // const allowance = async () => {
+  //   return await getAllowance(gStrdudelContract, gStrdudelContract, account)
+  // }
+
+  const lockStrudel = async () => {
+    setInProgress(true)
+
+    const blocksLock =
+      Number(process.env.REACT_APP_BLOCKS_PER_WEEK) * (weeks as number)
+    const amountBigNum = decToBn(Number(amount))
+
+    console.log(
+      account,
+      amountBigNum,
+      blocksLock,
+      'account, amountBigNum, blocksLock, false',
+    )
+
+    await gStrdudelContract.methods
+      .lock(account, amountBigNum, blocksLock, false)
+      .send()
+
+    setInProgress(false)
+  }
+
+  const calculateGStrudel = (weeks: number, amount: number) => {
+    return (
+      ((MAX_LOCK_DURATION * 2 - weeks) * weeks * amount) /
+        (MAX_LOCK_DURATION * MAX_LOCK_DURATION) +
+      amount
+    )
+  }
 
   const marks = [
     {
@@ -76,9 +108,6 @@ const Lock: React.FC = () => {
       label: '52 weeks',
     },
   ]
-
-  const calculateGStrudel = (weeks: number, amount: number) =>
-    (52 * 2 - weeks) * weeks * amount
 
   return (
     <>
@@ -111,7 +140,18 @@ const Lock: React.FC = () => {
       <Container>
         <Card>
           <CardContentRow>
-            <FlexContainer align={'flex-start'}>
+            {inProgress && (
+              <>
+                <OpacityContainer>
+                  <CircularProgress
+                    disableShrink
+                    size={80}
+                    style={{ color: 'rgba(229, 147, 16, 1)' }}
+                  />
+                </OpacityContainer>
+              </>
+            )}
+            <ColumnFlexContainer align={'flex-start'}>
               <div style={{ width: '100%', maxWidth: '300px' }}>
                 <StyledTokenAdornmentWrapper>
                   <StyledInfo>Duration</StyledInfo>
@@ -132,9 +172,9 @@ const Lock: React.FC = () => {
                 value={amount}
                 symbol="TRDL"
               />
-            </FlexContainer>
+            </ColumnFlexContainer>
             <hr style={{ margin: '0 15px' }} />
-            <FlexContainer align="flex-start">
+            <ColumnFlexContainer align="flex-start">
               <StyledTokenAdornmentWrapper>
                 <StyledTokenSymbol>
                   {' '}
@@ -146,12 +186,25 @@ const Lock: React.FC = () => {
                 </StyledTokenSymbol>
               </StyledTokenAdornmentWrapper>
               <Spacer size="lg" />
+              {/* <FlexContainer align="flex-start" flexDirection={'row'}> */}
+              {/* <InlineBtn
+                  text="Approve"
+                  className="glow-btn orange"
+                  width={150}
+                  size={'xl'}
+                  // disabled={!Number(amount)}
+                  onClick={approve}
+                /> */}
               <InlineBtn
                 text="Lock $TRDL for g$TRDL"
                 className="glow-btn orange"
+                // width={150}
+                // size={'xl'}
                 disabled={!Number(amount)}
-              ></InlineBtn>
-            </FlexContainer>
+                onClick={lockStrudel}
+              />
+              {/* </FlexContainer> */}
+            </ColumnFlexContainer>
           </CardContentRow>
         </Card>
       </Container>
@@ -169,10 +222,13 @@ const CardContentRow = styled.div`
   flex: 1;
   flex-direction: row;
   justify-content: space-between;
+  position: relative;
   padding: ${(props) => props.theme.spacing[5]}px;
 `
 
-export const FlexContainer = styled.div<{ align: string }>`
+const ColumnFlexContainer = styled.div<{
+  align: string
+}>`
   box-sizing: border-box;
   max-width: 400px;
   word-wrap: break-word;
@@ -231,6 +287,18 @@ const StyledBalance = styled.div`
   align-items: center;
   display: flex;
   flex: 1;
+`
+
+const OpacityContainer = styled.div`
+  z-index: 1;
+  background: rgb(255, 255, 255, 0.8);
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: grid;
+  place-items: center;
 `
 
 export default Lock

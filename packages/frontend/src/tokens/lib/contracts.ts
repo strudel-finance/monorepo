@@ -6,6 +6,7 @@ import VBTCAbi from './abi/vbtc.json'
 import VBCHAbi from './abi/vbch.json'
 import UNIV2PairAbi from './abi/uni_v2_lp.json'
 import WETHAbi from './abi/weth.json'
+import gStrudel from './abi/gStrudel.json'
 import RelayAbi from './abi/Relay.json'
 import { contractAddresses, supportedPools, Pool } from './constants'
 import Web3 from 'web3'
@@ -53,6 +54,7 @@ export class Contracts {
   relay: RelayContract
   // !!! TODO: import types !!!
   vbch: any
+  gStrudel: any
   // !!! TODO: import types !!!
   pools: ExtendedPool[]
   confirmationType: number
@@ -65,7 +67,9 @@ export class Contracts {
     this.defaultGas = options.defaultGas
     this.defaultGasPrice = options.defaultGasPrice
 
+    // !!! TODO: TYPES !!!
     this.strudel = new this.web3.eth.Contract(StrudelAbi as AbiItem[]) as any
+    this.gStrudel = new this.web3.eth.Contract(gStrudel as AbiItem[]) as any
     this.vbtc = new this.web3.eth.Contract(VBTCAbi as AbiItem[]) as any
     this.masterChef = new this.web3.eth.Contract(
       MasterChefAbi as AbiItem[],
@@ -82,9 +86,7 @@ export class Contracts {
         lpContract: new this.web3.eth.Contract(
           UNIV2PairAbi as AbiItem[],
         ) as any,
-        tokenContract: new this.web3.eth.Contract(
-          ERC20Abi as AbiItem[],
-        ) as any,
+        tokenContract: new this.web3.eth.Contract(ERC20Abi as AbiItem[]) as any,
       })
     })
 
@@ -106,6 +108,7 @@ export class Contracts {
     _setProvider(this.weth, contractAddresses.weth[networkId])
     _setProvider(this.relay, contractAddresses.relay[networkId])
     _setProvider(this.vbch, contractAddresses.vbch[networkId])
+    _setProvider(this.gStrudel, contractAddresses.gStrudel[networkId])
 
     this.pools.forEach(
       ({
@@ -128,6 +131,7 @@ export class Contracts {
   setDefaultAccount(account: string) {
     this.vbtc.options.from = account
     this.strudel.options.from = account
+    this.gStrudel.options.from = account
     this.masterChef.options.from = account
   }
 }

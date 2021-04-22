@@ -6,7 +6,7 @@ import PageHeader from '../../components/PageHeader'
 import Spacer from '../../components/Spacer'
 import { icons } from '../../helpers/icon'
 import { ReddishTextTypography } from '../BCH/components/BCHTransactionTable'
-import Lock, { FlexContainer, InlineBtn } from './components/Lock'
+import Lock from './components/Lock'
 import Unlock from './components/Unlock'
 import { StyledCards } from '/Users/matic/Documents/LeapDao/monorepo/packages/frontend/src/views/Farms/components/FarmCards'
 

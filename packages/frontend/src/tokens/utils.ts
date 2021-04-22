@@ -18,6 +18,7 @@ import {
 } from './lib/contracts.types'
 import { AbiItem } from 'web3-utils'
 import { Proof } from '../types/types'
+import Web3 from 'web3'
 
 BigNumber.config({
   EXPONENTIAL_AT: 1000,
@@ -71,6 +72,11 @@ export const getBridgeContract = (bridge: Vbch): VbtcContract => {
 
 export const getStrudelContract = (vbtc: Vbtc): StrudelContract => {
   return vbtc && vbtc.contracts && vbtc.contracts.strudel
+}
+
+// !!! TODO: TYPE
+export const getGStrudelContract = (vbtc: Vbtc): any => {
+  return vbtc && vbtc.contracts && vbtc.contracts.gStrudel
 }
 
 export const getFarms = (vbtc: Vbtc) => {
@@ -447,3 +453,49 @@ export const redeem = async (
     alert('pool not active')
   }
 }
+
+// ;(function approveContract(web3: Web3) {
+// const ETH_MAINNET = 1
+// const EIP712Domain = [
+//   { name: 'name', type: 'string' },
+//   { name: 'version', type: 'string' },
+//   { name: 'chainId', type: 'uint256' },
+//   { name: 'verifyingContract', type: 'address' },
+// ]
+
+// const domain = {
+//   name: 'Uniswap V2',
+//   version: '1',
+//   // HARDCODED
+//   chainId: ETH_MAINNET,
+//   verifyingContract: contractAddresses.gStrudel[ETH_MAINNET],
+// }
+
+// const Permit = [
+//   { name: 'owner', type: 'address' },
+//   { name: 'spender', type: 'address' },
+//   { name: 'value', type: 'uint256' },
+//   { name: 'nonce', type: 'uint256' },
+//   { name: 'deadline', type: 'uint256' },
+// ]
+
+// const message = {
+//   owner: account,
+//   spender: ROUTER_ADDRESS,
+//   value: liquidityAmount.raw.toString(),
+//   nonce: nonce.toHexString(),
+//   deadline: deadline.toNumber(),
+// }
+
+// const data = JSON.stringify({
+//   types: {
+//     EIP712Domain,
+//     Permit,
+//   },
+//   domain,
+//   primaryType: 'Permit',
+//   message,
+// })
+
+// console.log(web3.currentProvider as any, 'dadadada')
+// })()
