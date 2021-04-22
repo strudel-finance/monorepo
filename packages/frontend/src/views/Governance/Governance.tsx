@@ -11,7 +11,6 @@ import useModal from '../../hooks/useModal'
 import { ReddishTextTypography } from '../BCH/components/BCHTransactionTable'
 import Lock from './components/Lock'
 import Unlock from './components/Unlock'
-import { StyledCards } from '/Users/matic/Documents/LeapDao/monorepo/packages/frontend/src/views/Farms/components/FarmCards'
 
 const Governance: React.FC = () => {
   const { eth } = useETH()
