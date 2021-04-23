@@ -18,19 +18,10 @@ yarn test
 
 ## Usecases
 
-Good place to understand contract relationships:
-
-### Relayer
-![strudel on-chain user stories (2)](https://user-images.githubusercontent.com/659301/95352479-9156e200-08c2-11eb-876f-d08e7de6d803.png)
+Explaining some contract relationships:
 
 ### Bridge User
 ![strudel on-chain user stories (3)](https://user-images.githubusercontent.com/659301/95352480-91ef7880-08c2-11eb-8b68-7d41b5fc6c8d.png)
 
 ### Farmer
 ![strudel on-chain user stories (4)](https://user-images.githubusercontent.com/659301/95352481-91ef7880-08c2-11eb-9879-04b2dfc42851.png)
-
-### Governance part 1
-![strudel on-chain user stories (5)](https://user-images.githubusercontent.com/659301/95352484-92880f00-08c2-11eb-8356-9389ae63b8f9.png)
-
-### Governance part 2
-![strudel on-chain user stories (6)](https://user-images.githubusercontent.com/659301/95352486-92880f00-08c2-11eb-8228-fd9fa06f7e3a.png)
