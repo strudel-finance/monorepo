@@ -7,7 +7,6 @@ import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "./erc20/ITokenRecipient.sol";
 import "./StrudelToken.sol";
-import "./IGovBridge.sol";
 
 /// @title  Strudel Governance Token.
 /// @notice This is an ERC20 contract that mints by locking another token.
@@ -22,7 +21,7 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
 
   StrudelToken private strudel;
   uint256 public intervalLength;
-  IGovBridge public bridge;
+  address public bridge;
   mapping(address => uint256) private lockData;
 
   function initialize(
@@ -50,13 +49,13 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
     require(_strudelAddr != address(0), "zero strudel");
     strudel = StrudelToken(_strudelAddr);
     require(_bridgeAddr != address(0), "zero bridge");
-    bridge = IGovBridge(_bridgeAddr);
+    bridge = _bridgeAddr;
     _approve(address(this), _bridgeAddr, uint256(-1));
     require(_intervalLength > 0, "zero interval");
     intervalLength = _intervalLength;
   }
 
-  function _parse(uint256 lockData)
+  function _parse(uint256 _lockData)
     internal
     pure
     returns (
@@ -65,17 +64,17 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
       uint256 minted
     )
   {
-    endBlock = lockData >> 224;
-    locked = uint256(uint112(lockData >> 112));
-    minted = uint256(uint112(lockData));
+    endBlock = _lockData >> 224;
+    locked = uint256(uint112(_lockData >> 112));
+    minted = uint256(uint112(_lockData));
   }
 
   function _compact(
     uint256 endBlock,
     uint256 locked,
     uint256 minted
-  ) internal pure returns (uint256 lockData) {
-    lockData = (endBlock << 224) | (locked << 112) | minted;
+  ) internal pure returns (uint256 _lockData) {
+    _lockData = (endBlock << 224) | (locked << 112) | minted;
   }
 
   function getLock(address owner)
@@ -190,14 +189,14 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
   }
 
   function _transferLock(address sender, address recipient, uint256 amount) internal {
-    uint256 lock = lockData[sender];
+    uint256 tokenLock = lockData[sender];
     uint256 mintTotal;
-    (,, mintTotal) = _parse(lock);
+    (,, mintTotal) = _parse(tokenLock);
     if (mintTotal > 0) {
       require(amount >= mintTotal, "not enough g$TRDL to transfer lock");
       require(lockData[recipient] == 0, "recipient has a lock already");
       // transfer g$TRDL and lock together
-      lockData[recipient] = lock;
+      lockData[recipient] = tokenLock;
       lockData[sender] = 0;
     }
   }
