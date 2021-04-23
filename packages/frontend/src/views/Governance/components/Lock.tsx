@@ -29,6 +29,8 @@ import useVBTC from '../../../hooks/useVBTC'
 import { decToBn } from '../../../utils/index'
 import { getPermitData } from '../../../tokens/utils'
 import { contractAddresses } from '../../../tokens/lib/constants'
+import * as ethers from 'ethers'
+
 const MAX_LOCK_DURATION = 52
 const ETH_MAINNET = 1
 const MAX = new BigNumber(
@@ -112,10 +114,16 @@ const Lock: React.FC = () => {
       Number(process.env.REACT_APP_BLOCKS_PER_WEEK) * (weeks as number)
     const amountBigNum = decToBn(Number(amount))
 
-    console.log(gStrudelContract, 'gStrudelContract')
-
     await gStrudelContract.methods
-      .lockWithPermit(blocksLock, amountBigNum, deadline, sig.v, sig.r, sig.s)
+      .lockWithPermit(
+        amountBigNum,
+        blocksLock,
+        deadline,
+        sig.v,
+        sig.r,
+        sig.s,
+        false,
+      )
       .send({ from: account })
 
     setInProgress(false)
@@ -123,9 +131,9 @@ const Lock: React.FC = () => {
 
   const lockWithPermit = async () => {
     setInProgress(true)
-
     const nonce = await strudelContract.methods.nonces(account).call()
     const chainId = Number(eth.provider.chainId)
+    const amountBigNum = decToBn(Number(amount))
 
     const date = new Date()
     date.setHours(date.getHours() + 24)
@@ -134,8 +142,8 @@ const Lock: React.FC = () => {
       strudelContract,
       {
         owner: account,
-        spender: contractAddresses.strudel[chainId],
-        value: MAX,
+        spender: contractAddresses.gStrudel[chainId],
+        value: amountBigNum,
       },
       nonce,
       deadline,
@@ -145,6 +153,7 @@ const Lock: React.FC = () => {
     vbtc.web3.currentProvider
       .send('eth_signTypedData_v4', [account, data])
       .then((signature: any) => signature.result)
+      .then(ethers.utils.splitSignature)
       .then((signature: Signature) => {
         executeLockWithPermit(signature, deadline.toNumber())
       })
