@@ -29,7 +29,7 @@ const Governance: React.FC = () => {
             title="Enter the Strudel"
             subtitle="Turn your BTC into vBTC or BCH into vBCH, and earn $TRDL rewards."
           />
-          <CenterContent>
+          <StyledWrapper>
             <Button
               className="glow-btn orange"
               text="Discuss governance proposals"
@@ -43,7 +43,7 @@ const Governance: React.FC = () => {
               href="https://snapshot.org/#/strudel.eth"
               size="xl"
             />
-          </CenterContent>
+          </StyledWrapper>
           <Spacer size="lg" />
           <Lock />
           <Spacer size="lg" />
@@ -79,8 +79,13 @@ const Governance: React.FC = () => {
   )
 }
 
-const CenterContent = styled.div`
+const StyledWrapper = styled.div`
+  align-items: center;
   display: flex;
+  @media (max-width: 900px) {
+    width: 100%;
+    flex-flow: column nowrap;
+  }
 `
 
 export default Governance

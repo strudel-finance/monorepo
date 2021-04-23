@@ -285,6 +285,11 @@ const CardContentRow = styled.div`
   justify-content: space-between;
   position: relative;
   padding: ${(props) => props.theme.spacing[5]}px;
+  @media (max-width: 750px) {
+    justify-content: center;
+    align-items: center;
+    flex-flow: column nowrap;
+  }
 `
 
 const ColumnFlexContainer = styled.div<{
@@ -333,7 +338,7 @@ const StyledTokenAdornmentWrapper = styled.div`
 const StyledWrapper = styled.div`
   align-items: center;
   display: flex;
-  @media (max-width: 768px) {
+  @media (max-width: 900px) {
     width: 100%;
     flex-flow: column nowrap;
     align-items: stretch;

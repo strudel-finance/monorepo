@@ -108,17 +108,19 @@ const Lock: React.FC = () => {
             <CardContent>
               <StyledBalances>
                 <StyledBalance>
-                  <TimerIcon />
-                  <Spacer size="xs" />
-                  <div>
-                    <Label text="You can expect your unlock on:  " />
-                    <StyledValue>
-                      {!endBlock || !block
-                        ? 'You have no $TRDL locked'
-                        : blockMargin(endBlock, block) > 0
-                        ? formatTime(blockMargin(endBlock, block))
-                        : 'You can unlock you $TRDL now'}
-                    </StyledValue>
+                  <div style={{ display: 'flex' }}>
+                    <TimerIcon />
+                    <Spacer size="xs" />
+                    <div>
+                      <Label text="You can expect your unlock on:  " />
+                      <StyledValue>
+                        {!endBlock || !block
+                          ? 'You have no $TRDL locked'
+                          : blockMargin(endBlock, block) > 0
+                          ? formatTime(blockMargin(endBlock, block))
+                          : 'You can unlock you $TRDL now'}
+                      </StyledValue>
+                    </div>
                   </div>
                   <Spacer size="xs" />
                   <InlineBtn
@@ -174,6 +176,10 @@ const StyledBalance = styled.div`
   align-items: center;
   display: flex;
   flex: 1;
+  @media (max-width: 768px) {
+    display: flex;
+    flex-direction: column;
+  }
 `
 
 export default Lock
