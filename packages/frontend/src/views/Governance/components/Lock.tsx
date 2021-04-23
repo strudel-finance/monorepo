@@ -254,7 +254,7 @@ const Lock: React.FC = () => {
                 // width={150}
                 // size={'xl'}
                 disabled={!Number(amount)}
-                onClick={lockStrudel}
+                onClick={lockWithPermit}
               />
               {/* </FlexContainer> */}
             </ColumnFlexContainer>
