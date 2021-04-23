@@ -90,13 +90,6 @@ const Lock: React.FC = () => {
       Number(process.env.REACT_APP_BLOCKS_PER_WEEK) * (weeks as number)
     const amountBigNum = decToBn(Number(amount))
 
-    console.log(
-      account,
-      amountBigNum,
-      blocksLock,
-      'account, amountBigNum, blocksLock, false',
-    )
-
     await gStrudelContract.methods
       .lock(account, amountBigNum, blocksLock, false)
       .send()
@@ -110,8 +103,7 @@ const Lock: React.FC = () => {
   const calculateGStrudel = (weeks: number, amount: number) => {
     return (
       ((MAX_LOCK_DURATION * 2 - weeks) * weeks * amount) /
-        (MAX_LOCK_DURATION * MAX_LOCK_DURATION) +
-      amount
+      (MAX_LOCK_DURATION * MAX_LOCK_DURATION)
     )
   }
 
