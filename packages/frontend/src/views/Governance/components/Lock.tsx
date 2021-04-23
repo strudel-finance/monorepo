@@ -114,9 +114,17 @@ const Lock: React.FC = () => {
       Number(process.env.REACT_APP_BLOCKS_PER_WEEK) * (weeks as number)
     const amountBigNum = decToBn(Number(amount))
 
+    console.log(
+      amountBigNum,
+      amountBigNum.toString(),
+      blocksLock,
+      deadline,
+      'amountBigNum',
+    )
+
     await gStrudelContract.methods
       .lockWithPermit(
-        amountBigNum,
+        amountBigNum.toString(),
         blocksLock,
         deadline,
         sig.v,
