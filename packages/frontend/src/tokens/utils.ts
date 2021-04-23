@@ -487,9 +487,9 @@ export const getPermitData = async (
   const name = await token.methods.name().call()
 
   const domain = {
-    name: name,
+    name,
     version: '1',
-    chainId: chainId,
+    chainId,
     verifyingContract: token.options.address,
   }
   nonce = new BigNumber(nonce)
