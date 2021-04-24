@@ -30,6 +30,7 @@ import BridgeProvider from './contexts/BridgeProvider'
 import Note from './views/Note'
 import { faLessThan } from '@fortawesome/pro-regular-svg-icons'
 import Governance from './views/Governance'
+import Bridge from './views/Bridge'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -112,13 +113,16 @@ const App: React.FC = () => {
         <Route path="/BCH">
           <BCH />
         </Route>
+        <Route path="/bridge">
+          <Bridge />
+        </Route>
         <Route path="/governance">
-          {localStorage.getItem('networkId') == '1' ||
-          !localStorage.getItem('networkId') ? (
-            <Governance />
-          ) : (
+          {/* {localStorage.getItem('networkId') == '1' ||
+          !localStorage.getItem('networkId') ? ( */}
+          <Governance />
+          {/* ) : (
             <Note affair={'Governance'} />
-          )}
+          )} */}
         </Route>
         {false && (
           <Route path="/staking">

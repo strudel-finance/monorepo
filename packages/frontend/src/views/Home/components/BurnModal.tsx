@@ -19,6 +19,7 @@ import { urlAssembler } from '../../../utils/urlAssembler'
 import { contractAddresses } from '../../../tokens/lib/constants'
 import BridgeAbi from '../../../tokens/lib/abi/bridge.json'
 import useInfura from '../../../hooks/useInfura'
+const BSC_NETWORK_ID = 56
 
 interface BurnModalProps extends ModalProps {
   value: number | string
@@ -63,7 +64,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     const sideContract = new Contract(
       // add ABI item as type
       BridgeAbi as any[],
-      contractAddresses.bridge[56],
+      contractAddresses.bridge[BSC_NETWORK_ID],
     )
 
     const supply =

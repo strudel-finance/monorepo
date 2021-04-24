@@ -112,19 +112,11 @@ const Lock: React.FC = () => {
   const executeLockWithPermit = async (sig: Signature, deadline: number) => {
     const blocksLock =
       Number(process.env.REACT_APP_BLOCKS_PER_WEEK) * (weeks as number)
-    const amountBigNum = decToBn(Number(amount))
-
-    console.log(
-      amountBigNum,
-      amountBigNum.toString(),
-      blocksLock,
-      deadline,
-      'amountBigNum',
-    )
+    const amountBigNum = decToBn(Number(amount)).toString()
 
     await gStrudelContract.methods
       .lockWithPermit(
-        amountBigNum.toString(),
+        amountBigNum,
         blocksLock,
         deadline,
         sig.v,
@@ -133,6 +125,7 @@ const Lock: React.FC = () => {
         false,
       )
       .send({ from: account })
+      .catch(() => setInProgress(false))
 
     setInProgress(false)
   }

@@ -19,6 +19,7 @@ const BalanceBCH: React.FC = () => {
   const infura = useInfura()
   const { eth } = useETH()
 
+  // !!! TODO: Rewrite that ugly shit !!!
   useEffect(() => {
     if (infura) {
       infura.vBCH.methods

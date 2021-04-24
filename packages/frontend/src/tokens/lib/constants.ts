@@ -61,6 +61,7 @@ export const contractAddresses = {
   strudel: {
     1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
     5: '0x611f48792751271328f5192d83343f0bfad8b78f',
+    56: '0x46c6426b0e18c61a642aca01adf668da17176bc2',
     1337: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
   },
   masterChef: {
@@ -90,11 +91,16 @@ export const contractAddresses = {
   bridge: {
     5: '',
     56: '0x8425cfcc0155208fe1178d446d15a079d4d309f7',
-    100: '0x9840d0417f89182CE4a6e60f4445B8e5dC4F273e',
+    // !!! TODO: check with 0xBurek
+    100: '0x162E898bD0aacB578C8D5F8d6ca588c13d2A383F',
   },
   gStrudel: {
     1: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
     1337: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
+  },
+  mediator: {
+    1: '0xb80A3Bc8A651e074164611AfEa6f9De056489d4c',
+    56: '0xD8D2A43b1a99C7061aEc22e6d498addb62f99baC',
   },
 }
 
