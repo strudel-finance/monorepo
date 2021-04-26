@@ -112,6 +112,8 @@ const BCH: React.FC = () => {
                   <span>Degen Tip</span>: Strudel only spins in one direction!
                 </StyledInfo>
               </Grid>
+              <Spacer size="lg" />
+
               <Grid item xs={12} sm={12} md={7} className="main-table-grid">
                 <BCHTransactionsTableContainer
                   account={account}

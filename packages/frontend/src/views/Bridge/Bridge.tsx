@@ -43,15 +43,17 @@ import VBCHBalances from './components/VBCHBalances'
 import Lock from './components/VBCHBalances'
 import StrudelBalances from './components/StrudelBalances'
 import Unlock from './components/StrudelBalances'
+import useBSCMediator from '../../hooks/useBSCMediator'
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
-    formControl: {
-      margin: theme.spacing(1),
-      minWidth: 160,
+    formControlBridge: {
+      width: '100%',
+      minWidth: 135,
     },
-    selectEmpty: {
-      marginTop: theme.spacing(2),
+    formControlToken: {
+      width: '100%',
+      minWidth: 65,
     },
   }),
 )
@@ -71,6 +73,7 @@ const Bridge: React.FC = () => {
   const [openToken, setOpenToken] = useState(false)
   const vbtc = useVBTC()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
+  const mediatorBSC = useBSCMediator()
 
   const handleCloseDirection = () => {
     setOpenDirection(false)
@@ -113,6 +116,11 @@ const Bridge: React.FC = () => {
     <>
       {account ? (
         <Page>
+          <PageHeader
+            className="page-header"
+            title="Bridge"
+            subtitle="Transfer your $TRDL and vBCH from Binance Smart Chain to Ethereum mainnet and vice versa."
+          />
           <Container>
             <StrudelBalances />
           </Container>
@@ -121,66 +129,86 @@ const Bridge: React.FC = () => {
             <VBCHBalances />
           </Container>
           <Spacer size="lg" />
-          <Grid item xs={12} sm={12} md={6} className="main-box-grid">
-            <div style={{ display: 'flex' }}>
-              <div>
-                <AddressInput
-                  address={formatAddress(account)}
-                  value={formatAddress(account)}
-                />
-                <BurnAmountInput
-                  onChange={onAmountChange}
-                  value={amount}
-                  symbol="BTC"
-                />
+          <Container>
+            <Grid item xs={12} sm={12} md={12} className="main-box-grid">
+              <div
+                style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <div>
+                  <AddressInput
+                    address={formatAddress(account)}
+                    value={formatAddress(account)}
+                  />
+                  <BurnAmountInput
+                    onChange={onAmountChange}
+                    value={amount}
+                    symbol="BTC"
+                  />
+                </div>
+                <Spacer size="md" />
+
+                <div
+                  style={{
+                    display: 'flex',
+                    flex: 1,
+                    padding: '8px',
+                    minWidth: '250px',
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <FormControl className={classes.formControlBridge}>
+                      <InputLabel id="demo-controlled-open-select-label">
+                        Bridge Direction
+                      </InputLabel>
+                      <Select
+                        labelId="demo-controlled-open-select-label"
+                        id="demo-controlled-open-select"
+                        open={openDirection}
+                        onClose={handleCloseDirection}
+                        onOpen={handleOpenDirection}
+                        value={direction}
+                        onChange={handleDirectionChange}
+                      >
+                        <MenuItem value={1}>BSC → Mainnet</MenuItem>
+                        <MenuItem value={2}>Mainnet → BSC</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                  <Spacer size="md" />
+
+                  <div style={{ flex: 1 }}>
+                    <FormControl className={classes.formControlToken}>
+                      <InputLabel id="demo-controlled-open-select-label">
+                        Token
+                      </InputLabel>
+                      <Select
+                        labelId="demo-controlled-open-select-label"
+                        id="demo-controlled-open-select"
+                        open={openToken}
+                        onClose={handleCloseToken}
+                        onOpen={handleOpenToken}
+                        value={token}
+                        onChange={handleTokenChange}
+                      >
+                        <MenuItem value={1}>vBCH</MenuItem>
+                        <MenuItem value={2}>$TRDL</MenuItem>
+                      </Select>
+                    </FormControl>
+                  </div>
+                </div>
               </div>
-              <Spacer size="lg" />
-              <div>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="demo-controlled-open-select-label">
-                    Bridge Direction
-                  </InputLabel>
-                  <Select
-                    labelId="demo-controlled-open-select-label"
-                    id="demo-controlled-open-select"
-                    open={openDirection}
-                    onClose={handleCloseDirection}
-                    onOpen={handleOpenDirection}
-                    value={direction}
-                    onChange={handleDirectionChange}
-                  >
-                    <MenuItem value={1}>BSC → Mainnet</MenuItem>
-                    <MenuItem value={2}>Mainnet → BSC</MenuItem>
-                  </Select>
-                </FormControl>
-              </div>
-              <div>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="demo-controlled-open-select-label">
-                    Token
-                  </InputLabel>
-                  <Select
-                    labelId="demo-controlled-open-select-label"
-                    id="demo-controlled-open-select"
-                    open={openToken}
-                    onClose={handleCloseToken}
-                    onOpen={handleOpenToken}
-                    value={token}
-                    onChange={handleTokenChange}
-                  >
-                    <MenuItem value={1}>vBCH</MenuItem>
-                    <MenuItem value={2}>$TRDL</MenuItem>
-                  </Select>
-                </FormControl>
-              </div>
-            </div>
-            <Button
-              // disabled={!Number(val)}
-              className="glow-btn orange"
-              text="Get vBTC"
-              // onClick={onPresentBurn}
-            />
-          </Grid>
+              <Button
+                disabled={!Number(amount)}
+                className="glow-btn orange"
+                text="Cross the bridge"
+                // onClick={onPresentBurn}
+              />
+            </Grid>
+          </Container>
         </Page>
       ) : (
         <Page>
@@ -204,9 +232,12 @@ const Bridge: React.FC = () => {
   )
 }
 
-const StyledTokenSymbol = styled.span`
-  color: rgba(37, 37, 44, 0.48);
-  font-weight: 700;
+const StyledWrapper = styled.div`
+  align-items: center;
+  display: flex;
+  @media (max-width: 900px) {
+    width: 100%;
+    flex-flow: column nowrap;
+  }
 `
-
 export default Bridge

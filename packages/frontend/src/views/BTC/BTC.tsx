@@ -112,6 +112,7 @@ const BTC: React.FC = () => {
                   <span>Degen Tip</span>: Strudel only spins in one direction!
                 </StyledInfo>
               </Grid>
+              <Spacer size="lg" />
               <Grid item xs={12} sm={12} md={7} className="main-table-grid">
                 <TransactionsTableContainer
                   account={account}
@@ -125,13 +126,12 @@ const BTC: React.FC = () => {
               </Grid>
             </Grid>
           </div>
-          <Spacer size="lg"/>
+          <Spacer size="lg" />
           <CenteringDiv>
-            <Button text="See Terra Farms" to="/farms" size='xl'/>
+            <Button text="See Terra Farms" to="/farms" size="xl" />
           </CenteringDiv>
           <Spacer size="lg" />
         </>
-        
       ) : (
         <Page>
           <div

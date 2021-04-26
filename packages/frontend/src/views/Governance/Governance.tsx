@@ -26,8 +26,8 @@ const Governance: React.FC = () => {
         <Page>
           <PageHeader
             className="page-header"
-            title="Enter the Strudel"
-            subtitle="Turn your BTC into vBTC or BCH into vBCH, and earn $TRDL rewards."
+            title="Enter the Governance"
+            subtitle="Lock your $TRDL to recieve g$TRDL and get your governance rights."
           />
           <StyledWrapper>
             <Button

@@ -80,7 +80,7 @@ footer {
 }
 
 .main-box-grid:first-child {
-  margin-right: 48px !important;
+  /* margin-right: 48px !important; */
 }
 
 .main-box-grid .MuiContainer-maxWidthLg {
