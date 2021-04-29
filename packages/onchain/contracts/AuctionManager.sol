@@ -1,18 +1,207 @@
 pragma solidity 0.6.6;
 
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
-import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
-import "./mocks/MockERC20.sol";
-import "./GovernanceToken.sol";
-import "./dutchSwap/IDutchAuction.sol";
-import "./dutchSwap/IDutchSwapFactory.sol";
-import "./IPriceOracle.sol";
+library SafeMath {
+    /**
+     * @dev Returns the addition of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `+` operator.
+     *
+     * Requirements:
+     * - Addition cannot overflow.
+     */
+    function add(uint256 a, uint256 b) internal pure returns (uint256) {
+        uint256 c = a + b;
+        require(c >= a, "SafeMath: addition overflow");
 
-contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
+        return c;
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b) internal pure returns (uint256) {
+        return sub(a, b, "SafeMath: subtraction overflow");
+    }
+
+    /**
+     * @dev Returns the subtraction of two unsigned integers, reverting with custom message on
+     * overflow (when the result is negative).
+     *
+     * Counterpart to Solidity's `-` operator.
+     *
+     * Requirements:
+     * - Subtraction cannot overflow.
+     */
+    function sub(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b <= a, errorMessage);
+        uint256 c = a - b;
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the multiplication of two unsigned integers, reverting on
+     * overflow.
+     *
+     * Counterpart to Solidity's `*` operator.
+     *
+     * Requirements:
+     * - Multiplication cannot overflow.
+     */
+    function mul(uint256 a, uint256 b) internal pure returns (uint256) {
+        // Gas optimization: this is cheaper than requiring 'a' not being zero, but the
+        // benefit is lost if 'b' is also tested.
+        // See: https://github.com/OpenZeppelin/openzeppelin-contracts/pull/522
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 c = a * b;
+        require(c / a == b, "SafeMath: multiplication overflow");
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b) internal pure returns (uint256) {
+        return div(a, b, "SafeMath: division by zero");
+    }
+
+    /**
+     * @dev Returns the integer division of two unsigned integers. Reverts with custom message on
+     * division by zero. The result is rounded towards zero.
+     *
+     * Counterpart to Solidity's `/` operator. Note: this function uses a
+     * `revert` opcode (which leaves remaining gas untouched) while Solidity
+     * uses an invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function div(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        // Solidity only automatically asserts when dividing by 0
+        require(b > 0, errorMessage);
+        uint256 c = a / b;
+        // assert(a == b * c + a % b); // There is no case in which this doesn't hold
+
+        return c;
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b) internal pure returns (uint256) {
+        return mod(a, b, "SafeMath: modulo by zero");
+    }
+
+    /**
+     * @dev Returns the remainder of dividing two unsigned integers. (unsigned integer modulo),
+     * Reverts with custom message when dividing by zero.
+     *
+     * Counterpart to Solidity's `%` operator. This function uses a `revert`
+     * opcode (which leaves remaining gas untouched) while Solidity uses an
+     * invalid opcode to revert (consuming all remaining gas).
+     *
+     * Requirements:
+     * - The divisor cannot be zero.
+     */
+    function mod(uint256 a, uint256 b, string memory errorMessage) internal pure returns (uint256) {
+        require(b != 0, errorMessage);
+        return a % b;
+    }
+}
+
+interface IToken {
+
+  function totalSupply() external view returns (uint256);
+
+  function balanceOf(address account) external view returns (uint256);
+
+  function name() external view returns (string memory);
+
+  function symbol() external view returns (string memory);
+
+  function decimals() external view returns (uint8);
+
+  function intervalLength() external returns (uint256);
+  
+  function owner() external view returns (address);
+  
+  function burn(uint256 _amount) external;
+  
+  function renounceMinter() external;
+  
+  function mint(address account, uint256 amount) external returns (bool);
+
+  function lock(
+    address recipient,
+    uint256 amount,
+    uint256 blocks,
+    bool deposit
+  ) external returns (bool);
+
+  function approve(address spender, uint256 amount) external returns (bool);
+  
+  function transfer(address to, uint256 amount) external returns (bool success);
+
+}
+
+interface IDutchAuction {
+  function auctionEnded() external view returns (bool);
+
+  function finaliseAuction() external;
+}
+
+
+interface IDutchSwapFactory {
+  function deployDutchAuction(
+    address _token,
+    uint256 _tokenSupply,
+    uint256 _startDate,
+    uint256 _endDate,
+    address _paymentCurrency,
+    uint256 _startPrice,
+    uint256 _minimumPrice,
+    address _wallet
+  ) external returns (address dutchAuction);
+}
+
+interface IPriceOracle {
+
+  function consult(uint256 amountIn) external view returns (uint256 amountOut);
+
+  function update() external;
+}
+
+contract AuctionManager {
   using SafeMath for uint256;
+
+  event OwnershipTransferred(address indexed previousOwner, address indexed newOwner);
 
   // used as factor when dealing with %
   uint256 constant ACCURACY = 1e4;
@@ -27,14 +216,13 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   // auction duration
   uint256 public auctionDuration;
 
-  MockERC20 private strudel;
-  IERC20 private vBtc;
-  GovernanceToken private gStrudel;
+  IToken private strudel;
+  IToken private vBtc;
+  IToken private gStrudel;
   IPriceOracle private btcPriceOracle;
   IPriceOracle private vBtcPriceOracle;
   IPriceOracle private strudelPriceOracle;
   IDutchSwapFactory private auctionFactory;
-  uint256 private govIntervalLength;
 
   IDutchAuction public currentAuction;
   mapping(address => uint256) public lockTimeForAuction;
@@ -48,12 +236,9 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     address _strudelPriceOracle,
     address _auctionFactory
   ) public {
-    __Ownable_init();
-    __ERC20_init("Strudel Auction Token", "a$TRDL");
-    strudel = MockERC20(_strudelAddr);
-    gStrudel = GovernanceToken(_gStrudel);
-    govIntervalLength = gStrudel.intervalLength();
-    vBtc = IERC20(_vBtcAddr);
+    strudel = IToken(_strudelAddr);
+    gStrudel = IToken(_gStrudel);
+    vBtc = IToken(_vBtcAddr);
     btcPriceOracle = IPriceOracle(_btcPriceOracle);
     vBtcPriceOracle = IPriceOracle(_vBtcPriceOracle);
     strudelPriceOracle = IPriceOracle(_strudelPriceOracle);
@@ -64,11 +249,73 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     auctionDuration = 84600; // ~23,5h
   }
 
+  function min(uint256 a, uint256 b) internal pure returns (uint256) {
+    return a < b ? a : b;
+  }
+
   function _getDiff(uint256 a, uint256 b) internal pure returns (uint256) {
     if (a > b) {
       return a - b;
     }
     return b - a;
+  }
+
+  function name() public view returns (string memory) {
+      return gStrudel.name();
+  }
+
+  function symbol() public view returns (string memory) {
+      return gStrudel.symbol();
+  }
+
+  function decimals() public view returns (uint8) {
+      return gStrudel.decimals();
+  }
+
+  /**
+   * @dev See {IERC20-totalSupply}.
+   */
+  function totalSupply() public view returns (uint256) {
+      return gStrudel.totalSupply();
+  }
+
+  /**
+   * @dev See {IERC20-balanceOf}.
+   */
+  function balanceOf(address account) public view returns (uint256) {
+      return gStrudel.balanceOf(account);
+  }
+
+  /**
+   * @dev Throws if called by any account other than the owner.
+   */
+  modifier onlyOwner() {
+    require(strudel.owner() == msg.sender, "Ownable: caller is not the owner");
+    _;
+  }
+
+  function updateOracles() public {
+    try btcPriceOracle.update() {
+      // do nothing
+    } catch Error(string memory) {
+      // do nothing
+    } catch (bytes memory) {
+      // do nothing
+    }
+    try vBtcPriceOracle.update() {
+      // do nothing
+    } catch Error(string memory) {
+      // do nothing
+    } catch (bytes memory) {
+      // do nothing
+    }
+    try strudelPriceOracle.update() {
+      // do nothing
+    } catch Error(string memory) {
+      // do nothing
+    } catch (bytes memory) {
+      // do nothing
+    }
   }
 
   function rotateAuctions() external {
@@ -87,6 +334,8 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
       }
     }
 
+    updateOracles();
+
     // get prices
     uint256 btcPriceInEth = btcPriceOracle.consult(1e18);
     uint256 vBtcPriceInEth = vBtcPriceOracle.consult(1e18);
@@ -103,7 +352,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
 
     uint256 cap = strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY);
     // cap by dillution bound
-    imbalance = Math.min(
+    imbalance = min(
       cap,
       imbalance
     );
@@ -119,7 +368,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
     uint256 priceRelation = btcPriceInEth.mul(ACCURACY).div(vBtcPriceInEth);
     if (priceRelation < ACCURACY.mul(ACCURACY).div(sellThreshold)) {
       // cap vBtcAmount by imbalance in vBTC
-      vBtcAmount = Math.min(vBtcAmount, imbalance.div(vBtcPriceInEth));
+      vBtcAmount = min(vBtcAmount, imbalance.div(vBtcPriceInEth));
       // calculate vBTC price
       imbalance = vBtcPriceInEth.mul(1e18).div(strudelPriceInEth);
       // auction off some vBTC
@@ -156,7 +405,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
 
       // if imbalance >= dillution bound, use max lock (52 weeks)
       // if imbalance < dillution bound, lock shorter
-      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance).div(cap);
+      lockTimeForAuction[address(currentAuction)] = gStrudel.intervalLength().mul(52).mul(imbalance).div(cap);
     }
   }
 
@@ -188,29 +437,25 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   }
 
   function swipe(address tokenAddr) external onlyOwner {
-    IERC20 token = IERC20(tokenAddr);
-    token.transfer(owner(), token.balanceOf(address(this)));
+    IToken token = IToken(tokenAddr);
+    token.transfer(strudel.owner(), token.balanceOf(address(this)));
   }
 
   // In deployDutchAuction, approve and transferFrom are called
   // In initDutchAuction, transferFrom is called again
   // In DutchAuction, transfer is called to either payout, or return money to AuctionManager
 
-  function transferFrom(
-    address _from,
-    address _to,
-    uint256 _value
-  ) public override returns (bool success) {
+  function transferFrom(address, address, uint256) public pure returns (bool) {
     return true;
   }
 
-  function approve(address _spender, uint256 _value) public override returns (bool success) {
+  function approve(address, uint256) public pure returns (bool) {
     return true;
   }
 
-  function transfer(address to, uint256 amount) public override returns (bool success) {
+  function transfer(address to, uint256 amount) public returns (bool success) {
     // require sender is our Auction
-    address auction = _msgSender();
+    address auction = msg.sender;
     require(lockTimeForAuction[auction] > 0, "Caller is not our auction");
 
     // if recipient is AuctionManager, it means we are doing a refund -> do nothing
