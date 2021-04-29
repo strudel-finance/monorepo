@@ -104,7 +104,7 @@ const App: React.FC = () => {
           !localStorage.getItem('networkId') ? (
             <Farms />
           ) : (
-            <Note affair={'Terra-farms'} />
+            <Note affair={'Terra-farms'} networks={['Ethereum Mainnet']} />
           )}
         </Route>
         <Route path="/BTC">
@@ -113,21 +113,23 @@ const App: React.FC = () => {
         <Route path="/BCH">
           <BCH />
         </Route>
-        <Route path="/bridge">
-          <Bridge />
-        </Route>
         <Route path="/governance">
-          {/* {localStorage.getItem('networkId') == '1' ||
-          !localStorage.getItem('networkId') ? ( */}
-          <Governance />
-          {/* ) : (
-            <Note affair={'Governance'} />
-          )} */}
+          {localStorage.getItem('networkId') == '1' ||
+          !localStorage.getItem('networkId') ? (
+            <Governance />
+          ) : (
+            <Note affair={'Governance'} networks={['Ethereum Mainnet']} />
+          )}
         </Route>
-        {false && (
-          <Route path="/staking">
-            <Stake />
-          </Route>
+        {localStorage.getItem('networkId') == '1' ||
+        localStorage.getItem('networkId') == '56' ||
+        !localStorage.getItem('networkId') ? (
+          <Bridge />
+        ) : (
+          <Note
+            affair={'Bridge'}
+            networks={['Ethereum Mainnet', 'Binance Smart Chain']}
+          />
         )}
       </Switch>
     </>

@@ -1,60 +1,27 @@
-import { Slider } from '@material-ui/core'
 import BigNumber from 'bignumber.js'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
-import Container from '../../../components/Container'
-import Input from '../../../components/Input'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import {
-  TimerIcon,
-  GStrudelIcon,
-  StrudelIcon,
-} from '../../../components/StrudelIcon'
+import { StrudelIcon } from '../../../components/StrudelIcon'
 import ValueBTC from '../../../components/ValueBTC'
-import useBlock from '../../../hooks/useBlock'
 import useETH from '../../../hooks/useETH'
-import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
-import dayjs from 'dayjs'
-import {
-  getGStrudelAddress,
-  getGStrudelContract,
-  getStrudelAddress,
-} from '../../../tokens/utils'
-import useVBTC from '../../../hooks/useVBTC'
-import useTokenBalance from '../../../hooks/useTokenBalance'
-import useStrudelOnBSC from '../../../hooks/useStrudelOnBSC'
-const BLOCKS_PER_WEEK = 45850
-const SECONDS_PER_BLOCK = 13.1908
 
-const StrudelBalances: React.FC = () => {
+interface Balances {
+  strudelOnMainnetBalance: BigNumber
+  strudelOnBSCBalance: BigNumber
+}
+
+const StrudelBalances: React.FC<Balances> = ({
+  strudelOnMainnetBalance,
+  strudelOnBSCBalance,
+}) => {
   const { eth } = useETH()
   const account = eth?.account
-  const infura = useInfura()
-  // const [gTrdlBalance, setGTrdlBalance] = useState<BigNumber>()
-  const [endBlock, setEndBlock] = useState<number>(0)
-  // !!! TODO: put that into provider
-  const block = useBlock()
-  const vbtc = useVBTC()
-  const strudelOnBSC = useStrudelOnBSC()
-  const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
-  const [strudelOnBSCBalance, setStrudelOnBSCBalance] = useState<BigNumber>()
-
-  // !!! TODO: FIX IT !!!
-
-  useEffect(() => {
-    if (strudelOnBSC && account)
-      strudelOnBSC.methods
-        .balanceOf(account)
-        .call()
-        .then((s: any) => {
-          setStrudelOnBSCBalance(new BigNumber(s))
-        })
-  }, [account, strudelOnBSC])
 
   return (
     <>
@@ -69,8 +36,8 @@ const StrudelBalances: React.FC = () => {
                   <Label text="Your $TRDL Balance on ETH Mainnet" />
                   <ValueBTC
                     value={
-                      !!account && !!strudelBalance
-                        ? getBalanceNumber(strudelBalance)
+                      !!account && !!strudelOnMainnetBalance
+                        ? getBalanceNumber(strudelOnMainnetBalance)
                         : 'Locked'
                     }
                   />

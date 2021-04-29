@@ -46,14 +46,14 @@ const Governance: React.FC = () => {
           </StyledWrapper>
           <Spacer size="lg" />
           <Lock />
-          <Spacer size="lg" />
+          {/* <Spacer size="lg" />
           <div>
             <Button
               size="xl"
               href="https://studio.dutchswap.com/auctions"
               text="Get g$TRDL on Peg Auctions"
             ></Button>
-          </div>
+          </div> */}
           <Spacer size="lg" />
           <Unlock />
         </Page>

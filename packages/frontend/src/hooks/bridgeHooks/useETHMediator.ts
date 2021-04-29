@@ -1,19 +1,19 @@
 import { useEffect, useState } from 'react'
 // import debounce from 'debounce'
-import { contractAddresses } from '../tokens/lib/constants'
-import homeAMB from '../tokens/lib/abi/homeAMB.json'
+import { contractAddresses } from '../../tokens/lib/constants'
+import mediator from '../../tokens/lib/abi/mediator.json'
 const Contract = require('web3-eth-contract')
-const XDAI_NETWORK_ID = 100
+const ETH_MAINNET = 1
 
 const useBSCMediator = () => {
   const [contract, setContract] = useState<any>()
 
   useEffect(() => {
-    ;(Contract as any).setProvider(process.env.REACT_APP_XDAI_PROVIDER_SOCKET)
+    ;(Contract as any).setProvider(process.env.REACT_APP_MAINNET_PROVIDER)
 
     const ETHMediatorContract = new Contract(
-      homeAMB,
-      contractAddresses.mediator[XDAI_NETWORK_ID],
+      mediator,
+      contractAddresses.mediator[ETH_MAINNET],
     )
 
     setContract(ETHMediatorContract)

@@ -91,7 +91,9 @@ export const contractAddresses = {
   bridge: {
     5: '',
     56: '0x8425cfcc0155208fe1178d446d15a079d4d309f7',
-    // !!! TODO: check with 0xBurek
+  },
+  AMB: {
+    56: '0x75Df5AF045d91108662D8080fD1FEFAd6aA0bb59',
     100: '0x162E898bD0aacB578C8D5F8d6ca588c13d2A383F',
   },
   gStrudel: {

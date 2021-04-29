@@ -15,7 +15,7 @@ import {
   StrudelIcon,
 } from '../../../components/StrudelIcon'
 import ValueBTC from '../../../components/ValueBTC'
-import useVBCHonBSC from '../../../hooks/useBCHonBSC'
+import useVBCHonBSC from '../../../hooks/bridgeHooks/useVBCHonBSC'
 import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
@@ -30,41 +30,17 @@ import useTokenBalance from '../../../hooks/useTokenBalance'
 const BLOCKS_PER_WEEK = 45850
 const SECONDS_PER_BLOCK = 13.1908
 
-const VBCHBalances: React.FC = () => {
+interface Balances {
+  vBCHonMainnetBalance: BigNumber
+  vBCHonBSCBalance: BigNumber
+}
+
+const VBCHBalances: React.FC<Balances> = ({
+  vBCHonMainnetBalance: vBCHBalanceMainnet,
+  vBCHonBSCBalance,
+}) => {
   const { eth } = useETH()
   const account = eth?.account
-  // const [gTrdlBalance, setGTrdlBalance] = useState<BigNumber>()
-  const [vBCHBalanceMainnet, setVCHBalanceMainnet] = useState<BigNumber>()
-  const [vBCHonBSCBalance, setVBCHonBSCBalance] = useState<BigNumber>()
-
-  // !!! TODO: put that into provider
-  const vbtc = useVBTC()
-  const vBCHonBSC = useVBCHonBSC()
-  const infura = useInfura()
-
-  // !!! TODO: FIX IT !!!
-
-  useEffect(() => {
-    if (vBCHonBSC)
-      vBCHonBSC.methods
-        .balanceOf(account)
-        .call()
-        .then((s: any) => {
-          setVBCHonBSCBalance(new BigNumber(s))
-        })
-  }, [vBCHonBSC])
-
-  // !!! TODO: Rewrite that ugly shit !!!
-  useEffect(() => {
-    if (infura && account) {
-      infura.vBCH.methods
-        .balanceOf(account)
-        .call()
-        .then((s: any) => {
-          setVCHBalanceMainnet(new BigNumber(s))
-        })
-    }
-  }, [infura, account])
 
   return (
     <>

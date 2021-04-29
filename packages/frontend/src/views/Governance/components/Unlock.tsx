@@ -40,6 +40,8 @@ const Lock: React.FC = () => {
 
   useEffect(() => {
     if (eth?.account && gStrudelContract) {
+      console.log(gStrudelContract, 'gStrudelContractgStrudelContract')
+
       // gStrudelContract.methods
       //   .balanceOf(account)
       //   .call()
@@ -118,7 +120,7 @@ const Lock: React.FC = () => {
                           ? 'You have no $TRDL locked'
                           : blockMargin(endBlock, block) > 0
                           ? formatTime(blockMargin(endBlock, block))
-                          : 'You can unlock you $TRDL now'}
+                          : 'You can unlock your $TRDL now'}
                       </StyledValue>
                     </div>
                   </div>

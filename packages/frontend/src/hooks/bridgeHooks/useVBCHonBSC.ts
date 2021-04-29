@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useState } from 'react'
 import Web3 from 'web3'
-import useETH from './useETH'
+import useETH from '../useETH'
 // import debounce from 'debounce'
-import { contractAddresses } from '../tokens/lib/constants'
-import ERC20Abi from '../tokens/lib/abi/erc20.json'
+import { contractAddresses } from '../../tokens/lib/constants'
+import ERC20Abi from '../../tokens/lib/abi/erc20.json'
 const Contract = require('web3-eth-contract')
 const BSC_NETWORK_ID = 56
 
@@ -14,7 +14,6 @@ const useVBCHonBSC = () => {
     ;(Contract as any).setProvider(process.env.REACT_APP_BSC_PROVIDER)
 
     const vBCHcontract = new Contract(
-      // add ABI item as type
       ERC20Abi as any[],
       contractAddresses.vbch[BSC_NETWORK_ID],
     )

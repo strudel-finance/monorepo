@@ -6,15 +6,21 @@ import { CenteringDiv } from '../BTC/BTC'
 
 interface INote {
   affair: string
+  networks: string[]
 }
 
-const Note: React.FC<INote> = ({ affair }: INote) => {
+const Note: React.FC<INote> = ({ affair, networks }: INote) => {
   return (
     <Switch>
       <Page>
         <CenteringDiv>
           <ReddishTextTypography>
-            If you want to use {affair}, please move to Ethereum Mainnet.
+            If you want to use {affair}, please move to{' '}
+            {networks.reduce((acc, el, i) => {
+              if (i) return acc + ' or ' + el
+              return acc + el
+            }, '')}
+            .
           </ReddishTextTypography>
         </CenteringDiv>
       </Page>

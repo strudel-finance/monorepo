@@ -62,7 +62,7 @@ const Lock: React.FC = () => {
   }
 
   const onAmountChange = (event: any) => {
-    const value = event.target.value.replace(/^0+/, '')
+    const value = event.target.value
 
     if (value === '') {
       setAmonut('')
