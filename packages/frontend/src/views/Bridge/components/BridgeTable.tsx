@@ -50,8 +50,6 @@ const BridgeTable: React.FC<BridgeTableProps> = ({ events }) => {
   }))
   const classes = useStyles()
 
-  console.log(events, 'eventseventsevents')
-
   return (
     <SimpleBar>
       <TableContainer style={{ height: 360 }}>
