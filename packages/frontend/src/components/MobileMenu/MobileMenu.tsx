@@ -49,6 +49,14 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
           >
             Governance
           </StyledLink>
+          <StyledLink
+            exact
+            activeClassName="active"
+            to="/bridge"
+            onClick={onDismiss}
+          >
+            Bridge
+          </StyledLink>
           {false && (
             <StyledLink
               exact

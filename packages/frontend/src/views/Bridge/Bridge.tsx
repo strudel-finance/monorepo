@@ -53,6 +53,7 @@ import Card from '../../components/Card'
 import CardContent from '../../components/CardContent'
 import Label from '../../components/Label'
 import { ExternalLink } from '../../components/TransactionsTableContainer/components/ExternalLink'
+import useBlock from '../../hooks/useBlock'
 
 const BSC_NETWORK_ID = 56
 const OUR_KEY = '$TRDL-bridgeCrossing'
@@ -132,6 +133,8 @@ const Bridge: React.FC = () => {
   const [crossingState, setCrossingState] = useState<CrossingState>({
     stage: 'none',
   })
+  const mainnetBlock = useBlock()
+
   // !!! TODO: FIX IT !!!
 
   useEffect(() => {
@@ -180,7 +183,7 @@ const Bridge: React.FC = () => {
           setVBCHonMainnetBalance(new BigNumber(s))
         })
     }
-  }, [infura, account])
+  }, [infura, account, mainnetBlock])
 
   useEffect(() => {
     if (infura && account) {
@@ -191,7 +194,7 @@ const Bridge: React.FC = () => {
           setStrudelOnMainnetBalance(new BigNumber(s))
         })
     }
-  }, [infura, account])
+  }, [infura, account, mainnetBlock])
 
   const handleCloseDirection = () => {
     setOpenDirection(false)
