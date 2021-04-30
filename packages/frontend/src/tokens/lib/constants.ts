@@ -96,6 +96,10 @@ export const contractAddresses = {
     56: '0x75Df5AF045d91108662D8080fD1FEFAd6aA0bb59',
     100: '0x162E898bD0aacB578C8D5F8d6ca588c13d2A383F',
   },
+  edgeAmb: {
+    1: "0x4C36d2919e407f0Cc2Ee3c993ccF8ac26d9CE64e",
+    56: "0x05185872898b6f94AA600177EF41B9334B1FA48B",
+  },
   gStrudel: {
     1: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
     1337: '0x64d506ba9ba0cc9f0326cc72f134e754df0e2aff',
