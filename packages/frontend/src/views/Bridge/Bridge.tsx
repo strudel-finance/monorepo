@@ -48,6 +48,7 @@ import { Contract } from 'web3-eth-contract'
 import useBSCtoXDAIamb from '../../hooks/bridgeHooks/useBSCtoXDAIBridge'
 import useBSCAMB from '../../hooks/bridgeHooks/useBSCAMB'
 import useETHAMB from '../../hooks/bridgeHooks/useETHAMB'
+import useMainnetStudelMediator from '../../hooks/bridgeHooks/useMainnetStrudelMediator'
 import Card from '../../components/Card'
 import CardContent from '../../components/CardContent'
 import Label from '../../components/Label'
@@ -127,6 +128,7 @@ const Bridge: React.FC = () => {
 
   const BSCamb = useBSCAMB()
   const ETHamb = useETHAMB()
+  const StrudelMediator = useMainnetStudelMediator()
   const [crossingState, setCrossingState] = useState<CrossingState>({
     stage: 'none',
   })
@@ -272,41 +274,79 @@ const Bridge: React.FC = () => {
     }
   }, [XDAItoBSCamb, BSCtoXDAIamb, ETHamb, BSCamb])
 
+  // TODO gasPrice  by chain
   const onBridgeCross = () => {
     let mediator
-    let xDAIAMB: ERC20Contract
-    // !!! TODO:
+
     if (token === '$TRDL') {
-      console.error('$TRDL not supported yet')
-      return
+      if (direction === 'BSC → Mainnet') {
+        mediator = StrudelMediator
+        mediator.methods
+          .startCross(decToBn(Number(amount)).toString(), account)
+          .send({
+            from: account,
+            gas: 150000,
+            gasPrice: '5000000000',
+          })
+          .on('transactionHash', (txHash: string) => {
+            const crossData: CrossData = {
+              txHash: txHash,
+              direction: 'BSC → Mainnet',
+              asset: '$TRDL',
+            }
+            localStorage.setItem(OUR_KEY, JSON.stringify(crossData))
+            crossFlow(crossData)
+          })
+      }
+      if (direction === 'Mainnet → BSC') {
+        const strudel = vbtc.contracts.strudel;
+        strudel.methods
+          .approveAndCall(
+            "0x1E065d816361bC3E078Ce25AC381B4B8F34F8C30",
+            decToBn(Number(amount)).toString(),
+            account
+          )
+          .send({
+            from: account,
+            gas: 150000,
+          })
+          .on('transactionHash', (txHash: string) => {
+            const crossData: CrossData = {
+              txHash: txHash,
+              direction: 'Mainnet → BSC',
+              asset: '$TRDL',
+            }
+            localStorage.setItem(OUR_KEY, JSON.stringify(crossData))
+            crossFlow(crossData)
+          })
+      }
     }
     if (token === 'vBCH') {
+      let gasPrice;
       if (direction === 'BSC → Mainnet') {
         mediator = mediatorBSC
-        // xDAIAMB = XDAItoBSCamb
+        gasPrice = '5000000000';
       }
       if (direction === 'Mainnet → BSC') {
         mediator = mediatorETH
-        // xDAIAMB = BSCtoXDAIamb
       }
+      mediator.methods
+        .startCross(false, decToBn(Number(amount)).toString(), account)
+        .send({
+          from: account,
+          gas: 150000,
+          gasPrice: gasPrice,
+        })
+        .on('transactionHash', (txHash: string) => {
+          const crossData: CrossData = {
+            txHash: txHash,
+            direction: 'BSC → Mainnet',
+            asset: 'vBCH',
+          }
+          localStorage.setItem(OUR_KEY, JSON.stringify(crossData))
+          crossFlow(crossData)
+        })
     }
-
-    mediator.methods
-      .startCross(false, decToBn(Number(amount)).toString(), account)
-      .send({
-        from: account,
-        gas: 150000,
-        gasPrice: '5000000000',
-      })
-      .on('transactionHash', (txHash: string) => {
-        const crossData: CrossData = {
-          txHash: txHash,
-          direction: 'BSC → Mainnet',
-          asset: 'vBCH',
-        }
-        localStorage.setItem(OUR_KEY, JSON.stringify(crossData))
-        crossFlow(crossData)
-      })
   }
 
   type CrossData = {
@@ -344,7 +384,7 @@ const Bridge: React.FC = () => {
       await sleep(5000)
       receipt = await web3.eth.getTransactionReceipt(txHash)
     }
-    return receipt.logs.find((l) => l.address.toLowerCase() == amb)?.topics[1]
+    return receipt.logs.find((l) => l.address.toLowerCase() == amb.toLowerCase())?.topics[1]
   }
 
   const getAMBTxHashViaEvent = async (
@@ -356,7 +396,7 @@ const Bridge: React.FC = () => {
       filter: {
         messageId: msgId,
       },
-      fromBlock: 'earliest',
+      // fromBlock: 'earliest',
       toBlock: 'latest',
     })
     while (pastEvents.length == 0) {
@@ -365,7 +405,7 @@ const Bridge: React.FC = () => {
         filter: {
           messageId: msgId,
         },
-        fromBlock: 'earliest',
+        // fromBlock: 'earliest',
         toBlock: 'latest',
       })
     }
@@ -419,7 +459,7 @@ const Bridge: React.FC = () => {
   }
 
   const crossFlow = async (crossData: CrossData) => {
-    const { txHash, direction, asset } = crossData
+    const { txHash, direction } = crossData
 
     // initial Effects
     setInProgress(true)
@@ -433,6 +473,7 @@ const Bridge: React.FC = () => {
     const xDaiWeb3 = new Web3(process.env.REACT_APP_XDAI_PROVIDER)
     const mainnetWeb3 = new Web3(process.env.REACT_APP_MAINNET_PROVIDER)
 
+    console.log(direction, "aaaaaaaaaaaaaaaaaa")
     const web3 = direction == 'BSC → Mainnet' ? bscWeb3 : mainnetWeb3
     const amb =
       direction == 'BSC → Mainnet'
@@ -442,6 +483,7 @@ const Bridge: React.FC = () => {
     const edgeAmb = direction == 'BSC → Mainnet' ? ETHamb : BSCamb
 
     const msgId = await getCrossMsgId(txHash, web3, amb)
+    console.log(msgId)
     setCrossingState({
       stage: 'initTxMined',
       crossData: crossData,
@@ -491,8 +533,8 @@ const Bridge: React.FC = () => {
         if (crossingState.crossData?.txHash)
           link =
             crossingState.crossData.direction == 'BSC → Mainnet'
-              ? 'https://bscscan.com/tx/' + crossingState.validatorsTxHash
-              : 'https://etherscan.io/tx/' + crossingState.validatorsTxHash
+              ? 'https://bscscan.com/tx/' + crossingState.crossData?.txHash
+              : 'https://etherscan.io/tx/' + crossingState.crossData?.txHash
 
         // 'https://bscscan.com/tx/' + crossingState.crossData?.txHash
 
@@ -501,8 +543,8 @@ const Bridge: React.FC = () => {
         status = 'Message sent over the bridge'
         link =
           crossingState.crossData.direction == 'BSC → Mainnet'
-            ? 'https://bscscan.com/tx/' + crossingState.validatorsTxHash
-            : 'https://etherscan.io/tx/' + crossingState.validatorsTxHash
+            ? 'https://bscscan.com/tx/' + crossingState.crossData?.txHash
+            : 'https://etherscan.io/tx/' + crossingState.crossData?.txHash
 
         // 'https://bscscan.com/tx/' + crossingState.crossData?.txHash
 
@@ -512,20 +554,16 @@ const Bridge: React.FC = () => {
         link =
           crossingState.crossData.direction == 'BSC → Mainnet'
             ? 'https://alm-xdai.herokuapp.com/100/' +
-              crossingState.validatorsTxHash
-            : 'https://alm-bsc-xdai.herokuapp.com/56/' +
-              crossingState.validatorsTxHash
+            crossingState.validatorsTxHash
+            : 'https://alm-bsc-xdai.herokuapp.com/100/' +
+            crossingState.validatorsTxHash
         break
       case 'confirmationTxMined':
         status = 'Crossing finished'
         link =
           crossingState.crossData.direction == 'BSC → Mainnet'
-            ? 'https://etherscan.io/tx/' + crossingState.validatorsTxHash
-            : 'https://bscscan.com/tx/' + crossingState.validatorsTxHash
-        console.log(link, 'linklinklink')
-
-        // 'https://blockscout.com/xdai/mainnet/tx/' +
-        //   crossingState.confirmationTxHash
+            ? 'https://etherscan.io/tx/' + crossingState.confirmationTxHash
+            : 'https://bscscan.com/tx/' + crossingState.confirmationTxHash
         break
     }
     return (
@@ -702,23 +740,23 @@ const Bridge: React.FC = () => {
           </Container>
         </Page>
       ) : (
-        <Page>
-          <div
-            style={{
-              alignItems: 'center',
-              display: 'flex',
-              flex: 1,
-              justifyContent: 'center',
-            }}
-          >
-            <Button
-              boxShadowGlow={true}
-              onClick={onPresentWalletProviderModal}
-              text="Unlock Wallet"
-            />
-          </div>
-        </Page>
-      )}
+          <Page>
+            <div
+              style={{
+                alignItems: 'center',
+                display: 'flex',
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            >
+              <Button
+                boxShadowGlow={true}
+                onClick={onPresentWalletProviderModal}
+                text="Unlock Wallet"
+              />
+            </div>
+          </Page>
+        )}
     </>
   )
 }
