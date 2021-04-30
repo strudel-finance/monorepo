@@ -299,12 +299,12 @@ const Bridge: React.FC = () => {
           })
       }
       if (direction === 'Mainnet → BSC') {
-        const strudel = vbtc.contracts.strudel;
+        const strudel = vbtc.contracts.strudel
         strudel.methods
           .approveAndCall(
-            "0x1E065d816361bC3E078Ce25AC381B4B8F34F8C30",
+            '0x1E065d816361bC3E078Ce25AC381B4B8F34F8C30',
             decToBn(Number(amount)).toString(),
-            account
+            account,
           )
           .send({
             from: account,
@@ -322,10 +322,10 @@ const Bridge: React.FC = () => {
       }
     }
     if (token === 'vBCH') {
-      let gasPrice;
+      let gasPrice
       if (direction === 'BSC → Mainnet') {
         mediator = mediatorBSC
-        gasPrice = '5000000000';
+        gasPrice = '5000000000'
       }
       if (direction === 'Mainnet → BSC') {
         mediator = mediatorETH
@@ -384,7 +384,9 @@ const Bridge: React.FC = () => {
       await sleep(5000)
       receipt = await web3.eth.getTransactionReceipt(txHash)
     }
-    return receipt.logs.find((l) => l.address.toLowerCase() == amb.toLowerCase())?.topics[1]
+    return receipt.logs.find(
+      (l) => l.address.toLowerCase() == amb.toLowerCase(),
+    )?.topics[1]
   }
 
   const getAMBTxHashViaEvent = async (
@@ -473,7 +475,7 @@ const Bridge: React.FC = () => {
     const xDaiWeb3 = new Web3(process.env.REACT_APP_XDAI_PROVIDER)
     const mainnetWeb3 = new Web3(process.env.REACT_APP_MAINNET_PROVIDER)
 
-    console.log(direction, "aaaaaaaaaaaaaaaaaa")
+    console.log(direction, 'aaaaaaaaaaaaaaaaaa')
     const web3 = direction == 'BSC → Mainnet' ? bscWeb3 : mainnetWeb3
     const amb =
       direction == 'BSC → Mainnet'
@@ -483,7 +485,6 @@ const Bridge: React.FC = () => {
     const edgeAmb = direction == 'BSC → Mainnet' ? ETHamb : BSCamb
 
     const msgId = await getCrossMsgId(txHash, web3, amb)
-    console.log(msgId)
     setCrossingState({
       stage: 'initTxMined',
       crossData: crossData,
@@ -554,9 +555,9 @@ const Bridge: React.FC = () => {
         link =
           crossingState.crossData.direction == 'BSC → Mainnet'
             ? 'https://alm-xdai.herokuapp.com/100/' +
-            crossingState.validatorsTxHash
+              crossingState.validatorsTxHash
             : 'https://alm-bsc-xdai.herokuapp.com/100/' +
-            crossingState.validatorsTxHash
+              crossingState.validatorsTxHash
         break
       case 'confirmationTxMined':
         status = 'Crossing finished'
@@ -566,17 +567,34 @@ const Bridge: React.FC = () => {
             : 'https://bscscan.com/tx/' + crossingState.confirmationTxHash
         break
     }
+
+    console.log(crossingState.stage, 'crossingState.stagecrossingState.stage')
+
     return (
       <>
         <div style={{ minWidth: '178px' }}>
           <Label text="Status:" />
+          <Spacer size="sm" />
+          {crossingState.stage === 'none' ? (
+            'Not initialized'
+          ) : crossingState.stage === 'validatorsTxMined' ? (
+            <span style={{ color: 'red' }}>Action required</span>
+          ) : crossingState.stage === 'confirmationTxMined' ? (
+            <span style={{ color: 'green' }}>Completed</span>
+          ) : (
+            <span style={{ color: 'orange' }}>
+              Please wait, this may take a while!
+            </span>
+          )}
+          <Spacer size="sm" />
+          <Label text="Description:" />
           <Spacer size="sm" />
           {status}
         </div>
         <Spacer size="md" />
 
         {(() => {
-          if (status === 'Validators transaction minned')
+          if (crossingState.stage === 'validatorsTxMined')
             return (
               <>
                 <div style={{ minWidth: '133px' }}>
@@ -740,23 +758,23 @@ const Bridge: React.FC = () => {
           </Container>
         </Page>
       ) : (
-          <Page>
-            <div
-              style={{
-                alignItems: 'center',
-                display: 'flex',
-                flex: 1,
-                justifyContent: 'center',
-              }}
-            >
-              <Button
-                boxShadowGlow={true}
-                onClick={onPresentWalletProviderModal}
-                text="Unlock Wallet"
-              />
-            </div>
-          </Page>
-        )}
+        <Page>
+          <div
+            style={{
+              alignItems: 'center',
+              display: 'flex',
+              flex: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <Button
+              boxShadowGlow={true}
+              onClick={onPresentWalletProviderModal}
+              text="Unlock Wallet"
+            />
+          </div>
+        </Page>
+      )}
     </>
   )
 }
