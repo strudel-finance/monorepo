@@ -1,15 +1,17 @@
 pragma solidity 0.6.6;
 
 import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts-ethereum-package/contracts/token/ERC20/ERC20.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/SafeMath.sol";
 import "@openzeppelin/contracts-ethereum-package/contracts/math/Math.sol";
 import "./mocks/MockERC20.sol";
+import "./GovernanceToken.sol";
 import "./dutchSwap/IDutchAuction.sol";
 import "./dutchSwap/IDutchSwapFactory.sol";
 import "./IPriceOracle.sol";
 
-contract AuctionManager is OwnableUpgradeSafe {
+contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
   using SafeMath for uint256;
 
   // used as factor when dealing with %
@@ -19,7 +21,7 @@ contract AuctionManager is OwnableUpgradeSafe {
   // cap auctions at certain amount of $TRDL minted
   uint256 public dilutionBound;
   // stop selling when volume small
-  uint256 public dustThreshold;
+  // uint256 public dustThreshold; set at dilutionBound / 52
   // % start_price above estimate, and % min_price below estimate
   uint256 public priceSpan;
   // auction duration
@@ -27,14 +29,19 @@ contract AuctionManager is OwnableUpgradeSafe {
 
   MockERC20 private strudel;
   IERC20 private vBtc;
+  GovernanceToken private gStrudel;
   IPriceOracle private btcPriceOracle;
   IPriceOracle private vBtcPriceOracle;
   IPriceOracle private strudelPriceOracle;
   IDutchSwapFactory private auctionFactory;
+  uint256 private govIntervalLength;
+
   IDutchAuction public currentAuction;
+  mapping(address => uint256) public lockTimeForAuction;
 
   constructor(
     address _strudelAddr,
+    address _gStrudel,
     address _vBtcAddr,
     address _btcPriceOracle,
     address _vBtcPriceOracle,
@@ -42,7 +49,10 @@ contract AuctionManager is OwnableUpgradeSafe {
     address _auctionFactory
   ) public {
     __Ownable_init();
+    __ERC20_init("Strudel Auction Token", "a$TRDL");
     strudel = MockERC20(_strudelAddr);
+    gStrudel = GovernanceToken(_gStrudel);
+    govIntervalLength = gStrudel.intervalLength();
     vBtc = IERC20(_vBtcAddr);
     btcPriceOracle = IPriceOracle(_btcPriceOracle);
     vBtcPriceOracle = IPriceOracle(_vBtcPriceOracle);
@@ -50,7 +60,6 @@ contract AuctionManager is OwnableUpgradeSafe {
     auctionFactory = IDutchSwapFactory(_auctionFactory);
     sellThreshold = 9500; // vBTC @ 95% of BTC price or above
     dilutionBound = 70; // 0.7% of $TRDL total supply
-    dustThreshold = 10; // 0.1% of $TRDL total supply
     priceSpan = 2500; // 25%
     auctionDuration = 84600; // ~23,5h
   }
@@ -61,8 +70,6 @@ contract AuctionManager is OwnableUpgradeSafe {
     }
     return b - a;
   }
-
-  event Data(uint256 indexed data, uint256 indexed dataB);
 
   function rotateAuctions() external {
     if (address(currentAuction) != address(0)) {
@@ -94,14 +101,15 @@ contract AuctionManager is OwnableUpgradeSafe {
     // calculate vBTC supply imbalance in ETH
     uint256 imbalance = _getDiff(btcPriceInEth, vBtcPriceInEth).mul(vBtcOutstandingSupply);
 
+    uint256 cap = strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY);
     // cap by dillution bound
     imbalance = Math.min(
-      strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY),
+      cap,
       imbalance
     );
 
     // pause if imbalance below dust threshold
-    if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(dustThreshold).div(ACCURACY)) {
+    if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(dilutionBound).div(52).div(ACCURACY)) {
       // pause auctions
       currentAuction = IDutchAuction(address(0));
       return;
@@ -129,17 +137,14 @@ contract AuctionManager is OwnableUpgradeSafe {
         )
       );
     } else {
-      // calculate imbalance in $TRDL
-      imbalance = imbalance.div(strudelPriceInEth);
-      strudel.mint(address(this), imbalance);
-      strudel.approve(address(auctionFactory), imbalance);
+
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
       // auction off some $TRDL
       currentAuction = IDutchAuction(
         auctionFactory.deployDutchAuction(
-          address(strudel),
-          imbalance,
+          address(this),
+          imbalance.div(strudelPriceInEth), // calculate imbalance in $TRDL
           now,
           now + auctionDuration,
           address(vBtc),
@@ -148,6 +153,10 @@ contract AuctionManager is OwnableUpgradeSafe {
           address(this)
         )
       );
+
+      // if imbalance >= dillution bound, use max lock (52 weeks)
+      // if imbalance < dillution bound, lock shorter
+      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance).div(cap);
     }
   }
 
@@ -158,15 +167,8 @@ contract AuctionManager is OwnableUpgradeSafe {
   }
 
   function setDulutionBound(uint256 _dilutionBound) external onlyOwner {
-    require(_dilutionBound > dustThreshold, "dilution bound below dustThreshold");
     require(_dilutionBound <= 1000, "dilution bound above 10% max value");
     dilutionBound = _dilutionBound;
-  }
-
-  function setDustThreshold(uint256 _dustThreshold) external onlyOwner {
-    require(_dustThreshold > 0, "dust threshold can not be 0");
-    require(_dustThreshold < dilutionBound, "dust threshold above dilution bound");
-    dustThreshold = _dustThreshold;
   }
 
   function setPriceSpan(uint256 _priceSpan) external onlyOwner {
@@ -188,5 +190,36 @@ contract AuctionManager is OwnableUpgradeSafe {
   function swipe(address tokenAddr) external onlyOwner {
     IERC20 token = IERC20(tokenAddr);
     token.transfer(owner(), token.balanceOf(address(this)));
+  }
+
+  // In deployDutchAuction, approve and transferFrom are called
+  // In initDutchAuction, transferFrom is called again
+  // In DutchAuction, transfer is called to either payout, or return money to AuctionManager
+
+  function transferFrom(
+    address _from,
+    address _to,
+    uint256 _value
+  ) public override returns (bool success) {
+    return true;
+  }
+
+  function approve(address _spender, uint256 _value) public override returns (bool success) {
+    return true;
+  }
+
+  function transfer(address to, uint256 amount) public override returns (bool success) {
+    // require sender is our Auction
+    address auction = _msgSender();
+    require(lockTimeForAuction[auction] > 0, "Caller is not our auction");
+
+    // if recipient is AuctionManager, it means we are doing a refund -> do nothing
+    if (to == address(this)) return true;
+
+    uint256 blocks = lockTimeForAuction[auction];
+    strudel.mint(address(this), amount);
+    strudel.approve(address(gStrudel), amount);
+    gStrudel.lock(to, amount, blocks, false);
+    return true;
   }
 }
