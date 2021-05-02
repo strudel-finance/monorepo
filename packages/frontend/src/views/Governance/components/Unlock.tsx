@@ -86,7 +86,7 @@ const Lock: React.FC = () => {
                   <GStrudelIcon />
                   <Spacer size="xs" />
                   <div>
-                    <Label text="g$TRDL Available for voting" />
+                    <Label text="g$TRDL available for voting" />
                     <ValueBTC
                       value={
                         !!account && !!gTrdlBalance

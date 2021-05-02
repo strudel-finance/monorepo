@@ -28,7 +28,6 @@ import { getStrudelAddress } from '../../tokens/utils'
 import { decToBn, formatAddress } from '../../utils'
 import VBCHBalances from './components/VBCHBalances'
 import StrudelBalances from './components/StrudelBalances'
-import BridgeTable from './components/BridgeTable'
 import useBSCMediator from '../../hooks/bridgeHooks/useBSCMediator'
 import useETHMediator from '../../hooks/bridgeHooks/useETHMediator'
 import useXDAItoBSCamb from '../../hooks/bridgeHooks/useXDAItoBSCBridge'
@@ -145,7 +144,7 @@ const Bridge: React.FC = () => {
         .then((s: any) => {
           setStrudelOnBSCBalance(new BigNumber(s))
         })
-  }, [strudelOnBSC, account])
+  }, [strudelOnBSC, account, mainnetBlock])
 
   // !!! TODO: FIX IT !!!
 
@@ -158,20 +157,7 @@ const Bridge: React.FC = () => {
           setVBCHonBSCBalance(new BigNumber(s))
         })
     }
-  }, [vBCHonBSC, account])
-
-  // useEffect(() => {
-  //   if (mediatorBSC) {
-  //     const num = 6952280 - 3000
-  //     mediatorBSC.getPastEvents(
-  //       'allEvents',
-  //       { fromBlock: num },
-  //       (z: any, a: any) => {
-  //         console.log(a, 'aaa')
-  //       },
-  //     )
-  //   }
-  // }, [mediatorBSC])
+  }, [vBCHonBSC, account, mainnetBlock])
 
   // !!! TODO: Rewrite that ugly shit !!!
   useEffect(() => {

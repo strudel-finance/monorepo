@@ -185,7 +185,7 @@ const Lock: React.FC = () => {
                   <StrudelIcon />
                   <Spacer size="xs" />
                   <div>
-                    <Label text="$TRDL Available for locking:  " />
+                    <Label text="$TRDL available for locking:  " />
                     <ValueBTC
                       value={
                         !!account && !!strudelBalance
