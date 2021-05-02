@@ -670,7 +670,7 @@ const Bridge: React.FC = () => {
                 </>
               )}
               <StyledWrapper>
-                <div style={{ minWidth: '250px' }}>
+                <div style={{ minWidth: '340px' }}>
                   <AddressInput
                     address={formatAddress(account)}
                     value={formatAddress(account)}

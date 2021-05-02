@@ -1,35 +1,20 @@
-import { Slider } from '@material-ui/core'
 import BigNumber from 'bignumber.js'
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import Button from '../../../components/Button'
 import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
-import Container from '../../../components/Container'
-import Input from '../../../components/Input'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import {
-  TimerIcon,
-  GStrudelIcon,
-  StrudelIcon,
-} from '../../../components/StrudelIcon'
+///Users/matic/Documents/LeapDao/monorepo/packages/frontend/src/components/VBCHIcon/VBCHIcon.tsx
+import { VBCHMainnet, VBCHBinance } from '../../../components/VBCHIcon/VBCHIcon'
 import ValueBTC from '../../../components/ValueBTC'
-import useVBCHonBSC from '../../../hooks/bridgeHooks/useVBCHonBSC'
 import useETH from '../../../hooks/useETH'
-import useInfura from '../../../hooks/useInfura'
 import { getBalanceNumber } from '../../../utils/formatBalance'
-import dayjs from 'dayjs'
-import {
-  getGStrudelAddress,
-  getGStrudelContract,
-  getStrudelAddress,
-} from '../../../tokens/utils'
-import useVBTC from '../../../hooks/useVBTC'
-import useTokenBalance from '../../../hooks/useTokenBalance'
-const BLOCKS_PER_WEEK = 45850
-const SECONDS_PER_BLOCK = 13.1908
-
+// import {
+//   StrudelBinance,
+//   StrudelMainnet,
+// } from '../../../components/StrudelIcon/StrudelIcon'
 interface Balances {
   vBCHonMainnetBalance: BigNumber
   vBCHonBSCBalance: BigNumber
@@ -49,7 +34,7 @@ const VBCHBalances: React.FC<Balances> = ({
           <CardContent>
             <StyledBalances>
               <StyledBalance>
-                <StrudelIcon />
+                <VBCHMainnet />
                 <Spacer size="xs" />
                 <div style={{ flex: 1 }}>
                   <Label text="Your vBCH Balance on ETH Mainnet" />
@@ -70,7 +55,7 @@ const VBCHBalances: React.FC<Balances> = ({
           <CardContent>
             <StyledBalances>
               <StyledBalance>
-                <StrudelIcon />
+                <VBCHBinance />
                 <Spacer size="xs" />
                 <div style={{ flex: 1 }}>
                   <Label text="Your vBCH Balance on Binance Smart Chain" />

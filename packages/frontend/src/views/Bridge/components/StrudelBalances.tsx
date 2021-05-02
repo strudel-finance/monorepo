@@ -6,7 +6,10 @@ import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import { StrudelIcon } from '../../../components/StrudelIcon'
+import {
+  StrudelBinance,
+  StrudelMainnet,
+} from '../../../components/StrudelIcon/StrudelIcon'
 import ValueBTC from '../../../components/ValueBTC'
 import useETH from '../../../hooks/useETH'
 import { getBalanceNumber } from '../../../utils/formatBalance'
@@ -30,7 +33,7 @@ const StrudelBalances: React.FC<Balances> = ({
           <CardContent>
             <StyledBalances>
               <StyledBalance>
-                <StrudelIcon />
+                <StrudelMainnet />
                 <Spacer size="xs" />
                 <div style={{ flex: 1 }}>
                   <Label text="Your $TRDL Balance on ETH Mainnet" />
@@ -51,7 +54,7 @@ const StrudelBalances: React.FC<Balances> = ({
           <CardContent>
             <StyledBalances>
               <StyledBalance>
-                <StrudelIcon />
+                <StrudelBinance />
                 <Spacer size="xs" />
                 <div style={{ flex: 1 }}>
                   <Label text="Your $TRDL Balance on Binance Smart Chain" />
