@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react'
 import { BrowserRouter, Route, Switch, useLocation } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { UseWalletProvider } from 'use-wallet'
-import DisclaimerModal from './components/DisclaimerModal'
 import MobileMenu from './components/MobileMenu'
 import TopBar from './components/TopBar'
 import FarmsProvider from './contexts/Farms'
@@ -15,11 +14,9 @@ import BTCtheme from './theme/BTC.theme'
 import BCHtheme from './theme/BCH.theme'
 import Farms from './views/Farms'
 import Home from './views/Home'
-import Stake from './views/Stake'
 import { useTracking } from './hooks/useTracking'
 import { ToastContainer } from 'react-toastify'
 import { ErrorBoundary } from 'react-error-boundary'
-
 import 'react-toastify/dist/ReactToastify.css'
 import RollbarErrorTracking from './errorTracking/rollbar'
 import BTC from './views/BTC'
@@ -28,9 +25,9 @@ import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
 import BridgeProvider from './contexts/BridgeProvider'
 import Note from './views/Note'
-import { faLessThan } from '@fortawesome/pro-regular-svg-icons'
 import Governance from './views/Governance'
 import Bridge from './views/Bridge'
+import Button from './components/Button/Button'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -113,6 +110,23 @@ const App: React.FC = () => {
         <Route path="/BCH">
           <BCH />
         </Route>
+        <Route path="/clear-crossing">
+          <div
+            style={{
+              display: 'grid',
+              padding: '30px',
+              placeItems: 'center',
+            }}
+          >
+            <Button
+              text="Clear crossing"
+              size="xl"
+              onClick={() => {
+                localStorage.removeItem('$TRDL-bridgeCrossing')
+              }}
+            />
+          </div>
+        </Route>
         <Route path="/governance">
           {localStorage.getItem('networkId') == '1' ||
           !localStorage.getItem('networkId') ? (
@@ -127,7 +141,7 @@ const App: React.FC = () => {
           <Bridge />
         ) : (
           <Note
-            affair={'Bridge'}
+            affair={'BSC Bridge'}
             networks={['Ethereum Mainnet', 'Binance Smart Chain']}
           />
         )}

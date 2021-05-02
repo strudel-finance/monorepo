@@ -1,8 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-
-import Button from '../Button'
-import Input, {InputProps} from '../Input'
+import Input, { InputProps } from '../Input'
 
 interface AddressInputProps extends InputProps {
   address: string
@@ -33,7 +31,6 @@ const InlineInput = styled(Input)`
   display: inline-block;
 `
 
-
 const StyledSpacer = styled.div`
   width: ${(props) => props.theme.spacing[3]}px;
 `
@@ -56,7 +53,7 @@ const StyledMaxText = styled.div`
 `
 
 const StyledTokenSymbol = styled.span`
-  color: rgba(37,37,44,0.48);
+  color: rgba(37, 37, 44, 0.48);
   font-weight: 700;
 `
 

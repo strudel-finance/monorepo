@@ -55,7 +55,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             to="/bridge"
             onClick={onDismiss}
           >
-            Bridge
+            BSC Bridge
           </StyledLink>
           {false && (
             <StyledLink
