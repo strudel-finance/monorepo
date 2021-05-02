@@ -5,7 +5,6 @@ import { expandTo18Decimals } from './shared/utilities';
 import { StrudelToken } from '../typechain/StrudelToken';
 import { StrudelWrapper } from '../typechain/StrudelWrapper';
 
-
 const { expect } = chai;
 const txHash = '0x0000000000000000000000000000000000000000000000000000000000000000';
 
@@ -49,7 +48,9 @@ describe('Strudel Wrapper', async () => {
       const tsBefore = await strudel.totalSupply();
       const signerAddr = await signers[0].getAddress();
       const tx = await strudel.approveAndCall(wrapper.address, expandTo18Decimals(100), signerAddr);
-      expect((await tx.wait()).logs[3].topics[1]).to.eq(`0x000000000000000000000000${signerAddr.toLowerCase().replace('0x', '')}`);
+      expect((await tx.wait()).logs[3].topics[1]).to.eq(
+        `0x000000000000000000000000${signerAddr.toLowerCase().replace('0x', '')}`
+      );
       const tsAfter = await strudel.totalSupply();
       expect(tsBefore.sub(expandTo18Decimals(100))).to.eq(tsAfter);
     });
