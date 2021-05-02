@@ -103,10 +103,7 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
 
     uint256 cap = strudelSupply.mul(dilutionBound).mul(strudelPriceInEth).div(ACCURACY);
     // cap by dillution bound
-    imbalance = Math.min(
-      cap,
-      imbalance
-    );
+    imbalance = Math.min(cap, imbalance);
 
     // pause if imbalance below dust threshold
     if (imbalance.div(strudelPriceInEth) < strudelSupply.mul(dilutionBound).div(52).div(ACCURACY)) {
@@ -137,7 +134,6 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
         )
       );
     } else {
-
       // calculate price in vBTC
       vBtcAmount = strudelPriceInEth.mul(1e18).div(vBtcPriceInEth);
       // auction off some $TRDL
@@ -156,7 +152,9 @@ contract AuctionManager is OwnableUpgradeSafe, ERC20UpgradeSafe {
 
       // if imbalance >= dillution bound, use max lock (52 weeks)
       // if imbalance < dillution bound, lock shorter
-      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance).div(cap);
+      lockTimeForAuction[address(currentAuction)] = govIntervalLength.mul(52).mul(imbalance).div(
+        cap
+      );
     }
   }
 

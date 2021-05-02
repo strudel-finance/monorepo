@@ -9,27 +9,24 @@ const useBlock = () => {
   const provider = eth?.provider
 
   useEffect(() => {
-    // const setBlockDebounced = debounce(setBlock, 300)
     if (!provider) return
-    const web3 = new Web3(provider)
 
-    // const subscription = new Web3(provider).eth.subscribe(
-    //   'newBlockHeaders',
-    //   (error, result) => {
-    //     if (!error) {
-    //       setBlockDebounced(result.number)
-    //     }
-    //   },
-    // )
+    const web3 = new Web3(provider);
+    web3.eth.getBlockNumber()
+    .then((blockNumber: number) =>  setBlock(blockNumber))
 
-    const interval = setInterval(async () => {
-      const latestBlockNumber = await web3.eth.getBlockNumber()
-      if (block !== latestBlockNumber) {
-        setBlock(latestBlockNumber)
-      }
-    }, 1000)
+    const subscription = web3.eth.subscribe(
+      'newBlockHeaders',
+      (error, result) => {
+        if (!error) {
+          setBlock(result.number)
+        }
+      },
+    )
 
-    return () => clearInterval(interval)
+    return () => {
+      subscription.unsubscribe(() => console.log('Successsfully unsubscribed'))
+    }
   }, [provider])
 
   return block

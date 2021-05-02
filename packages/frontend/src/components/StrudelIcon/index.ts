@@ -1,1 +1,1 @@
-export {default} from './StrudelIcon'
+export { StrudelIcon, GStrudelIcon, TimerIcon } from './StrudelIcon'

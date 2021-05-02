@@ -118,7 +118,7 @@ describe('AuctionManager', () => {
     expect(bal.toString()).to.eq('1400000000000000000000');
 
     // participate in vBTC sell auction
-    await advanceTime(60 * 60 * 23.5 / 2);
+    await advanceTime((60 * 60 * 23.5) / 2);
     // outstanding supply: 10 - 0.014 = 9.986 vBTC
     // imbalance in ETH: (40 - 32) * 9.986 = 79.888 ETH
     // imbalance in $TRDL: 120 ETH / 0.0002 = 399,440 $TRDL
@@ -165,7 +165,7 @@ describe('AuctionManager', () => {
 
   it('should fail if not called from auctionManager', async () => {
     await expect(auctionManager.transfer(vBtc.address, 0)).to.be.revertedWith(
-      "Caller is not our auction"
+      'Caller is not our auction'
     );
   });
 });

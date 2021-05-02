@@ -1,13 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react'
-import {
-  BrowserRouter,
-  Route,
-  Switch,
-  useLocation,
-} from 'react-router-dom'
+import { BrowserRouter, Route, Switch, useLocation } from 'react-router-dom'
 import { ThemeProvider } from 'styled-components'
 import { UseWalletProvider } from 'use-wallet'
-import DisclaimerModal from './components/DisclaimerModal'
 import MobileMenu from './components/MobileMenu'
 import TopBar from './components/TopBar'
 import FarmsProvider from './contexts/Farms'
@@ -20,11 +14,9 @@ import BTCtheme from './theme/BTC.theme'
 import BCHtheme from './theme/BCH.theme'
 import Farms from './views/Farms'
 import Home from './views/Home'
-import Stake from './views/Stake'
 import { useTracking } from './hooks/useTracking'
 import { ToastContainer } from 'react-toastify'
 import { ErrorBoundary } from 'react-error-boundary'
-
 import 'react-toastify/dist/ReactToastify.css'
 import RollbarErrorTracking from './errorTracking/rollbar'
 import BTC from './views/BTC'
@@ -33,7 +25,9 @@ import useETH from './hooks/useETH'
 import WalletProvider from './contexts/WalletProvider'
 import BridgeProvider from './contexts/BridgeProvider'
 import Note from './views/Note'
-import { faLessThan } from '@fortawesome/pro-regular-svg-icons'
+import Governance from './views/Governance'
+import Bridge from './views/Bridge'
+import Button from './components/Button/Button'
 
 const ErrorFallback = (any: any) => {
   return (
@@ -62,20 +56,21 @@ const App: React.FC = () => {
   }
 
   if ((window as any).ethereum) {
-    (window as any).ethereum.on('networkChanged',
-    (networkId: string) => {
-      localStorage.setItem('networkId', networkId);
-      window.location.reload();
-    },
-    );
-    (window as any).ethereum.on('accountsChanged', accountChange);
+    ;(window as any).ethereum.on('networkChanged', (networkId: string) => {
+      localStorage.setItem('networkId', networkId)
+      window.location.reload()
+    })
+    ;(window as any).ethereum.on('accountsChanged', accountChange)
     localStorage.setItem('networkId', (window as any).ethereum.networkVersion)
   } else {
     ;(window as any).addEventListener(
       'ethereum#initialized',
       () => {
-        localStorage.setItem('networkId', (window as any).ethereum.networkVersion);
-        (window as any).ethereum.on('accountsChanged', accountChange)
+        localStorage.setItem(
+          'networkId',
+          (window as any).ethereum.networkVersion,
+        )
+        ;(window as any).ethereum.on('accountsChanged', accountChange)
       },
       {
         once: true,
@@ -106,7 +101,7 @@ const App: React.FC = () => {
           !localStorage.getItem('networkId') ? (
             <Farms />
           ) : (
-            <Note />
+            <Note affair={'Terra-farms'} networks={['Ethereum Mainnet']} />
           )}
         </Route>
         <Route path="/BTC">
@@ -115,10 +110,40 @@ const App: React.FC = () => {
         <Route path="/BCH">
           <BCH />
         </Route>
-        {false && (
-          <Route path="/staking">
-            <Stake />
-          </Route>
+        <Route path="/clear-crossing">
+          <div
+            style={{
+              display: 'grid',
+              padding: '30px',
+              placeItems: 'center',
+            }}
+          >
+            <Button
+              text="Clear crossing"
+              size="xl"
+              onClick={() => {
+                localStorage.removeItem('$TRDL-bridgeCrossing')
+              }}
+            />
+          </div>
+        </Route>
+        <Route path="/governance">
+          {localStorage.getItem('networkId') == '1' ||
+          !localStorage.getItem('networkId') ? (
+            <Governance />
+          ) : (
+            <Note affair={'Governance'} networks={['Ethereum Mainnet']} />
+          )}
+        </Route>
+        {localStorage.getItem('networkId') == '1' ||
+        localStorage.getItem('networkId') == '56' ||
+        !localStorage.getItem('networkId') ? (
+          <Bridge />
+        ) : (
+          <Note
+            affair={'BSC Bridge'}
+            networks={['Ethereum Mainnet', 'Binance Smart Chain']}
+          />
         )}
       </Switch>
     </>
@@ -128,9 +153,9 @@ const App: React.FC = () => {
 const Providers: React.FC = ({ children }) => {
   return (
     <ThemeProvider
-           theme={useLocation().pathname.includes('/BCH') ? BCHtheme : BTCtheme}
+      theme={useLocation().pathname.includes('/BCH') ? BCHtheme : BTCtheme}
     >
-    <UseWalletProvider
+      <UseWalletProvider
         chainId={1}
         connectors={{
           walletconnect: {
@@ -139,21 +164,21 @@ const Providers: React.FC = ({ children }) => {
         }}
       >
         {/* pro */}
-          <InfuraProvider>
+        <InfuraProvider>
           <WalletProvider>
             <BridgeProvider>
-          <VBTCProvider>
-            <VBCHProvider>
-              <TransactionProvider>
-                <FarmsProvider>
-                  <ModalsProvider>{children}</ModalsProvider>
-                </FarmsProvider>
-              </TransactionProvider>
-            </VBCHProvider>
+              <VBTCProvider>
+                <VBCHProvider>
+                  <TransactionProvider>
+                    <FarmsProvider>
+                      <ModalsProvider>{children}</ModalsProvider>
+                    </FarmsProvider>
+                  </TransactionProvider>
+                </VBCHProvider>
               </VBTCProvider>
-              </BridgeProvider>
+            </BridgeProvider>
           </WalletProvider>
-            </InfuraProvider>
+        </InfuraProvider>
       </UseWalletProvider>
       <ToastContainer limit={3} />
     </ThemeProvider>
@@ -161,11 +186,11 @@ const Providers: React.FC = ({ children }) => {
 }
 
 export default () => (
-      <BrowserRouter>
-        <Providers >
-          <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
-              <App />
-          </ErrorBoundary>
-        </Providers>
-      </BrowserRouter>
+  <BrowserRouter>
+    <Providers>
+      <ErrorBoundary FallbackComponent={ErrorFallback} onError={myErrorHandler}>
+        <App />
+      </ErrorBoundary>
+    </Providers>
+  </BrowserRouter>
 )

@@ -41,6 +41,22 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
           >
             Terra-Farms
           </StyledLink>
+          <StyledLink
+            exact
+            activeClassName="active"
+            to="/governance"
+            onClick={onDismiss}
+          >
+            Governance
+          </StyledLink>
+          <StyledLink
+            exact
+            activeClassName="active"
+            to="/bridge"
+            onClick={onDismiss}
+          >
+            BSC Bridge
+          </StyledLink>
           {false && (
             <StyledLink
               exact

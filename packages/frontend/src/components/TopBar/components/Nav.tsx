@@ -17,6 +17,12 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/farms">
         Terra-Farms
       </StyledLink>
+      <StyledLink exact activeClassName="active" to="/governance">
+        Governance
+      </StyledLink>
+      <StyledLink exact activeClassName="active" to="/bridge">
+        BSC Bridge
+      </StyledLink>
       {false && (
         <StyledLink exact activeClassName="active" to="/staking">
           Gravity Bags

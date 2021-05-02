@@ -17,7 +17,12 @@ import BurnModal from '../../../views/Home/components/BurnModal'
 import Button from '../../Button'
 
 import useVBTC from '../../../hooks/useVBTC'
-import { getVbchContract, getVbtcContract, proofOpReturnAndMint, proofOpReturnAndMintBCH } from '../../../tokens/utils'
+import {
+  getVbchContract,
+  getVbtcContract,
+  proofOpReturnAndMint,
+  proofOpReturnAndMintBCH,
+} from '../../../tokens/utils'
 import showError, { handleErrors } from '../../../utils/showError'
 import RollbarErrorTracking from '../../../errorTracking/rollbar'
 import { useLocation } from 'react-router'
@@ -97,7 +102,7 @@ const getRawTx = (tx_hash: string): Promise<Response> => {
   return fetch(url)
 }
 
-const  getProofBCH = (
+const getProofBCH = (
   rawTx: string,
   tx_hash: string,
   block_hash: string,
@@ -142,7 +147,7 @@ const callProofHelperBCH = async (
     account,
     proof,
     burnOutputIndex,
-    xDaiBridgeContract
+    xDaiBridgeContract,
   )
 }
 

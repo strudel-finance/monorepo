@@ -15,6 +15,10 @@ const showError = (message: string) => {
   })
 }
 
+export const closeError = () => {
+  toast.dismiss()
+}
+
 export const handleErrors = (response: any) => {
   if (!response.ok) {
     throw Error(response.status)

@@ -17,7 +17,7 @@ import ModalTitle from '../../ModalTitle'
 import Spacer from '../../Spacer'
 import Value from '../../Value'
 import ValueBTC from '../../ValueBTC'
-import StrudelIcon from '../../StrudelIcon'
+import { StrudelIcon } from '../../StrudelIcon'
 import useETH from '../../../hooks/useETH'
 import useVBCH from '../../../hooks/useVBCH'
 

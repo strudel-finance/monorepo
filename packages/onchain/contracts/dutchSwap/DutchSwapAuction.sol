@@ -278,7 +278,7 @@ contract DutchSwapAuction {
       /// @dev Successful auction
       /// @dev Transfer contributed tokens to wallet.
       _tokenPayment(paymentCurrency, wallet, commitmentsTotal);
-    } else if ( commitmentsTotal == 0 && block.timestamp < startDate ) {
+    } else if (commitmentsTotal == 0 && block.timestamp < startDate) {
       /// @dev Cancelled Auction
       /// @dev You can cancel the auction before it starts
       _tokenPayment(auctionToken, wallet, totalTokens);

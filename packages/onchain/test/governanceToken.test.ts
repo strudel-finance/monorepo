@@ -53,8 +53,9 @@ describe('GovernanceToken', async () => {
       const signerAddr = await signers[0].getAddress();
       await strudel.approveAndCall(
         gov.address,
-        expandTo18Decimals(26), 
-        `0x0000000000000000000000000000000000000000000000000000000000000${maxInterval.toString(16)}`);
+        expandTo18Decimals(26),
+        `0x0000000000000000000000000000000000000000000000000000000000000${maxInterval.toString(16)}`
+      );
 
       const bal = await gov.balanceOf(signerAddr);
       expect(bal).to.eq(expandTo18Decimals(26));

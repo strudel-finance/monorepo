@@ -1,8 +1,6 @@
 import React from 'react'
 import styled from 'styled-components'
-
-import Button from '../Button'
-import Input, {InputProps} from '../Input'
+import Input, { InputProps } from '../Input'
 
 interface AddressInputProps extends InputProps {
   address: string
@@ -11,7 +9,7 @@ interface AddressInputProps extends InputProps {
 const AddressInput: React.FC<AddressInputProps> = ({ value, onChange }) => {
   return (
     <StyledTokenInput className="styled-token-input">
-      <Input
+      <InlineInput
         startAdornment={
           <StyledTokenAdornmentWrapper>
             <StyledInfo>Address</StyledInfo>
@@ -27,6 +25,10 @@ const AddressInput: React.FC<AddressInputProps> = ({ value, onChange }) => {
 
 const StyledTokenInput = styled.div`
   margin: 5px 0;
+`
+
+const InlineInput = styled(Input)`
+  display: inline-block;
 `
 
 const StyledSpacer = styled.div`
@@ -51,7 +53,7 @@ const StyledMaxText = styled.div`
 `
 
 const StyledTokenSymbol = styled.span`
-  color: rgba(37,37,44,0.48);
+  color: rgba(37, 37, 44, 0.48);
   font-weight: 700;
 `
 
