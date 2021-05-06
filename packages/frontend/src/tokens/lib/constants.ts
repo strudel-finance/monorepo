@@ -155,7 +155,7 @@ export const supportedPools: Pool[] = [
     pid: 7,
     isBalancer: false,
     url:
-      'https://app.sushi.com/pair/0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
+      'https://app.sushi.com/add/ETH/0x297D33e17e61C2Ddd812389C2105193f8348188a',
     lpAddresses: {
       1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
     },
@@ -187,7 +187,7 @@ export const supportedPools: Pool[] = [
     pid: 8,
     isBalancer: false,
     url:
-      'https://app.sushi.com/pair/0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
+      'https://app.sushi.com/add/0x7BD198b9107496fD5cC3d7655AF52f43a8eDBc4C/0x297D33e17e61C2Ddd812389C2105193f8348188a',
     lpAddresses: {
       1: '0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
     },
@@ -197,7 +197,7 @@ export const supportedPools: Pool[] = [
     name: 'oneVBTC Party',
     symbol: 'oneVBTC-$TRDL SLP',
     tokenSymbol: 'onevBTC',
-    icon: '4',
+    icon: '',
   },
   {
     pid: 1,
