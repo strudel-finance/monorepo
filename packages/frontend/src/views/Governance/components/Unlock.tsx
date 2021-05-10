@@ -40,8 +40,6 @@ const Lock: React.FC = () => {
 
   useEffect(() => {
     if (eth?.account && gStrudelContract) {
-      console.log(gStrudelContract, 'gStrudelContractgStrudelContract')
-
       // gStrudelContract.methods
       //   .balanceOf(account)
       //   .call()
