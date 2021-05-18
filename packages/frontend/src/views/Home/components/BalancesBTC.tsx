@@ -10,9 +10,7 @@ import VIcons from '../../../components/VBTCIcon'
 import useTokenBalance from '../../../hooks/useTokenBalance'
 import useVBTC from '../../../hooks/useVBTC'
 import useVBCH from '../../../hooks/useVBCH'
-import {
-  getVbtcAddress,
-} from '../../../tokens/utils'
+import { getVbtcAddress } from '../../../tokens/utils'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
@@ -29,19 +27,19 @@ const Balances: React.FC = () => {
   useEffect(() => {
     if (infura)
       infura.vBTC.methods
-      .totalSupply()
-      .call()
-      .then((s: string) => {  
+        .totalSupply()
+        .call()
+        .then((s: string) => {
           setTotalVBTCSupply(new BigNumber(s))
-      })
-    
+        })
+
     if (eth?.account) {
       infura.vBTC.methods
-      .balanceOf(eth.account)
-      .call()
-      .then((s: any) => {
-        setVBTCBalance(new BigNumber(s))
-      })
+        .balanceOf(eth.account)
+        .call()
+        .then((s: any) => {
+          setVBTCBalance(new BigNumber(s))
+        })
     }
   }, [infura, eth?.account])
 
@@ -53,7 +51,7 @@ const Balances: React.FC = () => {
   //     .then((s: any) => {
   //       setTotalVBCHSupply(new BigNumber(s))
   //     })
-      
+
   //     if (eth?.account) {
   //       infura.vBCH.methods
   //       .balanceOf(eth.account)
@@ -94,13 +92,7 @@ const Balances: React.FC = () => {
           <Label text="Total vBTC Supply" />
           <ValueBTC
             value={
-              totalVBTCSupply
-
-
-                                              ? getBalanceNumber(totalVBTCSupply)
-               
-               
-                : 'Locked'
+              totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'
             }
           />
         </CardContent>

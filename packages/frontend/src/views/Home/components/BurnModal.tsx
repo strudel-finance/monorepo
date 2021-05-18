@@ -11,15 +11,15 @@ import DangerLabel from '../../../components/DangerLabel'
 import Spacer from '../../../components/Spacer'
 import Checkbox from '../../../components/Checkbox'
 import QRCode from 'qrcode.react'
-import StrudelIcon from '../../../components/StrudelIcon'
+import { StrudelIcon } from '../../../components/StrudelIcon'
 import OrgIcons from '../../../components/BitcoinIcon'
 import VIcons from '../../../components/VBTCIcon'
 import { BTCTransaction } from '../../../types/types'
 import { urlAssembler } from '../../../utils/urlAssembler'
-import useVBCH from '../../../hooks/useVBCH'
-import useInfura from '../../../hooks/useInfura'
 import { contractAddresses } from '../../../tokens/lib/constants'
 import BridgeAbi from '../../../tokens/lib/abi/bridge.json'
+import useInfura from '../../../hooks/useInfura'
+const BSC_NETWORK_ID = 56
 
 interface BurnModalProps extends ModalProps {
   value: number | string
@@ -43,7 +43,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   onAddition,
   continueV = false,
   onDismiss,
-  coin
+  coin,
 }) => {
   const [checked, setChecked] = useState<boolean>(false)
   const [continued, setContinued] = useState(continueV)
@@ -57,16 +57,16 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
 
   const calculateStrudel = async () => {
     // more ugly stuff
-    
+
     const Contract = require('web3-eth-contract')
     ;(Contract as any).setProvider(process.env.REACT_APP_BSC_PROVIDER)
 
     const sideContract = new Contract(
       // add ABI item as type
       BridgeAbi as any[],
-      contractAddresses.bridge[56],
+      contractAddresses.bridge[BSC_NETWORK_ID],
     )
-    
+
     const supply =
       coin === 'bitcoin'
         ? new BigNumber(await infura.vBTC.methods.totalSupply().call())
@@ -76,7 +76,7 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     let calculatedStrudel =
       getInStrudelCurve(dividedSupply + Number(value)) -
       getInStrudelCurve(dividedSupply)
-      setStrudelAmount(calculatedStrudel.toFixed(2).toString())
+    setStrudelAmount(calculatedStrudel.toFixed(2).toString())
   }
 
   useEffect(() => {
@@ -150,7 +150,9 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
               <DangerLabel
                 className="danger-label"
                 color="rgba(229,147,16,1)"
-                checkbox={<Checkbox onChange={handleCheckboxChange} checked={checked } />}
+                checkbox={
+                  <Checkbox onChange={handleCheckboxChange} checked={checked} />
+                }
                 text={
                   'Attention: You can only mint v' +
                   coinAbrv +

@@ -6,7 +6,7 @@ import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
 import ValueBTC from '../../../components/ValueBTC'
-import VBTHIcon from '../../../components/VBTHIcon'
+import { VBCHIcon } from '../../../components/VBCHIcon'
 import useETH from '../../../hooks/useETH'
 import { getBalanceNumber } from '../../../utils/formatBalance'
 import { contractAddresses } from '../../../tokens/lib/constants'
@@ -59,7 +59,7 @@ const BalancesBCHXDAI: React.FC = () => {
         <CardContent>
           <StyledBalances>
             <StyledBalance>
-              <VBTHIcon />
+              <VBCHIcon />
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
                 <Label text="Your vBCH Balance on Binance Smart Chain" />
