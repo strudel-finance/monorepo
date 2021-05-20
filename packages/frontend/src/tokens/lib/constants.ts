@@ -155,7 +155,7 @@ export const supportedPools: Pool[] = [
     pid: 7,
     isBalancer: false,
     url:
-      'https://app.sushi.com/pair/0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
+      'https://app.sushi.com/add/ETH/0x297D33e17e61C2Ddd812389C2105193f8348188a',
     lpAddresses: {
       1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
     },
@@ -187,7 +187,7 @@ export const supportedPools: Pool[] = [
     pid: 8,
     isBalancer: false,
     url:
-      'https://app.sushi.com/pair/0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
+      'https://app.sushi.com/add/0x7BD198b9107496fD5cC3d7655AF52f43a8eDBc4C/0x297D33e17e61C2Ddd812389C2105193f8348188a',
     lpAddresses: {
       1: '0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
     },
@@ -197,7 +197,7 @@ export const supportedPools: Pool[] = [
     name: 'oneVBTC Party',
     symbol: 'oneVBTC-$TRDL SLP',
     tokenSymbol: 'onevBTC',
-    icon: '4',
+    icon: '',
   },
   {
     pid: 1,
@@ -215,6 +215,38 @@ export const supportedPools: Pool[] = [
     name: 'Spin Strudel',
     symbol: '$TRDL-ETH UNI-V2 LP',
     tokenSymbol: 'STRDL',
+    icon: '1',
+  },
+  {
+    pid: 2,
+    isBalancer: true,
+    url:
+      'https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b/',
+    lpAddresses: {
+      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
+    },
+    tokenAddresses: {
+      1: '',
+    },
+    name: 'Mare Imbrium Fund',
+    symbol: 'MARE',
+    tokenSymbol: 'MARE',
+    icon: '1',
+  },
+  {
+    pid: 3,
+    isBalancer: false,
+    url:
+      'https://v2.info.uniswap.org/pair/0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    lpAddresses: {
+      1: '0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    },
+    tokenAddresses: {
+      1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
+    },
+    name: 'vBCH Spot',
+    symbol: 'vBCH-ETH UNI-V2 LP',
+    tokenSymbol: 'vBCH',
     icon: '1',
   },
   // {
