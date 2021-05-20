@@ -224,14 +224,15 @@ export const supportedPools: Pool[] = [
       'https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b/',
     lpAddresses: {
       1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
+      5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03'
     },
     tokenAddresses: {
-      1: '',
+      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
     },
     name: 'Mare Imbrium Fund',
     symbol: 'MARE',
     tokenSymbol: 'MARE',
-    icon: '',
+    icon: '1',
   },
   {
     pid: 10,
