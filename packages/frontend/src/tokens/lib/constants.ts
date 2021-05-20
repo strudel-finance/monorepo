@@ -217,6 +217,38 @@ export const supportedPools: Pool[] = [
     tokenSymbol: 'STRDL',
     icon: '1',
   },
+  {
+    pid: 2,
+    isBalancer: true,
+    url:
+      'https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b/',
+    lpAddresses: {
+      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
+    },
+    tokenAddresses: {
+      1: '',
+    },
+    name: 'Mare Imbrium Fund',
+    symbol: 'MARE',
+    tokenSymbol: 'MARE',
+    icon: '1',
+  },
+  {
+    pid: 3,
+    isBalancer: false,
+    url:
+      'https://v2.info.uniswap.org/pair/0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    lpAddresses: {
+      1: '0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    },
+    tokenAddresses: {
+      1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
+    },
+    name: 'vBCH Spot',
+    symbol: 'vBCH-ETH UNI-V2 LP',
+    tokenSymbol: 'vBCH',
+    icon: '1',
+  },
   // {
   //   pid: 0,
   //   isBalancer: true,
