@@ -218,7 +218,7 @@ export const supportedPools: Pool[] = [
     icon: '1',
   },
   {
-    pid: 2,
+    pid: 9,
     isBalancer: true,
     url:
       'https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b/',
@@ -231,10 +231,10 @@ export const supportedPools: Pool[] = [
     name: 'Mare Imbrium Fund',
     symbol: 'MARE',
     tokenSymbol: 'MARE',
-    icon: '1',
+    icon: '',
   },
   {
-    pid: 3,
+    pid: 10,
     isBalancer: false,
     url:
       'https://v2.info.uniswap.org/pair/0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
@@ -247,7 +247,7 @@ export const supportedPools: Pool[] = [
     name: 'vBCH Spot',
     symbol: 'vBCH-ETH UNI-V2 LP',
     tokenSymbol: 'vBCH',
-    icon: '1',
+    icon: '',
   },
   // {
   //   pid: 0,

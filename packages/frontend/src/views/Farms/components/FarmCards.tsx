@@ -163,7 +163,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
               <img style={{ height: 48 }} src={getSymbol(farm.icon)} />
             </CardIcon>
 
-            <StyledTitle>{farm.name}</StyledTitle>
+            <StyledTitle style={{ textAlign: 'center' }}>{farm.name}</StyledTitle>
             <StyledDetails>
               <StyledDetail>
                 Deposit{' '}
