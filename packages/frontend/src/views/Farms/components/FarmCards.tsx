@@ -25,7 +25,8 @@ interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
   url?: string
   apy: BigNumber
-  percentage: string
+  percentage: string,
+  disabled?: boolean
 }
 
 const FarmCards: React.FC = () => {
@@ -80,7 +81,7 @@ const FarmCards: React.FC = () => {
           <StyledRow key={i}>
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
-                <FarmCard farm={farm} index={i + j} rowIndex={i} />
+                <FarmCard farm={farm} index={i + j} />
               </React.Fragment>
             ))}
           </StyledRow>
@@ -97,10 +98,9 @@ const FarmCards: React.FC = () => {
 interface FarmCardProps {
   farm: FarmWithStakedValue
   index: number
-  rowIndex: number
 }
 
-const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
+const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
@@ -154,7 +154,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const poolActive = true // startTime * 1000 - Date.now() <= 0
 
   return (
-    <StyledCardWrapper style={{ opacity: rowIndex === 1 && '0.5' }}>
+    <StyledCardWrapper style={{ opacity: farm.disabled  && '0.5' }}>
       {farm.pid == 1 && <StyledCardAccent />}
       <Card>
         <CardContent>

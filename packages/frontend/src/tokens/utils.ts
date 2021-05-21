@@ -98,6 +98,7 @@ export const getFarms = (vbtc: Vbtc) => {
           tokenContract,
           lpAddress,
           lpContract,
+          disabled
         }) => ({
           pid,
           isBalancer,
@@ -113,6 +114,7 @@ export const getFarms = (vbtc: Vbtc) => {
           earnToken: '$TRDL',
           earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
+          disabled
         }),
       )
     : []
