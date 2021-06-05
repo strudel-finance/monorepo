@@ -13,11 +13,16 @@ import useETH from '../../../hooks/useETH'
 interface WalletCardProps {
   icon: React.ReactNode
   onConnect: () => void
-  title: string,
+  title: string
   style?: any
 }
 
-const WalletCard: React.FC<WalletCardProps> = ({ icon, onConnect, title, style }) => {
+const WalletCard: React.FC<WalletCardProps> = ({
+  icon,
+  onConnect,
+  title,
+  style,
+}) => {
   const [chainId, setChainId] = useState('')
 
   return (
