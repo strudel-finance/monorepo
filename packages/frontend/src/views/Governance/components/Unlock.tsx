@@ -40,12 +40,6 @@ const Lock: React.FC = () => {
 
   useEffect(() => {
     if (eth?.account && gStrudelContract) {
-      // gStrudelContract.methods
-      //   .balanceOf(account)
-      //   .call()
-      //   .then((balance: string) => {
-      //     setGTrdlBalance(new BigNumber(balance))
-      //   })
 
       gStrudelContract.methods
         .getLock(account)
