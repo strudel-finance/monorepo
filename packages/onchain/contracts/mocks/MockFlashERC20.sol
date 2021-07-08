@@ -51,8 +51,14 @@ contract MockFlashERC20 is FlashERC20 {
     bytes32 s
   ) external {
     require(deadline >= block.timestamp, "vBTC: EXPIRED");
-    bytes memory msg =
-      abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline);
+    bytes memory msg = abi.encode(
+      PERMIT_TYPEHASH,
+      owner,
+      spender,
+      value,
+      nonces[owner]++,
+      deadline
+    );
     emit Data(msg);
     bytes32 digest = keccak256(abi.encodePacked("\x19\x01", DOMAIN_SEPARATOR, keccak256(msg)));
     address recoveredAddress = ecrecover(digest, v, r, s);

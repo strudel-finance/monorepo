@@ -77,7 +77,7 @@ contract BtcPriceOracle is OwnableUpgradeSafe, IPriceOracle {
       uint256 price0Cumulative;
       uint256 price1Cumulative;
       (price0Cumulative, price1Cumulative, blockTimestamp) = UniswapV2OracleLibrary
-        .currentCumulativePrices(address(pair));
+      .currentCumulativePrices(address(pair));
       uint256 priceCumulative = (pair.token0() == weth) ? price1Cumulative : price0Cumulative;
       uint32 timeElapsed = blockTimestamp - blockTimestampLast; // overflow is desired
 
