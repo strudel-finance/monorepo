@@ -102,8 +102,8 @@ const Lock: React.FC = () => {
     setInProgress(false)
   }
 
-  const calculateGStrudel = (weeks: number, amount: number) => {
-    return (
+  const calculateGStrudel = (weeks: number, amount: number) : number => {
+    return Number(
       ((MAX_LOCK_DURATION * 2 - weeks) * weeks * amount) /
       (MAX_LOCK_DURATION * MAX_LOCK_DURATION)
     )
@@ -173,6 +173,10 @@ const Lock: React.FC = () => {
       label: '52 weeks',
     },
   ]
+
+  const approx = (lockAmount: number, mintAmount: number) =>  (1 - (lockAmount - mintAmount) / lockAmount) * 52;
+
+  const trdlReward = (locked: number, approx: number) => Math.sqrt(locked) * approx / 52 || 0;
 
   return (
     <>
@@ -247,7 +251,7 @@ const Lock: React.FC = () => {
                   {weeks != 1 ? weeks + ' weeks ' : weeks + ' week '} will{' '}
                   return{' '}
                   {calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '}
-                  g$TRDL
+                  g$TRDL and you will be rewarded {trdlReward(Number(amount),approx(Number(amount), calculateGStrudel(weeks as number, +amount))).toFixed(2)} $TRDL
                 </StyledTokenSymbol>
               </StyledTokenAdornmentWrapper>
               <Spacer size="lg" />
