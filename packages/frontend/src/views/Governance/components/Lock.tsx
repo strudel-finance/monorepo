@@ -250,29 +250,19 @@ const Lock: React.FC = () => {
                   Locking {Number(amount).toFixed(2)} $TRDL for{' '}
                   {weeks != 1 ? weeks + ' weeks ' : weeks + ' week '} will{' '}
                   return{' '}
-                  {calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '}
-                  g$TRDL and you will be rewarded {trdlReward(Number(amount),approx(Number(amount), calculateGStrudel(weeks as number, +amount))).toFixed(2)} $TRDL
+                  {calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '} g$TRDL
+                <br />
+                <br />
+                $TRDL reward at the end of your lock period: {trdlReward(Number(amount),approx(Number(amount), calculateGStrudel(weeks as number, +amount))).toFixed(2)} $TRDL
                 </StyledTokenSymbol>
               </StyledTokenAdornmentWrapper>
-              <Spacer size="lg" />
-              {/* <FlexContainer align="flex-start" flexDirection={'row'}> */}
-              {/* <InlineBtn
-                  text="Approve"
-                  className="glow-btn orange"
-                  width={150}
-                  size={'xl'}
-                  // disabled={!Number(amount)}
-                  onClick={approve}
-                /> */}
+                <br />
               <InlineBtn
                 text="Lock $TRDL for g$TRDL"
                 className="glow-btn orange"
-                // width={150}
-                // size={'xl'}
                 disabled={!Number(amount)}
                 onClick={lockWithPermit}
               />
-              {/* </FlexContainer> */}
             </ColumnFlexContainer>
           </CardContentRow>
         </Card>

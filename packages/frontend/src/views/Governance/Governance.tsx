@@ -27,7 +27,7 @@ const Governance: React.FC = () => {
           <PageHeader
             className="page-header"
             title="Enter the Governance"
-            subtitle="Lock your $TRDL to recieve g$TRDL and get your governance rights."
+            subtitle="Lock your $TRDL and receive g$TRDL for use in governance."
           />
           <StyledWrapper>
             <Button
