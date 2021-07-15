@@ -247,13 +247,13 @@ const Lock: React.FC = () => {
               <StyledTokenAdornmentWrapper>
                 <StyledTokenSymbol>
                   {' '}
-                  Locking {Number(amount).toFixed(2)} $TRDL for{' '}
+                  Locking <TrdlText>{Number(amount).toFixed(2)} $TRDL</TrdlText> for{' '}
                   {weeks != 1 ? weeks + ' weeks ' : weeks + ' week '} will{' '}
                   return{' '}
-                  {calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '} g$TRDL
+                  <TrdlText>{calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '} g$TRDL</TrdlText>
                 <br />
                 <br />
-                $TRDL reward at the end of your lock period: {trdlReward(Number(amount),approx(Number(amount), calculateGStrudel(weeks as number, +amount))).toFixed(2)} $TRDL
+                $TRDL reward at the end of your lock period: <TrdlText>{trdlReward(Number(amount),approx(Number(amount), calculateGStrudel(weeks as number, +amount))).toFixed(2)} $TRDL</TrdlText>
                 </StyledTokenSymbol>
               </StyledTokenAdornmentWrapper>
                 <br />
@@ -331,6 +331,9 @@ const StyledTokenAdornmentWrapper = styled.div`
   display: flex;
   position: relative;
   top: -1px;
+`
+const TrdlText = styled.span`
+ color: #e49312
 `
 
 const StyledWrapper = styled.div`
