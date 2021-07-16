@@ -17,6 +17,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
           <StyledLink exact activeClassName="active" to="/" onClick={onDismiss}>
             Home
           </StyledLink>
+          <StyledAbsoluteLink
+            href="https://hackmd.io/@HD-Strudel/WtS"
+            target="_blank">
+            Strudel Guide
+          </StyledAbsoluteLink>
           <StyledLink
             exact
             activeClassName="active"
@@ -72,12 +77,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
               Staking
             </StyledLink>
           )}
-          <StyledAbsoluteLink
-            href="https://strudel-finance.medium.com/"
-            target="_blank"
-          >
-            Help
-          </StyledAbsoluteLink>
           <StyledAbsoluteLink
             href="https://strudel-finance.medium.com/"
             target="_blank"

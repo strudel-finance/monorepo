@@ -8,6 +8,11 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/">
         Home
       </StyledLink>
+      <StyledAbsoluteLink
+        href="https://hackmd.io/@HD-Strudel/WtS"
+        target="_blank">
+        Strudel Guide
+      </StyledAbsoluteLink>
       <StyledLink exact activeClassName="active" to="/BTC">
         Bitcoin
       </StyledLink>
@@ -33,12 +38,6 @@ const Nav: React.FC = () => {
           Gravity Bags
         </StyledLink>
       )}
-      <StyledAbsoluteLink
-        href="https://strudel-finance.medium.com/"
-        target="_blank"
-      >
-        Help
-      </StyledAbsoluteLink>
       <StyledAbsoluteLink
         href="https://strudel-finance.medium.com/"
         target="_blank"
