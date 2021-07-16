@@ -15,12 +15,13 @@ interface ButtonProps {
   size?: 'xs' | 'sm' | 'md' | 'lg' | 'xl'
   text?: string
   to?: string
+  disableCursor?: boolean
   variant?: 'default' | 'secondary' | 'tertiary'
   backgroundImage?: string
   color?: string
-  BCH?: boolean
   className?: string
   icon?: any
+  style?: any
 }
 
 const Button: React.FC<ButtonProps> = ({
@@ -35,10 +36,11 @@ const Button: React.FC<ButtonProps> = ({
   boxShadowGlow,
   borderButton,
   backgroundImage,
-  BCH,
   className,
   icon,
-  hideBoxShadow
+  hideBoxShadow,
+  style,
+  disableCursor
 }) => {
   const { color, spacing } = useContext(ThemeContext)
 
@@ -85,7 +87,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const ButtonChild = useMemo(() => {
     if (to) {
-      return <StyledLink to={to}>{text}</StyledLink>
+      return <StyledLink style={{ cursor: disableCursor ? 'default' : ''}} to={to}>{text}</StyledLink>
     } else if (href) {
       return (
         <StyledExternalLink href={href} target="__blank">
@@ -115,6 +117,7 @@ const Button: React.FC<ButtonProps> = ({
                 padding={buttonPadding}
                 size={buttonSize}
                 backgroundImage={backgroundImage}
+                style={style}
               >
                 {icon && (
                   <div className="icon-wrap">
@@ -143,6 +146,7 @@ const Button: React.FC<ButtonProps> = ({
                   onClick={onClick}
                   padding={buttonPadding}
                   size={buttonSize}
+                  style={style}
                 >
                   {icon && (
                     <div>
@@ -168,6 +172,7 @@ const Button: React.FC<ButtonProps> = ({
                 onClick={onClick}
                 padding={buttonPadding}
                 size={buttonSize}
+                style={style}
               >
                 {icon && (
                   <div className="icon-wrap">
@@ -194,6 +199,7 @@ const Button: React.FC<ButtonProps> = ({
               onClick={onClick}
               padding={buttonPadding}
               size={buttonSize}
+              style={style}
             >
               {icon &&
                 <div>
