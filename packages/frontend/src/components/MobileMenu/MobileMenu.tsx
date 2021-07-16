@@ -82,7 +82,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             href="https://strudel-finance.medium.com/"
             target="_blank"
           >
-            About
+            Medium
           </StyledAbsoluteLink>
         </StyledMobileMenu>
       </StyledMobileMenuWrapper>
