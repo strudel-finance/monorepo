@@ -14,7 +14,7 @@ interface TopBarProps {
 const TopBar: React.FC<TopBarProps> = ({ onPresentMobileMenu }) => {
   return (
     <StyledTopBar id="topbar">
-      <Container size="lg">
+      <Container size="xl">
         <StyledTopBarInner>
           <StyledLogoWrapper>
             <Logo />
@@ -56,7 +56,6 @@ const StyledTopBarInner = styled.div`
   display: flex;
   height: ${(props) => props.theme.topBarSize}px;
   justify-content: space-between;
-  max-width: ${(props) => props.theme.siteWidth}px;
   width: 100%;
 `
 const StyledNavWrapper = styled.div`

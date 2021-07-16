@@ -41,6 +41,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
           >
             Terra-Farms
           </StyledLink>
+          <StyledAbsoluteLink
+            href="https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b"
+            target="_blank">
+            Mare Funds
+          </StyledAbsoluteLink>
           <StyledLink
             exact
             activeClassName="active"
