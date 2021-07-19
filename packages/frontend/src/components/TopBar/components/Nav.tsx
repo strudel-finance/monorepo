@@ -20,7 +20,7 @@ const Nav: React.FC = () => {
         Bitcoin Cash
       </StyledLink>
       <StyledLink exact activeClassName="active" to="/farms">
-        Terra-Farms
+        Strudel Farms
       </StyledLink>
       <StyledAbsoluteLink
         href="https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b"

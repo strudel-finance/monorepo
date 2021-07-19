@@ -44,7 +44,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             to="/farms"
             onClick={onDismiss}
           >
-            Terra-Farms
+            Strudel Farms
           </StyledLink>
           <StyledAbsoluteLink
             href="https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b"
