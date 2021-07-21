@@ -8,6 +8,11 @@ const Nav: React.FC = () => {
       <StyledLink exact activeClassName="active" to="/">
         Home
       </StyledLink>
+      <StyledAbsoluteLink
+        href="https://hackmd.io/@HD-Strudel/WtS"
+        target="_blank">
+        Strudel Guide
+      </StyledAbsoluteLink>
       <StyledLink exact activeClassName="active" to="/BTC">
         Bitcoin
       </StyledLink>
@@ -15,8 +20,13 @@ const Nav: React.FC = () => {
         Bitcoin Cash
       </StyledLink>
       <StyledLink exact activeClassName="active" to="/farms">
-        Terra-Farms
+        Strudel Farms
       </StyledLink>
+      <StyledAbsoluteLink
+        href="https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b"
+        target="_blank">
+        Mare Funds
+      </StyledAbsoluteLink>
       <StyledLink exact activeClassName="active" to="/governance">
         Governance
       </StyledLink>
@@ -32,13 +42,7 @@ const Nav: React.FC = () => {
         href="https://strudel-finance.medium.com/"
         target="_blank"
       >
-        Help
-      </StyledAbsoluteLink>
-      <StyledAbsoluteLink
-        href="https://strudel-finance.medium.com/"
-        target="_blank"
-      >
-        About
+        Medium
       </StyledAbsoluteLink>
     </StyledNav>
   )
@@ -59,10 +63,10 @@ const StyledLink = styled(NavLink)`
   }
   &.active {
     color: ${(props) => {
-      // return useLocation().pathname === '/BCH'
-      // ? props.theme.color.BCHgreen[100]
-      return props.theme.color.primary.main
-    }};
+    // return useLocation().pathname === '/BCH'
+    // ? props.theme.color.BCHgreen[100]
+    return props.theme.color.primary.main
+  }};
   }
   @media (max-width: 400px) {
     padding-left: ${(props) => props.theme.spacing[2]}px;

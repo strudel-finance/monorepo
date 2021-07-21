@@ -63,7 +63,7 @@ const Farms: React.FC = () => {
               justifyContent: 'center',
             }}
           >
-            To se Terra-Farms, please go to Ethereum mainnet.
+            To se Strudel Farms, please go to Ethereum mainnet.
           </div>
         ) : !!account ? (
           <>
@@ -71,11 +71,11 @@ const Farms: React.FC = () => {
               <PageHeader
                 iconSize={200}
                 subtitle="Earn $TRDL by staking LP Tokens."
-                title="Terra-Farms to Explore"
+                title="Strudel Farms to Explore"
               />
               <Container maxWidth="md" className="farm-container">
                 <StyledP>
-                  The Terra-Farms strengthen the protocol and the peg of vBTC to
+                  The Strudel Farms strengthen the protocol and the peg of vBTC to
                   BTC.
                 </StyledP>
                 <StyledP>

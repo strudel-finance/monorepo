@@ -17,6 +17,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
           <StyledLink exact activeClassName="active" to="/" onClick={onDismiss}>
             Home
           </StyledLink>
+          <StyledAbsoluteLink
+            href="https://hackmd.io/@HD-Strudel/WtS"
+            target="_blank">
+            Strudel Guide
+          </StyledAbsoluteLink>
           <StyledLink
             exact
             activeClassName="active"
@@ -39,8 +44,13 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             to="/farms"
             onClick={onDismiss}
           >
-            Terra-Farms
+            Strudel Farms
           </StyledLink>
+          <StyledAbsoluteLink
+            href="https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b"
+            target="_blank">
+            Mare Funds
+          </StyledAbsoluteLink>
           <StyledLink
             exact
             activeClassName="active"
@@ -71,13 +81,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             href="https://strudel-finance.medium.com/"
             target="_blank"
           >
-            Help
-          </StyledAbsoluteLink>
-          <StyledAbsoluteLink
-            href="https://strudel-finance.medium.com/"
-            target="_blank"
-          >
-            About
+            Medium
           </StyledAbsoluteLink>
         </StyledMobileMenu>
       </StyledMobileMenuWrapper>

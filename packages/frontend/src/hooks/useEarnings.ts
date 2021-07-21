@@ -1,6 +1,4 @@
 import { useCallback, useEffect, useState } from 'react'
-import { provider } from 'web3-core'
-
 import BigNumber from 'bignumber.js'
 
 import { getEarned, getMasterChefContract } from '../tokens/utils'

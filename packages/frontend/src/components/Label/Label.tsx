@@ -3,11 +3,12 @@ import styled from 'styled-components'
 
 interface LabelProps {
   text?: string
-  checkbox?: any
+  checkbox?: any,
+  style?: any
 }
 
-const Label: React.FC<LabelProps> = ({text, checkbox}) => (
-  <StyledLabel>
+const Label: React.FC<LabelProps> = ({text, checkbox, style}) => (
+  <StyledLabel style={style}>
     {checkbox}
     {text}
   </StyledLabel>
