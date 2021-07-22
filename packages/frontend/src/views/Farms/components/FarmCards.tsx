@@ -8,6 +8,7 @@ import CardContent from '../../../components/CardContent'
 import CardIcon from '../../../components/CardIcon'
 import Loader from '../../../components/Loader'
 import Spacer from '../../../components/Spacer'
+import Label from '../../../components/Label'
 import { Farm } from '../../../contexts/Farms'
 import useAllStakedValue, {
   StakedValue,
@@ -23,9 +24,18 @@ import useETH from '../../../hooks/useETH'
 
 interface FarmWithStakedValue extends Farm, StakedValue {
   isBalancer?: boolean
+  isIndependent?: boolean
+  btnText?: string
+  subText?: string
   url?: string
+  customCardBackgroundColorInHex?: string
+  customCardTextColorInHex?: string
+  customCardDepositColorInHex?: string
+  buttonClickable?: boolean
+  hasAPY?: boolean
   apy: BigNumber
   percentage: string
+  disabled?: boolean
 }
 
 const FarmCards: React.FC = () => {
@@ -63,7 +73,7 @@ const FarmCards: React.FC = () => {
           : null,
       }
       const newFarmRows = [...farmRows]
-      if (i <= 2) {
+      if (i <= 3) {
         newFarmRows[0].push(farmWithStakedValue)
       } else {
         newFarmRows[1].push(farmWithStakedValue)
@@ -80,16 +90,16 @@ const FarmCards: React.FC = () => {
           <StyledRow key={i}>
             {farmRow.map((farm, j) => (
               <React.Fragment key={j}>
-                <FarmCard farm={farm} index={i + j} rowIndex={i} />
+                <FarmCard farm={farm} index={i + j} />
               </React.Fragment>
             ))}
           </StyledRow>
         ))
       ) : (
-          <StyledLoadingWrapper>
-            <Loader text="Exploring new planets ..." />
-          </StyledLoadingWrapper>
-        )}
+        <StyledLoadingWrapper>
+          <Loader text="Exploring new planets ..." />
+        </StyledLoadingWrapper>
+      )}
     </StyledCards>
   )
 }
@@ -97,10 +107,9 @@ const FarmCards: React.FC = () => {
 interface FarmCardProps {
   farm: FarmWithStakedValue
   index: number
-  rowIndex: number
 }
 
-const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
+const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
   const [startTime, setStartTime] = useState(0)
   const [harvestable, setHarvestable] = useState(0)
 
@@ -154,37 +163,43 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
   const poolActive = true // startTime * 1000 - Date.now() <= 0
 
   return (
-    <StyledCardWrapper style={{ opacity: rowIndex === 1 && '0.5' }}>
+    <StyledCardWrapper  style={{ opacity: farm.disabled && '0.5', backgroundColor: farm.customCardBackgroundColorInHex, borderRadius: 12 }}>
       {farm.pid == 1 && <StyledCardAccent />}
-      <Card>
+      <Card style={{ minHeight: 440 }}>
         <CardContent>
           <StyledContent>
             <CardIcon>
               <img style={{ height: 48 }} src={getSymbol(farm.icon)} />
             </CardIcon>
 
-            <StyledTitle>{farm.name}</StyledTitle>
+            <StyledTitle style={{ textAlign: 'center', color: farm.customCardTextColorInHex }}>{farm.name}</StyledTitle>
             <StyledDetails>
-              <StyledDetail>
+              <StyledDetail style={{ color: farm.customCardTextColorInHex }}>
                 Deposit{' '}
-                <a href={farm.url} target="_blank">
+                <a href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex }}>
                   {farm.lpToken.toUpperCase()}
                 </a>
               </StyledDetail>
-              <StyledDetail style={{ paddingTop: '10px' }}>
-                <span style={{ fontWeight: 700, fontSize: '24px' }}>
-                  {farm.percentage}%
-                </span>{' '}
-                <br />
-                of {farm.earnToken.toUpperCase()} rewards
-              </StyledDetail>
+              {farm.subText && <Label style={{ color: farm.customCardTextColorInHex, fontSize: 12, paddingTop: 12}} text={farm.subText} />}
+              {!farm.isIndependent &&
+                <StyledDetail style={{ paddingTop: '10px' }}>
+                  <span style={{ fontWeight: 700, fontSize: '24px' }}>
+                    {farm.percentage}%
+                  </span>{' '}
+
+                  <br />
+                  of {farm.earnToken.toUpperCase()} rewards
+                </StyledDetail>
+              }
             </StyledDetails>
             <Spacer />
             <Button
               hideBoxShadow={true}
               disabled={!poolActive}
-              text={poolActive ? 'Select' : undefined}
-              to={`/farms/${farm.id}`}
+              text={poolActive && !farm.btnText ? 'Select' : poolActive && farm.btnText ? farm.btnText : undefined}
+              to={!farm.buttonClickable ? `/farms/${farm.id}` : ''}
+              disableCursor={farm.buttonClickable ? true : false}
+              style={{ cursor: farm.buttonClickable ? 'default' : ''}}
             >
               {!poolActive && (
                 <Countdown
@@ -193,30 +208,20 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index, rowIndex }) => {
                 />
               )}
             </Button>
-            <StyledInsight>
-              <span>APY</span>
-              <span>
-                {farm.apy
-                  ? `${farm.apy
-                    .times(new BigNumber(100))
-                    .toNumber()
-                    .toLocaleString('en-US')
-                    .slice(0, -1)}%`
-                  : 'Loading ...'}
-              </span>
-              {/* <span>
-                {farm.tokenAmount
-                  ? (farm.tokenAmount.toNumber() || 0).toLocaleString('en-US')
-                  : '-'}{' '}
-                {farm.tokenSymbol}
-              </span>
-              <span>
-                {farm.wethAmount
-                  ? (farm.wethAmount.toNumber() || 0).toLocaleString('en-US')
-                  : '-'}{' '}
-                ETH
-              </span> */}
-            </StyledInsight>
+            {!farm.isIndependent && 
+              <StyledInsight>
+                <span>APY</span>
+                <span>
+                  {farm.apy
+                    ? `${farm.apy
+                      .times(new BigNumber(100))
+                      .toNumber()
+                      .toLocaleString('en-US')
+                      .slice(0, -1)}%`
+                    : 'Loading ...'}
+                </span>
+              </StyledInsight>
+            }
           </StyledContent>
         </CardContent>
       </Card>

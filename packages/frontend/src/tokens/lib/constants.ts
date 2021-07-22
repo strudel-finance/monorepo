@@ -135,6 +135,13 @@ UNI-V2 LP Address on mainnet for reference
 export interface Pool {
   pid: number
   isBalancer: boolean
+  isIndependent?: boolean
+  btnText?: string
+  subText?: string
+  customCardBackgroundColorInHex?: string,
+  customCardTextColorInHex?: string
+  customCardDepositColorInHex?: string
+  buttonClickable?: boolean
   url: string
   lpAddresses: {
     1: string
@@ -148,9 +155,28 @@ export interface Pool {
   symbol: string
   tokenSymbol: string
   icon: string
+  disabled: boolean
 }
 
 export const supportedPools: Pool[] = [
+  {
+    pid: 9,
+    isBalancer: true,
+    url:
+      'https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b/',
+    lpAddresses: {
+      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
+      5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03'
+    },
+    tokenAddresses: {
+      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
+    },
+    name: 'Mare Imbrium Fund',
+    symbol: 'MARE',
+    tokenSymbol: 'MARE',
+    icon: '1',
+    disabled: false,
+  },
   {
     pid: 7,
     isBalancer: false,
@@ -166,6 +192,7 @@ export const supportedPools: Pool[] = [
     symbol: '$TRDL-ETH SLP',
     tokenSymbol: 'STRDL',
     icon: '1',
+    disabled: false,
   },
   {
     pid: 4,
@@ -182,6 +209,48 @@ export const supportedPools: Pool[] = [
     symbol: 'vBTC-ETH UNI-V2 LP',
     tokenSymbol: 'vBTC',
     icon: '2',
+    disabled: false,
+  },
+  {
+    pid: null,
+    isBalancer: false,
+    isIndependent: true,
+    btnText: 'Daily Rate: 1,000 TRDL',
+    subText: 'Pool and enter farm in one transaction',
+    customCardBackgroundColorInHex: '#2d2e40',
+    customCardTextColorInHex: '#e59310',
+    customCardDepositColorInHex: '#1e67b8',
+    buttonClickable: true,
+    url:
+      'https://covenants.eth.link/#/farm/dapp/0xFFc0bc10C9b98D53E9f4124291B23346B68D7E7a',
+    lpAddresses: {
+      1: '0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    },
+    tokenAddresses: {
+      1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
+    },
+    name: 'vBTC-WBTC Uniswap V3 (Covenants)',
+    symbol: 'vBTC-WBTC UNI-V3 LP',
+    tokenSymbol: 'STRDL',
+    icon: '1',
+    disabled: false,
+  },
+  {
+    pid: 10,
+    isBalancer: false,
+    url:
+      'https://v2.info.uniswap.org/pair/0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    lpAddresses: {
+      1: '0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
+    },
+    tokenAddresses: {
+      1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
+    },
+    name: 'vBCH Spot',
+    symbol: 'vBCH-ETH UNI-V2 LP',
+    tokenSymbol: 'vBCH',
+    icon: '',
+    disabled: false,
   },
   {
     pid: 8,
@@ -198,6 +267,7 @@ export const supportedPools: Pool[] = [
     symbol: 'oneVBTC-$TRDL SLP',
     tokenSymbol: 'onevBTC',
     icon: '',
+    disabled: true,
   },
   {
     pid: 1,
@@ -216,6 +286,7 @@ export const supportedPools: Pool[] = [
     symbol: '$TRDL-ETH UNI-V2 LP',
     tokenSymbol: 'STRDL',
     icon: '1',
+    disabled: true,
   },
   // {
   //   pid: 0,

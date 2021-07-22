@@ -229,7 +229,20 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
     return true;
   }
 
-  function unlock() public returns (bool) {
+  function _sqrt(uint y) internal pure returns (uint z) {
+    if (y > 3) {
+        z = y;
+        uint x = y / 2 + 1;
+        while (x < z) {
+            z = x;
+            x = (y / x + x) / 2;
+        }
+    } else if (y != 0) {
+        z = 1;
+    }
+  }
+
+function unlock() public returns (bool) {
     uint256 endBlock;
     uint256 locked;
     uint256 minted;
@@ -239,6 +252,15 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
     lockData[_msgSender()] = 0;
     _burn(_msgSender(), minted);
     strudel.transfer(_msgSender(), locked);
+
+    uint256 normalizer = 1000000000;
+    // (               lockAmount - mintAmount  )
+    // (normalizer - ---------------------------) * 52
+    // (                    lockAmount          )
+
+    uint256 approx = normalizer.sub(locked.sub(minted).mul(normalizer).div(locked)).mul(52);
+    uint256 trdlReward = _sqrt(locked).mul(approx).div(52);
+    strudel.mint(_msgSender(), trdlReward);
   }
 
   /// @notice           Set allowance for other address and notify.

@@ -101,7 +101,7 @@ const App: React.FC = () => {
           !localStorage.getItem('networkId') ? (
             <Farms />
           ) : (
-            <Note affair={'Terra-farms'} networks={['Ethereum Mainnet']} />
+            <Note affair={'Strudel Farms'} networks={['Ethereum Mainnet']} />
           )}
         </Route>
         <Route path="/BTC">

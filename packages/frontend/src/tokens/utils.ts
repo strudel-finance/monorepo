@@ -98,6 +98,14 @@ export const getFarms = (vbtc: Vbtc) => {
           tokenContract,
           lpAddress,
           lpContract,
+          disabled,
+          isIndependent,
+          btnText,
+          subText,
+          customCardBackgroundColorInHex,
+          customCardTextColorInHex,
+          customCardDepositColorInHex,
+          buttonClickable
         }) => ({
           pid,
           isBalancer,
@@ -113,6 +121,14 @@ export const getFarms = (vbtc: Vbtc) => {
           earnToken: '$TRDL',
           earnTokenAddress: vbtc.contracts.strudel.options.address,
           icon,
+          disabled,
+          isIndependent,
+          btnText,
+          subText,
+          customCardBackgroundColorInHex,
+          customCardTextColorInHex,
+          customCardDepositColorInHex,
+          buttonClickable
         }),
       )
     : []
@@ -122,11 +138,13 @@ export const getPoolWeight = async (
   masterChefContract: MasterChefContract,
   pid: number,
 ) => {
-  const { allocPoint } = await masterChefContract.methods.poolInfo(pid).call()
-  const totalAllocPoint = await masterChefContract.methods
-    .totalAllocPoint()
-    .call()
-  return new BigNumber(allocPoint).div(new BigNumber(totalAllocPoint))
+  if(pid !== null) {
+    const { allocPoint } = await masterChefContract.methods.poolInfo(pid).call()
+    const totalAllocPoint = await masterChefContract.methods
+      .totalAllocPoint()
+      .call()
+    return new BigNumber(allocPoint).div(new BigNumber(totalAllocPoint))
+  }
 }
 
 export const getMultiplier = async (
