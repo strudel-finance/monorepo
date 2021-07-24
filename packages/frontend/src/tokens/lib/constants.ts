@@ -219,6 +219,7 @@ export const supportedPools: Pool[] = [
     customCardBackgroundColorInHex: '#2d2e40',
     customCardTextColorInHex: '#e59310',
     customDepositClassname: 'covenants',
+    customCardDepositColorInHex: '#1e67b8',
     btnText: 'Daily Rate: 1,000 TRDL',
     subText: 'Pool and enter farm in one transaction',
     buttonClickable: true,
