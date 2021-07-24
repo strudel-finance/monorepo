@@ -217,9 +217,6 @@ export const supportedPools: Pool[] = [
     isIndependent: true,
     btnText: 'Daily Rate: 1,000 TRDL',
     subText: 'Pool and enter farm in one transaction',
-    customCardBackgroundColorInHex: '#2d2e40',
-    customCardTextColorInHex: '#e59310',
-    customCardDepositColorInHex: '#1e67b8',
     buttonClickable: true,
     url:
       'https://covenants.eth.link/#/farm/dapp/0xFFc0bc10C9b98D53E9f4124291B23346B68D7E7a',
