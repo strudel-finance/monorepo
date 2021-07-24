@@ -22,7 +22,11 @@ a {
 }
 
 a:hover {
-  color: #ffffff
+  color: rgb(141, 56, 56);
+}
+
+a.covenants:hover {
+  color: rgb(30, 103, 184);
 }
 
 .txt-grid {
