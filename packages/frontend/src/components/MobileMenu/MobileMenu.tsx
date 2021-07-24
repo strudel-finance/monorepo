@@ -47,9 +47,9 @@ const MobileMenu: React.FC<MobileMenuProps> = ({ onDismiss, visible }) => {
             Strudel Farms
           </StyledLink>
           <NavDropdown className='mobile-nav-dropdown' title="Mare Fund" id="nav-dropdown">
-            <NavDropdown.Item eventKey="4.1" href='https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b'>Mare Imbrium Fund Balancer Pool</NavDropdown.Item>
-            <NavDropdown.Item eventKey="4.2" href='https://app.strudel.finance/farms/MARE'>Mare Imbrium Strudel Farm</NavDropdown.Item>
-            <NavDropdown.Item eventKey="4.3" href='https://hackmd.io/@HD-Strudel/MareFAQ'>Mare Imbrium Fund Guide</NavDropdown.Item>
+            <NavDropdown.Item eventKey="4.1" href='https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b'>Mare Fund Balancer Pool</NavDropdown.Item>
+            <NavDropdown.Item eventKey="4.2" href='https://app.strudel.finance/farms/MARE'>Mare Strudel Farm</NavDropdown.Item>
+            <NavDropdown.Item eventKey="4.3" href='https://hackmd.io/@HD-Strudel/MareFAQ'>Mare Fund Guide</NavDropdown.Item>
           </NavDropdown>
           <StyledLink
             exact
