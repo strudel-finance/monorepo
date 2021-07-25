@@ -177,9 +177,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
             <StyledDetails>
               <StyledDetail style={{ color: farm.customCardTextColorInHex }}>
                 Deposit{' '}
-                <a className={farm.customDepositClassname} href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex }}>
+                <StyledA className={farm.customDepositClassname} href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex }}>
                   {farm.lpToken.toUpperCase()}
-                </a>
+                </StyledA>
               </StyledDetail>
               {farm.subText && <Label style={{ color: farm.customCardTextColorInHex, fontSize: 12, paddingTop: 12}} text={farm.subText} />}
               {!farm.isIndependent &&
@@ -234,6 +234,12 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
 const StyledHeight = styled.div`
  height: 34px;
  width: 100%;
+`
+
+const StyledA = styled.a`
+&:hover {
+  color: rgb(141, 56, 56);
+}
 `
 
 const StyledCardAccent = styled.div`
