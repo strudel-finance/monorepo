@@ -408,14 +408,13 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
 
     require(tokenAmountIn <= bmul(inRecord.balance, MAX_IN_RATIO), "ERR_MAX_IN_RATIO");
 
-    uint256 spotPriceBefore =
-      calcSpotPrice(
-        inRecord.balance,
-        inRecord.denorm,
-        outRecord.balance,
-        outRecord.denorm,
-        _swapFee
-      );
+    uint256 spotPriceBefore = calcSpotPrice(
+      inRecord.balance,
+      inRecord.denorm,
+      outRecord.balance,
+      outRecord.denorm,
+      _swapFee
+    );
     require(spotPriceBefore <= maxPrice, "ERR_BAD_LIMIT_PRICE");
 
     tokenAmountOut = calcOutGivenIn(
@@ -466,14 +465,13 @@ contract BPool is ERC20UpgradeSafe, BMath, IBPool {
 
     require(tokenAmountOut <= bmul(outRecord.balance, MAX_OUT_RATIO), "ERR_MAX_OUT_RATIO");
 
-    uint256 spotPriceBefore =
-      calcSpotPrice(
-        inRecord.balance,
-        inRecord.denorm,
-        outRecord.balance,
-        outRecord.denorm,
-        _swapFee
-      );
+    uint256 spotPriceBefore = calcSpotPrice(
+      inRecord.balance,
+      inRecord.denorm,
+      outRecord.balance,
+      outRecord.denorm,
+      _swapFee
+    );
     require(spotPriceBefore <= maxPrice, "ERR_BAD_LIMIT_PRICE");
 
     tokenAmountIn = calcInGivenOut(

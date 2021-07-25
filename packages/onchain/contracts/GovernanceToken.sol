@@ -130,8 +130,9 @@ contract GovernanceToken is ERC20UpgradeSafe, OwnableUpgradeSafe, ITokenRecipien
 
     uint256 remainingLock = endBlock - block.number;
     // TODO: arithmetic mean here is not apropriate. should follow mintAmount formula
-    uint256 averageDuration =
-      remainingLock.mul(lockTotal).add(amount.mul(lockDuration)).div(amount.add(lockTotal));
+    uint256 averageDuration = remainingLock.mul(lockTotal).add(amount.mul(lockDuration)).div(
+      amount.add(lockTotal)
+    );
 
     lockData[lockOwner] = _compact(
       block.number + averageDuration,
@@ -296,14 +297,13 @@ function unlock() public returns (bool) {
     bytes32 s
   ) external {
     require(deadline >= block.timestamp, "Strudel Gov: EXPIRED");
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01",
-          DOMAIN_SEPARATOR,
-          keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-        )
-      );
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+      )
+    );
     address recoveredAddress = ecrecover(digest, v, r, s);
     require(
       recoveredAddress != address(0) && recoveredAddress == owner,

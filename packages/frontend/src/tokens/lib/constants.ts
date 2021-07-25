@@ -138,9 +138,10 @@ export interface Pool {
   isIndependent?: boolean
   btnText?: string
   subText?: string
-  customCardBackgroundColorInHex?: string,
+  customCardBackgroundColorInHex?: string
   customCardTextColorInHex?: string
   customCardDepositColorInHex?: string
+  customDepositClassname?: string
   buttonClickable?: boolean
   url: string
   lpAddresses: {
@@ -171,7 +172,7 @@ export const supportedPools: Pool[] = [
     tokenAddresses: {
       1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
     },
-    name: 'Mare Imbrium Fund',
+    name: 'Mare Fund',
     symbol: 'MARE',
     tokenSymbol: 'MARE',
     icon: '1',
@@ -215,11 +216,12 @@ export const supportedPools: Pool[] = [
     pid: null,
     isBalancer: false,
     isIndependent: true,
-    btnText: 'Daily Rate: 1,000 TRDL',
-    subText: 'Pool and enter farm in one transaction',
     customCardBackgroundColorInHex: '#2d2e40',
     customCardTextColorInHex: '#e59310',
+    customDepositClassname: 'covenants',
     customCardDepositColorInHex: '#1e67b8',
+    btnText: 'Daily Rate: 1,000 TRDL',
+    subText: 'Pool and enter farm in one transaction',
     buttonClickable: true,
     url:
       'https://covenants.eth.link/#/farm/dapp/0xFFc0bc10C9b98D53E9f4124291B23346B68D7E7a',

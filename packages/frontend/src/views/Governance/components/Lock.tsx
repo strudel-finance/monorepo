@@ -102,8 +102,8 @@ const Lock: React.FC = () => {
     setInProgress(false)
   }
 
-  const calculateGStrudel = (weeks: number, amount: number) => {
-    return (
+  const calculateGStrudel = (weeks: number, amount: number) : number => {
+    return Number(
       ((MAX_LOCK_DURATION * 2 - weeks) * weeks * amount) /
       (MAX_LOCK_DURATION * MAX_LOCK_DURATION)
     )
@@ -174,6 +174,10 @@ const Lock: React.FC = () => {
     },
   ]
 
+  const approx = (lockAmount: number, mintAmount: number) =>  (1 - (lockAmount - mintAmount) / lockAmount) * 52;
+
+  const trdlReward = (locked: number, approx: number) => Math.sqrt(locked) * approx / 52 || 0;
+
   return (
     <>
       <Container>
@@ -243,32 +247,22 @@ const Lock: React.FC = () => {
               <StyledTokenAdornmentWrapper>
                 <StyledTokenSymbol>
                   {' '}
-                  Locking {Number(amount).toFixed(2)} $TRDL for{' '}
+                  Locking <TrdlText>{Number(amount).toFixed(2)} $TRDL</TrdlText> for{' '}
                   {weeks != 1 ? weeks + ' weeks ' : weeks + ' week '} will{' '}
                   return{' '}
-                  {calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '}
-                  g$TRDL
+                  <TrdlText>{calculateGStrudel(weeks as number, +amount).toFixed(2)}{' '} g$TRDL</TrdlText>
+                <br />
+                <br />
+                $TRDL reward at the end of your lock period: <TrdlText>{trdlReward(Number(amount),approx(Number(amount), calculateGStrudel(weeks as number, +amount))).toFixed(2)} $TRDL</TrdlText>
                 </StyledTokenSymbol>
               </StyledTokenAdornmentWrapper>
-              <Spacer size="lg" />
-              {/* <FlexContainer align="flex-start" flexDirection={'row'}> */}
-              {/* <InlineBtn
-                  text="Approve"
-                  className="glow-btn orange"
-                  width={150}
-                  size={'xl'}
-                  // disabled={!Number(amount)}
-                  onClick={approve}
-                /> */}
+                <br />
               <InlineBtn
                 text="Lock $TRDL for g$TRDL"
                 className="glow-btn orange"
-                // width={150}
-                // size={'xl'}
                 disabled={!Number(amount)}
                 onClick={lockWithPermit}
               />
-              {/* </FlexContainer> */}
             </ColumnFlexContainer>
           </CardContentRow>
         </Card>
@@ -337,6 +331,9 @@ const StyledTokenAdornmentWrapper = styled.div`
   display: flex;
   position: relative;
   top: -1px;
+`
+const TrdlText = styled.span`
+ color: #e49312
 `
 
 const StyledWrapper = styled.div`

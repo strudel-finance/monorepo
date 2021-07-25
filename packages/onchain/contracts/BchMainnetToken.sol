@@ -60,8 +60,10 @@ contract BchMainnetToken is ERC20, Ownable {
   /// @param _account  The account whose tokens will be burnt.
   /// @param _amount   The amount of tokens that will be burnt.
   function burnFrom(address _account, uint256 _amount) external {
-    uint256 decreasedAllowance =
-      allowance(_account, _msgSender()).sub(_amount, "ERC20: burn amount exceeds allowance");
+    uint256 decreasedAllowance = allowance(_account, _msgSender()).sub(
+      _amount,
+      "ERC20: burn amount exceeds allowance"
+    );
 
     _approve(_account, _msgSender(), decreasedAllowance);
     _burn(_account, _amount);
@@ -110,14 +112,13 @@ contract BchMainnetToken is ERC20, Ownable {
     bytes32 s
   ) external {
     require(deadline >= block.timestamp, "Strudel BCH: EXPIRED");
-    bytes32 digest =
-      keccak256(
-        abi.encodePacked(
-          "\x19\x01",
-          DOMAIN_SEPARATOR,
-          keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
-        )
-      );
+    bytes32 digest = keccak256(
+      abi.encodePacked(
+        "\x19\x01",
+        DOMAIN_SEPARATOR,
+        keccak256(abi.encode(PERMIT_TYPEHASH, owner, spender, value, nonces[owner]++, deadline))
+      )
+    );
     address recoveredAddress = ecrecover(digest, v, r, s);
     require(
       recoveredAddress != address(0) && recoveredAddress == owner,

@@ -235,7 +235,7 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   border-radius: 9px;
   background: transparent;
   background-color: ${(props) => {
-    if  (props.disabled) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    if  (props.disabled) return 'rgba(229, 147, 16, 0.48)'
     return props.theme.color.primary.main
 
     // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
@@ -293,7 +293,7 @@ const StyledXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-    if  (props.disabled) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
+    if  (props.disabled) return 'rgba(229, 147, 16, 0.48)'
   
     return props.theme.color.primary.main
   }};

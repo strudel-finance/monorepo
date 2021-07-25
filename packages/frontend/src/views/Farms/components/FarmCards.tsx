@@ -31,6 +31,7 @@ interface FarmWithStakedValue extends Farm, StakedValue {
   customCardBackgroundColorInHex?: string
   customCardTextColorInHex?: string
   customCardDepositColorInHex?: string
+  customDepositClassname?: string
   buttonClickable?: boolean
   hasAPY?: boolean
   apy: BigNumber
@@ -176,9 +177,9 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
             <StyledDetails>
               <StyledDetail style={{ color: farm.customCardTextColorInHex }}>
                 Deposit{' '}
-                <a href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex }}>
+                <StyledA className={farm.customDepositClassname} href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex }}>
                   {farm.lpToken.toUpperCase()}
-                </a>
+                </StyledA>
               </StyledDetail>
               {farm.subText && <Label style={{ color: farm.customCardTextColorInHex, fontSize: 12, paddingTop: 12}} text={farm.subText} />}
               {!farm.isIndependent &&
@@ -208,8 +209,8 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
                 />
               )}
             </Button>
-            {!farm.isIndependent && 
-              <StyledInsight>
+            {!farm.isIndependent 
+              ? <StyledInsight>
                 <span>APY</span>
                 <span>
                   {farm.apy
@@ -221,6 +222,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
                     : 'Loading ...'}
                 </span>
               </StyledInsight>
+              : <StyledHeight></StyledHeight>
             }
           </StyledContent>
         </CardContent>
@@ -228,6 +230,17 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
     </StyledCardWrapper>
   )
 }
+
+const StyledHeight = styled.div`
+ height: 34px;
+ width: 100%;
+`
+
+const StyledA = styled.a`
+&:hover {
+  color: rgb(141, 56, 56);
+}
+`
 
 const StyledCardAccent = styled.div`
   background-size: 300% 300%;
