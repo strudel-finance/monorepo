@@ -52,6 +52,10 @@ footer {
   background-color: rgba(229, 147, 16, 0.48);
 }
 
+.dropdown-item:focus, .dropdown-item:hover {
+  background-color: #ffffff;
+}
+
 .mobile-nav-dropdown {
   box-sizing: border-box;
   color: #51473f;
