@@ -46,10 +46,6 @@ const StyledModal = styled.div`
   position: relative;
   width: 100%;
   min-height: 0;
-  @media (min-width: ${(props) =>
-      props.theme.breakpoints.mobile}px) and (orientation: landscape) {
-    padding: 0 20px;
-  }
 `
 
 export default Modal
