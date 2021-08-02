@@ -253,6 +253,23 @@ export const supportedPools: Pool[] = [
     tokenSymbol: 'vBCH',
     icon: '2',
     disabled: false,
+  },
+  {
+    pid: 11,
+    isBalancer: true,
+    url:
+      'https://app.zerion.io/invest/asset/BPT-0x095757776565bb611013d768fc53a78aec3731a6',
+    lpAddresses: {
+      1: '0x095757776565bb611013d768fc53a78aec3731a6',
+    },
+    tokenAddresses: {
+      1: '0x095757776565bb611013d768fc53a78aec3731a6'
+    },
+    name: 'Strudel NFT Index',
+    symbol: 'vBCH-COOL-PUNK-BAYC',
+    tokenSymbol: 'vBTC',
+    icon: '1',
+    disabled: false,
   }
   // {
   //   pid: 0,
