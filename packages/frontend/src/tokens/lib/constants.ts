@@ -266,7 +266,7 @@ export const supportedPools: Pool[] = [
       1: '0x095757776565bb611013d768fc53a78aec3731a6'
     },
     name: 'Strudel NFT Index',
-    symbol: 'vBCH-COOL-PUNK-BAYC',
+    symbol: 'vBTC-COOL-PUNK-BAYC',
     tokenSymbol: 'vBTC',
     icon: '1',
     disabled: false,
