@@ -251,45 +251,26 @@ export const supportedPools: Pool[] = [
     name: 'vBCH Spot',
     symbol: 'vBCH-ETH UNI-V2 LP',
     tokenSymbol: 'vBCH',
-    icon: '',
+    icon: '2',
     disabled: false,
   },
   {
-    pid: 8,
-    isBalancer: false,
+    pid: 11,
+    isBalancer: true,
     url:
-      'https://app.sushi.com/add/0x7BD198b9107496fD5cC3d7655AF52f43a8eDBc4C/0x297D33e17e61C2Ddd812389C2105193f8348188a',
+      'https://app.zerion.io/invest/asset/BPT-0x095757776565bb611013d768fc53a78aec3731a6',
     lpAddresses: {
-      1: '0x98538aCD76451191803e1550B5CEEd3cBA4E2289',
+      1: '0x095757776565bb611013d768fc53a78aec3731a6',
     },
     tokenAddresses: {
-      1: '0xe1406825186d63980fd6e2ec61888f7b91c4bae4',
+      1: '0x095757776565bb611013d768fc53a78aec3731a6'
     },
-    name: 'oneVBTC Party',
-    symbol: 'oneVBTC-$TRDL SLP',
-    tokenSymbol: 'onevBTC',
-    icon: '',
-    disabled: true,
-  },
-  {
-    pid: 1,
-    isBalancer: false,
-    url:
-      'https://info.uniswap.org/pair/0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
-    lpAddresses: {
-      1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
-      5: '0x175a715f4c37bdb1524a396cc799f6dcb7a52fcf',
-    },
-    tokenAddresses: {
-      1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
-      5: '0x611f48792751271328f5192d83343f0bfad8b78f',
-    },
-    name: 'Spin Strudel',
-    symbol: '$TRDL-ETH UNI-V2 LP',
-    tokenSymbol: 'STRDL',
+    name: 'Strudel NFT Index',
+    symbol: 'vBTC-COOL-PUNK-BAYC',
+    tokenSymbol: 'vBTC',
     icon: '1',
-    disabled: true,
-  },
+    disabled: false,
+  }
   // {
   //   pid: 0,
   //   isBalancer: true,

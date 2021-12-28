@@ -15,7 +15,7 @@ import Stake from './components/Stake'
 import useETH from '../../hooks/useETH'
 
 const Farm: React.FC = () => {
-  const { farmId } = useParams()
+  const { farmId } = useParams<any>()
   const {
     pid,
     lpToken,

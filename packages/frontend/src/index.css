@@ -8,6 +8,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+body > iframe {
+  display: none;
+}
+
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }
@@ -50,6 +54,10 @@ footer {
 
 .dropdown-item.active, .dropdown-item:active {
   background-color: rgba(229, 147, 16, 0.48);
+}
+
+.dropdown-item:focus, .dropdown-item:hover {
+  background-color: #ffffff;
 }
 
 .mobile-nav-dropdown {
