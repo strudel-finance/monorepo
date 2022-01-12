@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import styled from 'styled-components'
-
-import Button from '../Button'
 import Input, { InputProps } from '../Input'
 
 interface BurnAmountInputProps extends InputProps {
@@ -14,18 +12,12 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
   symbol,
 }) => {
   return (
-    <StyledTokenInput
-      className={`styled-token-input ${symbol === 'BCH' ? 'bch' : 'btc'}`}
-    >
+    <StyledTokenInput className={`styled-token-input ${symbol === 'BCH' ? 'bch' : 'btc'}`}>
       <Input
         startAdornment={
           <StyledTokenAdornmentWrapper>
             <StyledInfo>Amount</StyledInfo>
-          </StyledTokenAdornmentWrapper>
-        }
-        endAdornment={
-          <StyledTokenAdornmentWrapper className="styled-token-wrapper">
-            <StyledTokenSymbol>{symbol}</StyledTokenSymbol>
+            <StyledInfoSymbol>{symbol}</StyledInfoSymbol>
           </StyledTokenAdornmentWrapper>
         }
         onChange={onChange}
@@ -37,11 +29,7 @@ const BurnAmountInput: React.FC<BurnAmountInputProps> = ({
 }
 
 const StyledTokenInput = styled.div`
-  margin: 5px 0;
-`
-
-const StyledSpacer = styled.div`
-  width: ${(props) => props.theme.spacing[3]}px;
+  margin: 24px 0;
 `
 
 const StyledTokenAdornmentWrapper = styled.div`
@@ -60,4 +48,8 @@ const StyledInfo = styled(StyledTokenSymbol)`
   margin-right: 10px;
 `
 
+const StyledInfoSymbol = styled(StyledTokenSymbol)`
+  margin-right: 10px;
+  color: #000;
+`
 export default BurnAmountInput
