@@ -36,7 +36,8 @@ interface FarmWithStakedValue extends Farm, StakedValue {
   hasAPY?: boolean
   apy: BigNumber
   percentage: string
-  disabled?: boolean
+  disabled?: boolean,
+  canSelect?: boolean
 }
 
 const FarmCards: React.FC = () => {
@@ -164,26 +165,26 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
   const poolActive = true // startTime * 1000 - Date.now() <= 0
 
   return (
-    <StyledCardWrapper  style={{ opacity: farm.disabled && '0.5', backgroundColor: farm.customCardBackgroundColorInHex, borderRadius: 12 }}>
+    <StyledCardWrapper  style={{ backgroundColor: farm.customCardBackgroundColorInHex, borderRadius: 12 }}>
       {farm.pid == 1 && <StyledCardAccent />}
       <Card style={{ minHeight: 440 }}>
         <CardContent>
           <StyledContent>
             <CardIcon>
-              <img style={{ height: 48 }} src={getSymbol(farm.icon)} />
+              <img style={{ height: 48, opacity: farm.disabled && '0.5' }} src={getSymbol(farm.icon)} />
             </CardIcon>
 
-            <StyledTitle style={{ textAlign: 'center', color: farm.customCardTextColorInHex }}>{farm.name}</StyledTitle>
+            <StyledTitle style={{ textAlign: 'center', color: farm.customCardTextColorInHex, opacity: farm.disabled && '0.5' }}>{farm.name}</StyledTitle>
             <StyledDetails>
-              <StyledDetail style={{ color: farm.customCardTextColorInHex }}>
+              <StyledDetail style={{ color: farm.customCardTextColorInHex, opacity: farm.disabled && '0.5' }}>
                 Deposit{' '}
-                <StyledA className={farm.customDepositClassname} href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex }}>
+                <StyledA className={farm.customDepositClassname} href={farm.url} target="_blank"  style={{ color: farm.customCardDepositColorInHex, opacity: farm.disabled && '0.5' }}>
                   {farm.lpToken.toUpperCase()}
                 </StyledA>
               </StyledDetail>
-              {farm.subText && <Label style={{ color: farm.customCardTextColorInHex, fontSize: 12, paddingTop: 12}} text={farm.subText} />}
+              {farm.subText && <Label style={{ color: farm.customCardTextColorInHex, fontSize: 12, paddingTop: 12, opacity: farm.disabled && '0.5'}} text={farm.subText} />}
               {!farm.isIndependent &&
-                <StyledDetail style={{ paddingTop: '10px' }}>
+                <StyledDetail style={{ paddingTop: '10px', opacity: farm.disabled && '0.5'}}>
                   <span style={{ fontWeight: 700, fontSize: '24px' }}>
                     {farm.percentage}%
                   </span>{' '}
@@ -200,7 +201,7 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
               text={poolActive && !farm.btnText ? 'Select' : poolActive && farm.btnText ? farm.btnText : undefined}
               to={!farm.buttonClickable ? `/farms/${farm.id}` : ''}
               disableCursor={farm.buttonClickable ? true : false}
-              style={{ cursor: farm.buttonClickable ? 'default' : ''}}
+              style={{ opacity: farm.disabled && !farm.canSelect && '0.5', cursor: farm.buttonClickable ? 'default' : ''}}
             >
               {!poolActive && (
                 <Countdown
