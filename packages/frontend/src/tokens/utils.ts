@@ -106,7 +106,8 @@ export const getFarms = (vbtc: Vbtc) => {
           customCardBackgroundColorInHex,
           customCardTextColorInHex,
           customCardDepositColorInHex,
-          buttonClickable
+          buttonClickable,
+          canSelect,
         }) => ({
           pid,
           isBalancer,
@@ -130,7 +131,8 @@ export const getFarms = (vbtc: Vbtc) => {
           customCardBackgroundColorInHex,
           customCardTextColorInHex,
           customCardDepositColorInHex,
-          buttonClickable
+          buttonClickable,
+          canSelect
         }),
       )
     : []
