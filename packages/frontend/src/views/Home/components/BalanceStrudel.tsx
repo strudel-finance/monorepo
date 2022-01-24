@@ -6,16 +6,14 @@ import Card from '../../../components/Card'
 import CardContent from '../../../components/CardContent'
 import Label from '../../../components/Label'
 import Spacer from '../../../components/Spacer'
-import Value from '../../../components/Value'
-import { StrudelIcon } from '../../../components/StrudelIcon'
 import useAllEarnings from '../../../hooks/useAllEarnings'
 import useAllStakedValue from '../../../hooks/useAllStakedValue'
-import useFarms from '../../../hooks/useFarms'
-import useVBTC from '../../../hooks/useVBTC'
-import { getBalanceNumber } from '../../../utils/formatBalance'
 import useETH from '../../../hooks/useETH'
 import useInfura from '../../../hooks/useInfura'
 import ValueBTC from '../../../components/ValueBTC'
+
+import { StrudelIcon } from '../../../components/StrudelIcon'
+import { getBalanceNumber } from '../../../utils/formatBalance'
 
 const PendingRewards: React.FC = () => {
   const [start, setStart] = useState(0)
@@ -30,21 +28,11 @@ const PendingRewards: React.FC = () => {
       .toNumber()
   }
 
-  const [farms] = useFarms()
-  const allStakedValue = useAllStakedValue()
-
-  if (allStakedValue && allStakedValue.length) {
-    const sumWeth = farms.reduce(
-      (c, { id }, i) => c + (allStakedValue[i].totalWethValue.toNumber() || 0),
-      0,
-    )
-  }
-
   //hi
   useEffect(() => {
     setStart(end)
     setEnd(sumEarning)
-  }, [sumEarning])
+  }, [end, sumEarning])
 
   return (
     <span
@@ -72,7 +60,7 @@ const PendingRewards: React.FC = () => {
 
 
 const Multiplier: React.FC = () => {
-  const [start, setStart] = useState(0)
+  const [start] = useState(0)
   const [end, setEnd] = useState(0)
   const [scale, setScale] = useState(1)
 
@@ -115,12 +103,10 @@ const Multiplier: React.FC = () => {
 const BalanceStrudel: React.FC = () => {
   const [totalSupply, setTotalSupply] = useState<BigNumber>()
   const [strudelBalance, setStrudelBalance] = useState<BigNumber>()
-  const vbtc = useVBTC()
   // const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const { eth } = useETH()
   const account = eth?.account
   const infura = useInfura()
-  const [acc, setAcc] = useState<any>()
   // !!! TODO: put that into provider
   const networkId = (window as any).ethereum?.networkVersion
 
@@ -141,7 +127,7 @@ const BalanceStrudel: React.FC = () => {
           setStrudelBalance(new BigNumber(balance))
         })
     }
-  }, [infura, eth?.account])
+  }, [eth, infura])
 
   return (
     <StyledWrapper>
@@ -164,7 +150,7 @@ const BalanceStrudel: React.FC = () => {
             </StyledBalance>
           </StyledBalances>
         </CardContent>
-        {networkId == 1 && (
+        {networkId === 1 && (
           <Footnote>
             Pending harvest
             <FootnoteValue>
@@ -181,7 +167,7 @@ const BalanceStrudel: React.FC = () => {
             value={totalSupply ? getBalanceNumber(totalSupply) : 'Locked'}
           />
         </CardContent>
-        {networkId == 1 && (
+        {networkId === 1 && (
           <Footnote>
             <FootnoteValue>
               <Multiplier /> $TRDL / block
