@@ -165,7 +165,7 @@ export const supportedPools: Pool[] = [
     pid: 1,
     isBalancer: false,
     url:
-      'https://info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
+      'https://v2.info.uniswap.org/pair/0x29b0aa11de97f6d5a3293d980990e820bda5fbab',
     lpAddresses: {
       1: '0x29b0aA11dE97f6d5A3293d980990e820BDA5FBAb',
     },
@@ -183,7 +183,7 @@ export const supportedPools: Pool[] = [
     pid: 4,
     isBalancer: false,
     url:
-      'https://info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
+      'https://v2.info.uniswap.org/pair/0xcfdcd696dde5df39f569807c6934e6ba97cebb8a',
     lpAddresses: {
       1: '0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
     },
