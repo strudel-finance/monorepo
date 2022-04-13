@@ -162,6 +162,42 @@ export interface Pool {
 
 export const supportedPools: Pool[] = [
   {
+    pid: 12,
+    isBalancer: false,
+    url:
+      'https://app.zerion.io/explore/asset/UNI-V2-0x7e836e605cb85540775842f4b13df0742fbb208e',
+    lpAddresses: {
+      1: '0x7e836e605cb85540775842f4b13df0742fbb208e',
+    },
+    tokenAddresses: {
+      1: '0x297d33e17e61c2ddd812389c2105193f8348188a',
+    },
+    name: '$TRDL/VBTC',
+    symbol: '$TRDL/VBTC LP',
+    tokenSymbol: 'STRDL',
+    icon: '1',
+    disabled: false,
+    canSelect: true
+  },
+  {
+    pid: 13,
+    isBalancer: true,
+    url:
+      'https://app.zerion.io/explore/asset/vNFT-0xd8833594420db3d6589c1098dbdd073f52419dba',
+    lpAddresses: {
+      1: '0xd8833594420db3d6589c1098dbdd073f52419dba',
+    },
+    tokenAddresses: {
+      1: '0xd8833594420db3d6589c1098dbdd073f52419dba',
+    },
+    name: 'Strudel BlueChip Index',
+    symbol: 'vNFT',
+    tokenSymbol: 'vNFT',
+    icon: '1',
+    disabled: false,
+    canSelect: true
+  },
+  {
     pid: 1,
     isBalancer: false,
     url:
@@ -197,193 +233,4 @@ export const supportedPools: Pool[] = [
     disabled: false,
     canSelect: true
   },
-  {
-    pid: 9,
-    isBalancer: true,
-    url:
-      'https://pools.balancer.exchange/#/pool/0xde5921f03ba2ec1a9efbeb6957273b5414193a3b/',
-    lpAddresses: {
-      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
-      5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03'
-    },
-    tokenAddresses: {
-      1: '0x158E55b4B14C4f49da5599Ed3B26C0C8773095B2',
-    },
-    name: 'Mare Fund',
-    symbol: 'MARE',
-    tokenSymbol: 'MARE',
-    icon: '1',
-    disabled: true,
-    canSelect: true
-  },
-  {
-    pid: 7,
-    isBalancer: false,
-    url:
-      'https://app.sushi.com/add/ETH/0x297D33e17e61C2Ddd812389C2105193f8348188a',
-    lpAddresses: {
-      1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
-    },
-    tokenAddresses: {
-      1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
-    },
-    name: 'Strudel Sushi',
-    symbol: '$TRDL-ETH SLP',
-    tokenSymbol: 'STRDL',
-    icon: '1',
-    disabled: true,
-    canSelect: true
-  },
-  {
-    pid: 10,
-    isBalancer: false,
-    url:
-      'https://v2.info.uniswap.org/pair/0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
-    lpAddresses: {
-      1: '0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
-    },
-    tokenAddresses: {
-      1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
-    },
-    name: 'vBCH Spot',
-    symbol: 'vBCH-ETH UNI-V2 LP',
-    tokenSymbol: 'vBCH',
-    icon: '2',
-    disabled: true,
-    canSelect: true
-  },
-  {
-    pid: 11,
-    isBalancer: true,
-    url:
-      'https://app.zerion.io/invest/asset/BPT-0x095757776565bb611013d768fc53a78aec3731a6',
-    lpAddresses: {
-      1: '0x095757776565bb611013d768fc53a78aec3731a6',
-    },
-    tokenAddresses: {
-      1: '0x095757776565bb611013d768fc53a78aec3731a6'
-    },
-    name: 'Strudel NFT Index',
-    symbol: 'vBTC-COOL-PUNK-BAYC',
-    tokenSymbol: 'vBTC',
-    icon: '1',
-    disabled: true,
-    canSelect: true
-  },
-  {
-    pid: null,
-    isBalancer: false,
-    isIndependent: true,
-    customCardBackgroundColorInHex: '#2d2e40',
-    customCardTextColorInHex: '#e59310',
-    customDepositClassname: 'covenants',
-    customCardDepositColorInHex: '#1e67b8',
-    btnText: 'Daily Rate: 1,000 TRDL',
-    subText: 'Pool and enter farm in one transaction',
-    buttonClickable: true,
-    url:
-      'https://covenants.eth.link/#/farm/dapp/0xFFc0bc10C9b98D53E9f4124291B23346B68D7E7a',
-    lpAddresses: {
-      1: '0x58645aa09d39fcfba8c5708a09258fc8a5d823f2',
-    },
-    tokenAddresses: {
-      1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
-    },
-    name: 'vBTC-WBTC Uniswap V3 (Covenants)',
-    symbol: 'vBTC-WBTC UNI-V3 LP',
-    tokenSymbol: 'STRDL',
-    icon: '1',
-    disabled: true,
-    canSelect: true
-  },
-  // {
-  //   pid: 0,
-  //   isBalancer: true,
-  //   balancerPoolAddresses: {
-  //     1: '0xe044bC87a030D370D64a6cA4531a08a4e67444E0',
-  //     5: '0xe94b35A1b5e00C9d410A4E1A5D7e65365E8DbA03',
-  //   },
-  //   url: 'https://pool.strudel.finance/#/',
-  //   lpAddresses: {
-  //     1: '0xd439932fbc03c0f646324ef09a4a0c28c0d4008b',
-  //     5: '0xcd43a034efbf5b314ab48d77b4cece93e6e7876b',
-  //   },
-  //   tokenAddresses: {
-  //     1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
-  //     5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
-  //   },
-  //   name: 'Power vBTC',
-  //   symbol: 'VBTC-ETH LP',
-  //   tokenSymbol: 'VBTC',
-  //   icon: '2',
-  // },
-  // {
-  //   pid: 6,
-  //   isBalancer: false,
-  //   url: 'https://sushiswap.fi/pair/0xbcedc25cbb0ea44e03e41dc2d00d54fe6d4646db',
-  //   lpAddresses: {
-  //     1: '0xbcedc25cbb0ea44e03e41dc2d00d54fe6d4646db',
-  //     5: '',
-  //   },
-  //   tokenAddresses: {
-  //     1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
-  //     5: '',
-  //   },
-  //   name: 'vBTC/tBTC',
-  //   symbol: 'vBTC tBTC Sushi LP',
-  //   tokenSymbol: 'vBTC',
-  //   icon: '3',
-  // },
-  // {
-  //   pid: 2,
-  //   isBalancer: false,
-  //   url:
-  //     'https://info.uniswap.org/pair/0xBb2b8038a1640196FbE3e38816F3e67Cba72D940',
-  //   lpAddresses: {
-  //     1: '0xBb2b8038a1640196FbE3e38816F3e67Cba72D940',
-  //     5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
-  //   },
-  //   tokenAddresses: {
-  //     1: '0x2260fac5e5542a773aa44fbcfedf7c193bc2c599',
-  //     5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
-  //   },
-  //   name: 'WBTC Whale',
-  //   symbol: 'WBTC-ETH UNI-V2 LP',
-  //   tokenSymbol: 'WBTC',
-  //   icon: '🐋',
-  // },
-  // {
-  //   pid: 3,
-  //   isBalancer: false,
-  //   url:
-  //     'https://info.uniswap.org/pair/0x81FbEf4704776cc5bBa0A5dF3a90056d2C6900B3',
-  //   lpAddresses: {
-  //     1: '0x81FbEf4704776cc5bBa0A5dF3a90056d2C6900B3',
-  //     5: '0xb1b2312E79E8479813C4AfC025bCeCb84c9301b4',
-  //   },
-  //   tokenAddresses: {
-  //     1: '0xeb4c2781e4eba804ce9a9803c67d0893436bb27d',
-  //     5: '0xb59D2A31C4B94F0b00214a69a98723882018E4E4',
-  //   },
-  //   name: 'renBTC Rhino',
-  //   symbol: 'renBTC-ETH UNI-V2 LP',
-  //   tokenSymbol: 'renBTC',
-  //   icon: '🦏',
-  // },
-  // {
-  //   pid: 5,
-  //   isBalancer: false,
-  //   url:
-  //     'https://info.uniswap.org/pair/0x854056Fd40C1B52037166285B2e54Fee774d33f6',
-  //   lpAddresses: {
-  //     1: '0x854056Fd40C1B52037166285B2e54Fee774d33f6',
-  //   },
-  //   tokenAddresses: {
-  //     1: '0x8daebade922df735c38c80c7ebd708af50815faa',
-  //   },
-  //   name: 'tBTC Dino',
-  //   symbol: 'tBTC-ETH UNI-V2 LP',
-  //   tokenSymbol: 'tBTC',
-  //   icon: '🦕',
-  // },
 ]
