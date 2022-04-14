@@ -327,6 +327,10 @@ max-height: 340px;
   margin-bottom: 24px;
 }
 
+.davatar {
+  margin-right: 10px;
+}
+
 .danger-label {
   display: flex;
   align-items: center;
