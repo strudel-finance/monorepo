@@ -5,8 +5,7 @@ import {
   purple,
   grey,
   BTCYellow,
-  white,
-  BCHgreen,
+  white
 } from './colors'
 
 const BTCtheme = {

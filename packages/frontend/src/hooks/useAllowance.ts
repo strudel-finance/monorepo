@@ -1,12 +1,10 @@
 import { useCallback, useEffect, useState } from 'react'
+import { getAllowance } from '../utils/erc20'
+import { getMasterChefContract } from '../tokens/utils'
+import { Contract } from 'web3-eth-contract'
 
 import BigNumber from 'bignumber.js'
 import useVBTC from './useVBTC'
-import { provider } from 'web3-core'
-import { Contract } from 'web3-eth-contract'
-
-import { getAllowance } from '../utils/erc20'
-import { getMasterChefContract } from '../tokens/utils'
 import useETH from './useETH'
 
 const useAllowance = (lpContract: Contract) => {

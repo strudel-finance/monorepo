@@ -4,7 +4,6 @@ import {
   green,
   purple,
   grey,
-  BTCYellow,
   white,
   BCHgreen,
 } from './colors'

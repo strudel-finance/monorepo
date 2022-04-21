@@ -18,19 +18,11 @@ import {
 } from './lib/contracts.types'
 import { AbiItem } from 'web3-utils'
 import { Proof } from '../types/types'
-import Web3 from 'web3'
 
 BigNumber.config({
   EXPONENTIAL_AT: 1000,
   DECIMAL_PLACES: 80,
 })
-
-const GAS_LIMIT = {
-  STAKING: {
-    DEFAULT: 200000,
-    SNX: 850000,
-  },
-}
 
 export const getMasterChefAddress = (vbtc: Vbtc): string => {
   return vbtc && vbtc.masterChefAddress
