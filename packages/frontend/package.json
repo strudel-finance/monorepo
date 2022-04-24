@@ -2,6 +2,9 @@
   "name": "yam",
   "version": "0.1.0",
   "private": true,
+  "resolutions": {
+    "@types/react": "^17.0.0"
+  },
   "dependencies": {
     "@davatar/react": "^1.8.1",
     "@fortawesome/fontawesome-svg-core": "^1.2.34",
@@ -55,7 +58,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "CI= GENERATE_SOURCEMAP=false react-scripts build",
+    "build": "react-scripts build",
     "eject": "react-scripts eject",
     "deploy": "yarn build && cp ./build/index.html ./build/200.html && surge ./build sushiswap.org"
   },
