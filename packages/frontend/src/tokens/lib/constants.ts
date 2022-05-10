@@ -162,24 +162,6 @@ export interface Pool {
 
 export const supportedPools: Pool[] = [
   {
-    pid: 12,
-    isBalancer: false,
-    url:
-      'https://app.zerion.io/explore/asset/UNI-V2-0x7e836e605cb85540775842f4b13df0742fbb208e',
-    lpAddresses: {
-      1: '0x7e836e605cb85540775842f4b13df0742fbb208e',
-    },
-    tokenAddresses: {
-      1: '0x297d33e17e61c2ddd812389c2105193f8348188a',
-    },
-    name: '$TRDL/VBTC',
-    symbol: '$TRDL/VBTC LP',
-    tokenSymbol: 'STRDL',
-    icon: '1',
-    disabled: false,
-    canSelect: true
-  },
-  {
     pid: 13,
     isBalancer: true,
     url:
@@ -219,7 +201,7 @@ export const supportedPools: Pool[] = [
     pid: 4,
     isBalancer: false,
     url:
-      'https://v2.info.uniswap.org/pair/0xcfdcd696dde5df39f569807c6934e6ba97cebb8a',
+      'https://v2.info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
     lpAddresses: {
       1: '0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
     },
@@ -233,4 +215,22 @@ export const supportedPools: Pool[] = [
     disabled: false,
     canSelect: true
   },
+  {
+    pid: 12,
+    isBalancer: false,
+    url:
+      'https://app.zerion.io/explore/asset/UNI-V2-0x7e836E605Cb85540775842F4B13df0742FBb208E',
+    lpAddresses: {
+      1: '0x7e836E605Cb85540775842F4B13df0742FBb208E',
+    },
+    tokenAddresses: {
+      1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+    },
+    name: 'STRDL-VBTC',
+    symbol: 'STRDL-VBTC LP',
+    tokenSymbol: 'STRDL',
+    icon: '2',
+    disabled: false,
+    canSelect: true
+  }
 ]
