@@ -1,8 +1,6 @@
-import React, { useContext, useMemo } from 'react'
-import styled, { ThemeContext } from 'styled-components'
-
-import { Link } from 'react-router-dom'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import React, { useContext, useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import styled, { ThemeContext } from 'styled-components';
 
 interface ButtonProps {
   borderButton?: boolean
@@ -20,7 +18,7 @@ interface ButtonProps {
   backgroundImage?: string
   color?: string
   className?: string
-  icon?: any
+  icon?: string
   style?: any
 }
 
@@ -87,7 +85,7 @@ const Button: React.FC<ButtonProps> = ({
 
   const ButtonChild = useMemo(() => {
     if (to) {
-      return <StyledLink style={{ cursor: disableCursor ? 'default' : ''}} to={to}>{text}</StyledLink>
+      return <StyledLink style={{ cursor: disableCursor ? 'default' : '' }} to={to}>{text}</StyledLink>
     } else if (href) {
       return (
         <StyledExternalLink href={href} target="__blank">
@@ -121,7 +119,7 @@ const Button: React.FC<ButtonProps> = ({
               >
                 {icon && (
                   <div className="icon-wrap">
-                    <FontAwesomeIcon icon={icon} />
+                    <i className={icon}></i>
                   </div>
                 )}
                 {children}
@@ -150,7 +148,7 @@ const Button: React.FC<ButtonProps> = ({
                 >
                   {icon && (
                     <div>
-                      <FontAwesomeIcon icon={icon} />
+                      <i className={icon}></i>
                     </div>
                   )}
                   {children}
@@ -176,7 +174,7 @@ const Button: React.FC<ButtonProps> = ({
               >
                 {icon && (
                   <div className="icon-wrap">
-                    <FontAwesomeIcon icon={icon} />
+                    <i className={icon}></i>
                   </div>
                 )}
                 {children}
@@ -203,7 +201,7 @@ const Button: React.FC<ButtonProps> = ({
             >
               {icon &&
                 <div>
-                  <FontAwesomeIcon icon={icon} />
+                  <i className={icon}></i>
                 </div>
               }
               {children}
@@ -235,7 +233,7 @@ const StyledButtonBorder = styled.button<StyledButtonProps>`
   border-radius: 9px;
   background: transparent;
   background-color: ${(props) => {
-    if  (props.disabled) return 'rgba(229, 147, 16, 0.48)'
+    if (props.disabled) return 'rgba(229, 147, 16, 0.48)'
     return props.theme.color.primary.main
 
     // if(props.BCH) return !props.disabled ? props.theme.color.BCHgreen[100] : 'rgba(229, 147, 16, 0.5)'
@@ -293,8 +291,8 @@ const StyledXLButton = styled.button<StyledButtonProps>`
 const StyledButton = styled.button<StyledButtonProps>`
   align-items: center;
   background-color: ${(props) => {
-    if  (props.disabled) return 'rgba(229, 147, 16, 0.48)'
-  
+    if (props.disabled) return 'rgba(229, 147, 16, 0.48)'
+
     return props.theme.color.primary.main
   }};
   border: 0;
@@ -310,10 +308,10 @@ const StyledButton = styled.button<StyledButtonProps>`
   font-weight: 700;
   letter-spacing: 1px;
   box-shadow: ${(props) => {
-      // if (props.BCH)
-      // if (props.hideBoxShadow) return 'none'
-  return props.theme.color.shadow.light
-  // '0px 0px 30px rgb(47 208 109 / 48%);'
+    // if (props.BCH)
+    // if (props.hideBoxShadow) return 'none'
+    return props.theme.color.shadow.light
+    // '0px 0px 30px rgb(47 208 109 / 48%);'
     // if (props.boxShadowGlow) return '0px 0px 30px rgba(229, 147, 16, 0.48)'
     // return !props.disabled
     //   ? '0px 0px 30px rgba(229, 147, 16, 0.48)'

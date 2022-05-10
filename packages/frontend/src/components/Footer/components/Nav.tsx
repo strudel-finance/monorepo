@@ -1,38 +1,35 @@
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { icons } from '../../../helpers/icon'
-
-import React from 'react'
-import styled from 'styled-components'
+import React from 'react';
+import styled from 'styled-components';
 
 const Nav: React.FC = () => {
   return (
     <StyledNav>
       <StyledLink target="_blank" href="https://www.instagram.com/strudel.finance/">
-        <FontAwesomeIcon icon={icons.instagram} />
+        <i className="fa-brands fa-instagram"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://www.linkedin.com/company/strudel-finance/">
-        <FontAwesomeIcon icon={icons.linkedIn} />
+        <i className="fa-brands fa-linkedin"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://vm.tiktok.com/ZMeRBrCsJ/">
-        <FontAwesomeIcon icon={icons.tiktok} />
+        <i className="fa-brands fa-tiktok"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://t.me/StrudelFinanceOfficial">
-        <FontAwesomeIcon icon={icons.telegram} />
+        <i className="fa-brands fa-telegram"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://www.youtube.com/channel/UC6Znj2lAHKGjNLYrKs_SYwg">
-        <FontAwesomeIcon icon={icons.youtube} />
+        <i className="fa-brands fa-youtube"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://twitter.com/EnterTheStrudel">
-        <FontAwesomeIcon icon={icons.twitter} />
+        <i className="fa-brands fa-twitter"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://strudel-finance.medium.com/">
-        <FontAwesomeIcon icon={icons.medium} />
+        <i className="fa-brands fa-medium"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://discord.com/invite/CcEE5mC">
-        <FontAwesomeIcon icon={icons.discord} />
+        <i className="fa-brands fa-discord"></i>
       </StyledLink>
       <StyledLink target="_blank" href="https://github.com/strudel-finance/">
-        <FontAwesomeIcon icon={icons.github} />
+        <i className="fa-brands fa-github"></i>
       </StyledLink>
 
     </StyledNav>

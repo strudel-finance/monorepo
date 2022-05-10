@@ -1,33 +1,27 @@
-import { makeStyles, TableContainer, withStyles } from '@material-ui/core'
-import Grid from '@material-ui/core/Grid'
-import Table from '@material-ui/core/Table'
-import TableBody from '@material-ui/core/TableBody'
-import MuiTableCell from '@material-ui/core/TableCell'
-import MuiTableHead from '@material-ui/core/TableHead'
-import TableRow from '@material-ui/core/TableRow'
-import Typography from '@material-ui/core/Typography'
-import ConversionStatus from './components/ConversionStatus'
-import ConversionActions from './components/ConversionActions'
-import {
-  BTCTransaction,
-  LoadingStatus,
-  SoChainConfirmedGetTx,
-  Confirmation,
-} from '../../types/types'
-import SimpleBar from 'simplebar-react'
-import 'simplebar/dist/simplebar.min.css'
-import React, { useState, useRef, useEffect } from 'react'
-import { apiServer } from '../../constants/backendAddresses'
-import RollbarErrorTracking from '../../errorTracking/rollbar'
-import showError, { handleErrors } from '../../utils/showError'
-import useInterval from '../../hooks/useInterval'
-import sb from 'satoshi-bitcoin'
-import { changeEndian } from '../../utils/changeEndian'
-import { Contract } from 'web3-eth-contract'
-import { getRelayContract } from '../../tokens/utils'
-import useVBTC from '../../hooks/useVBTC'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { icons } from '../../helpers/icon'
+import 'simplebar/dist/simplebar.min.css';
+
+import { makeStyles, TableContainer, withStyles } from '@material-ui/core';
+import Grid from '@material-ui/core/Grid';
+import Table from '@material-ui/core/Table';
+import TableBody from '@material-ui/core/TableBody';
+import MuiTableCell from '@material-ui/core/TableCell';
+import MuiTableHead from '@material-ui/core/TableHead';
+import TableRow from '@material-ui/core/TableRow';
+import Typography from '@material-ui/core/Typography';
+import React, { useEffect, useRef, useState } from 'react';
+import sb from 'satoshi-bitcoin';
+import SimpleBar from 'simplebar-react';
+
+import { apiServer } from '../../constants/backendAddresses';
+import RollbarErrorTracking from '../../errorTracking/rollbar';
+import useInterval from '../../hooks/useInterval';
+import useVBTC from '../../hooks/useVBTC';
+import { getRelayContract } from '../../tokens/utils';
+import { BTCTransaction, Confirmation, LoadingStatus, SoChainConfirmedGetTx } from '../../types/types';
+import { changeEndian } from '../../utils/changeEndian';
+import showError from '../../utils/showError';
+import ConversionActions from './components/ConversionActions';
+import ConversionStatus from './components/ConversionStatus';
 
 export interface TransactionTableProps {
   account: any
@@ -144,8 +138,8 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   const handleTransactionUpdate = async (abortController?: any) => {
     let abortProps = abortController
       ? {
-          signal: abortController.signal,
-        }
+        signal: abortController.signal,
+      }
       : {}
     if (account) {
       let res = await fetch(

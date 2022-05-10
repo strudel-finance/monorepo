@@ -1,16 +1,15 @@
-import React, { useCallback, useState, useEffect, useRef } from 'react'
-import styled from 'styled-components'
-import Button from '../../components/Button'
-import Page from '../../components/Page'
-import PageHeader from '../../components/PageHeader'
-import Spacer from '../../components/Spacer'
-import WalletProviderModal from '../../components/WalletProviderModal'
-import { icons } from '../../helpers/icon'
-import useETH from '../../hooks/useETH'
-import useModal from '../../hooks/useModal'
-import { ReddishTextTypography } from '../BCH/components/BCHTransactionTable'
-import Lock from './components/Lock'
-import Unlock from './components/Unlock'
+import React from 'react';
+import styled from 'styled-components';
+
+import Button from '../../components/Button';
+import Page from '../../components/Page';
+import PageHeader from '../../components/PageHeader';
+import Spacer from '../../components/Spacer';
+import WalletProviderModal from '../../components/WalletProviderModal';
+import useETH from '../../hooks/useETH';
+import useModal from '../../hooks/useModal';
+import Lock from './components/Lock';
+import Unlock from './components/Unlock';
 
 const Governance: React.FC = () => {
   const { eth } = useETH()

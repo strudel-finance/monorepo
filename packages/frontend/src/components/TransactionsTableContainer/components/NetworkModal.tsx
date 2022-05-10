@@ -1,16 +1,13 @@
-import React, { useCallback } from 'react'
-import styled from 'styled-components'
+import React, { useCallback } from 'react';
+import { CopyToClipboard } from 'react-copy-to-clipboard';
+import styled from 'styled-components';
 
-import Button from '../../Button'
-import Modal, { ModalProps } from '../../Modal'
-import ModalActions from '../../ModalActions'
-import ModalContent from '../../ModalContent'
-import ModalTitle from '../../ModalTitle'
-import Spacer from '../../Spacer'
-import { CopyToClipboard } from 'react-copy-to-clipboard'
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { icons } from '../../../helpers/icon'
-// import * as fab from '@fortawesome/'
+import Button from '../../Button';
+import Modal, { ModalProps } from '../../Modal';
+import ModalActions from '../../ModalActions';
+import ModalContent from '../../ModalContent';
+import ModalTitle from '../../ModalTitle';
+import Spacer from '../../Spacer';
 
 const NetworkModal: React.FC<ModalProps> = ({ onDismiss }) => {
   const handleSignOutClick = useCallback(() => {
@@ -40,35 +37,35 @@ const NetworkModal: React.FC<ModalProps> = ({ onDismiss }) => {
         <StyledBalanceWrapper>
           <b>Network Name:</b> Binance Smart Chain Mainnet {'  '}
           <CCB text="Binance Smart Chain Mainnet">
-            <FontAwesomeIcon icon={icons.copy} />
+            <i className="fa-thin fa-copy"></i>
           </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>RPC URL:</b> https://bsc-dataseed1.binance.org {'  '}
           <CCB text="https://bsc-dataseed1.binance.org">
-            <FontAwesomeIcon icon={icons.copy} />
+            <i className="fa-thin fa-copy"></i>
           </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>Chain ID:</b> 56 {'  '}
           <CCB text="56">
-            <FontAwesomeIcon icon={icons.copy} />
+            <i className="fa-thin fa-copy"></i>
           </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>Symbol:</b> BNB{'  '}
           <CCB text="BNB">
-            <FontAwesomeIcon icon={icons.copy} />
+            <i className="fa-thin fa-copy"></i>
           </CCB>
         </StyledBalanceWrapper>
         <Spacer />
         <StyledBalanceWrapper>
           <b>Explorer URL:</b> https://bscscan.com {'  '}
           <CCB text="https://bscscan.com">
-            <FontAwesomeIcon icon={icons.copy} />
+            <i className="fa-thin fa-copy"></i>
           </CCB>
         </StyledBalanceWrapper>
       </ModalContent>
