@@ -157,13 +157,15 @@ export interface Pool {
   tokenSymbol: string
   icon: string
   disabled: boolean,
-  canSelect: boolean
+  canSelect: boolean,
+  useLPWethValue: boolean
 }
 
 export const supportedPools: Pool[] = [
   {
     pid: 13,
     isBalancer: true,
+    useLPWethValue: false,
     url:
       'https://app.zerion.io/explore/asset/vNFT-0xd8833594420db3d6589c1098dbdd073f52419dba',
     lpAddresses: {
@@ -182,6 +184,7 @@ export const supportedPools: Pool[] = [
   {
     pid: 1,
     isBalancer: false,
+    useLPWethValue: false,
     url:
       'https://v2.info.uniswap.org/pair/0x29b0aa11de97f6d5a3293d980990e820bda5fbab',
     lpAddresses: {
@@ -200,6 +203,7 @@ export const supportedPools: Pool[] = [
   {
     pid: 4,
     isBalancer: false,
+    useLPWethValue: false,
     url:
       'https://v2.info.uniswap.org/pair/0xcFDCD696dde5df39f569807C6934E6bA97ceBb8A',
     lpAddresses: {
@@ -214,10 +218,11 @@ export const supportedPools: Pool[] = [
     icon: '2',
     disabled: false,
     canSelect: true
-  },
+  }, 
   {
     pid: 12,
     isBalancer: false,
+    useLPWethValue: true,
     url:
       'https://app.zerion.io/explore/asset/UNI-V2-0x7e836E605Cb85540775842F4B13df0742FBb208E',
     lpAddresses: {

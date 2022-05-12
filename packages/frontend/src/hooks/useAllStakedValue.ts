@@ -1,16 +1,10 @@
-import { useCallback, useEffect, useState } from 'react'
-import BigNumber from 'bignumber.js'
-import {
-  getMasterChefContract,
-  getWethContract,
-  getVbtcContract,
-  getFarms,
-  getTotalLPWethValue,
-} from '../tokens/utils'
-import useVBTC from './useVBTC'
-import useBlock from './useBlock'
-import { ERC20Contract, UniContract } from '../tokens/lib/contracts.types'
-import useETH from './useETH'
+import BigNumber from 'bignumber.js';
+import { useCallback, useEffect, useState } from 'react';
+
+import { getFarms, getMasterChefContract, getTotalLPWethValue, getVbtcContract, getWethContract } from '../tokens/utils';
+import useBlock from './useBlock';
+import useETH from './useETH';
+import useVBTC from './useVBTC';
 
 export interface StakedValue {
   tokenAmount: BigNumber

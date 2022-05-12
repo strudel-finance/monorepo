@@ -268,7 +268,7 @@ export const getTotalLPWethValue = async (
       lpContract,
       portionLp,
     )
-  } else if (pid === 8) {
+  } else if (pid === 8 || pid === 12) {
     ;[totalLpWethValue, lpContractWeth] = await getValueOfTrdlWeth(
       vbtc,
       wethContract,

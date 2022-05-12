@@ -214,7 +214,6 @@ const FarmCard: React.FC<FarmCardProps> = ({ farm, index }) => {
               ? <StyledInsight>
                 <span>APY</span>
                 <span>
-                  {console.log('farm.apy', farm.apy)}
                   {farm.apy
                     ? `${farm.apy
                       .times(new BigNumber(100))
