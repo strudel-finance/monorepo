@@ -270,8 +270,6 @@ const callProofOpReturnAndMint = async (
       // Is this necessary?
       tx.ethTxHash = ethTxHash.transactionHash
 
-      // Should be ethTxHash: ethTxHash.transactionHash instead also?
-      // or use ethTxHash instead
       await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash, blockchainNetworkId }, tx, 'BTC')
         .then(handleErrors)
         .catch((e) => {
@@ -379,16 +377,42 @@ const callProofOpReturnAndMintHarmony = async (
 
       showInfo("We are about to save your tx to the Harmony BTC to vBTC bridge, please contact Strudel team if you had any issue.")
 
+      // Should be ethTxHash: ethTxHash.transactionHash instead also?
+      // or use ethTxHash instead
+
+      // export const handleErrors = (response: any) => {
+      //   if (!response.ok) {
+      //     throw Error(response.status)
+      //   }
+      //   return response
+      // }
+
+      const response = await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash, blockchainNetworkId }, tx, 'BTC')
+      if (response.ok) {
+        showInfo(`We saved your tx ${formatAddress(ethTxHash.transactionHash)} to the Harmony BTC to vBTC bridge`)
+        return
+      }
+
+      // @ts-ignore
+      const error = Error(response.status);
+      
+      RollbarErrorTracking.logErrorInRollbar(
+        'Problem pushing Harmony tx hash to DB: ' + error.message, // Showed this error
+        )
+      showError(`Problem pushing Harmony tx hash to DB: ${error.message}`)
+      showError("vBTC and $TRDL were minted ok, but please contact $TRDL team to save your tx to BTC to vBTC bridge")
+
       // transactionHash
       // Use ethTxHash.transactionHash instead of ethTxHash here
-      const response = await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash, blockchainNetworkId }, tx, 'BTC')
-        .then(handleErrors)
-        .catch((e) => {
-          RollbarErrorTracking.logErrorInRollbar(
-            'Problem pushing Harmony tx hash to DB: ' + e.message, // Showed this error
-          )
-          showError('Problem pushing Harmony tx hash to DB: ' + e.message)
-        })
+      // const response = await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash, blockchainNetworkId }, tx, 'BTC')
+      // await pushEthTxHash({ ethTxHash: ethTxHash.transactionHash, blockchainNetworkId }, tx, 'BTC')
+      //   .then(handleErrors)
+      //   .catch((e) => {
+      //     RollbarErrorTracking.logErrorInRollbar(
+      //       'Problem pushing Harmony tx hash to DB: ' + e.message, // Showed this error
+      //     )
+      //     showError('Problem pushing Harmony tx hash to DB: ' + e.message)
+      //   })
 
     }
   } catch (error) {
