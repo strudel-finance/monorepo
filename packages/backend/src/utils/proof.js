@@ -98,7 +98,7 @@ function parseTxHex(hex) {
   };
 }
 
-
+// payload
 async function getMerkleProof(txid, block) {
 
   let index = -1;
@@ -136,6 +136,7 @@ async function getProof(client, txid, blockhash, txData) {
 
   const txinfo = parseTxHex(txData);
 
+  // proof, index
   const [nodes, index] = await getMerkleProof(txid, block);
 
   let path = '';
@@ -145,10 +146,10 @@ async function getProof(client, txid, blockhash, txData) {
 
   return {
     header: `0x${rawheader}`,
-    proof: `0x${path}`,
+    proof: `0x${path}`, // use it at relayer and getInclusion at the frontend
     version: `0x${txinfo.version}`,
     locktime: `0x${txinfo.locktime}`,
-    index,
+    index, // use it at relayer and getInclusion at the frontend
     intermediate_nodes: `0x${path}`,
     tx_id: `0x${txid.replace('0x', '').match(/.{2}/g).reverse().join("")}`,
     confirming_header: {

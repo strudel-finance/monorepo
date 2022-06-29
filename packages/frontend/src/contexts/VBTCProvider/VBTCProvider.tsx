@@ -25,7 +25,8 @@ const VBTCProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     if (eth) {
-      const chainId = Number(eth.provider.chainId)
+      const chainId = Number(eth.provider.chainId) // networkId
+
       const vbtcLib = new Vbtc(eth.provider, chainId, false, {
         defaultAccount: eth.provider.selectedAddress,
         defaultConfirmations: 1,

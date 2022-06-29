@@ -1,19 +1,39 @@
+// Read this
+// https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki
+
 const { Errors } = require('leap-lambda-boilerplate');
 const ethers = require('ethers');
-const bitcore = require("bitcore-lib");
-const PaymentProtocol = require("bitcore-payment-protocol");
+const bitcore = require("bitcore-lib"); // https://github.com/bitpay/bitcore/tree/v8.0.0/packages/bitcore-lib
+const PaymentProtocol = require("bitcore-payment-protocol"); // https://www.npmjs.com/package/bitcore-payment-protocol
 
 const ADDR_REGEX = /0x[A-Fa-f0-9]{40}/;
-const { Transaction, opcodes } = require('bitcoinjs-lib');
+const { Transaction, opcodes } = require('bitcoinjs-lib'); // https://github.com/bitcoinjs/bitcoinjs-lib
 const getProof = require('./utils/proof');
 const PROTOCOL_ID = Buffer.from("07ffff", "hex"); // 2^19-1
 
+const {
+  ETH_NETWORK_ID,
+  BSC_NETWORK_ID,
+  HARMONY_NETWORK_ID
+} = require("./blockchainNetworkIds");
+
 module.exports = class StrudelHandler {
 
-  constructor(db, provider, bclient, cert, chain, priv, bscProvider) {
+  constructor(
+    db, 
+    
+    provider, 
+    bscProvider,
+    harmonyProvider,
+    
+    bclient, cert, chain, priv
+  ) {
     this.db = db;
+    
     this.provider = provider;
     this.bscProvider = bscProvider;
+    this.harmonyProvider = harmonyProvider;
+
     this.bclient = bclient;
     this.cert = cert;
     this.chain = chain;
@@ -88,13 +108,21 @@ module.exports = class StrudelHandler {
       throw new Errors.ServerError(`output has 0 value.`);
     }
     const walletAddress = `0x${tx.outs[index].script.slice(5, 25).toString('hex')}`;
-    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`, isBch);
-    return 'Created';
+
+    await this.db.setPaymentOutput(txId, index, walletAddress, `${tx.outs[index].value}`, isBch); 
+    return 'Created'; 
   }
 
-  async addEthTx(btcTxHash, outputIndex, ethTxHash) {
+  async addEthTx(
+    btcTxHash, 
+    outputIndex, 
+    ethTxHash, 
+    blockchainNetworkId,
+  ) { 
+    // console.log("btcTxHash, outputIndex, ethTxHash, blockchainNetworkId");
+    // console.log(btcTxHash, outputIndex, ethTxHash, blockchainNetworkId);
+
     // btc output exists
-    const entry = await this.db.getPaymentOutput(btcTxHash, outputIndex);
 
     // check the Eth transaction matches what we need
     //   - same tx hash
@@ -104,34 +132,72 @@ module.exports = class StrudelHandler {
     let receipt;
     let parsedTxHash;
     let log;
-    if (entry.bchTxHash) {
+
+    if (blockchainNetworkId === undefined) {
+      throw new Errors.BadRequest(`blockchainNetworkId wasn't set`);
+    }
+
+    if (
+      blockchainNetworkId == ETH_NETWORK_ID
+    ) {
+      receipt = await this.provider.getTransactionReceipt(ethTxHash);
+    }
+    else if (blockchainNetworkId == BSC_NETWORK_ID) {
       receipt = await this.bscProvider.getTransactionReceipt(ethTxHash);
+    }
+    else if (blockchainNetworkId == HARMONY_NETWORK_ID) {
+      receipt = await this.harmonyProvider.getTransactionReceipt(ethTxHash);
+    }
+
+    // Should check it is in 
+    const entry = await this.db.getPaymentOutput(btcTxHash, outputIndex);
+
+    // No need to include ethTxHash again because it is from blockchain and permanent
+    if (entry.ethTxHash !== undefined) {
+      throw new Errors.BadRequest(`ethTxHash was already included for the btcTxHash ${btcTxHash}.`);
+    }
+
+    // Catch Crossing event at the vBTC contract?
+    if (entry.bchTxHash) {
+      // Test this part ok with ETH and BSC with mainnet later?
+      // BCH is currently deployed to ETH, BSC
+
+      // Need to see the contract for vBCH at ETH mainnet also and see these below are valid
       parsedTxHash = receipt.logs[1].topics[1].replace('0x', '');
       log = receipt.logs[1];
     } else {
-      receipt = await this.provider.getTransactionReceipt(ethTxHash);
+      // BTC is currently dpeloyed to ETH, BSC and Harmony (Not complete yet)
+
       parsedTxHash = receipt.logs[3].topics[1].replace('0x', '');
       log = receipt.logs[3];
     }
+
     // reverse 
     parsedTxHash = parsedTxHash.match(/.{2}/g).reverse().join("");
     if (parsedTxHash !== btcTxHash) {
       throw new Errors.BadRequest(`parsed txHash ${parsedTxHash} doesn't match.`);
     }
+    
     const dataBuf = Buffer.from(log.data.replace('0x', ''), 'hex');
     const parsedOutputIndex = dataBuf.readUInt8(dataBuf.length - 1);
+    
     if (parsedOutputIndex !== parseInt(outputIndex)) {
       throw new Errors.BadRequest(`parsed outIndex ${parsedOutputIndex} doesn't match.`);
     }
+    
     const parsedValue = ethers.utils.bigNumberify(`0x${dataBuf.slice(0, 32).toString('hex')}`);
+    
     if (parsedValue.eq(ethers.utils.bigNumberify(entry.amount))) {
       throw new Errors.BadRequest(`parsed value ${parsedValue} doesn't match.`);
     }
+    
     const parsedAccount = log.topics[2].replace('000000000000000000000000', '');
+    
     if (parsedAccount.toLowerCase() !== entry.account) {
       throw new Errors.BadRequest(`parsed accountAddr ${parsedAccount} doesn't match.`);
     }
-    await this.db.setClaimTx(btcTxHash, outputIndex, ethTxHash);
+
+    await this.db.setClaimTx(btcTxHash, outputIndex, ethTxHash, blockchainNetworkId);
   }
 
   async getWatchlist() {
@@ -142,16 +208,23 @@ module.exports = class StrudelHandler {
     if (!txData) {
       throw new Errors.BadRequest(`tx Data missing.`);
     }
-    const proof = await getProof(this.bclient, txHash, blockHash, txData);
+    
+    // payload
+    const proof = await getProof(this.bclient, txHash, blockHash, txData); // use proof and index for relayer at the frontend
     return JSON.stringify(proof);
   }
 
+  // paySyn -> payAck (addBtcTx is called here)
+  // PaymentDetails/PaymentRequest
   async paySyn(destinationAddress, amount, isBch = false) {
     if (!ADDR_REGEX.test(destinationAddress)) {
       throw new Errors.BadRequest(`${destinationAddress} invalid ethereum address.`);
     }
+    
     //const amount = req.params.amount;
     // TODO: sanitize amount input
+
+    // BCH is Bitcoin Cash
 
     destinationAddress = destinationAddress.replace("0x", "");
 
@@ -165,11 +238,14 @@ module.exports = class StrudelHandler {
 
     const now = (Date.now() / 1000) | 0;
     const details = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentDetails();
+
+    // https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki#paymentdetailspaymentrequest
     details.set("network", "main");
     details.set("outputs", output.message);
     details.set("time", now);
     details.set("expires", now + 60 * 60 * 24);
     details.set("memo", "A request to enter the strudel.");
+
     details.set("payment_url", (isBch)
       ? "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/ack"
       : "https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack");
@@ -186,26 +262,34 @@ module.exports = class StrudelHandler {
     console.log('syn: ', details);
     request.set("serialized_payment_details", details.serialize());
     request.sign(this.priv);
+
     const rawBody = request.serialize();
 
     return rawBody;
   }
 
+  // Confirm paySyn worked correctly with this
+  // PaymentACK
   async payAck(bodyRaw, isBch = false) {
     // Decode payment
     const body = PaymentProtocol.Payment.decode(bodyRaw);
     const payment = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePayment(body);
+    
     const merchantData = payment.get("merchant_data");
+    
     const transactions = payment.get("transactions");
     const txData = transactions[0].toString("hex");
     console.log("received tx: ", txData);
 
+    // Transaction (transfer) happens here
     const txHash = await this.bclient.sendRawTransaction(txData);
     console.log("txHash:", txHash);
 
+    // Save to db
     await this.addBtcTx(txHash, txData, isBch);
 
     // Make a payment acknowledgement
+    // https://github.com/bitcoin/bips/blob/master/bip-0070.mediawiki#payment
     const ack = new PaymentProtocol((isBch) ? "BCH" : "BTC").makePaymentACK();
     ack.set("payment", payment.message);
     ack.set("memo", "You have entered the strudel!");

@@ -1,23 +1,26 @@
 # API Overview
 
+https://www.serverless.com/plugins/serverless-dotenv-plugin
+
 ```
-  GET  - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/account/{account}
+  GET  - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/account/{account} - Used at frontend
   POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/payment/{txHash}
   POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/payment/{txHash}
-  POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/payment/{txHash}/output/{outputIndex}/addEthTx
+  POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/payment/{txHash}/output/{outputIndex}/addEthTx - Used at frontend after minting vBTC
   POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/payment/{txHash}/output/{outputIndex}/addEthTx
-  GET  - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/{destination}/{amount}
+  - Used at frontend after minting vBCH
+  GET  - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/syn/{destination}/{amount} - BTC to vBTC
   GET  - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/syn/{destination}/{amount}
   POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/ack
   POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/ack
   GET  - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/watchlist
-  POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/proof/{txHash}/{blockHash}
-  POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/proof/{txHash}/{blockHash}
+  POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/proof/{txHash}/{blockHash} - Used at frontend before minting vBTC
+  POST - https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com/production/bch/proof/{txHash}/{blockHash} - Used at frontend before minting vBCH
 ```
 
 ## GET /account/\<0xaa..ff\>
 possible responses:
-- 200: no previous paymnts
+- 200: no previous payment
 	```json
     {
       "account": "0x20",
@@ -108,7 +111,7 @@ responses:
 	```json
 	{
 	  "header": "0x2233..4455",
-	  "proof": "0x1122..3344",
+	  "proof": "0x1122..3344", // used with index at getInclusion at the frontend
 	  "version": "0x02000000",
 	  "locktime": "0x00000000",
 	  "index": 145, // tx in block, used for proof verification
@@ -127,11 +130,10 @@ curl  --data '{"txData": "02000000017aa6eca8ed999fd0205a3a8af9d60e2b1893cb1245ab
 
 [this code](https://github.com/summa-tx/bitcoin-spv/tree/master/js) can be used to verify proofs client side.
 
-
 ## deploy
 
 ```
-BCD_USERNAME=xxx BCD_PASSWORD=yyy PROVIDER_URL=https://mainnet.infura.io/v3/zzz yarn deploy
+$export AWS_ACCESS_KEY_ID=<your-key-here>
+$export AWS_SECRET_ACCESS_KEY=<your-secret-key-here>
+$deploy:serverless
 ```
-
-AWS_PROFILE=strudel BCD_USERNAME=masterbaker BCD_PASSWORD=test9900 PROVIDER_URL=https://mainnet.infura.io/v3/9487317cfa5f4c30834b75c0a975dd85 yarn deploy

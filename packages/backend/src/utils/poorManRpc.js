@@ -1,4 +1,3 @@
-
 function httpRequest(request, params) {
   return new Promise(function(resolve, reject) {
     const req = request(params, function(error, response, body) {
@@ -17,6 +16,8 @@ const headers = {
   "content-type": "text/plain;"
 };
 
+// https://developer.bitcoin.org/reference/rpc/sendrawtransaction.html
+// https://github.com/BlockchainCommons/Learning-Bitcoin-from-the-Command-Line/blob/master/03_2_Knowing_Your_Bitcoin_Setup.md#know-your-bitcoin-cli-commands
 exports.PoorManRpc = class PoorManRpc {
 
   constructor(request, user, password, host, port) {

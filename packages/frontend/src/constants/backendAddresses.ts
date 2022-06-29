@@ -1,2 +1,1 @@
-export const apiServer =
-  'https://4uuptfsxqa.execute-api.eu-west-1.amazonaws.com'
+export const apiServer = process.env.REACT_APP_API_URL;

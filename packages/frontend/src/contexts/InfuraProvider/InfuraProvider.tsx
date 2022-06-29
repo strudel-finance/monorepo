@@ -3,8 +3,15 @@ import { contractAddresses } from '../../tokens/lib/constants'
 import { StrudelContract, VbtcContract } from '../../tokens/lib/contracts.types'
 import ERC20Abi from '../../tokens/lib/abi/erc20.json'
 import GStrudelAbi from '../../tokens/lib/abi/gStrudel.json'
+
 const Contract = require('web3-eth-contract')
+
+// This part only works with ETH currently
+// @steadylearner
 const ETH_MAINNET = 1
+// const BSC_MAINNET = 56
+// const HARMONY_MAINNET = 1666600000
+// const NETWORKD_ID = (window as any).ethereum?.networkVersion;
 
 export interface InfuraProvider {
   vBTC: VbtcContract
@@ -26,12 +33,15 @@ declare global {
   }
 }
 
+// Blockchain ID
 const InfuraProvider: React.FC = ({ children }) => {
   const [infura, setInfura] = useState<InfuraProvider>()
   // const { eth } = useInfura()
 
   // @ts-ignore
   window.infura = infura
+
+  // Find blockchain id here
 
   useEffect(() => {
     ;(Contract as any).setProvider(process.env.REACT_APP_MAINNET_PROVIDER)

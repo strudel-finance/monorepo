@@ -1,4 +1,5 @@
 import sb from 'satoshi-bitcoin'
+import { apiServer } from '../constants/backendAddresses'
 
 export const urlAssembler = (
   coin: 'bitcoin' | 'bitcoincash',
@@ -7,10 +8,12 @@ export const urlAssembler = (
 ) => {
   if (coin === 'bitcoincash')
     return `bitcoincash:?r=${
-      process.env.REACT_APP_API_URL
+      apiServer
     }/bch/syn/${address}/${sb.toSatoshi(value).toString()}`
+
+    
   if (coin === 'bitcoin')
     return `bitcoin:?r=${
-      process.env.REACT_APP_API_URL
+      apiServer
     }/syn/${address}/${sb.toSatoshi(value).toString()}`
 }

@@ -5,7 +5,10 @@ logs
 **/*.back.*
 node_modules
 worker
+
 .env
+.env.development
+.env.production
 
 # production
 /build

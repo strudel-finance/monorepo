@@ -1,3 +1,13 @@
 node_modules
 dist
 .serverless
+
+.env
+cert.pem
+chain.epm
+priv.pem
+fullchain.pem
+cert.der
+chain.der
+priv.dev
+fullchain.der

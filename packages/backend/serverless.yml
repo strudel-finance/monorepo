@@ -1,7 +1,17 @@
+# 1. Edit this file with this https://www.serverless.com/framework/docs/providers/aws/guide/serverless.yml
+# 2. Set up credentials with this http://slss.io/aws-creds-setup and deploy with the command
+# $export AWS_ACCESS_KEY_ID=<your-key-here>
+# $export AWS_SECRET_ACCESS_KEY=<your-secret-key-here>
+# $yarn deploy:serverless
+
 service: strudel-finance
+
+useDotenv: true
+variablesResolutionMode: 20210326
 plugins:
   - serverless-apigw-binary
   - serverless-offline
+  - serverless-dotenv-plugin
 
 custom:
   serverless-offline:
@@ -14,10 +24,15 @@ custom:
       - 'application/bitcoincash-paymentack'
       - 'application/bitcoin-payment'
       - 'application/bitcoincash-payment'
+
   table: strudel-${opt:stage}
+  
   region: eu-west-1
   bcdRpc: 'bcd.strudel.finance'
   bcdPort: 8332
+  providerUrl: https://mainnet.infura.io/v3/9487317cfa5f4c30834b75c0a975dd85
+  bscProviderUrl: https://bsc-dataseed1.binance.org/
+  harmonyProviderUrl: https://api.harmony.one
 
 
 package:
@@ -27,8 +42,10 @@ package:
 provider:
   name: aws
   region: ${self:custom.region}
-  runtime: nodejs10.x
+  # When you update this, you should update Node version here 
+  runtime: nodejs14.x 
   timeout: 30
+  lambdaHashingVersion: 20201221
   apiGateway:
     binaryMediaTypes:
       - 'application/bitcoin-paymentrequest'
@@ -92,7 +109,9 @@ functions:
     timeout: 30
     handler: src/strudel.handler
     environment:
-      PROVIDER_URL: ${env:PROVIDER_URL}
+      PROVIDER_URL: ${env:PROVIDER_URL, self:custom.providerUrl}
+      BSC_PROVIDER_URL: ${env:BSC_PROVIDER_URL, self:custom.bscProviderUrl}
+      HARMONY_PROVIDER_URL: ${env:HARMONY_PROVIDER_URL, self:custom.harmonyProviderUrl}
       BCD_RPC: ${env:BCD_RPC, self:custom.bcdRpc}
       BCD_PORT: ${env:BCD_PORT, self:custom.bcdPort}
       BCD_USERNAME: ${env:BCD_USERNAME}
@@ -114,7 +133,7 @@ functions:
           response: *response_mappings
       - http:
           method: post
-          path: /payment/{txHash}
+          path: /payment/{txHash}/{blockchain} 
           integration: lambda
           cors: true
           response: *response_mappings

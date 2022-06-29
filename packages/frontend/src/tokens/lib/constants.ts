@@ -41,8 +41,8 @@ export const addressMap = {
 export const contractAddresses = {
   tbtc: {
     1: '0x8daebade922df735c38c80c7ebd708af50815faa',
-    1337: '0x8daebade922df735c38c80c7ebd708af50815faa',
     5: '',
+    1337: '0x8daebade922df735c38c80c7ebd708af50815faa',
   },
   trdlPool: {
     1: '0x05Cc2e064e0B48e46015EAd9961F1391d74E5F83',
@@ -57,22 +57,43 @@ export const contractAddresses = {
     1: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
     5: '0x190ca209d7174ffbf0e950cb076e901bc9250af5',
     1337: '0xe1406825186D63980fd6e2eC61888f7B91C4bAe4',
+
+    // Harmony mainnet
+    1666600000: '0xDb29b395e5E216593C406D9ecC3222580c636Fd4',
+    // Harmony testnet
+    1666700000: '0x2e33ed83aec04e2ad7a05178489b3da7ee1a1d42',
   },
   strudel: {
     1: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
     5: '0x611f48792751271328f5192d83343f0bfad8b78f',
     56: '0x46c6426b0e18c61a642aca01adf668da17176bc2',
     1337: '0x297D33e17e61C2Ddd812389C2105193f8348188a',
+    
+    // Harmony mainnet
+    1666600000: '0x8a3937950BF912c1680b7366DB4D1731E45F7fAA',
+    // Harmony testnet
+    1666700000: '0x79253d7F16Ef56CAFC881ec5BFa14551F2e04118',
   },
   masterChef: {
     1: '0x517b091FdB87A42c879BbB849444E76A324D53c8',
     5: '0xc80a91101adb246c286de0200bbb25f644aa1f56',
     1337: '0x517b091FdB87A42c879BbB849444E76A324D53c8',
+
+    // Temporary
+    // Harmony mainnet (Not deployed yet)
+    // 1666600000: '',
+    // Harmony testnet (Deployed)
+    // 1666700000: '0x2e33ed83aec04e2ad7a05178489b3da7ee1a1d42',
   },
   weth: {
     1: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
     5: '0xB4FBF271143F4FBf7B91A5ded31805e42b2208d6',
     1337: '0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2',
+
+    // Harmony mainnet
+    1666600000: '',
+    // Harmony testnet (Deployed)
+    1666700000: '0x2e33ed83aec04e2ad7a05178489b3da7ee1a1d42',
   },
   relay: {
     1: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
@@ -80,6 +101,12 @@ export const contractAddresses = {
     56: '0x3D4FFC1E924Ed1ee6ABDA7cb9c56Bbd1E26336D4',
     100: '0x9cb9CF602B09e6c8c8B4A9Abd688d1cEe3F1c7a7',
     1337: '0x1531b6e3d51bf80f634957df81a990b92da4b154',
+
+    // Harmony mainnet
+    // https://explorer.harmony.one/address/0xd4dbf2b5fa257718d7e1fb0d4cbfbc372097d888
+    // https://btc.harmony.one/dashboard/relay and https://btc.harmony.one/dashboard/relay
+    1666600000: '0xd4dbf2b5fa257718d7e1fb0d4cbfbc372097d888', 
+    1666700000: '0x3df0f698573e3a7957a1d582b93e8fa202b15d6c', 
   },
   vbch: {
     1: '0xb5badfa6e69728adba44d67c98b05f1d1d40182e',
@@ -218,7 +245,7 @@ export const supportedPools: Pool[] = [
     icon: '2',
     disabled: false,
     canSelect: true
-  }, 
+  },
   {
     pid: 12,
     isBalancer: false,

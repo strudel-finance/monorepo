@@ -33,6 +33,9 @@ interface Transaction  {
   ethTxHash?: string
   ethAddress?: string
   proof?: Proof
+
+  // Shouldnt'be optional but it doesn't exist for previous records
+  blockchainNetworkId?: string
 }
 export interface BTCTransaction extends Transaction {
   btcTxHash?: string

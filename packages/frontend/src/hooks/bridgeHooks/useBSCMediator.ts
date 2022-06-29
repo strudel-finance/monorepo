@@ -1,10 +1,8 @@
 import { useEffect, useState } from 'react'
 import { contractAddresses } from '../../tokens/lib/constants'
-
 import mediator from '../../tokens/lib/abi/mediator.json'
 import useETH from '../useETH'
-import showError  from '../../utils/showError'
-
+import showError, { handleErrors } from '../../utils/showError'
 const Contract = require('web3-eth-contract')
 const BSC_NETWORK_ID = 56
 const ETH_MAINNET = 1

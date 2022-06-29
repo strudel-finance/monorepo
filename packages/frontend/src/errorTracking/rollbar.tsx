@@ -1,10 +1,11 @@
 import Rollbar from 'rollbar'
 const RollbarErrorTracking = (() => {
-  const RollbarObj = new Rollbar({
-    accessToken: process.env.REACT_APP_ROLLBAR_ACCESS_TOKEN,
-    captureUncaught: true,
-    captureUnhandledRejections: true,
-  })
+  // This halts the app
+  // const RollbarObj = new Rollbar({
+  //   accessToken: process.env.REACT_APP_ROLLBAR_ACCESS_TOKEN,
+  //   captureUncaught: true,
+  //   captureUnhandledRejections: true,
+  // })
   const logErroInfo = (info: any) => {
     //RollbarObj.info(info)
   }
