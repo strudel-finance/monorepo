@@ -56,10 +56,10 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
   }
 
   const calculateStrudel = async () => {
-    // more ugly stuff
+    const Contract = require('web3-eth-contract');
+    (Contract as any).setProvider(process.env.REACT_APP_BSC_PROVIDER);
 
-    const Contract = require('web3-eth-contract')
-    ;(Contract as any).setProvider(process.env.REACT_APP_BSC_PROVIDER)
+    // https://stackoverflow.com/questions/48378337/create-react-app-not-picking-up-env-files
 
     const sideContract = new Contract(
       // add ABI item as type
@@ -76,7 +76,8 @@ const BurnModal: React.FunctionComponent<BurnModalProps> = ({
     let calculatedStrudel =
       getInStrudelCurve(dividedSupply + Number(value)) -
       getInStrudelCurve(dividedSupply)
-    setStrudelAmount(calculatedStrudel.toFixed(2).toString())
+
+    setStrudelAmount(process.env.NODE_ENV === "development" ? calculatedStrudel.toString() : calculatedStrudel.toFixed(2).toString())
   }
 
   useEffect(() => {

@@ -22,17 +22,23 @@ exports.DB = class DB extends SimpleDb {
     if (typeof amount == 'number') {
       throw new Error(`Error: amount should not be number.`);
     }
+
     const entry = {
       account: walletAddress,
       created: new Date().toString(),
       outputIndex: `${outputIndex}`,
       amount,
-      btcTxHash: txHash
+      btcTxHash: txHash,
     };
+
+    console.log("entry");
+    console.log(entry);
+
     if (isBch) {
       delete entry.btcTxHash;
       entry.bchTxHash = txHash;
     }
+    
     return this.setAttrs(`${txHash}-${oi}`, entry);
   }
 
@@ -48,10 +54,12 @@ exports.DB = class DB extends SimpleDb {
       });
   }
 
-  setClaimTx(btcTxHash, outputIndex, ethTxHash) {
+  // This is where we can see users have minted vBTC, vBCH and $TURDEL
+  setClaimTx(btcTxHash, outputIndex, ethTxHash, blockchainNetworkId) {
     const pad = "00";
     const oi = (pad + outputIndex).slice(-pad.length);
-    return this.setAttrs(`${btcTxHash}-${oi}`, { ethTxHash });
+
+    return this.setAttrs(`${btcTxHash}-${oi}`, { ethTxHash, blockchainNetworkId }); 
   }
 
   async getAccount(walletAddress) {
@@ -69,31 +77,47 @@ exports.DB = class DB extends SimpleDb {
     if (!rsp.created && payments.length == 0) {
       throw new Error(`Not Found: account ${walletAddress} not found in db.`);
     }
+
     payments.forEach((payment) => {
       if (payment.Attributes.btcTxHash) {
+        // Bitcoin
         const burn = {
           btcTxHash: payment.Attributes.btcTxHash,
           amount: payment.Attributes.amount,
           burnOutputIndex: payment.Attributes.outputIndex,
           dateCreated: payment.Attributes.created
         };
-        if (payment.Attributes.ethTxHash) {
+
+        if (payment.Attributes.ethTxHash) { 
           burn.ethTxHash = payment.Attributes.ethTxHash;
         } 
+
+        if (payment.Attributes.blockchainNetworkId) { 
+          burn.blockchainNetworkId = payment.Attributes.blockchainNetworkId;
+        } 
+
         rsp.burns.push(burn);
       } else {
+        // Bitcoin Cash
         const bchBurn = {
           bchTxHash: payment.Attributes.bchTxHash,
           amount: payment.Attributes.amount,
           burnOutputIndex: payment.Attributes.outputIndex,
           dateCreated: payment.Attributes.created
         };
+
         if (payment.Attributes.ethTxHash) {
           bchBurn.ethTxHash = payment.Attributes.ethTxHash;
         } 
+
+        if (payment.Attributes.blockchainNetworkId) { 
+          burn.blockchainNetworkId = payment.Attributes.blockchainNetworkId;
+        } 
+        
         rsp.bchBurns.push(bchBurn);
       }
     });
+
     return rsp;
   }
 

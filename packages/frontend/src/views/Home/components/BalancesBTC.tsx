@@ -72,7 +72,7 @@ const Balances: React.FC = () => {
               <VIcons.VBTCIcon />
               <Spacer size="xs" />
               <div style={{ flex: 1 }}>
-                <Label text="Your vBTC Balance" />
+                <Label text="Your vBTC Balance on ETH mainnet" />
                 <ValueBTC
                   value={
                     !!eth?.account && !!VBTCBalance
@@ -89,7 +89,7 @@ const Balances: React.FC = () => {
 
       <Card>
         <CardContent>
-          <Label text="Total vBTC Supply" />
+          <Label text="Total vBTC Supply on ETH mainnet" />
           <ValueBTC
             value={
               totalVBTCSupply ? getBalanceNumber(totalVBTCSupply) : 'Locked'

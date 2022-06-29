@@ -1,14 +1,18 @@
 import React, { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
-import Davatar from '@davatar/react'
+
+// Some versions have issues that halts the app
+import Davatar from '@davatar/react' 
+
 import { useENS } from '../../../hooks/useENS'
+
 import useETH from '../../../hooks/useETH'
 import useModal from '../../../hooks/useModal'
 import Button from '../../Button'
 import WalletProviderModal from '../../WalletProviderModal'
 import AccountModal from './AccountModal'
 
-interface AccountButtonProps {}
+interface AccountButtonProps { }
 
 const AccountButton: React.FC<AccountButtonProps> = (props) => {
   const [onPresentAccountModal] = useModal(<AccountModal />)
@@ -51,7 +55,10 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
       ) : (
         <Button onClick={onPresentAccountModal} size="sm">
           <div className="davatar">
-            <Davatar size={20} address={account} />
+            <Davatar 
+              size={20} 
+              address={account} 
+            />
           </div>
           {ensName || shortAdd}
         </Button>
@@ -63,3 +70,4 @@ const AccountButton: React.FC<AccountButtonProps> = (props) => {
 const StyledAccountButton = styled.div``
 
 export default AccountButton
+

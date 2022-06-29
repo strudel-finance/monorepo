@@ -19,7 +19,7 @@ import Value from '../../Value'
 import ValueBTC from '../../ValueBTC'
 import { StrudelIcon } from '../../StrudelIcon'
 import useETH from '../../../hooks/useETH'
-import useVBCH from '../../../hooks/useVBCH'
+// import useVBCH from '../../../hooks/useVBCH'
 
 const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
   const { eth, setStatus } = useETH()
@@ -31,14 +31,44 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
   }, [onDismiss])
 
   const vbtc = useVBTC()
-  const vbch = useVBCH()
   const strudelBalance = useTokenBalance(getStrudelAddress(vbtc))
   const vbtcBalance = useTokenBalance(getVbtcAddress(vbtc))
+  
   // !!! TODO: do it for xDaiTotal vBTC Supply
-  const vbchBalance = useTokenBalance(getVbchAddress(vbch))
+  // const vbch = useVBCH()
+  // const vbchBalance = useTokenBalance(getVbchAddress(vbch))
+
+  const networkId = Number((window as any).ethereum?.networkVersion);
+
+  // Extract these to a function
+  let onWhichBlockchain;
+  let blockchainExplorer;
+  let onWhichBlockchainExplorer;
+  if (networkId === 1) { // ETH
+    // onWhichBlockchain = "on ETH Mainnet"
+    onWhichBlockchain = "on ETH"
+
+    blockchainExplorer = "https://etherscan.io";
+    onWhichBlockchainExplorer = "on Etherscan";
+  }
+  else if (networkId === 56) { // BSC
+    // onWhichBlockchain = "on Binance Smart Chain"
+    onWhichBlockchain = "on BSC"
+
+    blockchainExplorer = "https://bscscan.com";
+    onWhichBlockchainExplorer = "on BscScan"
+  }
+  else if (networkId === 1666600000) { // Harmony
+    // onWhichBlockchain = "on Harmony Mainnet"
+    onWhichBlockchain = "on Harmony"
+
+    blockchainExplorer = "https://explorer.harmony.one";
+    onWhichBlockchainExplorer = "on Harmony Blockchain Explorer"
+  }
+
   return (
     <Modal>
-      <ModalTitle text="My Account" />
+      <ModalTitle text={`My Account ${onWhichBlockchain}`} />
       <ModalContent>
         <div style={{ display: 'flex' }}>
           <StyledBalanceWrapper>
@@ -57,8 +87,8 @@ const AccountModal: React.FC<ModalProps> = ({ onDismiss }) => {
 
         <Spacer />
         <Button
-          href={`https://etherscan.io/address/${account}`}
-          text="View on Etherscan"
+          href={`${blockchainExplorer}/address/${account}`}
+          text={`View ${onWhichBlockchainExplorer}`}
           variant="secondary"
         />
         <Spacer />
@@ -90,3 +120,5 @@ const StyledBalanceWrapper = styled.div`
 `
 
 export default AccountModal
+
+

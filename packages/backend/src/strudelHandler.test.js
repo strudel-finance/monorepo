@@ -232,6 +232,8 @@ describe('StrudelHandler', () => {
   const priv = 'fill in';
 
   describe('payment server', () => {
+    // This fails currently
+    // Should include .env? to make it work 
     it('syn', async () => {
       const rsp = await new StrudelHandler(null, null, null, Buffer.from(cert, 'hex'), Buffer.from(chain, 'hex'), Buffer.from(priv, 'hex')).paySyn(ADDR, '100000000');
       console.log(rsp);

@@ -1,0 +1,99 @@
+{
+  "name": "strudel-onchain",
+  "version": "0.1.0",
+  "description": "trustless one-way bridge",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "dependencies": {
+    "@codechecks/client": "^0.1.10",
+    "@openzeppelin/contracts": "3.4.0",
+    "@openzeppelin/contracts-ethereum-package": "^3.0.0",
+    "@uniswap/lib": "^1.1.4",
+    "@uniswap/v2-core": "^1.0.1",
+    "bitcoinjs-lib": "^5.1.7",
+    "dotenv": "^10.0.0",
+    "ethers": "^5.0.0",
+    "hardhat-contract-sizer": "^2.1.1",
+    "root": "nomiclabs/buidler"
+  },
+  "files": [
+    "contracts",
+    "dist"
+  ],
+  "devDependencies": {
+    "@chainlink/contracts": "0.2.2",
+    "@nomiclabs/hardhat-ethers": "^2.0.1",
+    "@nomiclabs/hardhat-etherscan": "^2.0.1",
+    "@nomiclabs/hardhat-ganache": "^2.0.0",
+    "@nomiclabs/hardhat-waffle": "^2.0.1",
+    "@openzeppelin/contracts-upgradeable": "3.4.2",
+    "@openzeppelin/hardhat-upgrades": "^1.6.0",
+    "@openzeppelin/upgrades": "^2.8.0",
+    "@typechain/ethers-v5": "^6.0.0",
+    "@types/chai": "^4.2.8",
+    "@types/mocha": "^8.0.3",
+    "@types/node": "^13.7.0",
+    "@typescript-eslint/eslint-plugin": "^2.21.0",
+    "@typescript-eslint/parser": "^2.21.0",
+    "@uniswap/v2-periphery": "^1.1.0-beta.0",
+    "chai": "^4.2.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "ethereum-abi-types-generator": "^1.3.2",
+    "ethereum-waffle": "^3.2.2",
+    "ethereumjs-util": "^7.0.6",
+    "ganache-core": "^2.13.2",
+    "hardhat": "^2.6.8",
+    "hardhat-deploy": "^0.7.0-beta.46",
+    "hardhat-gas-reporter": "^1.0.1",
+    "hardhat-typechain": "0.3.5",
+    "husky": "^4.2.5",
+    "prettier": "^2.2.1",
+    "prettier-plugin-solidity": "^1.0.0-alpha.56",
+    "solhint": "^3.1.0",
+    "solhint-plugin-prettier": "^0.0.5",
+    "solidity-coverage": "^0.7.1",
+    "ts-generator": "0.1.1",
+    "ts-node": "^8.6.2",
+    "typechain": "^4.0.2",
+    "typescript": "^4.1.5"
+  },
+  "scripts": {
+    "build": "yarn run compile && hardhat typechain",
+    "size": "yarn hardhat size-contracts",
+    "compile": "hardhat compile",
+    "test": "hardhat test",
+    "local": "npx hardhat node",
+    "deploy": "hardhat deploy",
+    "harmony:testnet": "hardhat deploy --network harmony_testnet",
+    "harmony:mainnet": "hardhat deploy --network harmony_mainnet",
+    "oracle:testnet": "hardhat run --network harmony_testnet scripts/deploy_oracle.js",
+    "tsc": "tsc && cp typechain/*.d.ts dist/typechain/",
+    "clean": "hardhat clean && rm -rf dist",
+    "lint::typescript": "eslint './**/*.ts' --ext .ts",
+    "prettier::typescript": "prettier --write './**/*.ts'",
+    "lint::solidity": "solhint 'contracts/**/*.sol'",
+    "prettier::solidity": "prettier --write 'contracts/**/*.sol'",
+    "lint": "yarn run lint::typescript && yarn run lint::solidity",
+    "prettier": "yarn run prettier::typescript && yarn run prettier::solidity",
+    "types": "yarn abi-types-generator hardhat"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn run prettier"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johannbarbie/sierra-retarda"
+  },
+  "author": "johannbarbie@me.com",
+  "keywords": [
+    "bitcoin",
+    "relay",
+    "ethereum",
+    "solidity"
+  ],
+  "license": "MPL-2.0"
+}

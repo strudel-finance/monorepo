@@ -19,6 +19,19 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
     confirmation = confirmations.confirmations
   }
 
+  const networkId = tx.blockchainNetworkId || Number((window as any).ethereum?.networkVersion);
+
+  let onWhichBlockchain;
+  if (networkId == 1) {
+    onWhichBlockchain = 'Ethereum';
+  }
+  else if (networkId == 56) {
+    onWhichBlockchain = 'BSC';
+  }
+  else if (networkId == 1666600000) {
+    onWhichBlockchain = 'Harmony';
+  }
+
   return (
     <React.Fragment>
       <ReddishTextTypography variant="caption">
@@ -41,7 +54,8 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
           isConfirmed &&
           !tx.ethTxHash &&
           confirmations.isRelayed && (
-            <span>Submit to {coin === 'BTC' ? 'Ethereum' : 'BSC'}</span>
+            // <span>Submit to {coin === 'BTC' ? 'Ethereum' : 'BSC'}</span>
+            <span>Submit to {onWhichBlockchain}</span>
           )}
         {tx.hasOwnProperty('confirmed') &&
         isConfirmed &&
@@ -52,7 +66,7 @@ const ConversionStatus: React.FC<Props> = ({ tx, confirmations }) => {
         {tx.hasOwnProperty('confirmed') &&
         (tx.confirmed || isConfirmed) &&
         tx.ethTxHash ? (
-          <span>{`Complete`}</span>
+          <span>{`Complete on ${onWhichBlockchain}`}</span>
         ) : null}
       </ReddishTextTypography>
     </React.Fragment>

@@ -9,6 +9,7 @@ import { Vbch } from './Vbch'
 import { Contract } from 'web3-eth-contract'
 import {
   ERC20Contract,
+  HarmonyVbtcContract,
   MasterChefContract,
   RelayContract,
   StrudelContract,
@@ -24,9 +25,17 @@ BigNumber.config({
   DECIMAL_PLACES: 80,
 })
 
+const GAS_LIMIT = {
+  STAKING: {
+    DEFAULT: 200000,
+    SNX: 850000,
+  },
+}
+
 export const getMasterChefAddress = (vbtc: Vbtc): string => {
   return vbtc && vbtc.masterChefAddress
 }
+
 export const getVbtcAddress = (vbtc: Vbtc): string => {
   return vbtc && vbtc.vbtcAddress
 }
@@ -43,8 +52,13 @@ export const getGStrudelAddress = (vbtc: Vbtc): string => {
   return vbtc && vbtc.gStrudelAddress
 }
 
+// It works for ETH, BSC
 export const getRelayContract = (vCoins: Vbtc | Vbch): RelayContract => {
   return vCoins && vCoins.contracts && vCoins.contracts.relay
+}
+
+export const getHarmonyRelayContract = (vCoins: Vbtc | Vbch): RelayContract => {
+  return vCoins && vCoins.contracts && vCoins.contracts.harmonyRelay
 }
 
 export const getWethContract = (vbtc: Vbtc): WethContract => {
@@ -54,8 +68,17 @@ export const getWethContract = (vbtc: Vbtc): WethContract => {
 export const getMasterChefContract = (vbtc: Vbtc): MasterChefContract => {
   return vbtc && vbtc.contracts && vbtc.contracts.masterChef
 }
+
 export const getVbtcContract = (vbtc: Vbtc): VbtcContract => {
+  // @steadylearner
+  // Remove this later 
   return vbtc && vbtc.contracts && vbtc.contracts.vbtc
+}
+
+export const getHarmonyVbtcContract = (vbtc: Vbtc): HarmonyVbtcContract => {
+  // @steadylearner
+  // Remove this later 
+  return vbtc && vbtc.contracts && vbtc.contracts.harmonyVbtc
 }
 
 export const getVbchContract = (vbch: Vbch): VbtcContract => {
@@ -63,6 +86,7 @@ export const getVbchContract = (vbch: Vbch): VbtcContract => {
 }
 
 export const getBridgeContract = (bridge: Vbch): VbtcContract => {
+  // @ts-ignore
   return bridge && bridge.contracts && bridge.contracts.bridge
 }
 
@@ -356,6 +380,41 @@ export const proofOpReturnAndMint = async (
       Number(burnOutputIndex),
       proof.vin,
       proof.vout,
+    )) as any)
+      .send({ from: account })
+      // TODO
+      .on('transactionHash', (tx: any) => {
+        return tx.transactionHash
+      })
+  )
+}
+
+export const proofOpReturnAndMintHarmony = async (
+  height: string,
+  harmonyVbtcContract: HarmonyVbtcContract,
+  account: string,
+  proof: Proof,
+  burnOutputIndex: number,
+) => {
+  // alert("burnOutputIndex"); // 0 Currently
+  // alert(burnOutputIndex); // uint32 _crossingOutputIndex at the contract
+
+  // We need only these to verify Bitcoin Tx with Harmony relayer
+  // index, tx_id: txid, header, proof
+
+  return (
+    // tx_id is not used from proof currently but calculated at the contract
+    // Include it here and remove from the contract after you comapre values?
+    ((await harmonyVbtcContract.methods.proofOpReturnAndMint(
+      height,
+      proof.header, // Used
+      proof.proof, // Used
+      proof.version,
+      proof.locktime,
+      Number(proof.index), // Used
+      Number(burnOutputIndex), // Except this, all is from the proof
+      proof.vin, // Used
+      proof.vout, // Used
     )) as any)
       .send({ from: account })
       // TODO

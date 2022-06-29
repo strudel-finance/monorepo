@@ -1,5 +1,5 @@
-import {useCallback, useEffect, useState} from 'react'
-import {provider} from 'web3-core'
+import { useCallback, useEffect, useState } from 'react'
+import { provider } from 'web3-core'
 
 import BigNumber from 'bignumber.js'
 
@@ -19,7 +19,7 @@ const useAllEarnings = () => {
 
   const fetchAllBalances = useCallback(async () => {
     const balances: Array<BigNumber> = await Promise.all(
-      farms.map(({pid}: {pid: number}) =>
+      farms.map(({ pid }: { pid: number }) =>
         getEarned(masterChefContract, pid, account),
       ),
     )

@@ -1,27 +1,50 @@
-import 'simplebar/dist/simplebar.min.css';
+import { makeStyles, TableContainer, withStyles } from '@material-ui/core'
+import Grid from '@material-ui/core/Grid'
+import Table from '@material-ui/core/Table'
+import TableBody from '@material-ui/core/TableBody'
+import MuiTableCell from '@material-ui/core/TableCell'
+import MuiTableHead from '@material-ui/core/TableHead'
+import TableRow from '@material-ui/core/TableRow'
+import Typography from '@material-ui/core/Typography'
+import ConversionStatus from './components/ConversionStatus'
+import ConversionActions from './components/ConversionActions'
+import {
+  BTCTransaction,
+  LoadingStatus,
+  SoChainConfirmedGetTx,
+  Confirmation,
+} from '../../types/types'
+import SimpleBar from 'simplebar-react'
+import 'simplebar/dist/simplebar.min.css'
+import React, { useState, useRef, useEffect } from 'react'
 
-import { makeStyles, TableContainer, withStyles } from '@material-ui/core';
-import Grid from '@material-ui/core/Grid';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import MuiTableCell from '@material-ui/core/TableCell';
-import MuiTableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import Typography from '@material-ui/core/Typography';
-import React, { useEffect, useRef, useState } from 'react';
-import sb from 'satoshi-bitcoin';
-import SimpleBar from 'simplebar-react';
+import RollbarErrorTracking from '../../errorTracking/rollbar'
+import showError from '../../utils/showError'
+import useInterval from '../../hooks/useInterval'
+import sb from 'satoshi-bitcoin'
+import { changeEndian } from '../../utils/changeEndian'
+import { getHarmonyRelayContract, getRelayContract } from '../../tokens/utils'
+import useVBTC from '../../hooks/useVBTC'
+import { apiServer } from '../../constants/backendAddresses'
 
-import { apiServer } from '../../constants/backendAddresses';
-import RollbarErrorTracking from '../../errorTracking/rollbar';
-import useInterval from '../../hooks/useInterval';
-import useVBTC from '../../hooks/useVBTC';
-import { getRelayContract } from '../../tokens/utils';
-import { BTCTransaction, Confirmation, LoadingStatus, SoChainConfirmedGetTx } from '../../types/types';
-import { changeEndian } from '../../utils/changeEndian';
-import showError from '../../utils/showError';
-import ConversionActions from './components/ConversionActions';
-import ConversionStatus from './components/ConversionStatus';
+// Extract this to a file, it is same to ConversionActions.tsx/getProof
+const getBitcoinTxProofDetails = async (
+  tx_data: string,
+  tx_hash: string,
+  block_hash: string,
+): Promise<Response> => {
+  const url = apiServer + '/proof/' + tx_hash + '/' + block_hash
+  // const url = apiServer + '/production/proof/' + tx_hash + '/' + block_hash
+  const opts: RequestInit = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ txData: tx_data }),
+  }
+
+  return fetch(url, opts)
+}
 
 export interface TransactionTableProps {
   account: any
@@ -48,6 +71,9 @@ interface AccountRequest {
       status: string
       burnOutputIndex: string
       ethTxHash?: string
+
+      // Shouldn't be optional but uses ? here because the previous tx records doesn't have it
+      blockchainNetworkId?: string
     },
   ]
 }
@@ -75,30 +101,99 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
   }
 
   const getInclusion = async (
+    tx_data: string,
+    tx_hash: string,
     blockHash: string,
     vbtc: any,
   ): Promise<boolean> => {
-    const relayContract = getRelayContract(vbtc)
-    let blockHashLittle = '0x' + changeEndian(blockHash)
+    let blockHashLittle = '0x' + changeEndian(blockHash) //
+    
     try {
-      const bestKnownDigest = await relayContract.methods
-        .getBestKnownDigest()
-        .call()
-      const heightTx = await relayContract.methods
-        .findHeight(blockHashLittle)
-        .call()
-      const heightDigest = await relayContract.methods
-        .findHeight(bestKnownDigest)
-        .call()
-      const offset = Number(heightDigest) - Number(heightTx)
-      const GCD = await relayContract.methods
-        .getLastReorgCommonAncestor()
-        .call()
-      const isAncestor = await relayContract.methods
-        .isAncestor(blockHashLittle, GCD, 2500)
-        .call()
-      return offset >= 5 && isAncestor
-    } catch (e) {
+      const relayContract = getRelayContract(vbtc)
+      const networkId = Number((window as any).ethereum?.networkVersion);
+
+      if (networkId == 1 || networkId == 56) { // ETH or BSC
+        const bestKnownDigest = await relayContract.methods
+          .getBestKnownDigest()
+          .call()
+        console.log("bestKnwonDigest");
+        console.log(bestKnownDigest);
+
+        const heightTx = await relayContract.methods
+          .findHeight(blockHashLittle)
+          .call()
+        console.log("heightTx");
+        console.log(heightTx);
+
+        const heightDigest = await relayContract.methods
+          .findHeight(bestKnownDigest)
+          .call()
+
+        const offset = Number(heightDigest) - Number(heightTx)
+        console.log("offset");
+        console.log(offset);
+
+        const GCD = await relayContract.methods
+          .getLastReorgCommonAncestor()
+          .call()
+
+        // https://github.com/summa-tx/relays/blob/master/solidity/contracts/Relay.sol#L113
+        const maxNumberOfBlocksToVerify = 10000; // Valid for about 70 days
+
+        // Why this is false?
+        const isAncestor = await relayContract.methods
+          .isAncestor(blockHashLittle, GCD, maxNumberOfBlocksToVerify)
+          .call()
+
+
+        const isRelayed = offset >= 5 && isAncestor
+
+        return isRelayed;
+      }
+      else if (networkId == 1666600000) { // Harmony
+
+        const harmonyRelayContract = getHarmonyRelayContract(vbtc)
+        const height = await harmonyRelayContract.methods.getBlockHeight(blockHashLittle).call(); 
+        
+        let response = await getBitcoinTxProofDetails(tx_data, tx_hash, blockHash);
+        response = await response.json(); // string
+        response = JSON.parse(`${response}`); // object
+
+        // console.log("getBitcoinTxProofDetails response");
+        // console.log(response);
+        // alert(response);
+        // Need these datas and along with txid
+        // const version = undefined; // proof.version
+        // const _locktime = undefined; // proof.locktime
+        // const _vin = undefined; // proof.vin,
+        // const _vout = undefined; // proof.vout,
+
+        // @ts-ignore
+        const { index, tx_id: txid, header, proof } = response;
+
+        const confirmations = 6;
+        const insecure = false;
+
+        // Harmony Mainnet
+        const isRelayed = await harmonyRelayContract.methods.verifyTx(
+          height, // uint32
+          index,
+          txid, // bytes32 txid
+          header, // bytes calldata header
+          proof, // bytes calldata proof
+
+          // Not important here
+          confirmations,
+          insecure,
+        ).call();
+
+        return isRelayed;
+      }
+
+    } catch (e) { 
+      console.log("getInclusion error");
+      console.error(e);
+      
       return false
     }
   }
@@ -143,7 +238,7 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
       : {}
     if (account) {
       let res = await fetch(
-        `${apiServer}/production/account/${account}`,
+        `${apiServer}/account/${account}`,
         abortProps,
       )
         // .then(handleErrors)
@@ -167,6 +262,12 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
       if (res === undefined) {
         return
       }
+
+      // alert(res);
+      // console.log("res");
+      // console.log(res);
+      // blockchainNetworkId is involved here
+
       if (passedAccount.current === account) {
         let resNew: BTCTransaction[] = []
         if (isAccountRequest(res)) {
@@ -178,6 +279,8 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               btcTxHash: tx.btcTxHash,
               burnOutputIndex: tx.burnOutputIndex,
               confirmed: tx.status === 'paid' ? true : false,
+              
+              blockchainNetworkId: tx.blockchainNetworkId,
             }
             if (tx.ethTxHash) {
               txNew.ethTxHash = tx.ethTxHash
@@ -246,8 +349,23 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
               highConfirmations[key].blockHash &&
               !highConfirmations[key].isRelayed
             ) {
+              console.log("highConfirmations");
+              console.log(highConfirmations);
+              
+              // alert("getInclusion");
+              // console.log("key");
+              // console.log(key);
+              // console.log("highConfirmations[key]");
+              // console.log(highConfirmations[key]);
+
+              const tx_hex = highConfirmations[key].tx_hex;
+              const tx_data = key;
+              const blockHash = highConfirmations[key].blockHash;
+
               highConfirmations[key].isRelayed = await getInclusion(
-                highConfirmations[key].blockHash,
+                tx_hex,
+                tx_data,
+                blockHash,
                 vbtc,
               )
             }
@@ -333,8 +451,6 @@ const BTCTransactionsTableContainer: React.FC<TransactionTableProps> = ({
                     </ReddishTextTypography>
                   </TableCell>
                   <TableCell>
-                    {/* @TODO: Intergrate the colors there is green and orange ^^ */}
-
                     <ConversionStatus tx={lastRequest} />
                   </TableCell>
                   <TableCell>

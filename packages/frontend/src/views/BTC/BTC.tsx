@@ -78,12 +78,33 @@ const BTC: React.FC = () => {
     'provider',
   )
 
+  const networkId = Number((window as any).ethereum?.networkVersion);
+
+  let onWhichBlockchain;
+  if (networkId === 1) { // ETH
+    // onWhichBlockchain = "on ETH"
+    onWhichBlockchain = "on Ethereum"
+  }
+  else if (networkId === 56) { // BSC
+    // onWhichBlockchain = "on Binance Smart Chain"
+    onWhichBlockchain = "on BSC"
+
+  }
+  else if (networkId === 1666600000) { // Harmony
+    // onWhichBlockchain = "on Harmony Mainnet"
+    onWhichBlockchain = "on Harmony"
+  } else {
+    onWhichBlockchain = "";
+  }
+
+
   return (
     <>
       {account ? (
         <>
           <PageHeader
-            title="Enter the Strudel"
+            // title="Enter the Strudel"
+            title={`Enter the Strudel ${onWhichBlockchain}`}
             subtitle="Turn your BTC into vBTC, and earn $TRDL rewards."
           />
           <div className="custom-container btc">
@@ -117,7 +138,7 @@ const BTC: React.FC = () => {
                 <TransactionsTableContainer
                   account={account}
                   previousAccount={previousAccount}
-                  lastRequest={lastRequest}
+                  lastRequest={lastRequest} // this is what matters
                   handleSetLastRequest={handleSetLastRequest}
                   checkAndRemoveLastRequest={checkAndRemoveLastRequest}
                   closeModal={onDismiss}

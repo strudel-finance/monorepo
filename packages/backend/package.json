@@ -6,8 +6,9 @@
   "scripts": {
     "lint": "eslint --fix src/**/*.js",
     "test": "mocha --recursive 'src/**/*.test.js'",
-    "start": "serverless offline start -s dev",
-    "deploy": "sls deploy -s production"
+    "start": "AWS_SDK_LOAD_CONFIG=1 npx serverless offline start -s dev",
+    "deploy:serverless": "npx serverless deploy -s production",
+    "deploy:sls": "npx sls deploy -s production"
   },
   "repository": {
     "type": "git",
@@ -36,6 +37,8 @@
     "pusher": "^3.0.1",
     "request": "^2.88.2",
     "serverless-apigw-binary": "^0.4.4",
-    "serverless-apigwy-binary": "^1.0.0"
-  }
+    "serverless-apigwy-binary": "^1.0.0",
+    "serverless-dotenv-plugin": "^3.12.2"
+  },
+  "postinstall": "find ./node_modules/**/node_modules -type d -name 'bitcore-lib' -exec rm -r {} + && echo 'Deleted duplicate bitcore-libs'"
 }
